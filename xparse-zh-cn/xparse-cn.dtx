@@ -66,9 +66,12 @@
 %        \href{mailto:latex-team@latex-project.org}
 %          {latex-team@latex-project.org}^^A
 %    }^^A
+%   \\
+%   \and
+%   \centerline{由~张泓知~翻译}
 % }
 %
-% \date{Released 2023-10-10}
+% \date{原文版本 2023-10-10}
 %
 % \maketitle
 %
@@ -322,7 +325,7 @@
 % \label{sec:body}
 %
 % 虽然 |\begin|\marg{environment} \dots{}
-%   |\end|\marg{environment} 环境通常用于实现 \meta{environment} 的代码不需要访问环境
+%   |\end|\marg{environment} 环境通常用于实现\hfil\break \meta{environment} 的代码不需要访问环境
 %   内容（其\enquote{主体}）的情况，但有时将主体作为标准参数会很有用。
 %
 % 在 \pkg{xparse} 中，通过在参数规范末尾加上~\texttt{b} 来实现这一点。在 \pkg{xparse}
@@ -445,7 +448,7 @@
 % 有了参数规范的概念，现在可以描述使用 \pkg{xparse} 创建函数和环境的方法。
 %
 % 接口构建命令是在 \LaTeX3 中创建文档级函数的首选方法。通过这种方式生成的所有
-% 函数都是天然健壮的（robust）（使用 \eTeX{} 的 \cs{protected} 机制）。
+% 函数都是天然健壮的(robust)（使用 \eTeX{} 的 \cs{protected} 机制）。
 %
 % \begin{function}
 %   {
