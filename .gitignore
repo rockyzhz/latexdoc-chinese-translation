@@ -1,0 +1,8 @@
+*.aux
+*.glo
+*.hd
+*.log
+*.out
+*.ind
+*.idx
+*.synctex.gz
