@@ -3,7 +3,7 @@
 
 ## 目前已有的文档包含有：
 * **docstrip.pdf** 的中文文档 **docstrip-zh-cn.pdf** ，该文档从另一个[项目][1]转移过来的，原项目已归档，后续的更新（如果有的话）放在本项目下继续维护。该文档主要描述了 DocStrip 程序的实现，DocStrip 程序是 TeX 实现文学编程的一个重要的工具。
-* **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供了高级的命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。
+* **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。
 
 ## 中文文档编译方法
 有的中文文档源文件是 .tex ，有的是 .dtx ，但是都可以直接在命令行下使用 XeLaTeX 来编译。
