@@ -1,0 +1,1760 @@
+% !TEX program = xelatex
+\documentclass{ltxdockit}[2010/09/26]
+\usepackage{ctex}
+\usepackage[utf8]{inputenc}
+\usepackage[american]{babel}
+\usepackage[strict]{csquotes}
+\usepackage{shortvrb}
+\MakeAutoQuote*{<}{>}
+\MakeShortVerb{\|}
+
+\titlepage{%
+  title={\sty{etoolbox} 宏包},
+  subtitle={面向类和包作者的 \etex 工具箱},
+  url={http://www.ctan.org/pkg/etoolbox/},
+  author={Philipp Lehman, Joseph Wright},
+  email={joseph.wright@morningstar2.co.uk},
+  revision={v2.5k},
+  date={2020/10/05}}
+
+\hypersetup{
+  pdftitle={etoolbox宏包},
+  pdfsubject={面向类和包作者的e-TeX工具箱},
+  pdfauthor={Philipp Lehman, Joseph Wright},
+  pdfkeywords={tex, e-tex, latex, class, package, programming}}
+
+\begin{document}
+
+\printtitlepage
+\centerline{\heiti 张泓知\qquad 翻译\hspace*{1em}}
+\centerline{\heiti\hspace*{40pt} 翻译日期\qquad \zhtoday}
+\tableofcontents
+
+\section{介绍}
+\label{int}
+
+\subsection[关于]{关于 \sty{etoolbox}}
+
+\sty{etoolbox} 宏包是一个编程工具箱，主要面向 \latex 类和宏包作者。它提供了
+一些 \etex 提供的新原语的 \latex 前端，以及一些与 \etex 无关但与本宏包的特
+性相匹配的通用工具。
+
+\subsection{许可证}
+
+版权 \textcopyright\ 2007--2011 Philipp Lehman，2015--2020 Joseph Wright。根
+据 \lppl \fnurl{http://www.latex-project.org/lppl/} 第 1.3c 版或更高版本的条款，
+允许复制、分发和/或修改此软件。
+
+
+\section{用户命令}
+\label{use}
+
+本节中的工具旨在面向常规用户以及类和宏包作者。
+
+\subsection{定义}
+\label{use:def}
+
+\begin{ltxsyntax}
+
+  \cmditem{newrobustcmd}{command}[arguments][optarg default]{replacement text}
+  \cmditem*{newrobustcmd*}{command}[arguments][optarg default]{replacement text}
+
+  此命令的语法和行为类似于 \cmd{newcommand}，但新定义的 \prm{command}
+  将是强健的 (robust)。此命令的行为与 \latex 核心的 \cmd{DeclareRobustCommand}
+  命令不同之处在于，如果 \prm{command} 已经定义，它将发出错误消息而不仅仅是
+  信息性消息。由于它使用 \etex 的低级保护机制而不是相应的更高级别的 \latex
+  工具，因此不需要额外的宏来实现<强健性 (robustness) >。
+
+  \cmditem{renewrobustcmd}{command}[arguments][optarg default]{replacement text}
+  \cmditem*{renewrobustcmd*}{command}[arguments][optarg default]{replacement text}
+
+  此命令的语法和行为类似于 \cmd{renewcommand}，但重新定义的 \prm{command}
+  将是强健的 (robust)。
+
+  \cmditem{providerobustcmd}{command}[arguments][optarg default]{replacement text}
+  \cmditem*{providerobustcmd*}{command}[arguments][optarg default]{replacement text}
+
+  此命令的语法和行为类似于 \cmd{providecommand}，但新定义的 \prm{command}
+  将是强健的 (robust)。请注意，此命令只会为未定义的 \prm{command} 提供强健 (robust) 定义。它
+  不会使已经定义的 \prm{command} 变得强健 (robust)。
+\end{ltxsyntax}
+
+\subsection{补丁 (Patching)}
+\label{use:pat}
+
+\begin{ltxsyntax}
+
+  \cmditem{robustify}{command}
+
+  重新定义了一个由 \cmd{newcommand} 定义的 \prm{command}，使其成为强健 (robust)命令，
+  而不更改其参数、前缀或替换文本。如果 \prm{command} 是用 \cmd{DeclareRobustCommand}
+  定义的，则会自动检测到，并且 \latex 的高级保护机制将被相应的低级 \etex 功能
+  替换。
+
+\end{ltxsyntax}
+
+\subsection{保护}
+\label{use:pro}
+
+\begin{ltxsyntax}
+
+  \cmditem{protecting}{code}
+
+  此命令将 \latex 的保护机制（通常需要在每个易损命令前加上 \cmd{protect}）应用于任
+  意 \prm{code} 的整个代码块。其行为取决于当前的 \cmd{protect} 状态。请注意，
+  即使是单个记号，\prm{code} 周围的大括号也是必需的。
+
+\end{ltxsyntax}
+
+\subsection[长度与计数器]{长度与计数器分配}
+\label{use:cal}
+
+此部分的工具是 \cmd{setcounter} 和 \cmd{setlength} 的替代品，支持算术表达式。
+
+\begin{ltxsyntax}
+
+  \cmditem{defcounter}{counter}{integer expression}
+
+  将值分配给之前用 \cmd{newcounter} 初始化的 \latex \prm{counter}。此命令在概念
+  和语法上类似于 \cmd{setcounter}，但有两个主要区别。1）第二个参数可以是一个
+  \prm{integer expression}，它将使用 \cmd{numexpr} 处理。 \prm{integer
+    expression} 可以是此上下文中有效的任意代码。分配给 \prm{counter} 的值将是
+  计算结果。2）与 \cmd{setcounter} 相反，默认情况下，此赋值是局部的，但
+  \cmd{defcounter} 可以使用 \cs{global} 进行前缀。 \cmd{setcounter} 的功能
+  等效于 \cs{global}\cmd{defcounter}。
+
+  \cmditem{deflength}{length}{glue expression}
+
+  将值分配给之前用 \cmd{newlength} 初始化的 \prm{length} 寄存器。此命令在概念
+  和语法上类似于 \cmd{setlength}，但第二个参数可以是一个 \prm{glue expression}，
+  它将使用 \cmd{glueexpr} 处理。 \prm{glue expression} 可以是此上下文中有效的任
+  意代码。分配给 \prm{length} 寄存器的值将是计算结果。此赋值默认情况下是局部
+  的，但 \cmd{deflength} 可以使用 \cs{global} 进行前缀。此命令可以作为
+  \cmd{setlength} 的替代。
+
+\end{ltxsyntax}
+
+\subsection[文档钩子]{附加文档钩子}
+\label{use:pre}
+
+\latex 提供了两个钩子，可以推迟代码的执行，要么推迟到文档正文的开头，要么推迟到文档的末尾。任何 \cmd{AtBeginDocument}
+代码都会在主 \file{aux} 文件首次读取后，在文档正文的开头执行。任何 \cmd{AtEndDocument} 代码都会在文档末尾执行，在主
+\file{aux} 文件第二次读取之前执行。这里介绍的钩子在概念上类似，但将其 \prm{code} 参数的执行推迟到略微不同的位置。
+\prm{code} 可以是任意 \tex 代码。 \prm{code} 参数中的参数字符是允许的，不需要加倍。
+
+\begin{ltxsyntax}
+
+\cmditem{AfterPreamble}{code}
+
+此钩子是 \cmd{AtBeginDocument} 的变体，可在导言部分和文档正文中使用。在导言部分使用时，其行为与 \cmd{AtBeginDocument}
+完全相同。在文档正文中使用时，它会立即执行其 \prm{code} 参数。 \cmd{AtBeginDocument} 在这种情况下会发出错误。此钩子非常
+有用，用于推迟需要写入主 \file{aux} 文件的代码。
+
+\cmditem{AtEndPreamble}{code}
+
+此钩子与 \cmd{AtBeginDocument} 不同，因为 \prm{code} 在导言部分的最后执行，在主 \file{aux} 文件（在前一个 \latex pass
+上写入）被读取之前，也在任何 \cmd{AtBeginDocument} 代码之前执行。请注意，此时不可能向 \file{aux} 文件写入。
+
+\cmditem{AfterEndPreamble}{code}
+
+此钩子与 \cmd{AtBeginDocument} 不同，因为 \prm{code} 在 |\begin{document}| 的最后执行，而且在任何 \cmd{AtBeginDocument}
+代码之后执行。请注意，在此钩子执行时，使用\hfil\break \cmd{@onlypreamble} 限定其作用域的命令将不再可用。
+
+\cmditem{AfterEndDocument}{code}
+
+此钩子与 \cmd{AtEndDocument} 不同，因为 \prm{code} 在文档的最后执行，在当前 \latex pass 上写入的主 \file{aux} 文件被读取
+之后，并在任何 \cmd{AtEndDocument} 代码之后执行。
+
+\end{ltxsyntax}
+
+从某种意义上说，\cmd{AtBeginDocument} 代码既不是导言部分的一部分，也不是文档正文的一部分，因为它在排版之前执行初始化序列的
+中间位置。有时，将代码移至导言部分的末尾是有必要的，因为此时已经加载了所有请求的包。然而，如果代码需要在 \file{aux} 文件中
+执行，\cmd{AtBeginDocument} 代码执行太晚了。相反，\cmd{AtEndPreamble} 代码是导言部分的一部分；\cmd{AfterEndPreamble}
+代码是文档正文的一部分，并可能包含要在文档开头排版的可打印文本。总而言之，在 |\begin{document}| 中，\latex 将执行以下任务：
+
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item 执行任何 \cmd{AtEndPreamble} 代码
+  \item 开始文档正文的初始化（页面布局、默认字体等）
+  \item 加载前一个 \latex pass 上写入的主 \file{aux} 文件
+  \item 在当前 pass 上打开主 \file{aux} 文件进行写入
+  \item 继续文档正文的初始化
+  \item 执行任何 \cmd{AtBeginDocument} 代码
+  \item 完成文档正文的初始化
+  \item 禁用所有 \cmd{@onlypreamble} 命令
+  \item 执行任何 \cmd{AfterEndPreamble} 代码
+\end{itemize}
+%
+在 |\end{document}| 中，\latex 将执行以下任务：
+
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item 执行任何 \cmd{AtEndDocument} 代码
+  \item 执行最终的 \cmd{clearpage} 操作
+  \item 关闭写入的主 \file{aux} 文件
+  \item 加载当前 pass 上写入的主 \file{aux} 文件
+  \item 执行最终的测试和警告，如果适用的话
+  \item 执行任何 \cmd{AfterEndDocument} 代码
+\end{itemize}
+%
+任何 \cmd{AtEndDocument} 代码都可以被视为文档正文的一部分，因为在其执行时，仍然可以执行排版任务并写入主 \file{aux} 文件。
+\cmd{AfterEndDocument} 代码不是文档正文的一部分。此钩子对于在 \latex pass 的最后评估 \file{aux} 文件中的数据非常有用。
+
+\subsection[环境钩子]{环境钩子}
+\label{use:env}
+
+本节工具提供了针对环境的钩子。请注意，它们不会修改\prm{environment}的定义。它们挂钩到 \cmd{begin} 和 \cmd{end} 命令上。
+重新定义 \prm{environment} 不会清除相应的钩子。参数字符在 \prm{code} 参数中是允许的，无需加倍。
+
+\begin{ltxsyntax}
+
+  \cmditem{AtBeginEnvironment}{environment}{code}
+
+  将任意 \prm{code} 附加到由 \cmd{begin} 命令在给定 \prm{environment} 的开头执行的钩子中，在 \cmd{\prm{environment}}
+  之前，位于由 \cmd{begin} 打开的组内。
+
+  \cmditem{AtEndEnvironment}{environment}{code}
+
+  将任意 \prm{code} 附加到由 \cmd{end} 命令在给定 \prm{environment} 的末尾执行的钩子中，在 \cmd{end\prm{environment}}
+  之前，位于由 \cmd{begin} 打开的组内。
+
+  \cmditem{BeforeBeginEnvironment}{environment}{code}
+
+  将任意 \prm{code} 附加到由 \cmd{begin} 命令在非常早期执行的钩子中，在持有环境的组被打开之前。
+
+  \cmditem{AfterEndEnvironment}{environment}{code}
+
+  将任意 \prm{code} 附加到由 \cmd{end} 命令在非常晚期执行的钩子中，在持有环境的组被关闭后执行。
+
+\end{ltxsyntax}
+
+\section{作者命令}
+
+本节工具面向类和包的作者。
+
+\subsection{定义}
+
+\subsubsection{宏定义}
+\label{aut:def:def}
+
+本节工具是简单但经常需要的快捷方式，扩展了 \latex 核心中 \cmd{@namedef} 和\hfil\break \cmd{@nameuse} 宏的作用范围。
+
+\begin{ltxsyntax}
+
+  \cmditem{csdef}{csname}<arguments>{replacement text}
+
+  类似于 \tex 原语 \cmd{def}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)，对应于 \cmd{@namedef}。
+
+  \cmditem{csgdef}{csname}<arguments>{replacement text}
+
+  类似于 \tex 原语 \cmd{gdef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+
+  \cmditem{csedef}{csname}<arguments>{replacement text}
+
+  类似于 \tex 原语 \cmd{edef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+
+  \cmditem{csxdef}{csname}<arguments>{replacement text}
+
+  类似于 \tex 原语 \cmd{xdef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+
+  \cmditem{protected@csedef}{csname}<arguments>{replacement text}
+
+  类似于 \cmd{csedef}，但临时启用了 \latex 的保护机制。换句话说，此命令类似于 \latex 核心命令
+  \cmd{protected@edef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+
+  \cmditem{protected@csxdef}{csname}<arguments>{replacement text}
+
+  类似于 \cmd{csxdef}，但临时启用了 \latex 的保护机制。换句话说，此命令类似于 \latex 核心命令
+  \cmd{protected@xdef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+
+  \cmditem{cslet}{csname}{command}
+
+  类似于 \tex 原语 \cmd{let}，但第一个参数是一个控制序列名称。如果 \prm{command} 未定义，在分配后
+  \prm{csname} 也将被未定义。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+
+  \cmditem{letcs}{command}{csname}
+
+  类似于 \tex 原语 \cmd{let}，但第二个参数是一个控制序列名称。如果 \prm{csname} 未定义，在分配后
+  \prm{command} 也将被未定义。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+
+  \cmditem{csletcs}{csname}{csname}
+
+  类似于 \tex 原语 \cmd{let}，但两个参数都是控制序列名称。如果第二个 \prm{csname} 未定义，在分配后第一个
+  \prm{csname} 也将被未定义。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+
+  \cmditem{csuse}{csname}
+
+  以控制序列名称为参数，并形成控制序列记号。此命令不同于 \latex 核心中的\hfil\break \cmd{@nameuse} 宏，如果控制
+  序列未定义，它会展开为空字符串。
+
+  \cmditem{undef}<command>
+
+  清除 \prm{command}，使得 \etex 的 \cmd{ifdefined} 和 \cmd{ifcsname} 测试将其视为未定义。此命令是
+  强健的 (robust)，可带有 \cs{global} 前缀。
+
+  \cmditem{gundef}<command>
+
+  类似于 \cmd{undef}，但是作用于全局。
+
+  \cmditem{csundef}{csname}
+
+  类似于 \cmd{undef}，但它以控制序列名称作为参数。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+
+  \cmditem{csgundef}{csname}
+
+  类似于 \cmd{csundef}，但是作用于全局。
+
+  \cmditem{csmeaning}{csname}
+
+  类似于 \tex 原语 \cmd{meaning}，但以控制序列名称作为参数。如果控制序列未定义，此命令不会隐式地将其赋予
+  \cmd{relax} 的含义。
+
+  \cmditem{csshow}{csname}
+
+  类似于 \tex 原语 \cmd{show}，但以控制序列名称作为参数。如果控制序列未定义，此命令不会隐式地将其赋予
+  \cmd{relax} 的含义。此命令是强健的 (robust)。
+
+\end{ltxsyntax}
+
+\subsubsection{算术定义}
+\label{aut:def:cal}
+
+本节中的工具允许使用宏进行计算，而不是长度寄存器和计数器。
+
+\begin{ltxsyntax}
+
+  \cmditem{numdef}<command>{integer expression}
+
+  类似于 \cmd{edef}，不同之处在于 \prm{integer expression} 使用 \cmd{numexpr} 处理。\hfil\break \prm{integer expression}
+  可以是在此上下文中有效的任意代码。分配给 \prm{command} 的替换文本将是该计算的结果。如果 \prm{command}
+  未定义，则在处理 \prm{integer expression} 之前将其初始化为 \texttt{0}.
+
+  \cmditem{numgdef}<command>{integer expression}
+
+  类似于 \cmd{numdef}，不同之处在于分配是全局的。
+
+  \cmditem{csnumdef}{csname}{integer expression}
+
+  类似于 \cmd{numdef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csnumgdef}{csname}{integer expression}
+
+  类似于 \cmd{numgdef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{dimdef}<command>{dimen expression}
+
+  类似于 \cmd{edef} ，不同之处在于 \prm{dimen expression} 使用 \cmd{dimexpr} 处理。\hfil\break \prm{dimen expression}
+  可以是在此上下文中有效的任意代码。分配给 \prm{command} 的替换文本将是该计算的结果。如果 \prm{command}
+  未定义，则在处理 \prm{dimen expression} 之前将其初始化为 \texttt{0pt}。
+
+  \cmditem{dimgdef}<command>{dimen expression}
+
+  类似于 \cmd{dimdef}，不同之处在于分配是全局的。
+
+  \cmditem{csdimdef}{csname}{dimen expression}
+
+  类似于 \cmd{dimdef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csdimgdef}{csname}{dimen expression}
+
+  类似于 \cmd{dimgdef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{gluedef}<command>{glue expression}
+
+  类似于 \cmd{edef}，不同之处在于 \prm{glue expression} 使用 \cmd{glueexpr} 处理。 \prm{glue expression}
+  可以是在此上下文中有效的任意代码。分配给 \prm{command} 的替换文本将是该计算的结果。如果
+  \prm{command} 未定义，则在处理 \prm{glue expression} 之前将其初始化为 \texttt{0pt plus 0pt minus 0pt}。
+
+  \cmditem{gluegdef}<command>{glue expression}
+
+  类似于 \cmd{gluedef}，不同之处在于分配是全局的。
+
+  \cmditem{csgluedef}{csname}{glue expression}
+
+  类似于 \cmd{gluedef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csgluegdef}{csname}{glue expression}
+
+  类似于 \cmd{gluegdef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{mudef}<command>{muglue expression}
+
+  类似于 \cmd{edef} ，不同之处在于 \prm{muglue expression} 使用 \cmd{muexpr} 处理。\hfil\break \prm{muglue expression}
+  可以是在此上下文中有效的任意代码。分配给 \prm{command} 的替换文本将是该计算的结果。如果 \prm{command}
+  未定义，则在处理 \prm{muglue expression} 之前将其初始化为 \texttt{0mu}。
+
+  \cmditem{mugdef}<command>{muglue expression}
+
+  类似于 \cmd{mudef}，不同之处在于分配是全局的。
+
+  \cmditem{csmudef}{csname}{muglue expression}
+
+  类似于 \cmd{mudef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csmugdef}{csname}{muglue expression}
+
+  类似于 \cmd{mugdef}，不同之处在于它以控制序列名称作为其第一个参数。
+
+\end{ltxsyntax}
+
+\subsection{展开控制}
+\label{aut:exp}
+
+本节中的工具对于控制在 \cmd{edef} 或类似情境下的展开很有用。
+
+\begin{ltxsyntax}
+
+  \cmditem{expandonce}<command>
+
+  此命令展开一次 \prm{command} 并阻止进一步展开替换文本。此命令可展开。
+
+  \cmditem{csexpandonce}{csname}
+
+  类似于 \cmd{expandonce}，不同之处在于它以控制序列名称作为其参数。
+
+\end{ltxsyntax}
+
+\subsection{钩子管理}
+\label{aut:hok}
+
+本节中的工具旨在进行钩子管理。在此上下文中，\prm{hook} 是一个没有任何参数和前缀的普通宏，用于收集稍后要执行的代码。
+这些工具也可以用于通过将代码附加到其替换文本来修补简单的宏。对于更复杂的修补操作，请参见第 \ref{aut:pat} 节。本节
+中的所有命令都将初始化 \prm{hook}，如果未定义的话。
+
+\subsubsection{向钩子追加内容}
+\label{aut:hok:app}
+
+本节中的工具用于向钩子追加任意代码。
+
+\begin{ltxsyntax}
+
+  \cmditem{appto}<hook>{code}
+
+  此命令将任意 \prm{code} 追加到 \prm{hook}。如果 \prm{code} 包含任何参数字符，它们无需加倍。此命令是强健的 (robust)。
+
+  \cmditem{gappto}<hook>{code}
+
+  类似于 \cmd{appto}，不同之处在于分配是全局的。此命令可用作 \latex 核心中的\hfil\break \cmd{g@addto@macro} 命令的替代品。
+
+  \cmditem{eappto}<hook>{code}
+
+  此命令将任意 \prm{code} 追加到 \prm{hook}。在定义时展开 \prm{code}。仅展开新的 \prm{code}，不展开
+  \prm{hook} 的当前替换文本。此命令是强健的 (robust)。
+
+  \cmditem{xappto}<hook>{code}
+
+  类似于 \cmd{eappto}，不同之处在于分配是全局的。
+
+  \cmditem{protected@eappto}<hook>{code}
+
+  类似于 \cmd{eappto}，不同之处在于暂时启用了 \latex 的保护机制。
+
+  \cmditem{protected@xappto}<hook>{code}
+
+  类似于 \cmd{xappto}，不同之处在于暂时启用了 \latex 的保护机制。
+
+  \cmditem{csappto}{csname}{code}
+
+  类似于 \cmd{appto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csgappto}{csname}{code}
+
+  类似于 \cmd{gappto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{cseappto}{csname}{code}
+
+  类似于 \cmd{eappto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csxappto}{csname}{code}
+
+  类似于 \cmd{xappto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{protected@cseappto}<hook>{code}
+
+  类似于 \cmd{protected@eappto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{protected@csxappto}<hook>{code}
+
+  类似于 \cmd{protected@xappto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+\end{ltxsyntax}
+
+\subsubsection{在钩子前面插入内容}
+\label{aut:hok:pre}
+
+本节中的工具向钩子前面插入任意代码，即将代码插入到钩子的开头而不是添加到末尾。
+
+\begin{ltxsyntax}
+
+  \cmditem{preto}<hook>{code}
+
+  类似于 \cmd{appto}，不同之处在于 \prm{code} 被前置。
+
+  \cmditem{gpreto}<hook>{code}
+
+  类似于 \cmd{preto}，不同之处在于分配是全局的。
+
+  \cmditem{epreto}<hook>{code}
+
+  类似于 \cmd{eappto}，不同之处在于 \prm{code} 被前置。
+
+  \cmditem{xpreto}<hook>{code}
+
+  类似于 \cmd{epreto}，不同之处在于分配是全局的。
+
+  \cmditem{protected@epreto}<hook>{code}
+
+  类似于 \cmd{epreto}，不同之处在于暂时启用了 \LaTeX 的保护机制。
+
+  \cmditem{protected@xpreto}<hook>{code}
+
+  类似于 \cmd{xpreto}，不同之处在于暂时启用了 \LaTeX 的保护机制。
+
+  \cmditem{cspreto}{csname}{code}
+
+  类似于 \cmd{preto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csgpreto}{csname}{code}
+
+  类似于 \cmd{gpreto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csepreto}{csname}{code}
+
+  类似于 \cmd{epreto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{csxpreto}{csname}{code}
+
+  类似于 \cmd{xpreto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{protected@csepreto}<hook>{code}
+
+  类似于 \cmd{protected@epreto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+  \cmditem{protected@csxpreto}<hook>{code}
+
+  类似于 \cmd{protected@xpreto}，不同之处在于它以控制序列名称作为其第一个参数。
+
+\end{ltxsyntax}
+
+\subsection{补丁 (Patching)}
+\label{aut:pat}
+
+本节中的工具用于钩取或修改现有代码。这里介绍的所有命令都保留了被修补命令的参数和前缀。请注意，\cs{outer}
+命令可能无法被修补。另外，本节中的命令在修补失败时不会自动发出任何错误信息。相反，它们接受一个 \prm{failure}
+参数，应该提供合适的回退代码或错误信息。在导言区使用 \cmd{tracingpatches} 可以让这些命令将调试信息写入传输文件。
+
+\begin{ltxsyntax}
+
+  \cmditem{patchcmd}[prefix]{command}{search}{replace}{success}{failure}
+
+  此命令提取 \prm{command} 的替换文本，用 \prm{replace} 替换 \prm{search}，然后重新组装\hfil\break \prm{command}。
+  匹配模式与类别码无关，在被修补的 \prm{command} 的替换文本中匹配第一个 \prm{search} 模式。请注意，修补过程
+  涉及对 \prm{command} 的替换文本进行解记号化，然后在修补后重新记号化为当前的类别码制度。@ 符号的类别码临时
+  设置为 11。如果 \prm{command} 的替换文本中包含任何具有非标准类别码的记号，必须在修补之前调整相应的类别码。
+  如果要替换或插入的代码涉及到 \prm{command} 的参数，则参数字符无需加倍。如果指定了可选的 \prm{prefix}，它将
+  替换 \prm{command} 的前缀。空的 \prm{prefix} 参数会从 \prm{command} 中删除所有前缀。此命令是局部的。此命令
+  在修补之前隐式执行相当于 \cmd{ifpatchable} 的测试。如果此测试成功，则命令应用修补并执行 \prm{success}。如果
+  测试失败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是强健的 (robust)。
+
+  \cmditem{ifpatchable}{command}{search}{true}{false}
+
+  如果可以使用 \cmd{patchcmd} 修补 \prm{command} 并在其替换文本中找到 \prm{search} 模式，则执行 \prm{true}；
+  否则执行 \prm{false}。此命令是强健的 (robust)。
+
+  \cmditem*{ifpatchable*}{command}{true}{false}
+
+  类似于 \cmd{ifpatchable}，但星号变体不需要搜索模式。使用此版本检查是否可以使用 \cmd{apptocmd} 和 \cmd{pretocmd}
+  修补命令。
+
+  \cmditem{apptocmd}{command}{code}{success}{failure}
+
+  此命令向 \prm{command} 的替换文本追加 \prm{code}。如果 \prm{command} 是一个无参数的宏，则其行为类似于第
+  \ref{aut:hok:app} 节中的 \cmd{appto}。与 \cmd{appto} 不同，\cmd{apptocmd} 还可以用于修补带参数的命令。在这种
+  情况下，它将解记号化 \prm{command} 的替换文本，应用修补，并在当前类别码制度下重新记号化。@ 符号的类别码临时设置为
+  11。 \prm{code} 可能涉及 \prm{command} 的参数。此命令是局部的。如果修补成功，则执行 \prm{success}。如果修补失
+  败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是强健的 (robust)。
+
+  \cmditem{pretocmd}{command}{code}{success}{failure}
+
+  此命令与 \cmd{apptocmd} 类似，但 \prm{code} 被插入到 \prm{command} 的替换文本开头。如果 \prm{command} 是一个
+  无参数的宏，则其行为类似于第 \ref{aut:hok:app} 节中的 \cmd{preto}。与 \cmd{preto} 不同，\cmd{pretocmd} 也可用
+  于修补带参数的命令。在这种情况下，它将解记号化 \prm{command} 的替换文本，应用修补，并在当前类别码制度下重新记号化。
+  @ 符号的类别码临时设置为 11。 \prm{code} 可能涉及 \prm{command} 的参数。此命令是局部的。如果修补成功，则执行
+  \prm{success}。如果修补失败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是强健的 (robust)。
+
+  \csitem{tracingpatches}
+
+  启用所有修补命令的跟踪，包括 \cmd{ifpatchable}。调试信息将写入传输文件。如果无法确定为何不应用修补或 \cmd{ifpatchable}
+  返回 \prm{false}，则此命令很有用。此命令必须在导言区使用。
+
+\end{ltxsyntax}
+
+\subsection{布尔标志}
+\label{aut:bol}
+
+该包提供了两个完全独立的布尔标志接口。第 \ref{aut:bo1:bol} 节中的工具是 \cmd{newif} 的 \LaTeX 前端。第
+\ref{aut:bo1:tgl} 节中的工具使用了不同的机制。
+
+\subsubsection{\tex 标志}
+\label{aut:bo1:bol}
+
+由于本节中的工具在内部基于 \cmd{newif}，因此它们可以用于测试和更改先前用 \cmd{newif} 定义的标志的状态。它们也与
+\sty{ifthen} 包的布尔测试兼容，并可以作为查询 \tex 原语（如 \cmd{ifmmode}）的 \LaTeX 接口。使用 \cmd{newif}
+方法需要每个标志总共三个宏。
+
+\begin{ltxsyntax}
+
+  \cmditem{newbool}{name}
+
+  定义名为 \prm{name} 的新布尔标志。如果已经定义了该标志，则此命令会发出错误。新定义的标志的初始状态为
+  \texttt{false}。此命令是强健的 (robust)。
+
+  \cmditem{providebool}{name}
+
+  定义名为 \prm{name} 的新布尔标志，除非已经定义。此命令是强健的 (robust)。
+
+  \cmditem{booltrue}{name}
+
+  将布尔标志 \prm{name} 设置为 \texttt{true}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  它将发出错误。
+
+  \cmditem{boolfalse}{name}
+
+  将布尔标志 \prm{name} 设置为 \texttt{false}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  它将发出错误。
+
+  \cmditem{setbool}{name}{value}
+
+  将布尔标志 \prm{name} 设置为 \prm{value}，可以是 \texttt{true} 或 \texttt{false}。此命令是强健的 (robust)，可以
+  使用 \cs{global} 修饰。如果标志未定义，它将发出错误。
+
+  \cmditem{ifbool}{name}{true}{false}
+
+  如果布尔标志 \prm{name} 的状态为 \texttt{true}，则展开为 \prm{true}，否则为 \prm{false}。如果标志未定义，
+  此命令将发出错误。此命令可用于执行基于普通 \tex 语法的任何布尔测试，即通常使用以下方式：
+
+  \begin{ltxcode}
+    <<\iftest>> true<<\else>> false<<\fi>>
+  \end{ltxcode}
+
+  这包括所有使用 \cmd{newif} 定义的标志，以及 \tex 原语，如 \cmd{ifmmode}。在表达式中使用标志或原语时省略
+  \cmd{if} 前缀。例如：
+
+  \begin{ltxcode}
+    <<\ifmytest>> true\else false\fi
+    <<\ifmmode>> true\else false\fi
+  \end{ltxcode}
+  %
+  变为
+
+  \begin{ltxcode}
+    \ifbool{<<mytest>>}{true}{false}
+    \ifbool{<<mmode>>}{true}{false}
+  \end{ltxcode}
+
+  \cmditem{notbool}{name}{not true}{not false}
+
+  类似于 \cmd{ifbool}，但对测试进行否定。
+
+\end{ltxsyntax}
+
+\subsubsection{\latex 标志}
+\label{aut:bo1:tgl}
+
+与第 \ref{aut:bo1:bol} 节中的标志相比，本节中的工具每个标志仅需要一个宏。它们还使用单独的命名空间，以避免
+与常规宏产生名称冲突。
+
+\begin{ltxsyntax}
+
+  \cmditem{newtoggle}{name}
+
+  定义名为 \prm{name} 的新布尔标志。如果已经定义了该标志，则此命令会发出错误。新定义的标志的初始状态为
+  \texttt{false}。此命令是强健的 (robust)。
+
+  \cmditem{providetoggle}{name}
+
+  定义名为 \prm{name} 的新布尔标志，除非已经定义。此命令是强健的 (robust)。
+
+  \cmditem{toggletrue}{name}
+
+  将布尔标志 \prm{name} 设置为 \texttt{true}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  它将发出错误。
+
+  \cmditem{togglefalse}{name}
+
+  将布尔标志 \prm{name} 设置为 \texttt{false}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  它将发出错误。
+
+  \cmditem{settoggle}{name}{value}
+
+  将布尔标志 \prm{name} 设置为 \prm{value}，可以是 \texttt{true} 或 \texttt{false}。此命令是强健的 (robust)，可以
+  使用 \cs{global} 修饰。如果标志未定义，它将发出错误。
+
+  \cmditem{iftoggle}{name}{true}{false}
+
+  如果布尔标志 \prm{name} 的状态为 \texttt{true}，则展开为 \prm{true}，否则为 \prm{false}。如果标志未定义，
+  此命令将发出错误。
+
+  \cmditem{nottoggle}{name}{not true}{not false}
+
+  类似于 \cmd{iftoggle}，但对测试进行否定。
+
+\end{ltxsyntax}
+
+\subsection{通用测试}
+\label{aut:tst}
+
+\subsubsection{宏测试}
+\label{aut:tst:def}
+
+\begin{ltxsyntax}
+
+  \cmditem{ifdef}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义，则展开为 \prm{true}，否则为 \prm{false}。请注意，即使控制序列的含义是
+  \cmd{relax}，它也将被视为已定义。此命令是对 \etex 原语 \cmd{ifdefined} 的 \latex 包装。
+
+  \cmditem{ifcsdef}{csname}{true}{false}
+
+  类似于 \cmd{ifdef}，但它以控制序列名称作为其第一个参数。此命令是对 \etex 原语 \cmd{ifcsname} 的 \latex 包装。
+
+  \cmditem{ifundef}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 未定义，则展开为 \prm{true}，否则为 \prm{false}。除了反转测试的逻辑外，此命令还
+  不同于 \cmd{ifdef}，它还包括如果命令的含义是 \cmd{relax} 则将其视为未定义。
+
+  \cmditem{ifcsundef}{csname}{true}{false}
+
+  类似于 \cmd{ifundef}，但它以控制序列名称作为其第一个参数。此命令可用作 \latex 核心中的 \cmd{@ifundefined} 测试
+  的替代品。
+
+  \cmditem{ifdefmacro}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义且是一个宏，则展开为 \prm{true}，否则为 \prm{false}。
+
+  \cmditem{ifcsmacro}{csname}{true}{false}
+
+  类似于 \cmd{ifdefmacro}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefparam}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义且是具有一个或多个参数的宏，则展开为 \prm{true}，否则为 \prm{false}。
+
+  \cmditem{ifcsparam}{csname}{true}{false}
+
+  类似于 \cmd{ifdefparam}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefprefix}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义且是以 \cs{long} 和/或 \cs{protected} 为前缀的宏，则展开为 \prm{true}，
+  否则为 \prm{false}。请注意，\cs{outer} 宏无法进行测试。
+
+  \cmditem{ifcsprefix}{csname}{true}{false}
+
+  类似于 \cmd{ifdefprefix}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefprotected}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义且是以 \cs{protected} 为前缀的宏，则展开为 \prm{true}，否则为 \prm{false}。
+
+  \cmditem{ifcsprotected}{csname}{true}{false}
+
+  类似于 \cmd{ifdefprotected}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefltxprotect}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义且是一个 \latex 保护外壳，则执行 \prm{true}，否则为 \prm{false}。此命令是
+  强健的 (robust)。它将检测通过 \cmd{DeclareRobustCommand} 或类似技术定义的命令。
+
+  \cmditem{ifcsltxprotect}{csname}{true}{false}
+
+  类似于 \cmd{ifdefltxprotect}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefempty}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 已定义且是一个没有参数且替换文本为空的宏，则展开为 \prm{true}，否则为 \prm{false}。
+  与 \cmd{ifx} 不同，此测试忽略了 \prm{command} 的前缀。
+
+  \cmditem{ifcsempty}{csname}{true}{false}
+
+  类似于 \cmd{ifdefempty}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefvoid}{control sequence}{true}{false}
+
+  如果 \prm{control sequence} 未定义，或其含义是 \cmd{relax}，或是一个没有参数且替换文本为空的控制序列，则展开为
+  \prm{true}，否则为 \prm{false}。
+
+  \cmditem{ifcsvoid}{csname}{true}{false}
+
+  类似于 \cmd{ifdefvoid}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefequal}{control sequence}{control sequence}{true}{false}
+
+  比较两个控制序列，如果它们在 \cmd{ifx} 的意义上相等，则展开为 \prm{true}，否则为 \prm{false}。与 \cmd{ifx} 不同，
+  此测试还将两个控制序列都未定义或含义为 \cmd{relax} 视为 \prm{false}。
+
+  \cmditem{ifcsequal}{csname}{csname}{true}{false}
+
+  类似于 \cmd{ifdefequal}，但它以控制序列名称作为其参数。
+
+  \cmditem{ifdefstring}{command}{string}{true}{false}
+
+  将 \prm{command} 的替换文本与 \prm{string} 进行比较，如果它们相等，则执行 \prm{true}，否则执行 \prm{false}。
+  在测试中，\prm{command} 和 \prm{string} 都不会被展开，并且比较是不受类别码影响的。在 \prm{string} 参数中的控制
+  序列标记将被解标记并视为字符串。此命令是强健的 (robust)。请注意，它只考虑 \prm{command} 的替换文本。例如，这个测试
+
+  \begin{ltxcode}
+    \long\edef\mymacro#1#2{\string&}
+    \ifdefstring{\mymacro}{&}{true}{false}
+  \end{ltxcode}
+  %
+  将得到 \prm{true}。忽略了 \cmd{mymacro} 的前缀和参数，以及替换文本中的类别码。
+
+  \cmditem{ifcsstring}{csname}{string}{true}{false}
+
+  类似于 \cmd{ifdefstring}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefstrequal}{command}{command}{true}{false}
+
+  执行两个命令的不受类别码影响的字符串比较。此命令类似于 \cmd{ifdefstring}，但要比较的两个参数都是宏。此命令是强健的 (robust)。
+
+  \cmditem{ifcsstrequal}{csname}{csname}{true}{false}
+
+  类似于 \cmd{ifdefstrequal}，但它以控制序列名称作为其参数。
+
+\end{ltxsyntax}
+
+\subsubsection{计数器和长度测试}
+\label{aut:tst:cnt}
+
+\begin{ltxsyntax}
+
+  \cmditem{ifdefcounter}{control sequence}{true}{false}
+
+  如果\prm{control sequence}是由\cmd{newcount}分配的 \tex \cmd{count} 寄存器，则扩展为\prm{true}，
+  否则为\prm{false}。
+
+  \cmditem{ifcscounter}{csname}{true}{false}
+
+  类似于\cmd{ifdefcounter}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifltxcounter}{name}{true}{false}
+
+  如果\prm{name}是由\cmd{newcounter}分配的 \LaTeX 计数器，则扩展为\prm{true}，否则为\prm{false}。
+
+  \cmditem{ifdeflength}{control sequence}{true}{false}
+
+  如果\prm{control sequence}是由\cmd{newskip}或\cmd{newlength}分配的 \tex \cmd{skip} 寄存器，则扩展为
+  \prm{true}，否则为\prm{false}。
+
+  \cmditem{ifcslength}{csname}{true}{false}
+
+  类似于\cmd{ifdeflength}，但它以控制序列名称作为其第一个参数。
+
+  \cmditem{ifdefdimen}{control sequence}{true}{false}
+
+  如果\prm{control sequence}是由\cmd{newdimen}分配的 \tex \cmd{dimen} 寄存器，则扩展为\prm{true}，否则
+  为\prm{false}。
+
+  \cmditem{ifcsdimen}{csname}{true}{false}
+
+  类似于\cmd{ifdefdimen}，但它以控制序列名称作为其第一个参数。
+
+\end{ltxsyntax}
+
+\subsubsection{字符串测试}
+\label{aut:tst:str}
+
+\begin{ltxsyntax}
+
+  \cmditem{ifstrequal}{string}{string}{true}{false}
+
+  比较两个字符串，如果它们相等则执行\prm{true}，否则执行\prm{false}。在测试中不会展开字符串，
+  比较时不考虑类别码。任何\prm{string}参数中的控制序列标记都将被解记号化并视为字符串。此命令是强健的 (robust)。
+
+  \cmditem{ifstrempty}{string}{true}{false}
+
+  如果\prm{string}为空，则扩展为\prm{true}，否则扩展为\prm{false}。在测试中不会展开\prm{string}。
+
+  \cmditem{ifblank}{string}{true}{false}
+
+  如果\prm{string}为空白（即空或只包含空格），则扩展为\prm{true}，否则扩展为\prm{false}。在测试中不会展开
+  \prm{string}。
+
+  \cmditem{notblank}{string}{not true}{not false}
+
+  类似于\cmd{ifblank}，但否定了测试。
+
+\end{ltxsyntax}
+
+\subsubsection{算术测试}
+\label{aut:tst:num}
+
+\begin{ltxsyntax}
+
+  \cmditem{ifnumcomp}{integer expression}{relation}{integer expression}{true}{false}
+
+  根据 \prm{relation} 比较两个整数表达式，根据结果展开为 \prm{true} 或 \prm{false}。 \prm{relation} 可以是 |<|、|>| 或 |=|。两个整数表达式将使用 \cmd{numexpr} 处理。一个 \prm{integer expression} 可以是在此上下文中有效的任意代码。所有算术表达式都可以包含空格。以下是一些例子：
+
+  \begin{ltxcode}
+    \ifnumcomp{<<3>>}{<<>>>}{<<6>>}{true}{<<false>>}
+    \ifnumcomp{<<(7 + 5) / 2>>}{<<=>>}{<<6>>}{<<true>>}{false}
+    \ifnumcomp{<<(7+5) / 4>>}{<<>>>}{<<3*(12-10)>>}{true}{<<false>>}
+    \newcounter{countA}
+    \setcounter{countA}{<<6>>}
+    \newcounter{countB}
+    \setcounter{countB}{<<5>>}
+    \ifnumcomp{<<\value{countA} * \value{countB}/2}>>{<<=>>}{<<15>>}{<<true>>}{false}
+    \ifnumcomp{<<6/2>>}{<<=>>}{<<5/2>>}{<<true>>}{false}
+  \end{ltxcode}
+  %
+  从技术上讲，此命令是 \latex 对 \tex 原语 \cmd{ifnum} 的包装，包含了 \cmd{numexpr}。注意，\cmd{numexpr} 将对所有整数表达式的结果进行四舍五入，即在比较之前，两个表达式都将被处理并四舍五入。在上述示例的最后一行中，第二个表达式的结果是2.5，四舍五入为3，因此 \cmd{ifnumcomp} 将展开为 \prm{true}。
+
+  \cmditem{ifnumequal}{integer expression}{integer expression}{true}{false}
+
+  |\ifnumcomp{...}{=}{...}{...}{...}| 的替代语法。
+
+  \cmditem{ifnumgreater}{integer expression}{integer expression}{true}{false}
+
+  |\ifnumcomp{...}{>}{...}{...}{...}| 的替代语法。
+
+  \cmditem{ifnumless}{integer expression}{integer expression}{true}{false}
+
+  |\ifnumcomp{...}{<}{...}{...}{...}| 的替代语法。
+
+  \cmditem{ifnumodd}{integer expression}{true}{false}
+
+  对整数表达式进行评估，如果结果为奇数则展开为 \prm{true}，否则展开为 \prm{false}。从技术上讲，此命令是 \latex 对 \tex 原语 \cmd{ifodd} 的包装，包含了 \cmd{numexpr}。
+
+  \cmditem{ifdimcomp}{dimen expression}{relation}{dimen expression}{true}{false}
+
+  根据 \prm{relation} 比较两个尺寸表达式，并根据结果展开为 \prm{true} 或 \prm{false}。 \prm{relation} 可以是 |<|、|>| 或 |=|。两个尺寸表达式都将使用 \cmd{dimexpr} 处理。一个 \prm{dimen expression} 可以是在此上下文中有效的任意代码。所有算术表达式都可以包含空格。以下是一些例子：
+
+  \begin{ltxcode}
+    \ifdimcomp{<<1cm>>}{<<=>>}{<<28.45274pt>>}{<<true>>}{false}
+    \ifdimcomp{<<(7pt + 5pt) / 2>>}{<<<>>}{2pt}{true}{<<false>>}
+    \ifdimcomp{<<(3.725pt + 0.025pt) * 2>>}{<<<>>}{<<7pt>>}{true}{<<false>>}
+    \newlength{\lengthA}
+    \setlength{\lengthA}{<<7.25pt>>}
+    \newlength{\lengthB}
+    \setlength{\lengthB}{<<4.75pt>>}
+    \ifdimcomp{<<(\lengthA + \lengthB) / 2>>}{<<>>>}{<<2.75pt * 2>>}{<<true>>}{false}
+    \ifdimcomp{<<(\lengthA + \lengthB) / 2>>}{<<>>>}{<<25pt / 6>>}{<<true>>}{false}
+  \end{ltxcode}
+  %
+  从技术上讲，此命令是 \latex 对 \tex 原语 \cmd{ifdim} 的包装，包含了 \cmd{dimexpr}。由于 \cmd{ifdimcomp} 和 \cmd{ifnumcomp} 都是可展开的，它们也可以嵌套使用：
+
+  \begin{ltxcode}
+    <<\ifnumcomp>>{<<\ifdimcomp>>{<<5pt+5pt>>}{<<=>>}{<<10pt>>}{<<1>>}{<<0>>}}{<<>>>}{<<0>>}{<<true>>}{false}
+  \end{ltxcode}
+
+  \cmditem{ifdimequal}{dimen expression}{dimen expression}{true}{false}
+
+  |\ifdimcomp{...}{=}{...}{...}{...}| 的替代语法。
+
+  \cmditem{ifdimgreater}{dimen expression}{dimen expression}{true}{false}
+
+  |\ifdimcomp{...}{>}{...}{...}{...}| 的替代语法。
+
+  \cmditem{ifdimless}{dimen expression}{dimen expression}{true}{false}
+
+  |\ifdimcomp{...}{<}{...}{...}{...}| 的替代语法。
+
+\end{ltxsyntax}
+
+\subsubsection{布尔表达式}
+\label{aut:tst:bol}
+
+本节中的命令是 \sty{ifthen} 包提供的 \cmd{ifthenelse} 命令的替代品。它们具有相同的目的，但在语法、概念和
+实现上有所不同。与 \cmd{ifthenelse} 不同，它们本身不提供任何测试，而是作为其他测试的前端。任何满足特定语法
+要求的测试都可以用于布尔表达式。
+
+\begin{ltxsyntax}
+
+  \cmditem{ifboolexpr}{expression}{true}{false}
+
+  对 \prm{expression} 进行评估，如果为真则执行 \prm{true}，否则执行 \prm{false}。从左到右顺序评估
+  \prm{expression}。以下元素在 \prm{expression} 中可用，并在下面更详细地讨论：测试运算符 \texttt{togl}、
+  \texttt{bool}、\texttt{test}；逻辑运算符 \texttt{not}、\texttt{and}、\texttt{or}；子表达式定界符
+  \texttt{(...)}。可以自由使用空格、制表符和换行符来可视化排列 \prm{expression}。在 \prm{expression}
+  中不允许空白行。此命令是强健的 (robust)。
+
+  \cmditem{ifboolexpe}{expression}{true}{false}
+
+  \cmd{ifboolexpr} 的可展开版本，在仅限展开的上下文中（例如 \cmd{edef} 或 \cmd{write} 操作）可以处理。
+  请注意，\prm{expression} 中使用的所有测试必须是可展开的，即使 \cmd{ifboolexpe} 不位于仅展开的上下文中。
+
+  \cmditem{whileboolexpr}{expression}{code}
+
+  类似于 \cmd{ifboolexpr} 对 \prm{expression} 进行评估，并在表达式为真时重复执行 \prm{code}。\prm{code}
+  可以是任何有效的 \tex 或 \latex 代码。此命令是强健的 (robust)。
+
+  \cmditem{unlessboolexpr}{expression}{code}
+
+  类似于 \cmd{whileboolexpr}，但否定了 \prm{expression}，即只有在表达式为真时才会重复执行 \prm{code}。
+  此命令是强健的 (robust)。
+
+\end{ltxsyntax}
+%
+以下测试运算符可用于 \prm{expression}：
+
+\begin{marglist}
+  \appto\marglistfont{\verbatimfont}
+
+  \item[togl]
+
+  使用 \texttt{togl} 运算符测试使用 \cmd{newtoggle} 定义的标志的状态。例如：
+
+  \begin{ltxcode}
+    <<\iftoggle{mytoggle}>>{true}{false}
+  \end{ltxcode}
+  %
+  变为
+
+  \begin{ltxcode}
+    \ifboolexpr{ <<togl>> {<<mytoggle>>} }{true}{false}
+  \end{ltxcode}
+  %
+  \texttt{togl} 运算符可以与 \cmd{ifboolexpr} 和 \cmd{ifboolexpe} 都一起使用。
+
+  \item[bool]
+
+  使用 \texttt{bool} 运算符基于纯 \tex 语法执行布尔测试，即通常使用如下方式的任何测试：
+
+  \begin{ltxcode}
+    <<\iftest>> true<<\else>> false<<\fi>>
+  \end{ltxcode}
+  %
+  这包括所有使用 \cmd{newif} 定义的标志以及诸如 \cmd{ifmmode} 等 \tex 原语。在表达式中使用标志或
+  原语时，忽略 \cmd{if} 前缀。例如：
+
+  \begin{ltxcode}
+    <<\ifmmode>> true\else false\fi
+    <<\ifmytest>> true\else false\fi
+  \end{ltxcode}
+  %
+  变为
+
+  \begin{ltxcode}
+    \ifboolexpr{ <<bool>> {<<mmode>>} }{true}{false}
+    \ifboolexpr{ <<bool>> {<<mytest>>} }{true}{false}
+  \end{ltxcode}
+  %
+  这也适用于使用 \cmd{newbool} 定义的标志（见 \secref{aut:bo1:bol}）。在这种情况下，
+
+  \begin{ltxcode}
+    <<\ifbool{mybool}>>{true}{false}
+  \end{ltxcode}
+  %
+  变为
+
+  \begin{ltxcode}
+    \ifboolexpr{ <<bool>> {<<mybool>>} }{true}{false}
+  \end{ltxcode}
+  %
+  \texttt{bool} 运算符可以与 \cmd{ifboolexpr} 和 \cmd{ifboolexpe} 都一起使用。
+
+  \item[test]
+
+  使用 \texttt{test} 运算符基于 \latex 语法执行测试，即通常使用如下方式的任何测试：
+
+  \begin{ltxcode}
+    <<\iftest>>{<<true>>}{<<false>>}
+  \end{ltxcode}
+  %
+  这适用于基于 \latex 语法的所有宏，即宏必须接受 \prm{true} 和 \prm{false} 参数，并且这些参数必须
+  是最终参数。例如：
+
+  \begin{ltxcode}
+    <<\ifdef>>{\somemacro}<<{true}{false}>>
+    <<\ifdimless>>{\textwidth}{365pt}<<{true}{false}>>
+      <<\ifnumcomp>>{\value{somecounter}}{>}{3}<<{true}{false}>>
+  \end{ltxcode}
+
+  在 \prm{expression} 中使用这些测试时，它们的 \prm{true} 和 \prm{false} 参数被省略。例如：
+
+  \begin{ltxcode}
+    <<\ifcsdef{mymacro}>>{true}{false}
+  \end{ltxcode}
+  %
+  变为
+
+  \begin{ltxcode}
+    \ifboolexpr{ <<test>> {<<\ifcsdef{mymacro}>>} }{true}{false}
+  \end{ltxcode}
+  %
+  和
+
+  \begin{ltxcode}
+    <<\ifnumcomp{\value{mycounter}}{>}{3}>>{true}{false}
+  \end{ltxcode}
+  %
+  变为
+
+  \begin{ltxcode}
+    \ifboolexpr{
+      <<test>> {<<\ifnumcomp{\value{mycounter}}{>}{3}>>}
+    }
+    {true}
+    {false}
+  \end{ltxcode}
+  %
+  \texttt{test} 运算符可以无限制地与 \cmd{ifboolexpr} 一起使用。它也可以与 \cmd{ifboolexpe} 一起
+  使用，前提是测试是可展开的。一些在 \secref{aut:tst} 中的通用测试是强健的 (robust)。，即使 \cmd{ifboolexpe}
+  不位于仅展开的上下文中，也不能与之一起使用。如果测试不可展开，请使用 \cmd{ifboolexpr}。
+\end{marglist}
+
+由于 \cmd{ifboolexpr} 和 \cmd{ifboolexpe} 需要处理开销，通常在单个测试中使用它们没有好处。 \secref{aut:tst} 中的独立测试比 \texttt{test} 更有效率，\secref{aut:bo1:bol} 中的 \cmd{ifbool} 比 \texttt{bool} 更有效率，\secref{aut:bo1:tgl} 中的 \cmd{iftoggle} 比 \texttt{togl} 更有效率。 \cmd{ifboolexpr} 和 \cmd{ifboolexpe} 的目的在于它们支持逻辑运算符和子表达式。以下逻辑运算符可用于 \prm{expression}：
+
+\begin{marglist}
+  \appto\marglistfont{\verbatimfont}
+
+  \item[not]
+
+  \texttt{not} 运算符否定紧接其后的元素的真值。您可以在 \texttt{togl}、\texttt{bool}、\texttt{test} 和子表达式前加上 \texttt{not}。例如：
+
+  \begin{ltxcode}
+    \ifboolexpr{
+      <<not>> bool {mybool}
+    }
+    {true}
+    {false}
+  \end{ltxcode}
+  %
+  如果 \texttt{mybool} 为 false，则结果为 \prm{true}；如果 \texttt{mybool} 为 true，则结果为 \prm{false}。并且
+
+  \begin{ltxcode}
+    \ifboolexpr{
+      <<not (>> bool {boolA} or bool {boolB} <<)>>
+    }
+    {true}
+    {false}
+  \end{ltxcode}
+  %
+  如果 \texttt{boolA} 和 \texttt{boolB} 都为 false，则结果为 \prm{true}。
+
+  \item[and]
+
+  \texttt{and} 运算符表示合取（\emph{a} 和 \emph{b} 都为真）。如果 \texttt{and} 连接的所有元素都为真，则 \prm{expression} 为真。例如：
+
+  \begin{ltxcode}
+    \ifboolexpr{
+      bool {boolA} <<and>> bool {boolB}
+    }
+    {true}
+    {false}
+  \end{ltxcode}
+  %
+  如果两个 \texttt{bool} 测试都为真，则结果为 \prm{true}。不提供 \texttt{nand} 运算符（否定的合取，即不是两者都为真），但可以通过在否定子表达式中使用 \texttt{and} 来表达。例如：
+
+  \begin{ltxcode}
+    bool {boolA} <<nand>> bool {boolB}
+  \end{ltxcode}
+  %
+  可以写为
+
+  \begin{ltxcode}
+    <<not>> <<(>> bool {boolA} <<and>> bool {boolB} <<)>>
+  \end{ltxcode}
+
+  \item[or]
+
+  \texttt{or} 运算符表示非排他的析取（\emph{a} 或 \emph{b} 或两者都为真）。如果至少有一个使用 \texttt{or} 连接的元素为真，则 \prm{expression} 为真。例如：
+
+  \begin{ltxcode}
+    \ifboolexpr{
+      togl {toglA} <<or>> togl {toglB}
+    }
+    {true}
+    {false}
+  \end{ltxcode}
+  %
+  如果至少一个或两个测试为真，则结果为 \prm{true}。不提供 \texttt{nor} 运算符（否定的非排他的析取，即两者都不为真），但可以通过在否定子表达式中使用 \texttt{or} 来表达。例如：
+
+  \begin{ltxcode}
+    bool {boolA} <<nor>> bool {boolB}
+  \end{ltxcode}
+  %
+  可以写为
+
+  \begin{ltxcode}
+    <<not>> <<(>> bool {boolA} <<or>> bool {boolB} <<)>>
+  \end{ltxcode}
+
+  \item[(...)]
+
+  括号用于限定 \prm{expression} 中的子表达式。子表达式会被计算，其计算结果会被视为封闭表达式中的单个真值。子表达式可以嵌套。例如，表达式：
+
+  \begin{ltxcode}
+    <<(>> bool {boolA} or bool {boolB} <<)>>
+    and
+    <<(>> bool {boolC} or bool {boolD} <<)>>
+  \end{ltxcode}
+  %
+  如果两个子表达式都为真，则结果为真；即如果 \texttt{boolA}/\texttt{boolB} 中至少一个为真，且
+  \texttt{boolC}/\texttt{boolD} 中至少一个为真，则结果为真。如果所有元素都使用 \texttt{and} 或 \texttt{or}
+  连接，则通常不需要子表达式。例如，表达式
+
+  \begin{ltxcode}
+    bool {boolA} <<and>> bool {boolB} <<and>> {boolC} <<and>> bool {boolD}
+    bool {boolA} <<or>> bool {boolB} <<or>> {boolC} <<or>> bool {boolD}
+  \end{ltxcode}
+  %
+  将产生预期的结果：第一个表达式如果所有元素都为真，则结果为真；第二个表达式如果至少一个元素为真，则结果为真。
+  但是，当组合 \texttt{and} 和 \texttt{or} 时，建议始终将元素分组到子表达式中，以避免可能因形式布尔表达式的
+  语义与自然语言的语义之间的差异而产生的误解。例如，以下表达式
+
+  \begin{ltxcode}
+    bool {<<coffee>>} <<and>> bool {<<milk>>} <<or>> bool {<<sugar>>}
+  \end{ltxcode}
+  %
+  如果 \texttt{sugar} 为真，则始终为真，因为 \texttt{or} 运算符将 \texttt{and} 评估结果作为输入。与英语中的
+  表达含义相反，它不是按照以下方式处理：
+
+  \begin{ltxcode}
+    bool {<<coffee>>} <<and>> <<(>> bool {<<milk>>} <<or>> bool {<<sugar>>} <<)>>
+  \end{ltxcode}
+  %
+  但是严格地从左到右进行评估：
+
+  \begin{ltxcode}
+    <<(>> bool {<<coffee>>} <<and>> bool {<<milk>>} <<)>> <<or>> bool {<<sugar>>}
+  \end{ltxcode}
+  %
+  这可能不是您想要的顺序。
+
+\end{marglist}
+
+\subsection{列表处理}
+\label{aut:lst}
+
+\subsubsection{用户输入}
+\label{aut:lst:inp}
+
+本节工具主要用于处理用户输入。在构建供包内部使用的列表时，可能更倾向于使用第 \ref{aut:lst:int} 节中的工具，
+因为它们允许测试元素是否在列表中。
+
+\begin{ltxsyntax}
+
+  \cmditem{DeclareListParser}{command}{separator}
+
+  此命令定义一个列表解析器，类似于下面的 \cmd{docsvlist} 命令，其定义如下：
+
+  \begin{ltxcode}
+    \DeclareListParser{\docsvlist}{,}
+  \end{ltxcode}
+  %
+  请注意，列表解析器对 \prm{separator} 的分类代码很敏感。
+
+  \cmditem*{DeclareListParser*}{command}{separator}
+
+  \cmd{DeclareListParser} 的星号变体定义了类似于下面的 \cmd{forcsvlist} 命令的列表解析器，其定义如下：
+
+  \begin{ltxcode}
+    \DeclareListParser*{\forcsvlist}{,}
+  \end{ltxcode}
+
+  \cmditem{docsvlist}{item, item, ...}
+
+  此命令循环处理逗号分隔的项目列表，并对列表中的每个项目执行辅助命令 \cmd{do}，将项目作为参数传递。与
+  \latex 核心中的 \cmd{@for} 循环不同，\cmd{docsvlist} 是可展开的。通过适当定义 \cmd{do}，列表可以在
+  \cmd{edef} 或可比较的上下文中处理。您可以在 \cmd{do} 的替换文本末尾使用 \cmd{listbreak} 来停止处理
+  并丢弃列表中的剩余项目。列表分隔符后的空格将被忽略。如果项目包含逗号或以空格开头，则必须用花括号包装。
+  在处理列表时，花括号将被移除。以下是使用示例，将逗号分隔的列表打印为 \env{itemize} 环境：
+
+  \begin{ltxcode}
+    \begin{itemize}
+      \renewcommand*{\do}[1]{\item #1}
+            \docsvlist{item1, item2, {item3a, item3b}, item4}
+    \end{itemize}
+  \end{ltxcode}
+  %
+  还有另一个示例：
+
+  \begin{ltxcode}
+    \renewcommand*{\do}[1]{* #1\MessageBreak}
+    \PackageInfo{mypackage}{%
+      Example list:\MessageBreak
+      \docsvlist{item1, item2, {item3a, item3b}, item4}}
+  \end{ltxcode}
+  %
+  在此示例中，列表将作为信息消息写入日志文件。列表处理发生在 \cmd{write} 操作期间。
+
+  \cmditem{forcsvlist}{handler}{item, item, ...}
+
+  此命令与 \cmd{docsvlist} 类似，但 \cmd{do} 被在调用时指定的 \prm{handler} 替换。 \prm{handler}
+  也可以是一系列命令，只要最后给出的命令将项目作为尾随参数。例如，以下代码将把逗号分隔的项目列表转换为名为
+  \cmd{mylist} 的内部列表：
+
+  \begin{ltxcode}
+    \forcsvlist{\listadd\mylist}{item1, item2, item3}
+  \end{ltxcode}
+
+\end{ltxsyntax}
+
+\subsubsection{内部列表}
+\label{aut:lst:int}
+
+本节中的工具用于处理内部数据列表。在这个上下文中，<内部列表> 是指一个没有任何参数和前缀的普通宏，
+用于收集数据。这些列表使用特殊字符作为内部列表分隔符。\footnote{这个特殊字符是具有类别码 3 的
+  \texttt{\string|}。请注意，你不能通过 \cmd{listname} 来排版列表。使用 \cmd{show} 来检查列表。}
+在处理用户以列表格式输入的内容时，请参考第 \ref{aut:lst:inp} 节中的工具。
+
+\begin{ltxsyntax}
+
+  \cmditem{listadd}{listmacro}{item}
+
+  这个命令将一个 \prm{item} 添加到 \prm{listmacro} 中。空的 \prm{item} 不会添加到列表中。
+
+  \cmditem{listgadd}{listmacro}{item}
+
+  类似于 \cmd{listadd}，但是执行的是全局赋值。
+
+  \cmditem{listeadd}{listmacro}{item}
+
+  类似于 \cmd{listadd}，但是 \prm{item} 在定义时被展开。只有新的 \prm{item} 会被展开，
+  \prm{listmacro} 不会被展开。如果展开后的 \prm{item} 是空的，那么它不会被添加到列表中。
+
+  \cmditem{listxadd}{listmacro}{item}
+
+  类似于 \cmd{listeadd}，但是执行的是全局赋值。
+
+  \cmditem{listcsadd}{listcsname}{item}
+
+  类似于 \cmd{listadd}，但是第一个参数是控制序列的名称。
+
+  \cmditem{listcsgadd}{listcsname}{item}
+
+  类似于 \cmd{listcsadd}，但是执行的是全局赋值。
+
+  \cmditem{listcseadd}{listcsname}{item}
+
+  类似于 \cmd{listeadd}，但是第一个参数是控制序列的名称。
+
+  \cmditem{listcsxadd}{listcsname}{item}
+
+  类似于 \cmd{listcseadd}，但是执行的是全局赋值。
+
+  \cmditem{listremove}{listmacro}{item}
+
+  这个命令从 \prm{listmacro} 中移除一个 \prm{item}。空的 \prm{item} 会被忽略。
+
+  \cmditem{listgremove}{listmacro}{item}
+
+  类似于 \cmd{listremove}，但是执行的是全局赋值。
+
+  \cmditem{listcsremove}{listcsname}{item}
+
+  类似于 \cmd{listremove}，但是第一个参数是控制序列的名称。
+
+  \cmditem{listcsgremove}{listcsname}{item}
+
+  类似于 \cmd{listcsremove}，但是执行的是全局赋值。
+
+  \cmditem{dolistloop}{listmacro}
+
+  这个命令遍历 \prm{listmacro} 中的所有项目，并为列表中的每个项目执行辅助命令 \cmd{do}，将项目作为
+  参数传递。列表循环本身是可展开的。你可以在 \cmd{do} 的替换文本末尾使用 \cmd{listbreak} 来停止处
+  理，并丢弃列表中剩余的项目。以下是一个用法示例，将名为 \cmd{mylist} 的内部列表打印为 \env{itemize}
+  环境：
+
+  \begin{ltxcode}
+    \begin{itemize}
+      \renewcommand*{\do}[1]{\item #1}
+            \dolistloop{\mylist}
+    \end{itemize}
+  \end{ltxcode}
+
+  \cmditem{dolistcsloop}{listcsname}
+
+  类似于 \cmd{dolistloop}，但是第一个参数是控制序列的名称。
+
+  \cmditem{forlistloop}{handler}{listmacro}
+
+  这个命令类似于 \cmd{dolistloop}，但是在调用时，\cmd{do} 被指定的 \prm{handler} 替代。
+  \prm{handler} 也可以是一系列命令，只要最后给出的命令将项目作为尾随参数。例如，以下代码将在内部
+  列表 \cmd{mylist} 中的所有项目前加上 \cmd{item}，在处理列表时计数项目，并在末尾附加项目计数：
+
+  \begin{ltxcode}
+    \newcounter{itemcount}
+    \begin{itemize}
+      \forlistloop{\stepcounter{itemcount}\item}{\mylist}
+      \item Total: \number\value{itemcount} items
+    \end{itemize}
+  \end{ltxcode}
+
+  \cmditem{forlistcsloop}{handler}{listcsname}
+
+  类似于 \cmd{forlistloop}，但是第二个参数是控制序列的名称。
+
+  \cmditem{ifinlist}{item}{listmacro}{true}{false}
+
+  如果 \prm{item} 包含在 \prm{listmacro} 中，则执行 \prm{true}，否则执行 \prm{false}。请注意，
+  此测试使用基于 \TeX{} 的参数扫描器进行模式匹配，以检查搜索字符串是否包含在列表中。这意味着它通常
+  比遍历列表中的所有项目更快，但也意味着项目不能包含花括号，否则会有效地隐藏它们。换句话说，在处理
+  纯字符串列表而不是可打印数据时，这个宏最有用。在处理可打印文本时，最好使用 \cmd{dolistloop} 来
+  检查一个项目是否在列表中，如下所示：
+
+  \begin{ltxcode}
+    \renewcommand*{\do}[1]{%
+      \ifstrequal{#1}{<<item>>}
+      {item found!\listbreak}
+      {}}
+    \dolistloop{\mylist}
+  \end{ltxcode}
+
+  \cmditem{xifinlist}{item}{listmacro}{true}{false}
+
+  类似于 \cmd{ifinlist}，但是在测试之前展开了 \prm{item}。
+
+  \cmditem{ifinlistcs}{item}{listcsname}{true}{false}
+
+  类似于 \cmd{ifinlist}，但是第二个参数是控制序列的名称。
+
+  \cmditem{xifinlistcs}{item}{listcsname}{true}{false}
+
+  类似于 \cmd{xifinlist}，但是第二个参数是控制序列的名称。
+
+\end{ltxsyntax}
+
+\subsection{杂项工具}
+\label{aut:msc}
+
+\begin{ltxsyntax}
+
+  \cmditem{rmntonum}{numeral}
+
+  \tex 原语 \cmd{romannumeral} 可以将整数转换为罗马数字，但是 \tex 或 \latex 没有提供相反的命令。
+  \cmd{rmntonum} 填补了这个空白。它以罗马数字作为参数，并将其转换为相应的整数。由于它是可展开的，
+  因此也可以用于计数器赋值或算术测试：
+
+  \begin{ltxcode}
+    <<\rmntonum>>{<<mcmxcv>>}
+    \setcounter{counter}{<<\rmntonum>>{<<CXVI>>}}
+    \ifnumless{<<\rmntonum>>{<<mcmxcviii>>}}{2000}{true}{false}
+  \end{ltxcode}
+  %
+  \prm{numeral} 参数必须是一个文字字符串。在解析之前，它将被去除记号化。罗马数字的解析不区分大小写，
+  并忽略参数中的空格。如果参数中存在无效的记号，\cmd{rmntonum} 将展开为 \texttt{-1}；空参数将产生
+  空字符串。请注意，\cmd{rmntonum} 不会检查罗马数字的形式有效性。例如，\texttt{V} 和 \texttt{VX}
+  都会产生 \texttt{5}，\texttt{IC} 会产生 \texttt{99}，等等。
+
+  \cmditem{ifrmnum}{string}{true}{false}
+
+  如果 \prm{string} 是一个罗马数字，则展开为 \prm{true}，否则展开为 \prm{false}。在执行测试之前，
+  \prm{string} 将被去除记号化。这个测试不区分大小写，并忽略 \prm{string} 中的空格。请注意，
+  \cmd{ifrmnum} 不会检查罗马数字的形式有效性。例如，\texttt{V} 和 \texttt{VXV} 都会展开为
+  \prm{true}。严格来说，\cmd{ifrmnum} 的作用是解析 \prm{string} 以确定它是否由可以构成有效罗马数字
+  的字符组成，但它不会检查它们是否真的是有效的罗马数字。
+
+\end{ltxsyntax}
+
+\section{报告问题}
+
+\sty{etoolbox} 宏包的开发代码托管在 GitHub 上： \url{https://github.com/josephwright/etoolbox} ，这是
+记录该包任何问题的最佳位置。
+
+\section{修订历史}
+
+本修订历史记录了与此软件包用户相关的变更列表。不包括更多技术性质的更改，这些更改不影响用户界面或软件包的行为。
+如果修订历史中的条目说明某个功能已经“改进”或“扩展”，这表示是一种语法向后兼容的修改，比如向现有命令添加可选参数。
+如果修订历史中的条目说明某个功能已被“修改”，那需要注意，这表示一种可能需要在一些，希望是少数情况下，修改现有
+文档的修改。右侧的数字表示本手册的相关部分。
+
+\begin{changelog}
+
+  \begin{release}{2.5k}{2020-10-05}
+    \item 内部更新
+  \end{release}
+
+  \begin{release}{2.5j}{2020-08-24}
+    \item 跟踪 \LaTeXe{} 核心变更
+  \end{release}
+
+  \begin{release}{2.5i}{2020-07-13}
+    \item 跟踪 \LaTeXe{} 核心变更
+  \end{release}
+
+  \begin{release}{2.5h}{2019-09-21}
+    \item 添加缺失的 \cmd{gundef}
+  \end{release}
+
+  \begin{release}{2.5g}{2019-09-09}
+    \item 更新对 \LaTeX{} 核心变更前 \cmd{begin} 和 \cmd{end} 的修补
+  \end{release}
+
+  \begin{release}{2.5f}{2018-08-18}
+    \item 修复 \cmd{ifdefempty}、\cmd{ifcsempty}、\cs{ifdefvoid} 和 \cmd{ifcsvoid} 用于扩展为空格符的宏时出现的问题
+  \end{release}
+
+  \begin{release}{2.5e}{2018-02-11}
+    \item 在 \cmd{DeclareListParser} 中对空列表分隔符进行更多工作
+  \end{release}
+
+  \begin{release}{2.5d}{2018-02-10}
+    \item 允许在 \cmd{DeclareListParser} 中使用空列表分隔符
+  \end{release}
+
+  \begin{release}{2.5c}{2018-02-06}
+    \item 修复了由 v2.5b 引入的 \cmd{forcsvlist} 的问题
+  \end{release}
+
+  \begin{release}{2.5b}{2018-02-04}
+    \item 在某些内部步骤中保留大括号
+    \item 对列表处理器进行内部性能改进
+  \end{release}
+
+  \begin{release}{2.5a}{2018-02-03}
+    \item 对列表处理器进行内部性能改进
+  \end{release}
+
+  \begin{release}{2.5}{2017-11-22}
+    \item 添加了 \cmd{csgundef}\see{aut:def:def}
+    \item 添加了 \cmd{gundef}\see{aut:def:def}
+    \item 允许扫描包含换行符的宏
+  \end{release}
+
+  \begin{release}{2.4}{2017-01-02}
+    \item 将 \cmd{listdel} 重命名为 \cmd{listremove}（名称冲突）\see{aut:lst:int}
+    \item 将 \cmd{listgdel} 重命名为 \cmd{listgremove}（名称冲突）\see{aut:lst:int}
+  \end{release}
+
+  \begin{release}{2.3}{2016-12-26}
+    \item 添加了 \cmd{listdel}\see{aut:lst:int}
+    \item 添加了 \cmd{listgdel}\see{aut:lst:int}
+  \end{release}
+
+  \begin{release}{2.2b}{2016-12-01}
+    \item 修复了对某些类型的 \latex 强健 (robust) 命令的 \cmd{ifdefltxprotect} 的问题
+    \item 在 \cmd{robustify} 处理后删除了冗余的宏
+  \end{release}
+
+  \begin{release}{2.2a}{2015-08-02}
+    \item 修复了 \cmd{ifblank}/\cmd{notblank} 中的强健性 (robustness) 错误
+  \end{release}
+
+  \begin{release}{2.2}{2015-05-04}
+    \item 添加了 \cmd{csmeaning}\see{aut:def:def}
+  \end{release}
+
+  \begin{release}{2.1d}{2015-03-19}
+    \item 修复了与 \sty{bm} 和某些类相关的问题
+  \end{release}
+
+  \begin{release}{2.1c}{2015-03-15}
+    \item 修复了 \cmd{ifpatchable} 中的空格问题
+    \item 修复了 \cmd{patchcmd} 中的空格问题
+    \item 修复了 \cmd{robustify} 中的空格问题
+  \end{release}
+
+  \begin{release}{2.1b}{2015-03-10}
+    \item 对文档进行了轻微修订
+  \end{release}
+
+  \begin{release}{2.1a}{2015-03-10}
+    \item 新的维护者：Joseph Wright
+    \item 在较新的 \latex 核心发布中跳过加载 \sty{etex} 包
+  \end{release}
+
+  \begin{release}{2.1}{2011-01-03}
+    \item 添加了 \cmd{AtBeginEnvironment}\see{use:env}
+    \item 添加了 \cmd{AtEndEnvironment}\see{use:env}
+    \item 添加了 \cmd{BeforeBeginEnvironment}\see{use:env}
+    \item 添加了 \cmd{AfterEndEnvironment}\see{use:env}
+    \item 添加了 \cmd{ifdefstrequal}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsstrequal}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefcounter}\see{aut:tst:cnt}
+    \item 添加了 \cmd{ifcscounter}\see{aut:tst:cnt}
+    \item 添加了 \cmd{ifltxcounter}\see{aut:tst:cnt}
+    \item 添加了 \cmd{ifdeflength}\see{aut:tst:cnt}
+    \item 添加了 \cmd{ifcslength}\see{aut:tst:cnt}
+    \item 添加了 \cmd{ifdefdimen}\see{aut:tst:cnt}
+    \item 添加了 \cmd{ifcsdimen}\see{aut:tst:cnt}
+  \end{release}
+
+  \begin{release}{2.0a}{2010-09-12}
+    \item 修复了 \cmd{patchcmd}、\cmd{apptocmd}、\cmd{pretocmd} 中的错误\see{aut:pat}
+  \end{release}
+
+  \begin{release}{2.0}{2010-08-21}
+
+    \item 添加了 \cmd{csshow}\see{aut:def:def}
+    \item 添加了 \cmd{DeclareListParser*}\see{aut:lst:inp}
+    \item 添加了 \cmd{forcsvlist}\see{aut:lst:inp}
+    \item 添加了 \cmd{forlistloop}\see{aut:lst:int}
+    \item 添加了 \cmd{forlistcsloop}\see{aut:lst:int}
+    \item 允许在宏测试中测试 \cmd{par}\see{aut:tst:def}
+    \item 修复了一些错误
+
+  \end{release}
+
+  \begin{release}{1.9}{2010-04-10}
+
+    \item 改进了 \cmd{letcs}\see{aut:def:def}
+    \item 改进了 \cmd{csletcs}\see{aut:def:def}
+    \item 改进了 \cmd{listeadd}\see{aut:lst:int}
+    \item 改进了 \cmd{listxadd}\see{aut:lst:int}
+    \item 添加了 \cmd{notblank}\see{aut:tst:str}
+    \item 添加了 \cmd{ifnumodd}\see{aut:tst:num}
+    \item 添加了 \cmd{ifboolexpr}\see{aut:tst:bol}
+    \item 添加了 \cmd{ifboolexpe}\see{aut:tst:bol}
+    \item 添加了 \cmd{whileboolexpr}\see{aut:tst:bol}
+    \item 添加了 \cmd{unlessboolexpr}\see{aut:tst:bol}
+
+  \end{release}
+
+  \begin{release}{1.8}{2009-08-06}
+
+    \item 改进了 \cmd{deflength}\see{use:cal}
+    \item 添加了 \cmd{ifnumcomp}\see{aut:tst:num}
+    \item 添加了 \cmd{ifnumequal}\see{aut:tst:num}
+    \item 添加了 \cmd{ifnumgreater}\see{aut:tst:num}
+    \item 添加了 \cmd{ifnumless}\see{aut:tst:num}
+    \item 添加了 \cmd{ifdimcomp}\see{aut:tst:num}
+    \item 添加了 \cmd{ifdimequal}\see{aut:tst:num}
+    \item 添加了 \cmd{ifdimgreater}\see{aut:tst:num}
+    \item 添加了 \cmd{ifdimless}\see{aut:tst:num}
+
+  \end{release}
+
+  \begin{release}{1.7}{2008-06-28}
+    \item 将 \cmd{AfterBeginDocument} 重命名为 \cmd{AfterEndPreamble}（名称冲突）\see{use:pre}
+    \item 解决了与 \sty{hyperref} 的冲突
+    \item 稍微重新排列了手册内容
+  \end{release}
+
+  \begin{release}{1.6}{2008-06-22}
+    \item 改进了 \cmd{robustify}\see{use:pat}
+    \item 改进了 \cmd{patchcmd} 和 \cmd{ifpatchable}\see{aut:pat}
+    \item 修改并改进了 \cmd{apptocmd}\see{aut:pat}
+    \item 修改并改进了 \cmd{pretocmd}\see{aut:pat}
+    \item 添加了 \cmd{ifpatchable*}\see{aut:pat}
+    \item 添加了 \cmd{tracingpatches}\see{aut:pat}
+    \item 添加了 \cmd{AfterBeginDocument}\see{use:pre}
+    \item 添加了 \cmd{ifdefmacro}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsmacro}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefprefix}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsprefix}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefparam}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsparam}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefprotected}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsprotected}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefltxprotect}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsltxprotect}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefempty}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsempty}\see{aut:tst:def}
+    \item 改进了 \cmd{ifdefvoid}\see{aut:tst:def}
+    \item 改进了 \cmd{ifcsvoid}\see{aut:tst:def}
+    \item 添加了 \cmd{ifstrempty}\see{aut:tst:str}
+    \item 添加了 \cmd{setbool}\see{aut:bo1:bol}
+    \item 添加了 \cmd{settoggle}\see{aut:bo1:tgl}
+  \end{release}
+
+  \begin{release}{1.5}{2008-04-26}
+    \item 添加了 \cmd{defcounter}\see{use:cal}
+    \item 添加了 \cmd{deflength}\see{use:cal}
+    \item 添加了 \cmd{ifdefstring}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsstring}\see{aut:tst:def}
+    \item 改进了 \cmd{rmntonum}\see{aut:msc}
+    \item 添加了 \cmd{ifrmnum}\see{aut:msc}
+    \item 添加了扩展的 \pdf 书签到本手册
+    \item 稍微重新排列了手册内容
+  \end{release}
+
+  \begin{release}{1.4}{2008-01-24}
+    \item 解决了与 \sty{tex4ht} 的冲突
+  \end{release}
+
+  \begin{release}{1.3}{2007-10-08}
+    \item 将 \sty{elatex} 包重命名为 \sty{etoolbox}\see{int}
+    \item 将 \cmd{newswitch} 重命名为 \cmd{newtoggle}（名称冲突）\see{aut:bo1:tgl}
+    \item 将 \cmd{provideswitch} 重命名为 \cmd{providetoggle}（保持一致性）\see{aut:bo1:tgl}
+    \item 将 \cmd{switchtrue} 重命名为 \cmd{toggletrue}（保持一致性）\see{aut:bo1:tgl}
+    \item 将 \cmd{switchfalse} 重命名为 \cmd{togglefalse}（保持一致性）\see{aut:bo1:tgl}
+    \item 将 \cmd{ifswitch} 重命名为 \cmd{iftoggle}（保持一致性）\see{aut:bo1:tgl}
+    \item 将 \cmd{notswitch} 重命名为 \cmd{nottoggle}（保持一致性）\see{aut:bo1:tgl}
+    \item 添加了 \cmd{AtEndPreamble}\see{use:pre}
+    \item 添加了 \cmd{AfterEndDocument}\see{use:pre}
+    \item 添加了 \cmd{AfterPreamble}\see{use:pre}
+    \item 添加了 \cmd{undef}\see{aut:def:def}
+    \item 添加了 \cmd{csundef}\see{aut:def:def}
+    \item 添加了 \cmd{ifdefvoid}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsvoid}\see{aut:tst:def}
+    \item 添加了 \cmd{ifdefequal}\see{aut:tst:def}
+    \item 添加了 \cmd{ifcsequal}\see{aut:tst:def}
+    \item 添加了 \cmd{ifstrequal}\see{aut:tst:str}
+    \item 添加了 \cmd{listadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listeadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listgadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listxadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listcsadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listcseadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listcsgadd}\see{aut:lst:int}
+    \item 添加了 \cmd{listcsxadd}\see{aut:lst:int}
+    \item 添加了 \cmd{ifinlist}\see{aut:lst:int}
+    \item 添加了 \cmd{xifinlist}\see{aut:lst:int}
+    \item 添加了 \cmd{ifinlistcs}\see{aut:lst:int}
+    \item 添加了 \cmd{xifinlistcs}\see{aut:lst:int}
+    \item 添加了 \cmd{dolistloop}\see{aut:lst:int}
+    \item 添加了 \cmd{dolistcsloop}\see{aut:lst:int}
+
+  \end{release}
+
+  \begin{release}{1.2}{2007-07-13}
+
+    \item 将 \cmd{patchcommand} 重命名为 \cmd{patchcmd}（名称冲突）\see{aut:pat}
+    \item 将 \cmd{apptocommand} 重命名为 \cmd{apptocmd}（保持一致性）\see{aut:pat}
+    \item 将 \cmd{pretocommand} 重命名为 \cmd{pretocmd}（保持一致性）\see{aut:pat}
+    \item 添加了 \cmd{newbool}\see{aut:bo1:bol}
+    \item 添加了 \cmd{providebool}\see{aut:bo1:bol}
+    \item 添加了 \cmd{booltrue}\see{aut:bo1:bol}
+    \item 添加了 \cmd{boolfalse}\see{aut:bo1:bol}
+    \item 添加了 \cmd{ifbool}\see{aut:bo1:bol}
+    \item 添加了 \cmd{notbool}\see{aut:bo1:bol}
+    \item 添加了 \cmd{newswitch}\see{aut:bo1:tgl}
+    \item 添加了 \cmd{provideswitch}\see{aut:bo1:tgl}
+    \item 添加了 \cmd{switchtrue}\see{aut:bo1:tgl}
+    \item 添加了 \cmd{switchfalse}\see{aut:bo1:tgl}
+    \item 添加了 \cmd{ifswitch}\see{aut:bo1:tgl}
+    \item 添加了 \cmd{notswitch}\see{aut:bo1:tgl}
+    \item 添加了 \cmd{DeclareListParser}\see{aut:lst:inp}
+    \item 添加了 \cmd{docsvlist}\see{aut:lst:inp}
+    \item 添加了 \cmd{rmntonum}\see{aut:msc}
+
+  \end{release}
+
+  \begin{release}{1.1}{2007-05-28}
+
+    \item 添加了 \cmd{protected@csedef}\see{aut:def:def}
+    \item 添加了 \cmd{protected@csxdef}\see{aut:def:def}
+    \item 添加了 \cmd{gluedef}\see{aut:def:cal}
+    \item 添加了 \cmd{gluegdef}\see{aut:def:cal}
+    \item 添加了 \cmd{csgluedef}\see{aut:def:cal}
+    \item 添加了 \cmd{csgluegdef}\see{aut:def:cal}
+    \item 添加了 \cmd{mudef}\see{aut:def:cal}
+    \item 添加了 \cmd{mugdef}\see{aut:def:cal}
+    \item 添加了 \cmd{csmudef}\see{aut:def:cal}
+    \item 添加了 \cmd{csmugdef}\see{aut:def:cal}
+    \item 添加了 \cmd{protected@eappto}\see{aut:hok:app}
+    \item 添加了 \cmd{protected@xappto}\see{aut:hok:app}
+    \item 添加了 \cmd{protected@cseappto}\see{aut:hok:app}
+    \item 添加了 \cmd{protected@csxappto}\see{aut:hok:app}
+    \item 添加了 \cmd{protected@epreto}\see{aut:hok:pre}
+    \item 添加了 \cmd{protected@xpreto}\see{aut:hok:pre}
+    \item 添加了 \cmd{protected@csepreto}\see{aut:hok:pre}
+    \item 添加了 \cmd{protected@csxpreto}\see{aut:hok:pre}
+    \item 修复了 \cmd{newrobustcmd} 中的 bug\see{use:def}
+    \item 修复了 \cmd{renewrobustcmd} 中的 bug\see{use:def}
+    \item 修复了 \cmd{providerobustcmd} 中的 bug\see{use:def}
+
+  \end{release}
+
+  \begin{release}{1.0}{2007-05-07}
+
+    \item 初始公开版本
+
+  \end{release}
+
+\end{changelog}
+
+\end{document}
