@@ -11,7 +11,11 @@
 ```
 xelatex <source-filename-with-ext>
 ```
-目前文档的中文实现方式都是通过 `\usepackage[fontset=fandol]{ctex}` 宏包来达成的，并未使用特殊字体，因此 CTeX 宏集支持的编译方式((pdf)LaTeX, XeLaTeX, LuaLaTeX, upLaTeX)理论上都可以编译（如果要用(pdf)LaTeX来编译的话，需要把 ctex 宏包的 `fontset` 选项 `[fontset=fandol]` 去掉，根据 ctex 宏包的说明文档，Fandol 中文字体不支持 pdfLaTeX ），不过我并未尝试过。
+目前文档的中文实现方式可以通过 `\usepackage[fontset=fandol]{ctex}` 宏包来达成的，并未使用特殊字体，因此 CTeX 宏集支持的编译方式((pdf)LaTeX, XeLaTeX, LuaLaTeX, upLaTeX)理论上都可以编译（如果要用(pdf)LaTeX来编译的话，需要把 ctex 宏包的 `fontset` 选项 `[fontset=fandol]` 去掉，根据 ctex 宏包的说明文档，Fandol 中文字体不支持 pdfLaTeX ），不过我并未尝试过。
+
+也可以利用我上传的 [ctex-fontset-source.def][2] 配置文件，放在同目录下或者放在 TDS （TEX 目录结构）中的某个合适的位置，然后命令行运行一遍
+`texhash` 。这个字体配置文件是在 ctex-fontset-fandol.def 配置文件的基础上，把宋体和黑体换成思源字体（思源字体目前仅有宋体和黑体这两种字形）。
+为了各位使用上的方便（主要是思源字体和 Noto 字体的文件名以及字体名多次变化），我把[相应的思源字体][3]放在网站上供各位配置使用。
 
 ## 意见和建议
 欢迎在issue区提出宝贵的修改意见及建议，也欢迎提交 **PR** 共同进步。文档翻译难免有所疏漏，请对照原文阅读。原文已经包含在相应的目录下了，既方便对照阅读，也方便之后的增量更新。
@@ -19,4 +23,5 @@ xelatex <source-filename-with-ext>
 *Happy TeXing!*
 
 [1]:https://github.com/rockyzhz/DocStrip-zh-cn
-
+[2]:https://github.com/rockyzhz/latexdoc-chinese-translation/raw/main/etoolbox-zh-cn/ctex-fontset-source.def
+[3]:https://texer.cn/wp-content/uploads/Source.rar
