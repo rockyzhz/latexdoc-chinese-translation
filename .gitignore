@@ -1,3 +1,9 @@
+## Customization
+etoolbox-zh-cn/*.cls
+etoolbox-zh-cn/*.sty
+etoolbox-zh-cn/*.cfg
+etoolbox-zh-cn/*.def
+
 ## Repository Related Files:
 ref/*
 tmp/*
