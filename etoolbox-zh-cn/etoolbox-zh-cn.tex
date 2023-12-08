@@ -1,6 +1,15 @@
 % !TEX program = xelatex
 \documentclass{ltxdockit}[2010/09/26]
 \usepackage{ctex}
+\defcaptionname{\languagename}{\contentsname}{\centerline{目\,录}}
+\makeatletter
+\define@key{ltd@ttp}{date}{\def\ltd@title@date{#1\par 翻译\par\zhtoday}}
+\define@key{ltd@ttp}{translator}{\def\ltd@title@translator{#1}}
+\patchcmd{\printtitlepage}{Version}
+         {\raggedleft\ltd@title@translator\par
+          翻译日期\par\raggedright
+          版本号}{}{}
+\makeatother
 \usepackage[utf8]{inputenc}
 \usepackage[american]{babel}
 \usepackage[strict]{csquotes}
@@ -15,7 +24,8 @@
   author={Philipp Lehman, Joseph Wright},
   email={joseph.wright@morningstar2.co.uk},
   revision={v2.5k},
-  date={2020/10/05}}
+  date={2020年10月5日},
+  translator={张泓知}}
 
 \hypersetup{
   pdftitle={etoolbox宏包},
@@ -26,8 +36,6 @@
 \begin{document}
 
 \printtitlepage
-\centerline{\heiti 张泓知\qquad 翻译\hspace*{1em}}
-\centerline{\heiti\hspace*{40pt} 翻译日期\qquad \zhtoday}
 \tableofcontents
 
 \section{介绍}
@@ -35,8 +43,8 @@
 
 \subsection[关于]{关于 \sty{etoolbox}}
 
-\sty{etoolbox} 宏包是一个编程工具箱，主要面向 \latex 类和宏包作者。它提供了
-一些 \etex 提供的新原语的 \latex 前端，以及一些与 \etex 无关但与本宏包的特
+\sty{etoolbox} 宏包是一个编程工具箱，主要面向 \LaTeX 类和宏包作者。它提供了
+一些 \etex 提供的新原语的 \LaTeX 前端，以及一些与 \etex 无关但与本宏包的特
 性相匹配的通用工具。
 
 \subsection{许可证}
@@ -60,23 +68,23 @@
   \cmditem*{newrobustcmd*}{command}[arguments][optarg default]{replacement text}
 
   此命令的语法和行为类似于 \cmd{newcommand}，但新定义的 \prm{command}
-  将是强健的 (robust)。此命令的行为与 \latex 核心的 \cmd{DeclareRobustCommand}
+  将是健壮的 (robust)。此命令的行为与 \LaTeX 核心的 \cmd{DeclareRobustCommand}
   命令不同之处在于，如果 \prm{command} 已经定义，它将发出错误消息而不仅仅是
-  信息性消息。由于它使用 \etex 的低级保护机制而不是相应的更高级别的 \latex
-  工具，因此不需要额外的宏来实现<强健性 (robustness) >。
+  信息性消息。由于它使用 \etex 的低级保护机制而不是相应的更高级别的 \LaTeX
+  工具，因此不需要额外的宏来实现<健壮性 (robustness) >。
 
   \cmditem{renewrobustcmd}{command}[arguments][optarg default]{replacement text}
   \cmditem*{renewrobustcmd*}{command}[arguments][optarg default]{replacement text}
 
   此命令的语法和行为类似于 \cmd{renewcommand}，但重新定义的 \prm{command}
-  将是强健的 (robust)。
+  将是健壮的 (robust)。
 
   \cmditem{providerobustcmd}{command}[arguments][optarg default]{replacement text}
   \cmditem*{providerobustcmd*}{command}[arguments][optarg default]{replacement text}
 
   此命令的语法和行为类似于 \cmd{providecommand}，但新定义的 \prm{command}
-  将是强健的 (robust)。请注意，此命令只会为未定义的 \prm{command} 提供强健 (robust) 定义。它
-  不会使已经定义的 \prm{command} 变得强健 (robust)。
+  将是健壮的 (robust)。请注意，此命令只会为未定义的 \prm{command} 提供健壮 (robust) 定义。它
+  不会使已经定义的 \prm{command} 变得健壮 (robust)。
 \end{ltxsyntax}
 
 \subsection{补丁 (Patching)}
@@ -86,9 +94,9 @@
 
   \cmditem{robustify}{command}
 
-  重新定义了一个由 \cmd{newcommand} 定义的 \prm{command}，使其成为强健 (robust)命令，
+  重新定义了一个由 \cmd{newcommand} 定义的 \prm{command}，使其成为健壮 (robust)命令，
   而不更改其参数、前缀或替换文本。如果 \prm{command} 是用 \cmd{DeclareRobustCommand}
-  定义的，则会自动检测到，并且 \latex 的高级保护机制将被相应的低级 \etex 功能
+  定义的，则会自动检测到，并且 \LaTeX 的高级保护机制将被相应的低级 \etex 功能
   替换。
 
 \end{ltxsyntax}
@@ -100,7 +108,7 @@
 
   \cmditem{protecting}{code}
 
-  此命令将 \latex 的保护机制（通常需要在每个易损命令前加上 \cmd{protect}）应用于任
+  此命令将 \LaTeX 的保护机制（通常需要在每个易损命令前加上 \cmd{protect}）应用于任
   意 \prm{code} 的整个代码块。其行为取决于当前的 \cmd{protect} 状态。请注意，
   即使是单个记号，\prm{code} 周围的大括号也是必需的。
 
@@ -115,7 +123,7 @@
 
   \cmditem{defcounter}{counter}{integer expression}
 
-  将值分配给之前用 \cmd{newcounter} 初始化的 \latex \prm{counter}。此命令在概念
+  将值分配给之前用 \cmd{newcounter} 初始化的 \LaTeX \prm{counter}。此命令在概念
   和语法上类似于 \cmd{setcounter}，但有两个主要区别。1）第二个参数可以是一个
   \prm{integer expression}，它将使用 \cmd{numexpr} 处理。 \prm{integer
     expression} 可以是此上下文中有效的任意代码。分配给 \prm{counter} 的值将是
@@ -137,10 +145,10 @@
 \subsection[文档钩子]{附加文档钩子}
 \label{use:pre}
 
-\latex 提供了两个钩子，可以推迟代码的执行，要么推迟到文档正文的开头，要么推迟到文档的末尾。任何 \cmd{AtBeginDocument}
+\LaTeX 提供了两个钩子，可以推迟代码的执行，要么推迟到文档正文的开头，要么推迟到文档的末尾。任何 \cmd{AtBeginDocument}
 代码都会在主 \file{aux} 文件首次读取后，在文档正文的开头执行。任何 \cmd{AtEndDocument} 代码都会在文档末尾执行，在主
 \file{aux} 文件第二次读取之前执行。这里介绍的钩子在概念上类似，但将其 \prm{code} 参数的执行推迟到略微不同的位置。
-\prm{code} 可以是任意 \tex 代码。 \prm{code} 参数中的参数字符是允许的，不需要加倍。
+\prm{code} 可以是任意 \TeX 代码。 \prm{code} 参数中的参数字符是允许的，不需要加倍。
 
 \begin{ltxsyntax}
 
@@ -152,7 +160,7 @@
 
 \cmditem{AtEndPreamble}{code}
 
-此钩子与 \cmd{AtBeginDocument} 不同，因为 \prm{code} 在导言部分的最后执行，在主 \file{aux} 文件（在前一个 \latex pass
+此钩子与 \cmd{AtBeginDocument} 不同，因为 \prm{code} 在导言部分的最后执行，在主 \file{aux} 文件（在前一个 \LaTeX\ pass
 上写入）被读取之前，也在任何 \cmd{AtBeginDocument} 代码之前执行。请注意，此时不可能向 \file{aux} 文件写入。
 
 \cmditem{AfterEndPreamble}{code}
@@ -162,7 +170,7 @@
 
 \cmditem{AfterEndDocument}{code}
 
-此钩子与 \cmd{AtEndDocument} 不同，因为 \prm{code} 在文档的最后执行，在当前 \latex pass 上写入的主 \file{aux} 文件被读取
+此钩子与 \cmd{AtEndDocument} 不同，因为 \prm{code} 在文档的最后执行，在当前 \LaTeX pass 上写入的主 \file{aux} 文件被读取
 之后，并在任何 \cmd{AtEndDocument} 代码之后执行。
 
 \end{ltxsyntax}
@@ -170,13 +178,13 @@
 从某种意义上说，\cmd{AtBeginDocument} 代码既不是导言部分的一部分，也不是文档正文的一部分，因为它在排版之前执行初始化序列的
 中间位置。有时，将代码移至导言部分的末尾是有必要的，因为此时已经加载了所有请求的包。然而，如果代码需要在 \file{aux} 文件中
 执行，\cmd{AtBeginDocument} 代码执行太晚了。相反，\cmd{AtEndPreamble} 代码是导言部分的一部分；\cmd{AfterEndPreamble}
-代码是文档正文的一部分，并可能包含要在文档开头排版的可打印文本。总而言之，在 |\begin{document}| 中，\latex 将执行以下任务：
+代码是文档正文的一部分，并可能包含要在文档开头排版的可打印文本。总而言之，在 |\begin{document}| 中，\LaTeX 将执行以下任务：
 
 \begin{itemize}
   \setlength{\itemsep}{0pt}
   \item 执行任何 \cmd{AtEndPreamble} 代码
   \item 开始文档正文的初始化（页面布局、默认字体等）
-  \item 加载前一个 \latex pass 上写入的主 \file{aux} 文件
+  \item 加载前一个 \LaTeX pass 上写入的主 \file{aux} 文件
   \item 在当前 pass 上打开主 \file{aux} 文件进行写入
   \item 继续文档正文的初始化
   \item 执行任何 \cmd{AtBeginDocument} 代码
@@ -185,7 +193,7 @@
   \item 执行任何 \cmd{AfterEndPreamble} 代码
 \end{itemize}
 %
-在 |\end{document}| 中，\latex 将执行以下任务：
+在 |\end{document}| 中，\LaTeX 将执行以下任务：
 
 \begin{itemize}
   \setlength{\itemsep}{0pt}
@@ -198,7 +206,7 @@
 \end{itemize}
 %
 任何 \cmd{AtEndDocument} 代码都可以被视为文档正文的一部分，因为在其执行时，仍然可以执行排版任务并写入主 \file{aux} 文件。
-\cmd{AfterEndDocument} 代码不是文档正文的一部分。此钩子对于在 \latex pass 的最后评估 \file{aux} 文件中的数据非常有用。
+\cmd{AfterEndDocument} 代码不是文档正文的一部分。此钩子对于在 \LaTeX pass 的最后评估 \file{aux} 文件中的数据非常有用。
 
 \subsection[环境钩子]{环境钩子}
 \label{use:env}
@@ -237,60 +245,60 @@
 \subsubsection{宏定义}
 \label{aut:def:def}
 
-本节工具是简单但经常需要的快捷方式，扩展了 \latex 核心中 \cmd{@namedef} 和\hfil\break \cmd{@nameuse} 宏的作用范围。
+本节工具是简单但经常需要的快捷方式，扩展了 \LaTeX 核心中 \cmd{@namedef} 和\hfil\break \cmd{@nameuse} 宏的作用范围。
 
 \begin{ltxsyntax}
 
   \cmditem{csdef}{csname}<arguments>{replacement text}
 
-  类似于 \tex 原语 \cmd{def}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)，对应于 \cmd{@namedef}。
+  类似于 \TeX 原语 \cmd{def}，但它以控制序列名称作为第一个参数。此命令是健壮的 (robust)，对应于 \cmd{@namedef}。
 
   \cmditem{csgdef}{csname}<arguments>{replacement text}
 
-  类似于 \tex 原语 \cmd{gdef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+  类似于 \TeX 原语 \cmd{gdef}，但它以控制序列名称作为第一个参数。此命令是健壮的 (robust)。
 
   \cmditem{csedef}{csname}<arguments>{replacement text}
 
-  类似于 \tex 原语 \cmd{edef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+  类似于 \TeX 原语 \cmd{edef}，但它以控制序列名称作为第一个参数。此命令是健壮的 (robust)。
 
   \cmditem{csxdef}{csname}<arguments>{replacement text}
 
-  类似于 \tex 原语 \cmd{xdef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+  类似于 \TeX 原语 \cmd{xdef}，但它以控制序列名称作为第一个参数。此命令是健壮的 (robust)。
 
   \cmditem{protected@csedef}{csname}<arguments>{replacement text}
 
-  类似于 \cmd{csedef}，但临时启用了 \latex 的保护机制。换句话说，此命令类似于 \latex 核心命令
-  \cmd{protected@edef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+  类似于 \cmd{csedef}，但临时启用了 \LaTeX 的保护机制。换句话说，此命令类似于 \LaTeX 核心命令
+  \cmd{protected@edef}，但它以控制序列名称作为第一个参数。此命令是健壮的 (robust)。
 
   \cmditem{protected@csxdef}{csname}<arguments>{replacement text}
 
-  类似于 \cmd{csxdef}，但临时启用了 \latex 的保护机制。换句话说，此命令类似于 \latex 核心命令
-  \cmd{protected@xdef}，但它以控制序列名称作为第一个参数。此命令是强健的 (robust)。
+  类似于 \cmd{csxdef}，但临时启用了 \LaTeX 的保护机制。换句话说，此命令类似于 \LaTeX 核心命令
+  \cmd{protected@xdef}，但它以控制序列名称作为第一个参数。此命令是健壮的 (robust)。
 
   \cmditem{cslet}{csname}{command}
 
-  类似于 \tex 原语 \cmd{let}，但第一个参数是一个控制序列名称。如果 \prm{command} 未定义，在分配后
-  \prm{csname} 也将被未定义。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+  类似于 \TeX 原语 \cmd{let}，但第一个参数是一个控制序列名称。如果 \prm{command} 未定义，在分配后
+  \prm{csname} 也将被未定义。此命令是健壮的 (robust)，可带有 \cs{global} 前缀。
 
   \cmditem{letcs}{command}{csname}
 
-  类似于 \tex 原语 \cmd{let}，但第二个参数是一个控制序列名称。如果 \prm{csname} 未定义，在分配后
-  \prm{command} 也将被未定义。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+  类似于 \TeX 原语 \cmd{let}，但第二个参数是一个控制序列名称。如果 \prm{csname} 未定义，在分配后
+  \prm{command} 也将被未定义。此命令是健壮的 (robust)，可带有 \cs{global} 前缀。
 
   \cmditem{csletcs}{csname}{csname}
 
-  类似于 \tex 原语 \cmd{let}，但两个参数都是控制序列名称。如果第二个 \prm{csname} 未定义，在分配后第一个
-  \prm{csname} 也将被未定义。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+  类似于 \TeX 原语 \cmd{let}，但两个参数都是控制序列名称。如果第二个 \prm{csname} 未定义，在分配后第一个
+  \prm{csname} 也将被未定义。此命令是健壮的 (robust)，可带有 \cs{global} 前缀。
 
   \cmditem{csuse}{csname}
 
-  以控制序列名称为参数，并形成控制序列记号。此命令不同于 \latex 核心中的\hfil\break \cmd{@nameuse} 宏，如果控制
+  以控制序列名称为参数，并形成控制序列记号。此命令不同于 \LaTeX 核心中的\hfil\break \cmd{@nameuse} 宏，如果控制
   序列未定义，它会展开为空字符串。
 
   \cmditem{undef}<command>
 
   清除 \prm{command}，使得 \etex 的 \cmd{ifdefined} 和 \cmd{ifcsname} 测试将其视为未定义。此命令是
-  强健的 (robust)，可带有 \cs{global} 前缀。
+  健壮的 (robust)，可带有 \cs{global} 前缀。
 
   \cmditem{gundef}<command>
 
@@ -298,7 +306,7 @@
 
   \cmditem{csundef}{csname}
 
-  类似于 \cmd{undef}，但它以控制序列名称作为参数。此命令是强健的 (robust)，可带有 \cs{global} 前缀。
+  类似于 \cmd{undef}，但它以控制序列名称作为参数。此命令是健壮的 (robust)，可带有 \cs{global} 前缀。
 
   \cmditem{csgundef}{csname}
 
@@ -306,13 +314,13 @@
 
   \cmditem{csmeaning}{csname}
 
-  类似于 \tex 原语 \cmd{meaning}，但以控制序列名称作为参数。如果控制序列未定义，此命令不会隐式地将其赋予
+  类似于 \TeX 原语 \cmd{meaning}，但以控制序列名称作为参数。如果控制序列未定义，此命令不会隐式地将其赋予
   \cmd{relax} 的含义。
 
   \cmditem{csshow}{csname}
 
-  类似于 \tex 原语 \cmd{show}，但以控制序列名称作为参数。如果控制序列未定义，此命令不会隐式地将其赋予
-  \cmd{relax} 的含义。此命令是强健的 (robust)。
+  类似于 \TeX 原语 \cmd{show}，但以控制序列名称作为参数。如果控制序列未定义，此命令不会隐式地将其赋予
+  \cmd{relax} 的含义。此命令是健壮的 (robust)。
 
 \end{ltxsyntax}
 
@@ -430,16 +438,16 @@
 
   \cmditem{appto}<hook>{code}
 
-  此命令将任意 \prm{code} 追加到 \prm{hook}。如果 \prm{code} 包含任何参数字符，它们无需加倍。此命令是强健的 (robust)。
+  此命令将任意 \prm{code} 追加到 \prm{hook}。如果 \prm{code} 包含任何参数字符，它们无需加倍。此命令是健壮的 (robust)。
 
   \cmditem{gappto}<hook>{code}
 
-  类似于 \cmd{appto}，不同之处在于分配是全局的。此命令可用作 \latex 核心中的\hfil\break \cmd{g@addto@macro} 命令的替代品。
+  类似于 \cmd{appto}，不同之处在于分配是全局的。此命令可用作 \LaTeX 核心中的\hfil\break \cmd{g@addto@macro} 命令的替代品。
 
   \cmditem{eappto}<hook>{code}
 
   此命令将任意 \prm{code} 追加到 \prm{hook}。在定义时展开 \prm{code}。仅展开新的 \prm{code}，不展开
-  \prm{hook} 的当前替换文本。此命令是强健的 (robust)。
+  \prm{hook} 的当前替换文本。此命令是健壮的 (robust)。
 
   \cmditem{xappto}<hook>{code}
 
@@ -447,11 +455,11 @@
 
   \cmditem{protected@eappto}<hook>{code}
 
-  类似于 \cmd{eappto}，不同之处在于暂时启用了 \latex 的保护机制。
+  类似于 \cmd{eappto}，不同之处在于暂时启用了 \LaTeX 的保护机制。
 
   \cmditem{protected@xappto}<hook>{code}
 
-  类似于 \cmd{xappto}，不同之处在于暂时启用了 \latex 的保护机制。
+  类似于 \cmd{xappto}，不同之处在于暂时启用了 \LaTeX 的保护机制。
 
   \cmditem{csappto}{csname}{code}
 
@@ -554,12 +562,12 @@
   如果要替换或插入的代码涉及到 \prm{command} 的参数，则参数字符无需加倍。如果指定了可选的 \prm{prefix}，它将
   替换 \prm{command} 的前缀。空的 \prm{prefix} 参数会从 \prm{command} 中删除所有前缀。此命令是局部的。此命令
   在修补之前隐式执行相当于 \cmd{ifpatchable} 的测试。如果此测试成功，则命令应用修补并执行 \prm{success}。如果
-  测试失败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是强健的 (robust)。
+  测试失败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是健壮的 (robust)。
 
   \cmditem{ifpatchable}{command}{search}{true}{false}
 
   如果可以使用 \cmd{patchcmd} 修补 \prm{command} 并在其替换文本中找到 \prm{search} 模式，则执行 \prm{true}；
-  否则执行 \prm{false}。此命令是强健的 (robust)。
+  否则执行 \prm{false}。此命令是健壮的 (robust)。
 
   \cmditem*{ifpatchable*}{command}{true}{false}
 
@@ -572,7 +580,7 @@
   \ref{aut:hok:app} 节中的 \cmd{appto}。与 \cmd{appto} 不同，\cmd{apptocmd} 还可以用于修补带参数的命令。在这种
   情况下，它将解记号化 \prm{command} 的替换文本，应用修补，并在当前类别码制度下重新记号化。@ 符号的类别码临时设置为
   11。 \prm{code} 可能涉及 \prm{command} 的参数。此命令是局部的。如果修补成功，则执行 \prm{success}。如果修补失
-  败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是强健的 (robust)。
+  败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是健壮的 (robust)。
 
   \cmditem{pretocmd}{command}{code}{success}{failure}
 
@@ -580,7 +588,7 @@
   无参数的宏，则其行为类似于第 \ref{aut:hok:app} 节中的 \cmd{preto}。与 \cmd{preto} 不同，\cmd{pretocmd} 也可用
   于修补带参数的命令。在这种情况下，它将解记号化 \prm{command} 的替换文本，应用修补，并在当前类别码制度下重新记号化。
   @ 符号的类别码临时设置为 11。 \prm{code} 可能涉及 \prm{command} 的参数。此命令是局部的。如果修补成功，则执行
-  \prm{success}。如果修补失败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是强健的 (robust)。
+  \prm{success}。如果修补失败，则执行 \prm{failure}，但不修改原始的 \prm{command}。此命令是健壮的 (robust)。
 
   \csitem{tracingpatches}
 
@@ -595,11 +603,11 @@
 该包提供了两个完全独立的布尔标志接口。第 \ref{aut:bo1:bol} 节中的工具是 \cmd{newif} 的 \LaTeX 前端。第
 \ref{aut:bo1:tgl} 节中的工具使用了不同的机制。
 
-\subsubsection{\tex 标志}
+\subsubsection{\TeX 标志}
 \label{aut:bo1:bol}
 
-由于本节中的工具在内部基于 \cmd{newif}，因此它们可以用于测试和更改先前用 \cmd{newif} 定义的标志的状态。它们也与
-\sty{ifthen} 包的布尔测试兼容，并可以作为查询 \tex 原语（如 \cmd{ifmmode}）的 \LaTeX 接口。使用 \cmd{newif}
+由于本节中的工具在内部基于 \cmd{newif}，因此它们可以用于测试和更改先前用\hfil\break \cmd{newif} 定义的标志的状态。它们也与
+\sty{ifthen} 包的布尔测试兼容，并可以作为查询 \TeX 原语（如 \cmd{ifmmode}）的 \LaTeX 接口。使用 \cmd{newif}
 方法需要每个标志总共三个宏。
 
 \begin{ltxsyntax}
@@ -607,37 +615,37 @@
   \cmditem{newbool}{name}
 
   定义名为 \prm{name} 的新布尔标志。如果已经定义了该标志，则此命令会发出错误。新定义的标志的初始状态为
-  \texttt{false}。此命令是强健的 (robust)。
+  \texttt{false}。此命令是健壮的 (robust)。
 
   \cmditem{providebool}{name}
 
-  定义名为 \prm{name} 的新布尔标志，除非已经定义。此命令是强健的 (robust)。
+  定义名为 \prm{name} 的新布尔标志，除非已经定义。此命令是健壮的 (robust)。
 
   \cmditem{booltrue}{name}
 
-  将布尔标志 \prm{name} 设置为 \texttt{true}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  将布尔标志 \prm{name} 设置为 \texttt{true}。此命令是健壮的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
   它将发出错误。
 
   \cmditem{boolfalse}{name}
 
-  将布尔标志 \prm{name} 设置为 \texttt{false}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  将布尔标志 \prm{name} 设置为 \texttt{false}。此命令是健壮的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
   它将发出错误。
 
   \cmditem{setbool}{name}{value}
 
-  将布尔标志 \prm{name} 设置为 \prm{value}，可以是 \texttt{true} 或 \texttt{false}。此命令是强健的 (robust)，可以
+  将布尔标志 \prm{name} 设置为 \prm{value}，可以是 \texttt{true} 或 \texttt{false}。此命令是健壮的 (robust)，可以
   使用 \cs{global} 修饰。如果标志未定义，它将发出错误。
 
   \cmditem{ifbool}{name}{true}{false}
 
   如果布尔标志 \prm{name} 的状态为 \texttt{true}，则展开为 \prm{true}，否则为 \prm{false}。如果标志未定义，
-  此命令将发出错误。此命令可用于执行基于普通 \tex 语法的任何布尔测试，即通常使用以下方式：
+  此命令将发出错误。此命令可用于执行基于普通 \TeX 语法的任何布尔测试，即通常使用以下方式：
 
   \begin{ltxcode}
     <<\iftest>> true<<\else>> false<<\fi>>
   \end{ltxcode}
 
-  这包括所有使用 \cmd{newif} 定义的标志，以及 \tex 原语，如 \cmd{ifmmode}。在表达式中使用标志或原语时省略
+  这包括所有使用 \cmd{newif} 定义的标志，以及 \TeX 原语，如 \cmd{ifmmode}。在表达式中使用标志或原语时省略
   \cmd{if} 前缀。例如：
 
   \begin{ltxcode}
@@ -658,7 +666,7 @@
 
 \end{ltxsyntax}
 
-\subsubsection{\latex 标志}
+\subsubsection{\LaTeX 标志}
 \label{aut:bo1:tgl}
 
 与第 \ref{aut:bo1:bol} 节中的标志相比，本节中的工具每个标志仅需要一个宏。它们还使用单独的命名空间，以避免
@@ -669,25 +677,25 @@
   \cmditem{newtoggle}{name}
 
   定义名为 \prm{name} 的新布尔标志。如果已经定义了该标志，则此命令会发出错误。新定义的标志的初始状态为
-  \texttt{false}。此命令是强健的 (robust)。
+  \texttt{false}。此命令是健壮的 (robust)。
 
   \cmditem{providetoggle}{name}
 
-  定义名为 \prm{name} 的新布尔标志，除非已经定义。此命令是强健的 (robust)。
+  定义名为 \prm{name} 的新布尔标志，除非已经定义。此命令是健壮的 (robust)。
 
   \cmditem{toggletrue}{name}
 
-  将布尔标志 \prm{name} 设置为 \texttt{true}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  将布尔标志 \prm{name} 设置为 \texttt{true}。此命令是健壮的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
   它将发出错误。
 
   \cmditem{togglefalse}{name}
 
-  将布尔标志 \prm{name} 设置为 \texttt{false}。此命令是强健的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
+  将布尔标志 \prm{name} 设置为 \texttt{false}。此命令是健壮的 (robust)，可以使用 \cs{global} 修饰。如果标志未定义，
   它将发出错误。
 
   \cmditem{settoggle}{name}{value}
 
-  将布尔标志 \prm{name} 设置为 \prm{value}，可以是 \texttt{true} 或 \texttt{false}。此命令是强健的 (robust)，可以
+  将布尔标志 \prm{name} 设置为 \prm{value}，可以是 \texttt{true} 或 \texttt{false}。此命令是健壮的 (robust)，可以
   使用 \cs{global} 修饰。如果标志未定义，它将发出错误。
 
   \cmditem{iftoggle}{name}{true}{false}
@@ -712,11 +720,11 @@
   \cmditem{ifdef}{control sequence}{true}{false}
 
   如果 \prm{control sequence} 已定义，则展开为 \prm{true}，否则为 \prm{false}。请注意，即使控制序列的含义是
-  \cmd{relax}，它也将被视为已定义。此命令是对 \etex 原语 \cmd{ifdefined} 的 \latex 包装。
+  \cmd{relax}，它也将被视为已定义。此命令是对 \etex 原语 \cmd{ifdefined} 的 \LaTeX 包装。
 
   \cmditem{ifcsdef}{csname}{true}{false}
 
-  类似于 \cmd{ifdef}，但它以控制序列名称作为其第一个参数。此命令是对 \etex 原语 \cmd{ifcsname} 的 \latex 包装。
+  类似于 \cmd{ifdef}，但它以控制序列名称作为其第一个参数。此命令是对 \etex 原语 \cmd{ifcsname} 的 \LaTeX 包装。
 
   \cmditem{ifundef}{control sequence}{true}{false}
 
@@ -725,7 +733,7 @@
 
   \cmditem{ifcsundef}{csname}{true}{false}
 
-  类似于 \cmd{ifundef}，但它以控制序列名称作为其第一个参数。此命令可用作 \latex 核心中的 \cmd{@ifundefined} 测试
+  类似于 \cmd{ifundef}，但它以控制序列名称作为其第一个参数。此命令可用作 \LaTeX 核心中的 \cmd{@ifundefined} 测试
   的替代品。
 
   \cmditem{ifdefmacro}{control sequence}{true}{false}
@@ -763,8 +771,8 @@
 
   \cmditem{ifdefltxprotect}{control sequence}{true}{false}
 
-  如果 \prm{control sequence} 已定义且是一个 \latex 保护外壳，则执行 \prm{true}，否则为 \prm{false}。此命令是
-  强健的 (robust)。它将检测通过 \cmd{DeclareRobustCommand} 或类似技术定义的命令。
+  如果 \prm{control sequence} 已定义且是一个 \LaTeX 保护外壳，则执行 \prm{true}，否则为 \prm{false}。此命令是
+  健壮的 (robust)。它将检测通过 \cmd{DeclareRobustCommand} 或类似技术定义的命令。
 
   \cmditem{ifcsltxprotect}{csname}{true}{false}
 
@@ -801,7 +809,7 @@
 
   将 \prm{command} 的替换文本与 \prm{string} 进行比较，如果它们相等，则执行 \prm{true}，否则执行 \prm{false}。
   在测试中，\prm{command} 和 \prm{string} 都不会被展开，并且比较是不受类别码影响的。在 \prm{string} 参数中的控制
-  序列标记将被解标记并视为字符串。此命令是强健的 (robust)。请注意，它只考虑 \prm{command} 的替换文本。例如，这个测试
+  序列标记将被解标记并视为字符串。此命令是健壮的 (robust)。请注意，它只考虑 \prm{command} 的替换文本。例如，这个测试
 
   \begin{ltxcode}
     \long\edef\mymacro#1#2{\string&}
@@ -816,7 +824,7 @@
 
   \cmditem{ifdefstrequal}{command}{command}{true}{false}
 
-  执行两个命令的不受类别码影响的字符串比较。此命令类似于 \cmd{ifdefstring}，但要比较的两个参数都是宏。此命令是强健的 (robust)。
+  执行两个命令的不受类别码影响的字符串比较。此命令类似于 \cmd{ifdefstring}，但要比较的两个参数都是宏。此命令是健壮的 (robust)。
 
   \cmditem{ifcsstrequal}{csname}{csname}{true}{false}
 
@@ -831,7 +839,7 @@
 
   \cmditem{ifdefcounter}{control sequence}{true}{false}
 
-  如果\prm{control sequence}是由\cmd{newcount}分配的 \tex \cmd{count} 寄存器，则扩展为\prm{true}，
+  如果\prm{control sequence}是由\cmd{newcount}分配的 \TeX \cmd{count} 寄存器，则扩展为\prm{true}，
   否则为\prm{false}。
 
   \cmditem{ifcscounter}{csname}{true}{false}
@@ -844,7 +852,7 @@
 
   \cmditem{ifdeflength}{control sequence}{true}{false}
 
-  如果\prm{control sequence}是由\cmd{newskip}或\cmd{newlength}分配的 \tex \cmd{skip} 寄存器，则扩展为
+  如果\prm{control sequence}是由\cmd{newskip}或\cmd{newlength}分配的 \TeX \cmd{skip} 寄存器，则扩展为
   \prm{true}，否则为\prm{false}。
 
   \cmditem{ifcslength}{csname}{true}{false}
@@ -853,7 +861,7 @@
 
   \cmditem{ifdefdimen}{control sequence}{true}{false}
 
-  如果\prm{control sequence}是由\cmd{newdimen}分配的 \tex \cmd{dimen} 寄存器，则扩展为\prm{true}，否则
+  如果\prm{control sequence}是由\cmd{newdimen}分配的 \TeX \cmd{dimen} 寄存器，则扩展为\prm{true}，否则
   为\prm{false}。
 
   \cmditem{ifcsdimen}{csname}{true}{false}
@@ -870,7 +878,7 @@
   \cmditem{ifstrequal}{string}{string}{true}{false}
 
   比较两个字符串，如果它们相等则执行\prm{true}，否则执行\prm{false}。在测试中不会展开字符串，
-  比较时不考虑类别码。任何\prm{string}参数中的控制序列标记都将被解记号化并视为字符串。此命令是强健的 (robust)。
+  比较时不考虑类别码。任何\prm{string}参数中的控制序列标记都将被解记号化并视为字符串。此命令是健壮的 (robust)。
 
   \cmditem{ifstrempty}{string}{true}{false}
 
@@ -908,7 +916,7 @@
     \ifnumcomp{<<6/2>>}{<<=>>}{<<5/2>>}{<<true>>}{false}
   \end{ltxcode}
   %
-  从技术上讲，此命令是 \latex 对 \tex 原语 \cmd{ifnum} 的包装，包含了 \cmd{numexpr}。注意，\cmd{numexpr} 将对所有整数表达式的结果进行四舍五入，即在比较之前，两个表达式都将被处理并四舍五入。在上述示例的最后一行中，第二个表达式的结果是2.5，四舍五入为3，因此 \cmd{ifnumcomp} 将展开为 \prm{true}。
+  从技术上讲，此命令是 \LaTeX 对 \TeX 原语 \cmd{ifnum} 的包装，包含了 \cmd{numexpr}。注意，\cmd{numexpr} 将对所有整数表达式的结果进行四舍五入，即在比较之前，两个表达式都将被处理并四舍五入。在上述示例的最后一行中，第二个表达式的结果是2.5，四舍五入为3，因此 \cmd{ifnumcomp} 将展开为 \prm{true}。
 
   \cmditem{ifnumequal}{integer expression}{integer expression}{true}{false}
 
@@ -924,7 +932,7 @@
 
   \cmditem{ifnumodd}{integer expression}{true}{false}
 
-  对整数表达式进行评估，如果结果为奇数则展开为 \prm{true}，否则展开为 \prm{false}。从技术上讲，此命令是 \latex 对 \tex 原语 \cmd{ifodd} 的包装，包含了 \cmd{numexpr}。
+  对整数表达式进行评估，如果结果为奇数则展开为 \prm{true}，否则展开为 \prm{false}。从技术上讲，此命令是 \LaTeX 对 \TeX 原语 \cmd{ifodd} 的包装，包含了 \cmd{numexpr}。
 
   \cmditem{ifdimcomp}{dimen expression}{relation}{dimen expression}{true}{false}
 
@@ -942,7 +950,7 @@
     \ifdimcomp{<<(\lengthA + \lengthB) / 2>>}{<<>>>}{<<25pt / 6>>}{<<true>>}{false}
   \end{ltxcode}
   %
-  从技术上讲，此命令是 \latex 对 \tex 原语 \cmd{ifdim} 的包装，包含了 \cmd{dimexpr}。由于 \cmd{ifdimcomp} 和 \cmd{ifnumcomp} 都是可展开的，它们也可以嵌套使用：
+  从技术上讲，此命令是 \LaTeX 对 \TeX 原语 \cmd{ifdim} 的包装，包含了 \cmd{dimexpr}。由于 \cmd{ifdimcomp} 和 \cmd{ifnumcomp} 都是可展开的，它们也可以嵌套使用：
 
   \begin{ltxcode}
     <<\ifnumcomp>>{<<\ifdimcomp>>{<<5pt+5pt>>}{<<=>>}{<<10pt>>}{<<1>>}{<<0>>}}{<<>>>}{<<0>>}{<<true>>}{false}
@@ -977,7 +985,7 @@
   \prm{expression}。以下元素在 \prm{expression} 中可用，并在下面更详细地讨论：测试运算符 \texttt{togl}、
   \texttt{bool}、\texttt{test}；逻辑运算符 \texttt{not}、\texttt{and}、\texttt{or}；子表达式定界符
   \texttt{(...)}。可以自由使用空格、制表符和换行符来可视化排列 \prm{expression}。在 \prm{expression}
-  中不允许空白行。此命令是强健的 (robust)。
+  中不允许空白行。此命令是健壮的 (robust)。
 
   \cmditem{ifboolexpe}{expression}{true}{false}
 
@@ -987,12 +995,12 @@
   \cmditem{whileboolexpr}{expression}{code}
 
   类似于 \cmd{ifboolexpr} 对 \prm{expression} 进行评估，并在表达式为真时重复执行 \prm{code}。\prm{code}
-  可以是任何有效的 \tex 或 \latex 代码。此命令是强健的 (robust)。
+  可以是任何有效的 \TeX 或 \LaTeX 代码。此命令是健壮的 (robust)。
 
   \cmditem{unlessboolexpr}{expression}{code}
 
   类似于 \cmd{whileboolexpr}，但否定了 \prm{expression}，即只有在表达式为真时才会重复执行 \prm{code}。
-  此命令是强健的 (robust)。
+  此命令是健壮的 (robust)。
 
 \end{ltxsyntax}
 %
@@ -1019,13 +1027,13 @@
 
   \item[bool]
 
-  使用 \texttt{bool} 运算符基于纯 \tex 语法执行布尔测试，即通常使用如下方式的任何测试：
+  使用 \texttt{bool} 运算符基于纯 \TeX 语法执行布尔测试，即通常使用如下方式的任何测试：
 
   \begin{ltxcode}
     <<\iftest>> true<<\else>> false<<\fi>>
   \end{ltxcode}
   %
-  这包括所有使用 \cmd{newif} 定义的标志以及诸如 \cmd{ifmmode} 等 \tex 原语。在表达式中使用标志或
+  这包括所有使用 \cmd{newif} 定义的标志以及诸如 \cmd{ifmmode} 等 \TeX 原语。在表达式中使用标志或
   原语时，忽略 \cmd{if} 前缀。例如：
 
   \begin{ltxcode}
@@ -1056,13 +1064,13 @@
 
   \item[test]
 
-  使用 \texttt{test} 运算符基于 \latex 语法执行测试，即通常使用如下方式的任何测试：
+  使用 \texttt{test} 运算符基于 \LaTeX 语法执行测试，即通常使用如下方式的任何测试：
 
   \begin{ltxcode}
     <<\iftest>>{<<true>>}{<<false>>}
   \end{ltxcode}
   %
-  这适用于基于 \latex 语法的所有宏，即宏必须接受 \prm{true} 和 \prm{false} 参数，并且这些参数必须
+  这适用于基于 \LaTeX 语法的所有宏，即宏必须接受 \prm{true} 和 \prm{false} 参数，并且这些参数必须
   是最终参数。例如：
 
   \begin{ltxcode}
@@ -1100,7 +1108,7 @@
   \end{ltxcode}
   %
   \texttt{test} 运算符可以无限制地与 \cmd{ifboolexpr} 一起使用。它也可以与 \cmd{ifboolexpe} 一起
-  使用，前提是测试是可展开的。一些在 \secref{aut:tst} 中的通用测试是强健的 (robust)。，即使 \cmd{ifboolexpe}
+  使用，前提是测试是可展开的。一些在 \secref{aut:tst} 中的通用测试是健壮的 (robust)。，即使 \cmd{ifboolexpe}
   不位于仅展开的上下文中，也不能与之一起使用。如果测试不可展开，请使用 \cmd{ifboolexpr}。
 \end{marglist}
 
@@ -1257,7 +1265,7 @@
   \cmditem{docsvlist}{item, item, ...}
 
   此命令循环处理逗号分隔的项目列表，并对列表中的每个项目执行辅助命令 \cmd{do}，将项目作为参数传递。与
-  \latex 核心中的 \cmd{@for} 循环不同，\cmd{docsvlist} 是可展开的。通过适当定义 \cmd{do}，列表可以在
+  \LaTeX 核心中的 \cmd{@for} 循环不同，\cmd{docsvlist} 是可展开的。通过适当定义 \cmd{do}，列表可以在
   \cmd{edef} 或可比较的上下文中处理。您可以在 \cmd{do} 的替换文本末尾使用 \cmd{listbreak} 来停止处理
   并丢弃列表中的剩余项目。列表分隔符后的空格将被忽略。如果项目包含逗号或以空格开头，则必须用花括号包装。
   在处理列表时，花括号将被移除。以下是使用示例，将逗号分隔的列表打印为 \env{itemize} 环境：
@@ -1424,7 +1432,7 @@
 
   \cmditem{rmntonum}{numeral}
 
-  \tex 原语 \cmd{romannumeral} 可以将整数转换为罗马数字，但是 \tex 或 \latex 没有提供相反的命令。
+  \TeX 原语 \cmd{romannumeral} 可以将整数转换为罗马数字，但是 \TeX 或 \LaTeX 没有提供相反的命令。
   \cmd{rmntonum} 填补了这个空白。它以罗马数字作为参数，并将其转换为相应的整数。由于它是可展开的，
   因此也可以用于计数器赋值或算术测试：
 
@@ -1525,12 +1533,12 @@
   \end{release}
 
   \begin{release}{2.2b}{2016-12-01}
-    \item 修复了对某些类型的 \latex 强健 (robust) 命令的 \cmd{ifdefltxprotect} 的问题
+    \item 修复了对某些类型的 \LaTeX 健壮 (robust) 命令的 \cmd{ifdefltxprotect} 的问题
     \item 在 \cmd{robustify} 处理后删除了冗余的宏
   \end{release}
 
   \begin{release}{2.2a}{2015-08-02}
-    \item 修复了 \cmd{ifblank}/\cmd{notblank} 中的强健性 (robustness) 错误
+    \item 修复了 \cmd{ifblank}/\cmd{notblank} 中的健壮性 (robustness) 错误
   \end{release}
 
   \begin{release}{2.2}{2015-05-04}
@@ -1553,7 +1561,7 @@
 
   \begin{release}{2.1a}{2015-03-10}
     \item 新的维护者：Joseph Wright
-    \item 在较新的 \latex 核心发布中跳过加载 \sty{etex} 包
+    \item 在较新的 \LaTeX 核心发布中跳过加载 \sty{etex} 包
   \end{release}
 
   \begin{release}{2.1}{2011-01-03}
