@@ -9,6 +9,7 @@
 ### 不想使用思源字体
 可以把源文件 `doc-zh-cn.dtx` 中的 `\usepackage[fontset=source]{ctex}` 语句改为 `\usepackage[fontset=fandol]{ctex}` 即可直接调用 Fandol 字体，或者直接去掉 `fontset` 选项设置，改为 `\usepackage{ctex}` 即可使用默认的中易字库。
 ## 文档编译方法
+该 `.bat` 文件仅适用于 Windows 系统，若想应用于其它的平台，请自行参照该 `.bat` 文件修改。该 `.bat` 文件主要是在 `xelatex` 编译的基础上增加了生成索引和修改历史的编译方法。
 * **doc-zh-cn.pdf**
   ```
   .\compile.bat doc-zh-cn.dtx
