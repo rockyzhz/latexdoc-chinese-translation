@@ -351,21 +351,24 @@
 % |\IndexInput| 更多细节。可以使用多个 |\DocInput| 命令包含多个文件，每个文件都是独
 % 立的、自我包含的、自我记录的包——例如，每个文件都包含 |\maketitle|。
 %
-% 例如，\DOC{} 包本身的驱动文件是以下代码，被 |%<*driver>| 和 |%</driver>| 包围。
+% 例如，\DOC{} 包本身的驱动文件是以下代码
+% ，被 |%<*driver>| 和 |%</driver>| 包围。
 % 要生成文档，你可以简单地在 \LaTeX{} 中运行 \texttt{.dtx} 文件，在这种情况下，这
 % 个代码将会被执行（加载文档类 \texttt{ltxdoc} 等）；或者，你可以使用 \texttt{docstrip}
-% 程序将其提取为一个单独的文件。
-% 下面的行号是由 \DOC{} 的格式化添加的。
+% 程序将其提取为一个单独的文件。下面的行号是由 \DOC{} 的格式化添加的。
 % 注意，类 \cls{ltxdoc} 预装载了 \DOC{} 包。
+% \footnote{译者注：下面代码中，第 4 行在英文版中是不存在的，出于编译中文的需要，添加上了 
+%           \pkg{ctex} 宏包的引用，被 \env{macrocode} 环境抄录 (verbatim) 下来了；另外，
+%           第 19 行在英文原文中是 \texttt{\bslash DocInput\{doc.dtx\}} ，出于方便中文
+%           读者对照原文阅读以及后续增量更新的需求，在本项目中， |doc.dtx| 是英文版的源文
+%           件，而中文版译文的源文件则更名为 |doc-zh-cn.dtx| 。}
 % \changes{v1.7a}{1992/03/06}{添加了可派生出 docstrip 驱动文件的示例。}
 % \changes{v1.7c}{1992/04/01}{从驱动文件中删除了 ltugboat.sty。}
 %    \begin{macrocode}
 %<*driver>
 \documentclass{ltxdoc}
-% 这里第 3~5 行在英文版的说明文档里是不存在的，出于编译中文的需要，
-% 被 macrocode 环境以抄录 (verbatim) 的形式显示出来了。
-\usepackage[fontset=source]{ctex}
 
+\usepackage[fontset=source]{ctex}
 \usepackage[T1]{fontenc}
 \usepackage{xspace}
 
@@ -3887,7 +3890,7 @@
 % \changes{v1.7a}{1992/02/27}{新增（来自 newdoc 但现在修改了 \cs{dospecials} 和 \cs{@sanitize}）。}
 % 这安排了对 |\verb| 的缩写，如果你接着使用 |\MakeShortVerb{\|\meta{c}|}| ，
 % 之后使用 \meta{c}\meta{text}\meta{c} 就相当于 |\verb|\meta{c}\meta{text}\meta{c}。
-% \footnote{警告：本节余下的评论是由 Dave Love 编写的。} 
+% \footnote{提示：本节余下的评论是由 Dave Love 编写的。} 
 % 此外，将 \meta{c} 设置为活动字符，以供 \env{verbatim} 和 \env{macrocode} 环境使用。
 % 特别注意以下定义是全局的。
 % 首先我们做的事情（不一定是第一件事）是用 |\add@special| 在 |\dospecials| 和 |\@sanitize| 中记录——假定是新的特殊字符。
