@@ -12,7 +12,7 @@
 该 `.bat` 文件仅适用于 Windows 系统，若想应用于其它的平台，请自行参照该 `.bat` 文件修改。该 `.bat` 文件主要是在 `xelatex` 编译的基础上增加了生成索引和修改历史的编译方法。
 * **doc-zh-cn.pdf**
   ```
-  .\compile.bat doc-zh-cn.dtx
+  .\compile.bat doc-zh-cn.tex
   ```
 * **doc-code-zh-cn.pdf**
   ```
