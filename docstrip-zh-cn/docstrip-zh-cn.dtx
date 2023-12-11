@@ -86,7 +86,9 @@
 %
 % ^^A 这里是文档的一些定义。
 %
-% \definecolor{spot}{rgb}{0,0.2,0.6}
+% \definecolor{spot}{HTML}{003399}
+% \definecolor{code}{HTML}{a25e26}
+% \definecolor{verb}{HTML}{007f00}
 % \hypersetup{%
 %   colorlinks=true,
 %   linkcolor=spot,
@@ -96,6 +98,13 @@
 %   bookmarksnumbered=false,
 %   plainpages=false,
 %   pdfview=FitH}
+% \let\OriginMF\MacroFont
+% \pretocmd{\MacroFont}{\color{spot}}{}{}
+% \pretocmd{\macrocode}{\color{code}}{}{}
+% \AtBeginEnvironment{macrocode}{\let\MF\MacroFont\def\MacroFont{\color{code}\OriginMF}}
+% \AtEndEnvironment{macrocode}{\let\MacroFont\MF}
+% \AtBeginEnvironment{verbatim}{\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
+% \AtEndEnvironment{verbatim}{\let\MacroFont\MF}
 % \newcommand{\ds}{\textsf{DocStrip}} ^^A maybe?
 % \newcommand{\bsl}{\protect\bslash}
 % \newcommand{\note}[1]{\marginpar{\textbf{#1}}}
@@ -454,7 +463,7 @@
 % 如果不想使用任何前言，可以使用 |\nopreamble| 命令。此命令相当于说 |\usepreamble\empty| 。同样的机制也适用于后言，|\use...|
 % 声明是局部的，可以出现在 |\generate| 内部。
 %
-% 命令 |\preamble| 和 |\postamble| 定义并激活名为 |\defaultpreamble| 和 |\defaultpostamble| 的前（后）言。
+% 命令 |\preamble| 和 |\postamble| 定义并激活名为 |\defaultpreamble| 和 |\defaultpostamble| 的前言（后文）。
 %
 % \DescribeMacro{\batchinput}
 % 批处理文件命令可以放入多个批处理文件中，然后从主批处理文件中执行这些文件。例如，如果一个分发包含几个不同的部分，这是很有用的。
@@ -728,6 +737,7 @@
 %    \begin{macrocode}
 \documentclass{ltxdoc}
 \usepackage[fontset=source]{ctex}
+\usepackage{xcolor}
 \EnableCrossrefs
 % \DisableCrossrefs
 % use \DisableCrossrefs if the
