@@ -70,7 +70,9 @@
 %  1.5b and higher...    are documented with the (undocumented) \changes
 %                        feature.
 %\fi
-% \definecolor{spot}{rgb}{0,0.2,0.6}
+% \definecolor{spot}{HTML}{003399}
+% \definecolor{code}{HTML}{a25e26}
+% \definecolor{verb}{HTML}{007f00}
 % \hypersetup{%
 %   colorlinks=true,
 %   linkcolor=spot,
@@ -80,6 +82,13 @@
 %   bookmarksnumbered=false,
 %   plainpages=false,
 %   pdfview=FitH}
+% \let\OriginMF\MacroFont
+% \def\MacroFont{\color{spot}\OriginMF}
+% \pretocmd{\macrocode}{\color{code}}{}{}
+% \AtBeginEnvironment{macrocode}{\let\MF\MacroFont\def\MacroFont{\color{code}\OriginMF}}
+% \AtEndEnvironment{macrocode}{\let\MacroFont\MF}
+% \AtBeginEnvironment{verbatim}{\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
+% \AtEndEnvironment{verbatim}{\let\MacroFont\MF}
 % \makeatletter
 % \def\index@prologue{\section*{索引}%
 %                  \markboth{索引}{索引}%
@@ -185,7 +194,7 @@
 % ^^A \newcommand\NewIn[1]{\leavevmode
 % ^^A         \marginpar{\hfill\fbox{\fbox{New in #1}}\hspace*{1em}}\ignorespaces}
 % \newcommand\NewIn[1]{\leavevmode
-%         \marginpar{\hfill\fbox{\fbox{#1新增}}\hspace*{1em}}\ignorespaces}
+%         \marginpar{\kaishu\color{spot}\hfill\fbox{\fbox{#1新增}}\hspace*{1em}}\ignorespaces}
 %
 %
 %\RenewDocElement[macrolike = true ,
@@ -345,8 +354,8 @@
 %
 %
 % \DescribeInterfaceMacro\DocInput \DescribeInterfaceMacro\IndexInput
-% 最后，\meta{special input commands} 部分应该包含一个或多个 |\DocInput|\marg{文件名}
-% 和/或 |\IndexInput|\marg{文件名} 命令。|\DocInput| 命令用于为 \DOC{} 包准备的文件，
+% 最后，\meta{special input commands} 部分应该包含一个或多个 |\DocInput|\hfil\break\marg{file name}
+% 和|/|或 |\IndexInput|\marg{file name} 命令。|\DocInput| 命令用于为 \DOC{} 包准备的文件，
 % 而 |\IndexInput| 则可用于各种类型的宏文件。参见第 \pageref{..Input} 页，了解
 % |\IndexInput| 更多细节。可以使用多个 |\DocInput| 命令包含多个文件，每个文件都是独
 % 立的、自我包含的、自我记录的包——例如，每个文件都包含 |\maketitle|。
@@ -733,7 +742,7 @@
 % \DescribeInterfaceMacro\SpecialMainEnvIndex
 % 要为宏生成主索引条目，可以使用 |\SpecialMainMacroIndex| 宏\footnote{
 %     此宏由 \env{macro} 环境调用。}。它被称为“特殊”，因为它必须逐字打印其参数。
-% 类似的宏，称为 |\SpecialMainEnvIndex|，用于索引环境的主定义点。\footnote{
+% 类似的宏，称为\hfil\break |\SpecialMainEnvIndex|，用于索引环境的主定义点。\footnote{
 %     此宏由 \env{environment} 环境调用。}
 %
 % \DescribeInterfaceMacro\SpecialMacroIndex
@@ -1031,7 +1040,7 @@
 % \changes{v1.7a}{1992/03/11}{添加了基本用法概要以明确阐述。}
 %
 % 总的来说，没有任何改进的 \texttt{.dtx} 文件的基本结构如下：
-% \begin{verse}\small
+% \begin{verse}\small\color{verb}\mbox{}\\[-\baselineskip]
 % |% |\meta{waffle}\ldots\\
 % \quad\ldots \\
 % |% \DescribeMacro{\fred}|\\
@@ -4463,7 +4472,7 @@
 %    \begin{macrocode}
   \expandafter\let\expandafter\doc@eoph@@k\csname doc.sty-h@@k\endcsname
 %    \end{macrocode}
-%    我们需要无任何选项加载包，因此如果已经加载，就不会有选项冲突。
+%    我们需要无任何选项加载包，因此如果已经加载，这样不会出现选项冲突。
 %    \begin{macrocode}
   \RequirePackage{hypdoc}
   \expandafter\let\csname doc.sty-h@@k\endcsname\doc@eoph@@k
@@ -4571,7 +4580,7 @@
 % 所述项是否类似于宏，这里我们不知道（只有\cs{NewDocElement}知道）。
 % 这就是为什么我们需要为每个单独的项生成\cs{saved@indexname}的正确方式
 % 的一个特定命令。这些命令命名为\cs{@Save\meta{item}IndexName}；
-% 它们在技术上是生成的API的一部分，只是不用于公共使用。
+% 它们在技术上是生成的API的一部分，只是不用于公开使用。
 %
 % \fmi{上面的文档已不再正确（但代码仍需要进一步更改）}
 %
@@ -4674,7 +4683,7 @@
 % \subsection{\DOC 描述}
 %
 % \begin{macro}{\@doc@describe}
-%   \marg{项}\marg{名称}\\
+%   \marg{item}\marg{name}\\
 %    \begin{macrocode}
 \def\@doc@describe#1#2{%
     \ifdoc@noprint\else
@@ -4695,7 +4704,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\doc@describe}
-%   \marg{项}\oarg{选项}\\
+%   \marg{item}\oarg{options}\\
 %   处理可选参数并调用 \cs{@doc@describe}。
 % \fmi{如果可用，使用2e接口的 \cs{keys\_set:nn}}
 %    \begin{macrocode}
