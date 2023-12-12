@@ -1230,9 +1230,8 @@ Z
     \edef\ListCondition{#2}%
     \Forlisttrue
 %    \end{macrocode}
-%    然后我们开始循环。
-%    我们将 |\ListCondition| 中的第一个元素存储在作为 |\forlist| 第一个参数提供的宏中。
-%    然后将此元素从 |\ListCondition| 中移除。
+%    然后开始循环。我们将 |\ListCondition| 中的第一个元素存储在作为 |\forlist| 第一个参数提供的宏中，
+%    再将此元素从 |\ListCondition| 中移除。
 %    \begin{macrocode}
     \loop
       \edef#1{\expandafter\FirstElt\ListCondition,\empty.}%
