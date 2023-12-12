@@ -1,6 +1,8 @@
 # doc 和 shortvrb 宏包文档中文翻译
 本项目包含了 **doc.pdf** 的中文文档 **doc-zh-cn.pdf** 以及 **doc-code.pdf** （增加了代码实现部分说明）的中文文档 **doc-code-zh-cn.pdf** 。doc & shortvrb 宏包是一个用于为 TeX 代码提供代码文档的包。从那时起，它被广泛用于记录 LaTeX 核心和现在大多数可用的包。
 
+为方便阅读，中文版的翻译文档在部分内容颜色上做了一定的区分，宏命令和标题以及其它带链接的部分（比如目录和引用等）用蓝色，抄录（verbatim）环境和类似的环境用的是绿色，宏包代码用的是褐色。
+
 ## 字体选择
 本项目文档使用了思源字体来作为主要的字体，并且在 `ctex-fontset-fandol.def` 文件的基础上，把其中的宋体与黑体修改为思源字体，生成了新的 [`ctex-fontset-source.def`][1] 文件 ，因此可以在源文件中直接通过 `\usepackage[fontset=source]{ctex}` 来调用思源字体。
 ### 使用思源字体
