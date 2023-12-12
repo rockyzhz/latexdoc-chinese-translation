@@ -25,7 +25,7 @@
 %% ---------------------------------------------------------------------
 %% 
 \GetIdInfo$Id: ctex.dtx 13a2256 2022-07-14 18:54:09 +0800 Qing Lee <sobenlee@gmail.com> $
-  {Rocky fonts definition (CTEX)}
+  {Source fonts definition (CTEX)}
 \ProvidesExplFile{ctex-fontset-source.def}
   {\ExplFileDate}{2.5.10}{\ExplFileDescription}
 \ctex_fontset_case:nnnn
