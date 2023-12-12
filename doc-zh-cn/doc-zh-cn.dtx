@@ -87,6 +87,8 @@
 % \pretocmd{\macrocode}{\color{code}}{}{}
 % \AtBeginEnvironment{macrocode}{\let\MF\MacroFont\def\MacroFont{\color{code}\OriginMF}}
 % \AtEndEnvironment{macrocode}{\let\MacroFont\MF}
+% \AtBeginEnvironment{quote}{\color{verb}}
+% \AtBeginEnvironment{flushleft}{\color{verb}}
 % \AtBeginEnvironment{verbatim}{\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
 % \AtEndEnvironment{verbatim}{\let\MacroFont\MF}
 % \makeatletter
@@ -1304,7 +1306,7 @@
 % \begin{multicols}{2}[\medskip \noindent\rule{\textwidth}{.3pt}
 %                      \section{前版简介}]
 %
-% \begin{quote}
+% \begin{quote}\color{black}
 %   \textbf{原始摘要：}
 %    这个包含了格式化包文件文档所需的定义。该包是在Mainz与Royal Military College
 %    of Science合作开发的。这是一个更新，记录了 \DOC{} 中的各种变化和新特性，并集成了 \env{newdoc} 的功能。
@@ -1942,9 +1944,9 @@
 % \begin{macro}{\star@module}
 % \begin{macro}{\slash@module}
 % \changes{v1.7a}{1992/03/12}{添加。}
-% \changes{v1.7f}{1992/05/16}{考虑嵌套的守卫。}
+% \changes{v1.7f}{1992/05/16}{考虑嵌套的 guard 。}
 % \changes{v1.7i}{1992/07/11}{添加计数器以确定何时切换到特殊字体。}
-% 如果指示了模块的开始或结束 {\em 块\/}，在设置守卫之后，我们必须检查
+% 如果指示了模块的开始或结束 {\em 块\/}，在设置 guard 之后，我们必须检查
 % 是否应该更改宏代码字体。如果我们已经在一个块内部或者正在结束最外层的块，
 % 则会出现这种情况。如果是这样，我们会在后续的宏代码部分全局切换普通形式
 % 和特殊形式的字体，并立即切换到新的字体。
@@ -1982,7 +1984,7 @@
 %
 % \begin{tcounter}{\guard@level}
 % \changes{v1.7f}{1992/05/16}{添加。}
-% 我们需要一个计数器来跟踪守卫的嵌套。
+% 我们需要一个计数器来跟踪 guard 的嵌套。
 %    \begin{macrocode}
 \newcount \guard@level
 %    \end{macrocode}
@@ -4363,7 +4365,7 @@
 %
 % \begin{macro}{\DocstyleParms}
 %    这个宏可以用来为 |\MacrocodeTopsep| 和 |\MacroIndent| 以及一些其他内部寄存器分配新值。
-%    如果已经定义了该宏，将不会执行默认定义。请注意，如果应该在类文件中（例如像 \texttt{ltugboat.cls}）
+%    如果已经定义了该宏，将不会执行默认定义。请注意，如果你想在类文件（例如像 \texttt{ltugboat.cls}）
 %    分配新值，则需要通过该宏进行，因为在读取 \texttt{doc.sty} 之前，这些寄存器是未定义的。
 %    内部寄存器的默认值分散在此文件中。
 % \changes{v1.5u}{1989/11/14}{\cs{DocStyleParms} 现在为空}
