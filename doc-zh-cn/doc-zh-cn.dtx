@@ -301,7 +301,7 @@
 %
 %    因此，这是该包的第 3 版，带有一些较小的扩展，这些扩展是向上兼容的，但希望能够很好地服务。最重要的
 %    修改是集成了 \pkg{hypdoc} 包的功能，可以在文档内（特别是从索引中）建立链接（如果需要的话）。还集
-%    成了 Didier Verna 的 \DOX 包的想法（尽管我提供了一个与 \DOC 其他接口更好地契合的不同界面）。最
+%    成了 Didier Verna 的 \DOX 包的想法（但是我提供了一个不同的接口，在我看来，其能更好地契合 \DOC 的其它接口）。最
 %    后，我更新了一些杂项。
 % \end{abstract}
 %
@@ -324,18 +324,18 @@
 % \section{介绍}
 %
 % 这是 \DOC{} 包的新版本，大约在初始发布后 30 年左右编写的。由于该包已经被使用了
-% 这么长时间（并且基本没有改变），保留现有接口非常重要，即使我们可以同意它们
-% 本来可以做得更好。
+% 这么长时间（并且基本没有改变），保留现有接口非常重要，即使我们承认这些接口
+% 本来可以被设计得更好。
 %
 % 因此，这只是一个轻量级的更改，基本上添加了超链接支持，并且添加了一种提供一
 % 般 \DOC{} 元素（不仅限于宏和环境）的方式，并尝试做到这一点（这在过去对于环境
-% 也不是这样）。这些想法是从 Didier Verna 的 \DOX 包中“借鉴”来的，尽管我没
+% 也不是这样）。这些想法是从 Didier Verna 的 \DOX 包中“借鉴”来的，但是我没
 % 有保留他的接口。
 %
 % 下面大部分的文档来自于之前的版本，这可能导致一些呈现上的不一致，我表示歉意。
 %
 %
-% \section{用户界面}\label{sec:interface}
+% \section{用户接口}\label{sec:interface}
 % \subsection{驱动文件}
 %
 % 如果要使用 \DOC{} 包来记录一组宏，就必须准备一个特殊的驱动文件，
@@ -357,17 +357,17 @@
 %
 % \DescribeInterfaceMacro\DocInput \DescribeInterfaceMacro\IndexInput
 % 最后，\meta{special input commands} 部分应该包含一个或多个 |\DocInput|\hfil\break\marg{file name}
-% 和|/|或 |\IndexInput|\marg{file name} 命令。|\DocInput| 命令用于为 \DOC{} 包准备的文件，
+% 和/或 |\IndexInput|\marg{file name} 命令。|\DocInput| 命令用于为 \DOC{} 包准备的文件，
 % 而 |\IndexInput| 则可用于各种类型的宏文件。参见第 \pageref{..Input} 页，了解
 % |\IndexInput| 更多细节。可以使用多个 |\DocInput| 命令包含多个文件，每个文件都是独
-% 立的、自我包含的、自我记录的包——例如，每个文件都包含 |\maketitle|。
+% 立的、自我记录的包——例如，每个文件都包含 |\maketitle|。
 %
 % 例如，\DOC{} 包本身的驱动文件是以下代码
 % ，被 |%<*driver>| 和 |%</driver>| 包围。
 % 要生成文档，你可以简单地在 \LaTeX{} 中运行 \texttt{.dtx} 文件，在这种情况下，这
 % 个代码将会被执行（加载文档类 \texttt{ltxdoc} 等）；或者，你可以使用 \texttt{docstrip}
 % 程序将其提取为一个单独的文件。下面的行号是由 \DOC{} 的格式化添加的。
-% 注意，类 \cls{ltxdoc} 预装载了 \DOC{} 包。
+% 注意，类 \cls{ltxdoc} 预加载了 \DOC{} 包。
 % \footnote{译者注：下面代码中，第 4 行在英文版中是不存在的，出于编译中文的需要，添加上了 
 %           \pkg{ctex} 宏包的引用，被 \env{macrocode} 环境抄录 (verbatim) 下来了；另外，
 %           第 19 行在英文原文中是 \texttt{\bslash DocInput\{doc.dtx\}} ，出于方便中文
@@ -409,7 +409,7 @@
 % \RecordIndexType{\hfuzz}{LaTeXDimen}
 %
 %
-% \subsection{包选项}
+% \subsection{宏包选项}
 %
 % \NewIn{v3}
 % 从版本~3 开始，\DOC{} 包现在提供了一些可以修改其整体行为的包选项。它们包括：
@@ -423,20 +423,20 @@
 % \DescribeOption[noprint]{reportchangedates}
 % \begin{description}
 % \item[\opt{hyperref}, \opt{nohyperref}] Boolean (default \texttt{true}). 
-%    载入 \pkg{hyperref} 包并使代码行、页码和其他项目的索引引用成为可点击的链接。
+%    加载 \pkg{hyperref} 包并使代码行、页码和其他项目的索引引用成为可点击的链接。
 %    \opt{nohyperref} 是对应的键。
 %
 % \item[\opt{multicol}, \opt{nomulticol}] Boolean (default \texttt{true}). 
-%    用于排版索引和变更列表的 \pkg{multicol} 包。 \opt{nomulticol} 是对应的键。
+%    加载 \pkg{multicol} 包，用于排版索引和变更列表。\opt{nomulticol} 是对应的键。
 %
 % \item[\opt{debugshow}] Boolean (default \texttt{false}). 
-%    在终端和转录文件中提供各种跟踪信息。特别是显示被索引的元素。
+%    在终端和日志文件中提供各种跟踪信息。特别是显示被索引的元素。
 %
 % \item[\opt{noindex}] Boolean (default \texttt{false}). 
 %    如果设置，则抑制所有自动索引。这个选项也可以像下面描述的那样用于单个元素。
 %
 % \item[\opt{noprint}] Boolean (default \texttt{false}). 
-%    如果设置，则抑制边距中元素名称的打印。这个选项也可以像下面描述的那样用于单个元素。
+%    如果设置，则抑制边注中元素名称的打印。这个选项也可以像下面描述的那样用于单个元素。
 %
 % \item[\opt{reportchangedates}] Boolean (default \texttt{false}). 
 %    如果设置，则变更条目中在版本号后面列出日期。
