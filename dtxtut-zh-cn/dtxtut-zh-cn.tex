@@ -42,6 +42,10 @@
 % \usepackage[scheme=plain,fontset=source]{ctex}
 \usepackage{xeCJK}
 \usepackage{zhnumber,zhspacing}
+\renewcommand{\abstractname}{摘\quad 要}
+\renewcommand{\refname}{参考文献}
+\renewcommand{\indexname}{索引}
+\renewcommand{\clsguide}{\LaTeXe\ 面向宏包与类文件编写者}
 \setlength{\parindent}{2em}
 \usepackage{indentfirst}
 \linespread{1.242} 
@@ -51,6 +55,7 @@
 \definecolor{verb}{HTML}{007f00}
 \AtBeginEnvironment{decl}{\color{spot}}
 \AtBeginEnvironment{verbatim}{\color{verb}}
+\AtBeginEnvironment{alltt}{\color{verb}}
 \hypersetup{%
   colorlinks=true,
   linkcolor=spot,
@@ -60,8 +65,6 @@
   bookmarksnumbered=false,
   plainpages=false,
   pdfview=FitH}
-% \makeatletter
-% \makeatother
 
 % Define this document's metadata.
 \title{\huge\bfseries\color{spot}如何打包你的 \LaTeX{} 宏包}
@@ -188,7 +191,7 @@
 我们假设您已经了解如何在 \latex\@ 中\emph{编程}。
 也就是说，您应该知道如何使用 \usemacro{newcommand}、
 \usemacro{newenvironment}，最好还懂一点 \TeX\@。
-您还应该熟悉“\clsguide”，它可以在 \CTAN{}
+您还应该熟悉《\clsguide》，它可以在 \CTAN{}
 (\URL{http://www.ctan.org}) 上获取，并且大多数
 \latex[\LaTeXe]{} 发行版中都包含一个名为 |clsguide.dvi| 的文件。
 最后，您应该知道如何安装由 \dtxfile{} 文件和 \insfile{} 文件
@@ -196,7 +199,7 @@
 
 \index{package|(}
 \paragraph{术语}
-一个\defn[style file]{宏包 \textnormal{（\styfile{}）}文件}主要是一组宏和环境的定义。
+一个\defn[style file]{宏包\textnormal{（ \styfile{}）}文件}主要是一组宏和环境的定义。
 一个或多个样式文件（例如一个主样式文件，\usemacro{input} 或 \usemacro{RequirePackage}
 多个辅助文件）称为一个\defn{package}。包可以用\usemacro{usepackage}|{<main .sty file>}|
 \index{style file}载入文档中。在本文档的其余部分，我们使用符号“\m{package}”
@@ -204,9 +207,9 @@
 
 \paragraph{动机}
 一个包\index{package}的重要部分包括代码、代码的文档和用户文档。
-使用\DOC{}和\ds{}程序，可以将这三者合并为一个单一的，带有说明的
+使用 \DOC{} 和 \ds{} 程序，可以将这三者合并为一个单一的，带有说明的
 \defn[documented LaTeX file@documented \string\LaTeX{} file]{说明 \LaTeX{}
-  \textnormal{（\dtxfile{}）}文件}。\dtxfile{}文件的主要优势在于，
+  \textnormal{（ \dtxfile{}）}文件}。 \dtxfile{}文件的主要优势在于，
 它允许您使用任意的 \latex{} 构造来注释\index{comments}您的代码。
 因此，宏、环境、代码段、变量等都可以使用表格、图形、数学公式和字体变化来解释。
 代码可以使用 \latex 的分段命令进行组织。\index{indexing|(}
@@ -217,8 +220,8 @@
 并自早期的 \TeX{} 开始就被使用。
 
 本教程将教您如何编写基本的 \dtxfile{} 文件和操作它们的 \insfile{} 文件。
-虽然与《\latex{} Companion》的第14章存在许多重叠~\cite{Goossens1994:companion}，
-但本文档结构更像是一步一步的教程，而《\latex{} Companion》更像是参考资料。
+虽然与《 \latex{} Companion》的第14章存在许多重叠~\cite{Goossens1994:companion}，
+但本文档结构更像是一步一步的教程，而《 \latex{} Companion》更像是参考资料。
 此外，本教程展示了如何编写一个单一文件，既作为文档又作为驱动文件，
 这是 \DOC{} 系统的一种更典型的用法，而不是使用分开的文件。
 
@@ -228,10 +231,10 @@
 \section{\texttt{.ins} 文件}
 \label{sec:ins-file}
 
-为了准备一个包用于发布，第一步是编写一个\defn[installer file]{安装
-  \textnormal{（\insfile{}）}文件}。安装文件从 \dtxfile{} 文件中提取代码，
+为了准备一个包用于发布，第一步是编写一个\defn[installer file]{安装\textnormal{（ \insfile{}）}文件}。
+安装文件从 \dtxfile{} 文件中提取代码，
 使用 \ds{} 去掉注释\index{comments}和文档，然后输出一个 \styfile{} 文件。
-好消息是，\insfile{} 文件通常相当简短，并且在一个包\index{package}到另一个
+好消息是， \insfile{} 文件通常相当简短，并且在一个包\index{package}到另一个
 包之间没有明显变化。
 
 \index{license|(}
@@ -383,8 +386,8 @@
   |{|\defmacro{from} |{<dtx-file>}| |{<tag>}}}|
 \end{decl}
 
-现在我们来到一个\insfile{}文件中最重要的部分：指定从\dtxfile{}文件生成哪些文件。
-以下告诉\ds{}从 |<package>.dtx| 中仅提取标记为“|package|”的部分，
+现在我们来到一个 \insfile{}文件中最重要的部分：指定从 \dtxfile{}文件生成哪些文件。
+以下告诉 \ds{} 从 |<package>.dtx| 中仅提取标记为“|package|”的部分，
 生成 |<package>.sty|\index{style file}。（如何标记 \dtxfile{} 文件的部分在第~\ref{sec:dtx-file}节中描述。）
 
 \label{code:generate}
@@ -448,9 +451,9 @@
 \indexmacroEnd{endbatchfile}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-附录~\ref{sec:skeleton-ins-file-style} 列出了一个完整的骨架 \insfile{} 文件。
+附录~\ref{sec:skeleton-ins-file-style} 列出了一个完整的 \insfile{} 框架文件。
 附录~\ref{sec:skeleton-ins-file-class} 类似，但包含了一些微小的修改，旨在生成
-一个类（\clsfile）文件，而不是样式（\styfile）文件。
+一个类（ \clsfile）文件，而不是样式（ \styfile）文件。
 
 \index{installer file|)}
 \index{documented LaTeX file@documented \LaTeX{} file|(}
@@ -515,7 +518,7 @@
 
 接下来的几行同样被\usemacro{iffalse}\dotsbrk|\fi|包围，以防止在第二次
 通过 \dtxfile{} 文件时被 |latex| 处理。不过，这些行不是为人类读者准备的，
-而是为了\ds{}（因此没有“\usething{meta-comment}”）：
+而是为了 \ds{} （因此没有“\usething{meta-comment}”）：
 
 \label{code:ProvidesPackage}
 \begin{verbatim}
@@ -748,7 +751,7 @@
 \end{verbatim}
 
 \noindent
-A success message looks like this:
+成功消息的样式如下：
 
 \begin{verbatim}
     ***************************
@@ -757,7 +760,7 @@ A success message looks like this:
 \end{verbatim}
 
 \noindent
-and an error message looks like this:
+而错误消息的样式如下：
 
 \begin{verbatim}
     ! Package doc Error: Character table corrupted.
@@ -776,11 +779,9 @@ and an error message looks like this:
 
 \index{package|(}
 
-On page~\pageref{item:RecordChanges} we learned that \DOC{} has a
-mechanism for recording changes to the package.  The command is
-``|\changes{<version>}{<date>}{<description>}|'', and it's common to
-use \usemacro{changes} for the initial version of the package to log
-the package's creation date:
+在第~\pageref{item:RecordChanges} 页我们了解到 \DOC{} 有一个记录
+包变更的机制。命令是“|\changes{<version>}{<date>}{<description>}|”，
+通常用 \usemacro{changes} 来记录包的初始版本和创建日期：
 
 \index{package|)}
 
@@ -788,11 +789,9 @@ the package's creation date:
     % \changes{v1.0}{2002/03/25}{Initial version}
 \end{verbatim}
 
-One nice feature of the \usemacro{changes} command is that it knows
-whether it was used internally to a macro/environment definition.  As
-Figure~\ref{fig:change-history} shows, top-level changes are prefixed
-with ``General:'', and internal changes are prefixed with the name of
-the enclosing macro or environment.
+\usemacro{changes} 命令的一个好处是它知道自己是在宏/环境定义的内
+部使用还是顶层使用。如图~\ref{fig:change-history} 所示，顶层变更以
+“General:”为前缀，而内部变更以包围它的宏或环境的名称为前缀。
 
 \begin{figure}[htbp]
   \centering
@@ -825,11 +824,11 @@ the enclosing macro or environment.
   \defmacro{fileinfo}
 \end{decl}
 
-Next, we tell \DOC{} to parse the \usemacro{ProvidesPackage} command
-(page~\pageref{code:ProvidesPackage}), calling the three components of
-\usemacro{ProvidesPackage}'s argument, respectively,
-``\usemacro{filedate}'', ``\usemacro{fileversion}'', and
-``\usemacro{fileinfo}'':
+接下来，我们告诉 \DOC{} 解析 \usemacro{ProvidesPackage} 命令
+（第~\pageref{code:ProvidesPackage} 页），依次调用
+\usemacro{ProvidesPackage} 参数的三个组成部分，
+分别是“\usemacro{filedate}”、“\usemacro{fileversion}” 和
+“\usemacro{fileinfo}”：
 
 \begin{verbatim}
     % \GetFileInfo{<package>.sty}
@@ -838,9 +837,8 @@ Next, we tell \DOC{} to parse the \usemacro{ProvidesPackage} command
 \indexmacro{GetFileInfo}
 
 \noindent
-For instance, the \usemacro{ProvidesPackage} example
-shown~\vpageref{code:ProvidesPackage-example} would be parsed as
-follows:
+例如，\usemacro{ProvidesPackage} 的示例
+（见第~\vpageref{code:ProvidesPackage-example} 页）将被解析如下：
 
 |    |%
 \begin{tabular}{@{}l@{\qquad$\equiv$\qquad}l@{}}
@@ -862,19 +860,13 @@ follows:
   \defmacro{DoNotIndex} \arg{macro-name \textnormal{, \dots}}
 \end{decl}
 
-When producing an index, \DOC{} normally indexes \emph{every} control
-sequence (\ie backslashed word or symbol) in the code.  The problem
-with this level of automation is that many control sequences are
-uninteresting from the perspective of understanding the code.  For
-example, a reader probably doesn't want to see every location where
-|\if| is used---or |\the| or |\let| or |\begin| or any of numerous
-other control sequences.
+在生成索引时，\DOC{} 通常会索引代码中的\emph{每个}控制序列（即反斜线开头的单词或符号）。
+这种自动化水平的问题在于，许多控制序列在理解代码的角度来看并不重要。例如，读者
+可能不想看到每个使用了 |\if|、|\the|、|\let|、|\begin| 或其他众多控制序列的地方。
 
-As its name implies, the \usemacro{DoNotIndex} command gives \DOC{} a
-list of control\index{control sequences} sequences that should not be
-indexed.  \usemacro{DoNotIndex} can be used any number of times, and
-it accepts any number of control\index{control sequences} sequence
-names per invocation:
+正如其名称所示，\usemacro{DoNotIndex} 命令给出了一个\index{control sequences}
+不应被索引的控制序列列表给 \DOC{}。\usemacro{DoNotIndex} 可以使用任意次数，
+并且每次调用可以接受任意数量的控制\index{control sequences}序列名称：
 
 \begin{verbatim}
     % \DoNotIndex{\#,\$,\%,\&,\@,\\,\{,\},\^,\_,\~,\ }
@@ -888,10 +880,9 @@ names per invocation:
 \indexmacroEnd{DoNotIndex}     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{User documentation}
+\subsection{用户文档}
 
-We can finally start writing the user documentation.  A typical
-beginning looks like this:
+我们终于可以开始编写用户文档了。典型的开头如下：
 
 \begin{verbatim}
     % \title{The \textsf{<package>} package\thanks{This document
@@ -907,22 +898,14 @@ beginning looks like this:
 
 \noindent
 \index{package|(}
-The title can certainly be more creative, but note that it's common
-for package names to be typeset with \usemacro{textsf} and for
-\usemacro{thanks} to be used to specify the package version and date.
-This yields one of the advantages of literate\index{literate
-  programming} programming: Whenever you change the package version (the
-optional second argument to \usemacro{ProvidesPackage}), the user
-documentation is updated accordingly.  Of course, you still have to
-ensure manually that the user documentation accurately describes the
-updated package.
+当然标题可以更有创意，但请注意，使用 \usemacro{textsf} 排版包名是常见的做法，而使用 \usemacro{thanks}
+来指定包的版本和日期。这样做带来了文学化编程\index{literate programming}的一个优点：每当你改变包的版本
+（作为 \usemacro{ProvidesPackage} 的可选第二参数），用户文档会相应更新。当然，你仍然需要手动确保用户文
+档准确描述了更新后的包。
 \index{package|)}
 
-Write the user documentation as you would any \latex{} document,
-except that you have to precede each line with a ``|%|''.  Note that
-the \usething{ltxdoc} document class is derived from |article|, so the
-top-level sectioning command is \usemacro{section}, not
-\usemacro{chapter}.
+以你处理任何 \latex{} 文档的方式撰写用户文档，不过每行都要以 ``|%|'' 开头。请注意，\usething{ltxdoc} 
+文档类派生自 |article|，因此顶级分段命令是 \usemacro{section}，而不是 \usemacro{chapter}。
 
 
 \indexmacroBegin{DescribeMacro} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -933,18 +916,14 @@ top-level sectioning command is \usemacro{section}, not
   \defmacro{DescribeEnv} \arg{environment}
 \end{decl}
 
-\DOC{} provides a couple of commands to help format user
-documentation.  If you include
-``|\DescribeMacro{<macro>}|''\footnote{``\m{macro}'' should include
-  the backslash.} within a paragraph, \DOC{} will stick ``\m{macro}'' in
-the margin to make it easy for a reader to see.  \DOC{} will also add
-\m{macro} to the index and format the corresponding page number to
-indicate that this is where the macro is described (as opposed to the
-place in the source code where the macro is defined).
+\DOC{} 提供了一些命令来帮助格式化用户文档。如果你在段落中包含
+``|\DescribeMacro{<macro>}|''\footnote{``\m{macro}'' 应包括反斜线。}，
+\DOC{} 会将 ``\m{macro}'' 放在边距中，方便读者查看。同时，\DOC{} 还会将
+\m{macro} 加入索引，并格式化相应的页码，以表明这是描述该宏的位置（而不是
+宏在源代码中定义的地方）。
 
-\usemacro{DescribeEnv} is the analogous command for describing an
-environment.  Both \usemacro{DescribeMacro} and \usemacro{DescribeEnv}
-can be used multiple times within a paragraph.
+\usemacro{DescribeEnv} 是描述环境的类似命令。\usemacro{DescribeMacro} 和
+\usemacro{DescribeEnv} 都可以在同一段落中多次使用。
 
 \indexmacroEnd{DescribeEnv}
 \indexmacroEnd{DescribeMacro}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -962,14 +941,11 @@ can be used multiple times within a paragraph.
   \defmacro{meta} \arg{text}
 \end{decl}
 
-The \usething{ltxdoc} document class provides three commands to help
-typeset macro and environment syntax
-(Table~\ref{tbl:argument-formatting}).  \usemacro{marg} formats
-mandatory arguments, \usemacro{oarg} formats optional arguments, and
-\usemacro{parg} formats picture arguments.  All three of these utilize
-\usemacro{meta} to typeset the argument proper.  \usemacro{meta} is
-also useful on its own.  For example, ``\texttt{This needs a}
-|\meta{dimen}|.'' is typeset as ``This needs a \m{dimen}.''
+\usething{ltxdoc} 文档类提供了三个命令来帮助排版宏和环境的语法
+（见表~\ref{tbl:argument-formatting}）。\usemacro{marg} 用于排版必选参数，
+\usemacro{oarg} 用于排版可选参数，\usemacro{parg} 用于排版图片参数。
+这三个命令都使用\usemacro{meta} 来排版参数内容。\usemacro{meta} 也可单独使用。
+例如，“\texttt{This needs a} |\meta{dimen}|.” 会排版为“This needs a \m{dimen}.”。
 
 \begin{table}[htbp]
   \centering
@@ -987,20 +963,18 @@ also useful on its own.  For example, ``\texttt{This needs a}
   \end{tabular}
 \end{table}
 
-In addition to those commands, \DOC{} facilitates the typesetting of
-macro descriptions by automatically loading the \svrb{}
-package\index{package}.  \svrb{} lets you use \verb+|+\dots\verb+|+
-as a convenient shorthand for |\verb|\verb+|+\dots\verb+|+.  For
-instance, ``\verb+|\mymacro|+ |\oarg{pos}| |\marg{width}|
-|\marg{text}|'' is typeset as follows:
+除了这些命令外，\DOC{} 通过自动加载 \svrb{} 包\index{package}，
+便利地简化了宏描述的排版。\svrb{} 允许你使用 \verb+|+\dots\verb+|+，
+作为方便的简写来表示 |\verb|\verb+|+\dots\verb+|+。例如，“\verb+|\mymacro|+
+|\oarg{pos}| |\marg{width}| |\marg{text}|” 的排版如下：
 
 \begin{verbatim}
     \mymacro [<pos>] {<width>} {<text>}
 \end{verbatim}
 
 \noindent
-Like \usemacro{verb}, the \verb+|+\dots\verb+|+ shorthand does not
-work within \usemacro{footnote} or other fragile macros.
+与\usemacro{verb}类似，\verb+|+\dots\verb+|+ 简写在\usemacro{footnote}
+或其他易碎的宏中无法使用。
 
 \indexmacroEnd{meta}
 \indexmacroEnd{parg}
@@ -1008,7 +982,7 @@ work within \usemacro{footnote} or other fragile macros.
 \indexmacroEnd{marg}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Code and commentary}
+\subsection{代码和评论}
 
 \indexmacroBegin{StopEventually} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \indexmacroBegin{Finale}
@@ -1018,19 +992,13 @@ work within \usemacro{footnote} or other fragile macros.
   \defmacro{Finale}
 \end{decl}
 
-The package's\index{package} source code is delineated by putting it
-between \usemacro{StopEventually} and \usemacro{Finale}.  Note that
-\usemacro{CheckSum} (page~\pageref{decl:CheckSum}) applies only to the
-package's\index{package} source code.  \usemacro{StopEventually} takes
-an argument, which is a block of text to typeset after the code.  If
-\usemacro{OnlyDescription} (page~\pageref{desc:OnlyDescription}) is
-specified, then nothing after the \usemacro{StopEventually} will be
-output---including text that follows \usemacro{Finale}.
-\usemacro{StopEventually}'s \m{text} parameter is therefore the
-mechanism for providing a piece of text that should be output
-regardless of whether or not a code listing is typeset.  It commonly
-includes a bibliography section and/or one or more of the following
-commands.
+该包的\index{package}源代码由\usemacro{StopEventually}和\usemacro{Finale}包围起来。
+请注意，\usemacro{CheckSum}（第~\pageref{decl:CheckSum} 页）仅适用于该包的\index{package}源代码。
+\usemacro{StopEventually}接受一个参数，即一段要在代码后排版的文本。
+如果指定了\usemacro{OnlyDescription}（第~\pageref{desc:OnlyDescription} 页），
+那么\usemacro{StopEventually}后面的内容将不会输出——包括\usemacro{Finale}后面的文本。
+因此，\usemacro{StopEventually}的 \m{text} 参数是用于提供一段无论是否排版代码都应输出的文本的机制。
+通常包括参考文献部分和/或以下命令中的一个或多个。
 
 \indexmacroEnd{Finale}
 \indexmacroEnd{StopEventually}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1044,18 +1012,11 @@ commands.
 \indexmacroBegin{PrintChanges} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \index{change history|(}
 
-\usemacro{PrintChanges} produces an unnumbered section called ``Change
-History''.  (See Figure~\vref{fig:change-history}).  The Change
-History section aggregates all of the \usemacro{changes} commands in
-the \dtxfile{} file into a single list of per-version modifications.
-This makes it easy to keep track of what changed from version to
-version.
+\usemacro{PrintChanges} 生成一个名为“变更历史”的无编号章节（见图~\vref{fig:change-history}）。
+变更历史部分汇总了 \dtxfile{}文件中所有\usemacro{changes}命令的各版本修改，这样就能轻松跟踪每个版本的变更内容。
 
-\usemacro{PrintChanges} uses \latex's glossary mechanism.  Running
-|latex| on |<package>.dtx| produces change-history data in
-|<package>.glo|.  To produce the actual change history
-(|<package>.gls|), the user should run the \usething{makeindex}
-program as follows:
+\usemacro{PrintChanges} 使用了 \latex 的术语表机制。在 |<package>.dtx| 上运行 |latex| 会在 |<package>.glo|
+中生成变更历史数据。要生成实际的变更历史（|<package>.gls|），用户应该按以下方式运行\usething{makeindex}程序：
 
 \begin{verbatim}
     makeindex -s gglo.ist -o <package>.gls <package>.glo
@@ -1067,18 +1028,11 @@ program as follows:
 \indexmacroBegin{PrintIndex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \index{indexing|(}
 
-\usemacro{PrintIndex} produces an unnumbered section called ``Index''.
-The index automatically includes entries for all macros and
-environments that are used, defined, or described in the document.
-All environments are additionally listed under ``environments''.
-Table~\ref{tbl:index-formatting} illustrates the way that various
-entries are formatted.  In that table, ``27'' refers to a page number,
-and ``123'' refers to a line number.\footnote{If
-  \texttt{\string\CodelineIndex} (page~\pageref{desc:CodelineIndex})
-  were not used then ``123'' would refer to a page number.}  Note that
-macro/environment definitions and uses are included in the index only
-if the document includes a code listing (\ie
-\usemacro{OnlyDescription} was not specified).
+\usemacro{PrintIndex} 生成一个名为“索引”的无编号章节。索引会自动包含文档中使用、定义或描述的所有宏和环境条目。
+所有环境还会额外列在“环境”下。表~\ref{tbl:index-formatting} 演示了各种条目的格式。在该表中，“27”指的是页码，
+“123”指的是行号。\footnote{如果未使用 \texttt{\string\CodelineIndex}（第~\pageref{desc:CodelineIndex} 页），
+  则“123”将指的是页码。} 请注意，只有在文档包含代码列表（即未指定\usemacro{OnlyDescription}）时，
+宏/环境的定义和使用才会包含在索引中。
 
 \begin{table}[htbp]
   \centering
@@ -1099,29 +1053,22 @@ if the document includes a code listing (\ie
   \end{tabular}
 \end{table}
 
-The default formatting for an explicit \usemacro{index} command uses a
-roman page number.  This leads to confusion, as roman page numbers
-otherwise indicate line numbers in the package source code.  The
-solution is to specify ``|usage|'' formatting to the \usemacro{index}
-command:
+对于显式\usemacro{index}命令的默认格式化使用了罗马页码。这会导致混淆，因为在包源代码中罗马页码通常
+表示行号。解决方案是向\usemacro{index}命令指定``|usage|''格式化：
 
 \begin{verbatim}
     \index{explicit indexing|usage}
 \end{verbatim}
 
-Running |latex| on |<package>.dtx| produces index data in
-|<package>.idx|.  To produce the actual index (|<package>.ind|), the
-user should run the \usething{makeindex} program as follows:
+在 |<package>.dtx| 上运行 |latex| 会在 |<package>.idx| 中生成索引数据。要生成实际的索引（|<package>.ind|），
+用户应该按以下方式运行\usething{makeindex}程序：
 
 \begin{verbatim}
     makeindex -s gind.ist -o <package>.ind <package>.idx
 \end{verbatim}
 
-A code index is a nice ``value added'' made possible by
-literate\index{literate programming} programming.  It requires
-virtually no extra effort and greatly helps code maintainers to find
-macro definitions and see what other macros a package\index{package}
-depends upon.
+代码索引是文学化\index{literate programming}编程的一个很好的“附加值”。它几乎不需要额外的工作量，并
+极大地帮助代码维护人员找到宏定义以及了解包\index{package}依赖的其他宏。
 
 \index{indexing|)}
 \indexmacroEnd{PrintIndex}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1135,32 +1082,23 @@ depends upon.
     |\end{macrocode}|
 \end{decl}
 
-Code fragments listed between |\begin{macrocode}| and
-  |\end{macrocode}| are extracted verbatim into the \styfile{} file.
-When typeset, the code fragments are shown with a running line counter
-to make it easy to refer to a specific line.  Here are some key points
-to remember about the \usething{macrocode} environment:
+|\begin{macrocode}| 和 |\end{macrocode}| 之间列出的代码片段会原样提取到 \styfile{} 文件中。
+排版时，代码片段会显示带有行号计数器，以便于指定特定行。以下是关于 \usething{macrocode} 环境的一些要点：
 
 \begin{enumerate}
-  \item There must be \emph{exactly} four spaces between the ``|%|''
-        and the ``|\begin{macrocode}|'' or ``|\end{macrocode}|''.
-        Otherwise, \DOC{} won't detect the end of the code
-        fragment.\footnote{Trivia: Only the
-          \texttt{\string\end\string{macrocode\string}} needs this precise
-          spacing and then, only for typesetting the documentation.
-          Nevertheless, it's good practice to use
-          ``\texttt{\%\textvisiblespace\textvisiblespace\textvisiblespace\textvisiblespace}''
-          for the \texttt{\string\begin\string{macrocode\string}}, as well.}
+  \item ``|%|'' 和 ``|\begin{macrocode}|'' 或 ``|\end{macrocode}|'' 之间必须有\emph{精确地}四个
+        空格。否则，\DOC{} 将无法检测到代码片段的结束。
+        \footnote{趣闻：只有 \texttt{\string\end\string{macrocode\string}} 需要这种精确的间距，
+          而且仅用于文档的排版。尽管如此，在 \texttt{\string\begin\string{macrocode\string}} 中使用
+          ``\texttt{\%\textvisiblespace\textvisiblespace\textvisiblespace\textvisiblespace}''是
+          个好习惯。}
 
-  \item The lines of code within
-        |\begin{macrocode}|\dotsbrk|\end{macrocode}| should not begin with
-        ``|%|''.  The code gets written exactly as it is to the \insfile{}
-        file, with no |%|-stripping.
+  \item 在 |\begin{macrocode}|\dotsbrk|\end{macrocode}| 中的代码行不应以``|%|''开头。代码将按原样
+        写入到 \insfile{} 文件中，不会删除 |%|。
 \end{enumerate}
 
-The following is a sample code fragment.  It happens to be a complete
-macro definition, but this is not necessary; any fragment of \latex{}
-code can appear within a \usething{macrocode} environment.
+以下是一个示例代码片段。它恰好是一个完整的宏定义，但这并非必须；任何 \latex{} 代码片段都可以出现在
+\usething{macrocode} 环境中。
 
 \label{code:mymacro}
 \begin{verbatim}
@@ -1171,7 +1109,7 @@ code can appear within a \usething{macrocode} environment.
 \end{verbatim}
 
 \noindent
-\DOC{} formats the preceding code fragment as follows:
+\DOC{} 将前面的代码片段格式化为以下内容：
 
 \begin{tabbing}
   |    |\={\tiny 9} \=\kill
@@ -1180,12 +1118,9 @@ code can appear within a \usething{macrocode} environment.
 \end{tabbing}
 
 \noindent
-Note that line numbers are unique across the entire program (as
-opposed to being reset at the top of each page).  If
-\usemacro{PrintIndex} is used in the \dtxfile{} file containing the
-preceding definition of |\mymacro|, the index will automatically
-include entries for |\newcommand|, |\mymacro|, and |\LaTeX|, unless
-any of these are \usemacro{DoNotIndex}'ed.
+请注意，行号在整个程序中是唯一的（而不是在每一页顶部重置）。如果在包含前述 |\mymacro| 定义的 \dtxfile{}
+文件中使用\usemacro{PrintIndex}，索引将自动包含 |\newcommand|、|\mymacro| 和 |\LaTeX| 的条目，除非
+其中任何一个被\usemacro{DoNotIndex}排除。
 
 \indexthingEnd{macrocode}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1203,12 +1138,9 @@ any of these are \usemacro{DoNotIndex}'ed.
     |\end{environment}| \\
 \end{decl}
 
-The \usething{macro} and \usething{environment} environments are used
-to delineate a complete macro or environment definition.
-\usething{macro}/\usething{environment} environments generally contain
-one or more \usething{macrocode} environments interspersed with code
-documentation.  The following is a more complete version of the
-\usething{macrocode} example shown~\vpageref{code:mymacro}.
+\usething{macro} 和 \usething{environment} 环境用于界定完整的宏或环境定义。
+\usething{macro}/\usething{environment} 环境通常包含一个或多个\usething{macrocode} 环境，其中穿插着代码文档。
+以下是\usething{macrocode}示例的更完整版本，见~\vpageref{code:mymacro}。
 
 \begin{verbatim}
     % \begin{macro}{\mymacro}
@@ -1222,7 +1154,7 @@ documentation.  The following is a more complete version of the
 \end{verbatim}
 
 \noindent
-The typeset version is shown below:
+以下是排版后的版本：
 
 \begin{tabbing}
   |    \mymacro|\qquad\={\tiny 9} \= \kill
@@ -1232,13 +1164,10 @@ The typeset version is shown below:
   \> {\tiny 2} \> |  a \LaTeX{} macro.}|
 \end{tabbing}
 
-\DOC{} typesets the macro/environment name in the margin for increased
-visibility.  \DOC{} also adds the appropriate entries to the index.
-(See Table~\vref{tbl:index-formatting} for examples of how these
-entries are formatted.)  Note that
-|\begin{macro}|\dotsbrk|\end{macro}| is not required to indicate a
-macro definition.  It can also be used to indicate definitions of
-\latex{} datatypes, such as counters, lengths, and boxes:
+\DOC{} 在边距中排版宏/环境名称，以增加可见性。此外，\DOC{} 也会将相应条目添加到索引中
+（参见表~\vref{tbl:index-formatting}，了解这些条目的格式示例）。请注意，
+|\begin{macro}|\dotsbrk|\end{macro}| 不是必需的来指示宏定义。它也可以用于指示 \latex{}
+数据类型的定义，例如计数器、长度和盒子：
 
 \begin{verbatim}
     % \begin{macro}{myCounter}
@@ -1251,10 +1180,8 @@ macro definition.  It can also be used to indicate definitions of
 \end{verbatim}%
 \indexthing{macrocode}
 
-\usething{macro} and \usething{environment} environments can be
-nested.  This capability is useful not only for macros that define
-other macros, but also when defining a group of related datatypes that
-share a description:
+\usething{macro} 和 \usething{environment} 环境可以嵌套。这种能力不仅对于定义其他宏的宏很有用，
+而且在定义一组共享描述的相关数据类型时也很有用：
 
 \begin{verbatim}
     % \begin{macro}{\thingheight}
@@ -1276,19 +1203,12 @@ share a description:
 \indexthing{macrocode}
 
 \noindent
-Descriptionless \usething{macro} environments should generally be
-avoided, as the formatting is a little ugly; the macro name appears on
-its own line, to the left of an ``empty'' description, but the code
-doesn't start until the next line.
+通常应避免没有描述的\usething{macro}环境，因为格式有些丑陋；宏名称单独出现在一行上，位于一个“空白”
+描述的左侧，但代码直到下一行才开始。
 
-There can be multiple \usething{macrocode} environments within a
-|\begin{macro}|\dotsbrk|\end{macro}| or
-|\begin{environment}|\dotsbrk|\end{environment}| block.
-\index{comments|(} This is the mechanism by which code can be
-commented internally to a macro/environment.  (It's considered bad
-style to use ``|%|'' for comments within a \usething{macrocode}
-block.)  Here's an example of the way that a nontrivial macro might be
-commented:
+在|\begin{macro}|\dotsbrk|\end{macro}|或|\begin{environment}|\dotsbrk|\end{environment}|块内
+可以有多个\usething{macrocode}环境。\index{comments|(} 这是代码可以被内部注释的机制，用于宏/环境。
+（在\usething{macrocode}块内使用“|%|”注释被认为是不良风格。）以下是一个非平凡的宏的注释示例：
 
 \begin{verbatim}
     % \begin{macro}{\complexMacro}
@@ -1308,7 +1228,7 @@ commented:
     %    \begin{macrocode}
 \end{verbatim}%
 \indexthing{macrocode}
-|                  |$\vdots$
+|                  |\textcolor{verb}{$\vdots$}
 \begin{verbatim}
     %    \end{macrocode}
     % We're all finished now.
@@ -1324,30 +1244,19 @@ commented:
 
 \index{comments|)}
 
-Appendix~\ref{sec:skeleton-dtx-file-style} lists a complete, skeleton
-\dtxfile{} file that encapsulates a \styfile{} file and its
-documentation.
+附录~\ref{sec:skeleton-dtx-file-style} 列出了一个完整的、包含 \styfile{} 文件及其文档的 \dtxfile{} 文件的框架。
 
 \index{class file|(}
 
-\paragraph{Class files}
-The procedure to produce a class file from a \dtxfile{} file is far
-less straightforward than the procedure to produce a style file.  The
-problem is that \usemacro{DocInput} relies on the
-|\usepackage{|\m{package}|}| line (more precisely, the
-\usemacro{ProvidesPackage} line within \m{package}|.sty|) to set the
-\usemacro{fileversion} and \usemacro{filedate} macros.  However, a
-class file can't be loaded with |\usepackage|.  Nor can we simply load
-it with |\documentclass{|\m{package}|}| because only one class can be
-loaded per document and we need that class to be \usething{ltxdoc}.
+\paragraph{类文件}
+从 \dtxfile{}文件生成类文件的过程比生成样式文件的过程复杂得多。问题在于\usemacro{DocInput}依赖于
+|\usepackage{|\m{package}|}|行（更准确地说，依赖于\m{package}|.sty|中的\usemacro{ProvidesPackage}行）来设置
+\usemacro{fileversion}和\usemacro{filedate}宏。然而，类文件无法使用|\usepackage|加载。我们也不能简单地用
+|\documentclass{|\m{package}|}|加载，因为一个文档只能加载一个类，并且我们需要加载的类是\usething{ltxdoc}。
 
-The solution is to use \usemacro{ProvidesFile} to make the file
-version and date available to the \dtxfile{} file.
-Appendix~\ref{sec:skeleton-dtx-file-class} lists a complete, skeleton
-\dtxfile{} file that encapsulates a \clsfile{} file and its
-documentation.  It resembles the skeleton file shown in
-Appendix~\ref{sec:skeleton-dtx-file-style} but has a differently
-structured header section.
+解决方法是使用\usemacro{ProvidesFile}来使文件版本和日期可供 \dtxfile{}文件使用。
+附录~\ref{sec:skeleton-dtx-file-class} 列出了一个完整的、包含 \clsfile{} 文件及其文档的 \dtxfile{} 文件的框架。
+它类似于附录~\ref{sec:skeleton-dtx-file-style} 中展示的框架文件，但头部部分结构不同。
 
 \index{class file|)}
 
@@ -1355,45 +1264,32 @@ structured header section.
 \index{documented LaTeX file@documented \LaTeX{} file|)}
 
 
-\section{Tips, tricks, and recommendations}
+\section{技巧、窍门和建议}
 
 \begin{itemize}
-  \item Write lots of good documentation!  It really helps others
-        understand your code and the package\index{package} as a whole.
+  \item 多写好文档！这确实有助于其他人理解你的代码和整个\index{package}包。
 
-  \item If you believe the \latex{} community at large would be
-        interested in your package then you should upload it to \CTAN{} at
-        \URL{http://www.ctan.org/upload}.  As a central repository of all
-        things \TeX-related, \CTAN{} makes it easier for others to find your
-        \latex{} package than if it were located on your personal home page.
+  \item 如果你认为整个 \latex{}社区都对你的包感兴趣，那么你应该将它上传到 \CTAN{}，网址是\URL{http://www.ctan.org/upload}。
+        作为所有与\TeX 相关事物的中央存储库， \CTAN{}会比你个人主页上的位置更容易让其他人找到你的 \latex{}包。
 
         \index{documentation, prebuilt PDF|(}
-  \item When distributing your package, be sure to include a
-        |README|\index{README file@\texttt{README} file} file describing
-        what your package does as well as \emph{prebuilt} documentation,
-        preferably as a PDF file.  Prebuilt documentation saves users the
-        bother of having to download your package, install it, and build the
-        documentation before even knowing what the package is supposed to do
-        or if it meets their needs.
+  \item 在分发你的包时，务必包含一个\index{README file@\texttt{README} file}描述你的包功能的 |README| 文件，
+        以及最好是作为PDF文件的\emph{预构建}文档。预构建的文档能够让用户免去下载你的包、安装它以及在了解包的功能
+        或是否符合他们需求之前构建文档的麻烦。
         \index{documentation, prebuilt PDF|)}
 
-  \item Use \latex's sectioning commands to organize the code and
-        clarify its structure (\eg |\subsection{|\texttt{Initialization
-            macros}|}|, |\subsection{|\texttt{Helper functions}|}|,
-        |\subsection{|\texttt{Exported macros and environments}|}|,~\dots).
+  \item 使用 \latex 的分段命令来组织代码并澄清其结构（例如 |\subsection{|\texttt{初始化宏}|}|、
+        |\subsection{|\texttt{辅助函数}|}|、|\subsection{|\texttt{导出的宏和环境}|}|，等等）。
 
         \index{comments|(}
 
-  \item Although commentary really belongs only in the typeset
-        documentation, it is also possible to write comments that are
-        visible only in the \styfile{} file, in both the typeset
-        documentation and the \styfile{} file, or only in the \dtxfile{}
-        source.  Table~\ref{tbl:comment-visibility} shows how to control
-        comment visibility.
+  \item 虽然注释确实只属于排版文档，但也可以编写只在 \styfile{}文件中可见的注释，以及在排版文档和 \styfile{}文件中都
+        可见的注释，或者只在 \dtxfile{}源文件中可见的注释。表~\ref{tbl:comment-visibility} 显示了如何控制注释的可
+        见性。
 
         \index{comments|)}
 
-        \begin{table}[hbp]
+        \begin{table}[htbp]
           \centering
           \caption{Comment visibility}
           \label{tbl:comment-visibility}
@@ -1420,115 +1316,83 @@ structured header section.
           \end{tabular}
         \end{table}
 
-  \item All lines between |<<*package>>| and |<</package>>|, except
-        those within a \usething{macrocode} environment, should begin with
-        ``|%|''.  Don't use any blank lines; these would get written to the
-        \styfile{} file (and oughtn't).
-
+  \item 在 |<<*package>>| 和 |<</package>>| 之间的所有行（除了在\usething{macrocode}环境内的行），
+        都应该以``|%|''开头。不要使用空行；这些空行会被写入到 \styfile{}文件中（而且不应该）。
 
         \index{package|(}
         \index{"@@\texttt{"@}!in macro names|(}
-  \item It is good practice for \latex{} programs to use ``|@|''
-        within the names of macros, lengths, counters, etc.\ that are
-        declared globally, but intended to be used only internally to the
-        package.  This prevents a user from corrupting package state by
-        inadvertently redefining package internals.\footnote{Within a
-          \LaTeX{} document, ``|@|'' is set to category code~12 (``other''),
-          not category code~11 (``letter''), so the user can't easily define
-          or use a macro with ``|@|'' in its name.}  Another good practice is
-        to prefix all global names that are internal to the package with the
-        name of the package (\eg ``|\<package>@thing|'' instead of
-        ``|\@thing|'' or---even worse---just ``|\thing|'').  This helps
-        avoid inter-package naming conflicts.  Finally, because decimal
-        digits are not normally allowed in macro names, it is common to use
-        roman\index{roman numerals} numerals instead, for example: |\arg@i|,
-        |\arg@ii|, |\arg@iii|, |\arg@iv|, etc.
+  \item 对于仅在包内部使用的宏、长度、计数器等，在其名称中使用``|@|''是个好习惯，可以声明为全局，但只打算
+        在包内部使用。这样可以防止用户通过无意中重新定义包内部而破坏包状态。
+        \footnote{在\LaTeX{}文档中，``|@|''被设置为类别码~12（``其他''），而不是类别码~11（``字母''），
+          所以用户不能轻易地定义或使用带有``|@|''的宏。}
+        另一个好习惯是为包内部的所有全局名称添加包的名称前缀（例如 ``|\<package>@thing|'' 而不是 ``|\@thing|''
+        或者更糟糕的是只是 ``|\thing|''）。这有助于避免包之间的命名冲突。最后，因为十进制数字通常不允许在
+        宏名称中，因此常常使用罗马数字\index{roman numerals}，例如：|\arg@i|、|\arg@ii|、|\arg@iii|、|\arg@iv|等。
         \index{"@@\texttt{"@}!in macro names|)}
         \index{package|)}
 
-  \item You can use \usemacro{index} in the normal way to index things
-        other than macros and environments.
+  \item 除了宏和环境之外，你可以像通常一样使用\usemacro{index}索引其他内容。
 
-  \item Because macro names can be long, consider using the
-        \defthing{idxlayout} package to reduce the number of columns in
-        the index.  (It provides control over other aspects of index
-        formatting, as well.)
+  \item 因为宏名称可能很长，考虑使用\defthing{idxlayout}包来减少索引中的列数。（它还提供了对索引格式的其他
+        方面的控制。）
 
-  \item If you use \Emacs{} as your text editor, try out \swiftexel's
-        |doctex-mode|\index{doctex-mode@\texttt{doctex-mode}}, an \Emacs{}
-        mode designed specifically for writing \dtxfile{} files.
-        \swiftexel{} is available from \CTAN{}.
+  \item 如果你使用 \Emacs{} 作为文本编辑器，请尝试 \swiftexel{} 的|doctex-mode|\index{doctex-mode@\texttt{doctex-mode}}，
+        这是专门用于编写 \dtxfile{} 文件的 \Emacs{} 模式。 \swiftexel{} 可以从 \CTAN{}获取。
 
-        As a more primitive alternative, look up \Emacs's |string-rectangle|
-        and |kill-rectangle| commands.  These help a great deal with adding
-        and removing a ``|%|'' at the beginning of every line in a region.
+        作为更原始的替代方法，查阅 \Emacs 的 |string-rectangle| 和 |kill-rectangle| 命令。
+        这些命令对于在区域内的每一行开头添加和删除``|%|''非常有帮助。
 
-  \item Be sure to read ``The \ds{} Program'' and ``The \DOC{} and
-        \svrb{} Packages'', the documentation for \ds{} and \DOC{},
-        respectively (provided in \dtxfile{} format, of course).  These
-        explain how to do more advanced things with \insfile{} and
-        \dtxfile{} files than this tutorial covered.  Some advanced topics
-        include the following:
+  \item 一定要阅读《\ds{} 程序》
+        \footnote{译者注：该文档可对照参阅由本人翻译的\href
+          {https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/docstrip-zh-cn/docstrip-zh-cn.pdf}{中文版}。}
+        和《\DOC{} 和\ \svrb{} 包》
+        \footnote{译者注：该文档可对照参阅由本人翻译的\href
+          {https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/doc-zh-cn/doc-code-zh-cn.pdf}{中文版}。}
+        的文档，分别是\ds{} 和\DOC{} 的文档（当然是以 \dtxfile{}格式提供的）。这些文档解释了如何
+        使用 \insfile{} 和 \dtxfile{} 文件进行比本教程涵盖的更高级的操作。一些高级主题包括以下内容：
 
-        \begin{itemize} \item Extracting multiple \styfile{}
-                files from a single \dtxfile{} file.
+        \begin{itemize}
+          \item 从单个 \dtxfile{} 文件中提取多个 \styfile{} 文件。
 
-          \item Putting different preambles in different
-                \styfile{} files.
+          \item 将不同的导言放入不同的 \styfile{} 文件中。
 
-          \item Extracting something other than a \styfile{} file (\eg a
-                configuration file or a Perl script) from a \dtxfile{} file.
+          \item 从 \dtxfile{} 文件中提取除了 \styfile{} 文件之外的其他内容（例如配置文件或Perl脚本）。
 
-          \item Changing the formatting of the typeset documentation.
+          \item 更改排版文档的格式。
         \end{itemize}
 \end{itemize}
 
 
-\section{Advanced packaging techniques}
+\section{高级打包技术}
 
-This section describes various bits of wizardry that can be
-accomplished with \DOC{} and \ds.  Few packages require these
-techniques but they are included here for convenient reference.
+本节介绍了使用 \DOC{} 和 \ds{} 可以实现的各种高级技巧。虽然很少有包需要这些技术，但它们被包含在这里以供方便参考。
 
-\subsection{Master documentation files}
+\subsection{主文档文件}
 \label{sec:master-files}
 
-\DOC{} supports ``master'' documentation files that typeset multiple
-\dtxfile{} files.  The advantage is that a set of related \dtxfile{}
-files can be typeset with continuous section numbering and a single,
-unified index.  In fact, the \latex[\LaTeXe]{} source code itself is
-typeset using a master document (|source2e.tex|) that includes all of
-the myriad \dtxfile{} files that comprise \latex[\LaTeXe].
+\DOC{}支持包含多个 \dtxfile{}文件的“主”文档文件。其优点在于，可以使用连续的节编号和单一的统一索引对一组相关的 \dtxfile{}文件进行排版。
+事实上， \latex[\LaTeXe{}]源代码本身就是使用一个主文档（|source2e.tex|）排版的，其中包含了构成 \latex[\LaTeXe{}]的众多 \dtxfile{}文件。
 
-To help produce master documents, the \usething{ltxdoc} class
-provides a command called ``\usemacro{DocInclude}''.
-\usething{ltxdoc}'s \usemacro{DocInclude} is much like \DOC's
-\usemacro{DocInput}---it even uses it internally---but has the
-following additional features.
+为了帮助生成主文档，\usething{ltxdoc}类提供了一个命令称为“\usemacro{DocInclude}”。
+\usething{ltxdoc}的\usemacro{DocInclude}与 \DOC{} 的\usemacro{DocInput}非常相似——它甚至在内部使用它——但具有以下附加功能。
 
 \begin{itemize}
-  \item \usemacro{PrintIndex} is automatically handled properly.
+  \item \usemacro{PrintIndex}会被自动正确处理。
 
-  \item Every \usemacro{DocInclude}'d file is given a title page.
+  \item 每个\usemacro{DocInclude}的文件都会有一个标题页。
 
-  \item \usemacro{tableofcontents} works as expected.  \dtxfile{}
-        filenames are used as ``chapter'' names.
+  \item \usemacro{tableofcontents}按预期工作。 \dtxfile{}文件名被用作“章节”名称。
 \end{itemize}
 
 \noindent
-Note that \usemacro{DocInclude}, unlike \usemacro{DocInput}, assumes
-a \dtxfile{} extension.
+注意，与\usemacro{DocInput}不同，\usemacro{DocInclude}假定使用 \dtxfile{}扩展名。
 
-Appendix~\ref{sec:skeleton-master-file} presents a master-document
-skeleton that uses \usemacro{DocInclude} to typeset |<file1>.dtx|,
-|<file2>.dtx|, and |<file3>.dtx| as a single document.  If you prefer
-a more manual approach (\eg if you dislike \usemacro{DocInclude}'s
-per-file title pages), you can still use \usemacro{DocInput}.
+附录~\ref{sec:skeleton-master-file} 提供了一个主文档的框架，使用\usemacro{DocInclude}将
+|<file1>.dtx|、|<file2>.dtx| 和 |<file3>.dtx|排版为单个文档。如果你更喜欢手动操作（例如，
+如果你不喜欢\usemacro{DocInclude}为每个文件生成标题页），你仍然可以使用\usemacro{DocInput}。
 \index{indexing|(}
-Just make sure to redefine \usemacro{PrintIndex} to do nothing;
-otherwise, each file will get its own index.  After all of the
-\dtxfile{} files have been typeset, call the original
-\usemacro{PrintIndex} command to print a unified index:
+只需确保重新定义\usemacro{PrintIndex}为空操作；否则，每个文件都会有自己的索引。
+在所有 \dtxfile{}文件都排版完之后，调用原始的\usemacro{PrintIndex}命令以打印一个统一的索引：
 
 \begin{verbatim}
     \begin{document}
@@ -1544,14 +1408,11 @@ otherwise, each file will get its own index.  After all of the
 
 \index{indexing|)}
 
-\subsection{Single-file package distributions}
+\subsection{单文件包发布}
 \label{sec:single-file}
 
-Although \latex{} packages are typically distributed as both
-a~\insfile{} and a \dtxfile{} file, it is possible to distribute a
-package as a single file.  The trick is to include the entire
-\insfile{} at the top of the \dtxfile{} file, right after the
-|%<package>| lines:
+尽管 \latex{}包通常以 \insfile{}和 \dtxfile{}文件的形式进行分发，但也可以将包作为单个文件进行分发。
+关键在于在 \dtxfile{}文件的顶部，在|%<package>|行之后，包含整个 \insfile{}：
 
 \begin{alltt}
   %\string<*batchfile\string>
@@ -1564,18 +1425,13 @@ package as a single file.  The trick is to include the entire
 \end{alltt}
 
 \noindent
-Omit the \usemacro{endbatchfile} to allow \latex{} to continue on with
-the rest of the \dtxfile{} file.  Also, to avoid the ``\texttt{File}
-\m{sty-file} \texttt{already exists on the system.  Overwrite it?
-[y/n]}'' message you can put ``\usemacro{askforoverwritefalse}''
-before the first \usemacro{generate} command.  (This will
-automatically overwrite the existing \styfile{} file.  Wrapping the
-\usemacro{generate} command(s) within
-``\usemacro{IfFileExists}|{|\m{sty-file}|}{}{|\dots|}|'' will suppress
-the overwriting.)  You should also move the \styfile{} installation
-instructions to the end of the \dtxfile{} file so they don't scroll
-off the user's screen.  You'll need to use \usemacro{typeout} as
-\usemacro{Msg} won't be defined:
+省略\usemacro{endbatchfile}以允许 \latex{}继续处理 \dtxfile{}文件的其余部分。
+另外，为了避免出现“\texttt{File} \m{sty-file} \texttt{already exists on the system.  Overwrite it?
+[y/n]}”的消息，你可以在第一个\usemacro{generate}命令之前加上“\usemacro{askforoverwritefalse}”。
+（这将自动覆盖现有的 \styfile{}文件。将\usemacro{generate}命令放在
+“\usemacro{IfFileExists}|{|\m{sty-file}|}{}{|\dots|}|”中将会阻止覆盖。）
+你还应该将 \styfile{}的安装说明移到 \dtxfile{}文件的末尾，这样用户就不会将其滚动到屏幕外。你需要使用
+\usemacro{typeout}，因为\usemacro{Msg}不会被定义：
 
 \begin{verbatim}
     % \Finale
@@ -1595,22 +1451,18 @@ off the user's screen.  You'll need to use \usemacro{typeout} as
 \end{verbatim}
 
 
-\subsection{Class and style files with shared versioning information}
+\subsection{具有共享版本信息的类和样式文件}
 
-Some packages contain both a \clsfile{} and \styfile{} file.  It may
-be desirable to have these extracted from the same \insfile{} file and
-share the same versioning string.  The \ds{} documentation explains
-how to extract multiple files from a single \usemacro{generate} call:
+某些包包含 \clsfile{}和 \styfile{}文件。希望从同一个 \insfile{}文件中提取这两个文件，并共享相同的
+版本信息字符串。《 \ds{} 程序》文档解释了如何从单个\usemacro{generate}调用中提取多个文件：
 
 \begin{verbatim}
     \generate{\file{<package>.cls}{\from{<package>.dtx}{class}}
               \file{<package>.sty}{\from{<package>.dtx}{package}}}
 \end{verbatim}
 
-Using a single versioning string for both the \clsfile{} and
-\styfile{} files can be accomplished by changing the following lines
-in the \dtxfile{} file shown in
-Appendix~\ref{sec:skeleton-dtx-file-class}:
+可以通过更改附录~\ref{sec:skeleton-dtx-file-class}中显示的 \dtxfile{}文件中的以下行来为
+\clsfile{}和 \styfile{}文件使用单个版本字符串：
 
 \begin{verbatim}
     %<<class>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
@@ -1620,8 +1472,7 @@ Appendix~\ref{sec:skeleton-dtx-file-class}:
     %<</class>>
 \end{verbatim}
 
-The replacement code specifies which lines belong to the class file
-and which belong to the style file:
+替换的代码指定了哪些行属于类文件，哪些属于样式文件：
 
 \begin{verbatim}
     %<<class|package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
@@ -1632,32 +1483,28 @@ and which belong to the style file:
     %<</class|package>>
 \end{verbatim}
 
-\subsection{Gallery of advanced packaging techniques}
+\subsection{高级打包技术示例集}
 
-See the \dtxfile\ gallery on
-\CTAN\ \URL{https://www.ctan.org/tex-archive/info/dtxgallery} for
-examples of various packaging possibilities, including the following:
+在 \CTAN\ \URL{https://www.ctan.org/tex-archive/info/dtxgallery}上查看 \dtxfile\
+示例集，其中包括以下内容的示例：
 
 \begin{itemize}
-  \item single-file package distributions (cf.~Section~\ref{sec:single-file})
+  \item 单文件包发布（参见第~\ref{sec:single-file}~节）
 
-  \item conditional code inclusion (cf.~Table~\ref{tbl:comment-visibility})
+  \item 条件代码包含（参见表~\ref{tbl:comment-visibility}~）
 
-  \item rearranging code for presentation in the documentation
+  \item 重新排列代码以在文档中展示
 \end{itemize}
-
 
 \appendix
 
-\section{Skeleton files}
+\section{框架文件}
 
-This section contains complete skeletons of the types of files
-discussed in the rest of the document.  These skeletons can be used as
-templates for creating your own packages.\index{package}
+本节包含了文档其余部分讨论的文件类型的完整框架。这些框架可以作为创建自己的包的模板。\index{package}
 
 \index{installer file|(}
 
-\subsection{A skeleton \texttt{.ins} file to generate a \texttt{.sty} file}
+\subsection{用于生成 \texttt{.sty}文件的框架 \texttt{.ins}文件}
 \label{sec:skeleton-ins-file-style}
 
 \begin{verbatim}
@@ -1717,7 +1564,7 @@ LaTeX version 2005/12/01 or later.
 \end{verbatim}
 
 
-\subsection{A skeleton \texttt{.ins} file to generate a \texttt{.cls} file}
+\subsection{用于生成 \texttt{.cls}文件的 \texttt{.ins}框架文件}
 \label{sec:skeleton-ins-file-class}
 
 \begin{verbatim}
@@ -1780,7 +1627,7 @@ LaTeX version 2005/12/01 or later.
 \index{documented LaTeX file@documented \LaTeX{} file|(}
 
 
-\subsection{A skeleton \texttt{.dtx} file to generate a \texttt{.sty} file}
+\subsection{用于生成 \texttt{.sty}文件的 \texttt{.dtx}框架文件}
 \label{sec:skeleton-dtx-file-style}
 
 \begin{verbatim}
@@ -1889,7 +1736,7 @@ LaTeX version 2005/12/01 or later.
 \end{verbatim}
 
 
-\subsection{A skeleton \texttt{.dtx} file to generate a \texttt{.cls} file}
+\subsection{用于生成 \texttt{.cls}文件的 \texttt{.dtx}框架文件}
 \label{sec:skeleton-dtx-file-class}
 
 \begin{verbatim}
@@ -2003,7 +1850,7 @@ LaTeX version 2005/12/01 or later.
 
 \index{documented LaTeX file@documented \LaTeX{} file|)}
 
-\subsection{A skeleton master-document file (\texttt{.tex})}
+\subsection{主文档框架文件（ \texttt{.tex}）}
 \label{sec:skeleton-master-file}
 
 \begin{verbatim}
