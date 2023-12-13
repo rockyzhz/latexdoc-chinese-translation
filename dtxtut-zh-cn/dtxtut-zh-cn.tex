@@ -60,6 +60,7 @@
   UprightFont = *-regular
 ]
 \usepackage{zhnumber,zhspacing}
+\usepackage{enumitem}
 \renewcommand{\abstractname}{摘\quad 要}
 \renewcommand{\refname}{参考文献}
 \renewcommand{\indexname}{索引}
@@ -616,7 +617,7 @@
 前述的代码块是 |latex| 在第一次处理 \dtxfile{} 文件时所评估的内容。
 现在我们逐行来看这段代码：
 
-\begin{enumerate}
+\begin{enumerate}[itemindent=2em, left= 1.5em .. .5em]
   \item 将代码放置在“|%<<*driver>>|”和“|%<</driver>>|”之间是 \ds{} 的一种简写，
         表示在每一行前加上“|%<<driver>>|”。这标示了 \DOC{} 的驱动代码\index{driver code}。
 
@@ -1268,7 +1269,7 @@
 
 \section{技巧、窍门和建议}
 
-\begin{itemize}
+\begin{itemize}[itemindent=2em, left= 1.5em .. .5em]
   \item 多写好文档！这确实有助于其他人理解你的代码和整个\index{package}包。
 
   \item 如果你认为整个 \latex{}社区都对你的包感兴趣，那么你应该将它上传到 \CTAN{}，网址是\URL{http://www.ctan.org/upload}。
