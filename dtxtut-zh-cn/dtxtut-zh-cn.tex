@@ -529,13 +529,12 @@
 \indexmacro{ProvidesPackage}
 
 \noindent
-(We'll encounter the |\fi| shortly.)
+（我们很快就会遇到 |\fi|。）
 
-Remember the \usemacro{generate} line in the \insfile{} file
-(page~\pageref{code:generate})?  It ended with the tag ``|package|''.
-This tells \ds{} to write lines that begin with ``|%<<package>>|'' to
-the \styfile{} file, stripping off the ``|%<<package>>|'' in the
-process.  Hence, our \styfile{} file will begin with the following:
+还记得 \insfile{} 文件（第 \pageref{code:generate} 页）中的 \usemacro{generate} 行吗？
+它以标签“|package|”结束。这告诉 \ds{} 将以“|%<<package>>|”开头的行写入到
+\styfile{} 文件中，并在此过程中剥离“|%<<package>>|”。因此，我们的 \styfile{} 文件
+将以以下内容开头：
 
 \begin{verbatim}
     \NeedsTeXFormat{LaTeX2e}[2005/12/01]
@@ -546,7 +545,7 @@ process.  Hence, our \styfile{} file will begin with the following:
 \indexmacro{ProvidesPackage}
 
 \noindent
-For example:
+比如：
 
 \begin{verbatim}
     \NeedsTeXFormat{LaTeX2e}[2005/12/01]
@@ -559,13 +558,10 @@ For example:
 
 \noindent
 \index{package|(}
-The \usemacro{NeedsTeXFormat} line ensures that the package won't run
-under a version of \latex[\LaTeXe]{} older than what the package was
-tested with.  The date and version strings in the
-\usemacro{ProvidesPackage} line are used by \DOC{} to set the
-\usemacro{filedate} and \usemacro{fileversion} macros.  Note the
-date\index{date format} format; \emph{YYYY/MM/DD} is used throughout
-\latex[\LaTeXe]{} and should be used in your packages as well.
+\usemacro{NeedsTeXFormat} 行确保该包不会在早于该包测试的 \latex[\LaTeXe]{} 版本下运行。
+\usemacro{ProvidesPackage} 行中的日期和版本字符串用于由 \DOC{} 设置 \usemacro{filedate}
+和 \usemacro{fileversion} 宏。请注意日期\index{date format}的格式：\emph{YYYY/MM/DD} 在
+整个 \latex[\LaTeXe]{} 中都被使用，您的包中也应该使用这种格式。
 \index{package|)}
 
 \indexmacroEnd{ProvidesPackage}
@@ -584,8 +580,7 @@ date\index{date format} format; \emph{YYYY/MM/DD} is used throughout
   \defmacro{DocInput} \arg{filename}   \label{desc:CodelineIndex}
 \end{decl}
 
-Next comes the only part of the \dtxfile{} file that isn't commented out
-(\ie doesn't begin each line with |%|):
+接下来是 \dtxfile{} 文件中唯一不被注释掉的部分（即每行不以 |%| 开头）：
 
 \begin{verbatim}
     %<<*driver>>
@@ -601,52 +596,42 @@ Next comes the only part of the \dtxfile{} file that isn't commented out
     % \fi
 \end{verbatim}
 
-The preceding code stanza is what |latex| evaluates on its first pass
-through the \dtxfile{} file.  We'll now examine that stanza line-by-line:
+前述的代码块是 |latex| 在第一次处理 \dtxfile{} 文件时所评估的内容。
+现在我们逐行来看这段代码：
 
 \begin{enumerate}
-  \item Putting code between ``|%<<*driver>>|'' and ``|%<</driver>>|''
-        is a \ds{} shorthand for prefixing each line with ``|%<<driver>>|''.
-        This demarcates the \DOC{} driver\index{driver code} code.
+  \item 将代码放置在“|%<<*driver>>|”和“|%<</driver>>|”之间是 \ds{} 的一种简写，
+        表示在每一行前加上“|%<<driver>>|”。这标示了 \DOC{} 的驱动代码\index{driver code}。
 
-  \item The \usemacro{documentclass} should almost always be
-        \usething{ltxdoc}, as that loads \DOC{} and provides a few useful
-        macros for formatting program documentation.
+  \item \usemacro{documentclass} 几乎总是应该使用 \usething{ltxdoc}，
+        因为这会加载 \DOC{} 并提供一些有用的宏来格式化程序文档。
 
         \index{package|(}
-  \item You should always \usemacro{usepackage} your package.  If you
-        don't, \DOC{} won't see the package's \usemacro{ProvidesPackage}
-        line and won't know how to set \usemacro{filedate} and
-        \usemacro{fileversion} (see page~\pageref{code:GetFileInfo}).  This
-        is also where you should \usemacro{usepackage} any other packages
-        needed to typeset the user documentation.
+  \item 您应该始终使用 \usemacro{usepackage} 导入您的包。如果不这样做，
+        \DOC{} 将无法看到包的 \usemacro{ProvidesPackage} 行，
+        并且不知道如何设置 \usemacro{filedate} 和 \usemacro{fileversion}
+        （参见第~\pageref{code:GetFileInfo} 页）。这也是您应该在此处使用
+        \usemacro{usepackage} 导入用于排版用户文档所需的其他任何包的地方。
         \index{package|)}
 
-  \item \usemacro{EnableCrossrefs} tells \DOC{} that you want it to
-        construct an index for your code---normally a good idea.  The
-        alternative is \usemacro{DisableCrossrefs}, which speeds up
-        processing by a negligible amount.
+  \item \usemacro{EnableCrossrefs} 告诉 \DOC{} 您希望它为您的代码构建索引——通常是个好主意。
+        另一种选择是 \usemacro{DisableCrossrefs}，它可以在处理速度上稍微提升一些，
+        但影响微乎其微。
 
-  \item \usemacro{CodelineIndex} tells \DOC{} that the index should
-        refer to program line numbers instead of page numbers.  (The
-        alternative is \usemacro{PageIndex}.)  \usemacro{CodelineIndex}
-        makes index entries easier to find at the expense of making the
-        index less self-consistent (because descriptions of macros and
-        environments are always indexed by page number).  The index does,
-        however, begin with a note of explanation.
+  \item \usemacro{CodelineIndex} 告诉 \DOC{} 索引应该引用程序行号而不是页码。
+        （另一种选择是 \usemacro{PageIndex}。）\usemacro{CodelineIndex} 使得索引条目更易于查找，
+        但以索引的自洽性稍有损失（因为宏和环境的描述总是按页码索引）。
+        索引，不过，会以一条说明性的注释开始。
 
-  \item \label{item:RecordChanges} On page~\pageref{code:changes},
-        we'll see how to log the changes made in each revision of the
-        package\index{package}.  \usemacro{RecordChanges} tells \DOC{} that
-        it should keep and aggregate the log entries.
+  \item \label{item:RecordChanges} 在第~\pageref{code:changes} 页，我们将看到如何记录
+        包\index{package}每个版本的更改。 \usemacro{RecordChanges} 告诉 \DOC{} 应该保留并
+        汇总日志条目。
 
-  \item There should be only one command between the
-        |\begin{document}| and |\end{document}|: a \usemacro{DocInput} call
-        with which the \dtxfile{} file inputs itself.  This enables a master
-        file to \usemacro{DocInput} multiple files in order to produce a
-        single document that covers more than one package\index{package} but
-        contains a unified index\index{indexing}.  Master documentation
-        files are described~\vpageref{sec:master-files}.
+  \item 在 |\begin{document}| 和 |\end{document}| 之间应该只有一个命令：
+        一个 \usemacro{DocInput} 调用，用于 \dtxfile{} 文件自身的输入。
+        这使得主文件可以通过 \usemacro{DocInput} 来输入多个文件，从而生成一个单一文档，
+        涵盖了多个包\index{package}但包含了一个统一的索引\index{indexing}。
+        主文档文件在第~\vpageref{sec:master-files} 页有描述。
 \end{enumerate}
 
 \indexmacroEnd{DocInput}
@@ -661,14 +646,11 @@ through the \dtxfile{} file.  We'll now examine that stanza line-by-line:
   \defmacro{OnlyDescription} \label{desc:OnlyDescription}
 \end{decl}
 
-Another command that sometimes appears in the preamble (\ie before the
-|\begin{document}|) is \usemacro{OnlyDescription}, which tells \DOC{}
-to typeset only the user documentation, not the package\index{package}
-code/comments\index{comments}.  It's usually best to omit
-\usemacro{OnlyDescription} (or add it commented out).  A user can
-always add it manually or even enable \usemacro{OnlyDescription} for
-\emph{all} \dtxfile{} files by adding the following to his
-\defthing{ltxdoc.cfg} file:
+在前言（即 |\begin{document}| 之前）有时会出现的另一个命令是 \usemacro{OnlyDescription}，
+它告诉 \DOC{} 仅排版用户文档，而不是包\index{package}的代码或注释\index{comments}。
+最好通常省略 \usemacro{OnlyDescription}（或将其注释掉）。用户始终可以手动添加它，
+甚至可以通过将以下内容添加到他的 \defthing{ltxdoc.cfg} 文件中，为\emph{所有} \dtxfile{}
+文件启用 \usemacro{OnlyDescription}：
 
 \begin{verbatim}
      \AtBeginDocument{\OnlyDescription}
@@ -678,9 +660,8 @@ always add it manually or even enable \usemacro{OnlyDescription} for
 \indexmacroEnd{OnlyDescription}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bigskip
-The remainder of this section covers |latex|'s second pass through the
-\dtxfile{} file.  Consequently, all subsequent examples are prefixed
-with percent signs.
+本节剩余部分涵盖了 |latex| 对 \dtxfile{} 文件的第二次处理。
+因此，所有随后的示例都以百分号开头。
 
 \indexmacroBegin{CheckSum} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \index{checksumming|(}
@@ -689,11 +670,8 @@ with percent signs.
   \defmacro{CheckSum} \arg{number} \label{decl:CheckSum}
 \end{decl}
 
-\DOC{} supports a very simplistic form of document checksumming, to
-help ensure that a package\index{package} didn't get corrupted in
-transport.  \DOC{} merely counts the number of backslashes that occur
-in the code.  If the number matches the checksum, \DOC{} gives a
-success message:
+\DOC{} 支持一种非常简单的文档校验机制，以确保包\index{package}在传输过程中没有损坏。
+\DOC{} 只是简单地计算代码中反斜杠的数量。如果数量与校验和匹配，\DOC{} 会给出一个成功的消息：
 
 \begin{verbatim}
     *******************
@@ -702,7 +680,7 @@ success message:
 \end{verbatim}
 
 \noindent
-Otherwise, it says what the correct checksum should be:
+否则，它会显示正确的校验和应该是多少：
 
 \begin{verbatim}
     ! Package doc Error: Checksum not passed (<incorrect><<>><correct>).
@@ -710,17 +688,15 @@ Otherwise, it says what the correct checksum should be:
 \indexthing{Checksum not passed}
 
 \noindent
-To specify the checksum in a \dtxfile{} file, merely add a \usemacro{CheckSum}
-statement:
+要在 \dtxfile{} 文件中指定校验和，只需添加一个 \usemacro{CheckSum} 语句：
 
 \begin{verbatim}
     % \CheckSum{<number>}
 \end{verbatim}
 
 \noindent
-If \m{number} is~|0|, or if the \dtxfile{} file lacks a
-\usemacro{CheckSum} line entirely, then \DOC{} outputs the following
-warning message:
+当 \m{number} 为 |0|，或者 \dtxfile{} 文件完全缺少 \usemacro{CheckSum} 行时，
+\DOC{} 会输出以下警告消息：
 
 \begin{verbatim}
     **********************************
@@ -730,10 +706,8 @@ warning message:
 \end{verbatim}
 
 \noindent
-During code development it is convenient to specify |\CheckSum{0}| so
-you don't receive an error message every time you run |latex|.  But
-don't forget to replace ``|0|'' with the correct number before
-releasing your package\index{package}!
+在代码开发过程中，指定 |\CheckSum{0}| 很方便，这样你每次运行 |latex| 时就不会收到错误消息。
+但在发布你的包\index{package}之前，请不要忘记将“|0|”替换为正确的数字！
 
 \index{checksumming|)}
 \indexmacroEnd{CheckSum}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -745,14 +719,15 @@ releasing your package\index{package}!
   \defmacro{CharacterTable} \arg{text}
 \end{decl}
 
-The second mechanism that \DOC{} uses to ensure that a \dtxfile{} file
-is uncorrupted is a character table.  If you put the following command
-verbatim into your \dtxfile{} file, then \DOC{} will ensure that no
-unexpected character translation took place in transport:\footnote{The
-  character table is commonly prefixed with double percent signs so that
-  it gets written to the \texttt{.sty}\index{style file} file.  This
-  seems unnecessary and is therefore shown here with single percent
-  signs.}
+\DOC{} 使用的第二种确保 \dtxfile{} 文件未损坏的机制是字符表。
+\footnote{译者注：虽然 \texttt{\bslash CharacterTable} 和 \texttt{\bslash CheckSum} 在公共互联网早
+  期是 \DOC{} 写作时的重要的特性，因为当时的邮件网关相当不可靠并经常搞乱文件，但在今天，它们更多的是一个
+  麻烦而不是帮助。因此，它们现在是完全可选的，并且不建议在新文件中使用。}
+如果你将以下命令原样放入你的 \dtxfile{} 文件中，\DOC{} 将确保在传输过
+程中没有发生意外的字符转换：
+\footnote{字符表通常以双百分号作为前
+  缀，这样它会被写入 \texttt{.sty}\index{style file} 文件。这似乎
+  是不必要的，因此此处用单百分号显示。}
 
 \begin{verbatim}
     % \CharacterTable
