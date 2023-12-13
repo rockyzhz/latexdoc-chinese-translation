@@ -30,6 +30,7 @@
 %%%  }
 %%% ====================================================================
 
+\PassOptionsToPackage{quiet}{fontspec}
 \documentclass[11pt]{ltxguide}
 \usepackage{varioref}
 \usepackage{makeidx}
@@ -39,8 +40,25 @@
 \usepackage{hyperxmp}
 
 % Chinese version settings
-% \usepackage[scheme=plain,fontset=source]{ctex}
 \usepackage{xeCJK}
+\setCJKmainfont {SourceHanSerifSC}
+[
+  Extension   = .otf,
+  UprightFont = *-regular,
+  BoldFont    = *-Bold,
+  ItalicFont  = FandolKai-Regular
+]
+\setCJKsansfont {SourceHanSansSC}
+[
+  Extension   = .otf,
+  UprightFont = *-regular,
+  BoldFont    = *-Bold
+]
+\setCJKmonofont {FandolKai}
+[
+  Extension   = .otf,
+  UprightFont = *-regular
+]
 \usepackage{zhnumber,zhspacing}
 \renewcommand{\abstractname}{摘\quad 要}
 \renewcommand{\refname}{参考文献}
@@ -120,7 +138,7 @@
   \texttt{\bslash#1}%
   \index{#1@\texttt{\string\bslash{}#1}}%
 }
-\newcommand{\usemacro}[1]{%                   % Use a macro.
+\newcommand{ \usemacro}[1]{%                   % Use a macro.
   \texttt{\bslash#1}%
   \index{#1@\texttt{\string\bslash{}#1}}%
 }
@@ -180,8 +198,8 @@
 \maketitle
 
 \begin{abstract}
-  本教程适用于高级 \latex[\LaTeXe]{} 用户，他们希望学习如何创建 \insfile{} 和 \dtxfile{} 文件，
-  以便分发他们自己编写的类和样式文件。
+  本教程适用于那些希望学习如何创建 \insfile{} 和 \dtxfile{} 文件，
+  以便分发他们自己编写的类和样式文件的高级 \latex[\LaTeXe]{} 用户。
 \end{abstract}
 
 
@@ -200,8 +218,8 @@
 \index{package|(}
 \paragraph{术语}
 一个\defn[style file]{宏包\textnormal{（ \styfile{}）}文件}主要是一组宏和环境的定义。
-一个或多个样式文件（例如一个主样式文件，\usemacro{input} 或 \usemacro{RequirePackage}
-多个辅助文件）称为一个\defn{package}。包可以用\usemacro{usepackage}|{<main .sty file>}|
+一个或多个样式文件（例如一个主样式文件， \usemacro{input} 或 \usemacro{RequirePackage}
+多个辅助文件）称为一个\defn{package}。包可以用 \usemacro{usepackage}|{<main .sty file>}|
 \index{style file}载入文档中。在本文档的其余部分，我们使用符号“\m{package}”
 代表您的包的名称。\index{package|)}
 
@@ -300,7 +318,7 @@
 \end{decl}
 
 系统管理员可以指定所有与 \TeX{} 相关文件应安装在其下的基本目录，
-例如 |/usr/share/texmf|。（请参阅 \ds{} 手册中的“\usemacro{BaseDirectory}”。）
+例如 |/usr/share/texmf|。（请参阅 \ds{} 手册中的“ \usemacro{BaseDirectory}”。）
 \insfile{} 文件指定其文件相对于该目录应安装的位置。以下是典型的设置：
 
 \begin{verbatim}
@@ -396,7 +414,6 @@
 \end{verbatim}%
 \index{style file}
 
-\noindent
 \usemacro{generate} 可以从给定的 \dtxfile{} 文件中提取任意数量的文件。
 它甚至可以从多个 \dtxfile{} 文件中提取单个文件。详细信息请参阅 \ds{} 手册。
 
@@ -501,11 +518,10 @@
 
 \index{comments|)}
 
-\noindent
 由于第二次处理 \dtxfile{} 文件时，行首的 |%| 字符会被忽略，所以需要使用
 \usemacro{iffalse} 和 |\fi|。为了防止版权\index{copyright}/
-许可\index{license}被解释为 \latex{} 代码，我们必须将其用\usemacro{iffalse}\dotsbrk|\fi|
-括起来。在“\usemacro{iffalse}”后添加“\usething{meta-comment}”只是一种约定，
+许可\index{license}被解释为 \latex{} 代码，我们必须将其用 \usemacro{iffalse}\dotsbrk|\fi|
+括起来。在“ \usemacro{iffalse}”后添加“\usething{meta-comment}”只是一种约定，
 表示这个注释\index{comments}是为人类阅读而非 \DOC{}、\ds{} 或 \latex{} 的。
 
 \indexmacroBegin{NeedsTeXFormat} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -516,7 +532,7 @@
   \defmacro{ProvidesPackage} \arg{package-name} \oarg{release-info}
 \end{decl}
 
-接下来的几行同样被\usemacro{iffalse}\dotsbrk|\fi|包围，以防止在第二次
+接下来的几行同样被 \usemacro{iffalse}\dotsbrk|\fi|包围，以防止在第二次
 通过 \dtxfile{} 文件时被 |latex| 处理。不过，这些行不是为人类读者准备的，
 而是为了 \ds{} （因此没有“\usething{meta-comment}”）：
 
@@ -547,7 +563,6 @@
 \indexmacro{NeedsTeXFormat}%
 \indexmacro{ProvidesPackage}
 
-\noindent
 比如：
 
 \begin{verbatim}
@@ -559,7 +574,6 @@
 \indexmacro{NeedsTeXFormat}%
 \indexmacro{ProvidesPackage}
 
-\noindent
 \index{package|(}
 \usemacro{NeedsTeXFormat} 行确保该包不会在早于该包测试的 \latex[\LaTeXe]{} 版本下运行。
 \usemacro{ProvidesPackage} 行中的日期和版本字符串用于由 \DOC{} 设置 \usemacro{filedate}
@@ -622,7 +636,7 @@
         但影响微乎其微。
 
   \item \usemacro{CodelineIndex} 告诉 \DOC{} 索引应该引用程序行号而不是页码。
-        （另一种选择是 \usemacro{PageIndex}。）\usemacro{CodelineIndex} 使得索引条目更易于查找，
+        （另一种选择是 \usemacro{PageIndex}。） \usemacro{CodelineIndex} 使得索引条目更易于查找，
         但以索引的自洽性稍有损失（因为宏和环境的描述总是按页码索引）。
         索引，不过，会以一条说明性的注释开始。
 
@@ -682,7 +696,6 @@
     *******************
 \end{verbatim}
 
-\noindent
 否则，它会显示正确的校验和应该是多少：
 
 \begin{verbatim}
@@ -690,14 +703,12 @@
 \end{verbatim}%
 \indexthing{Checksum not passed}
 
-\noindent
 要在 \dtxfile{} 文件中指定校验和，只需添加一个 \usemacro{CheckSum} 语句：
 
 \begin{verbatim}
     % \CheckSum{<number>}
 \end{verbatim}
 
-\noindent
 当 \m{number} 为 |0|，或者 \dtxfile{} 文件完全缺少 \usemacro{CheckSum} 行时，
 \DOC{} 会输出以下警告消息：
 
@@ -708,7 +719,6 @@
     **********************************
 \end{verbatim}
 
-\noindent
 在代码开发过程中，指定 |\CheckSum{0}| 很方便，这样你每次运行 |latex| 时就不会收到错误消息。
 但在发布你的包\index{package}之前，请不要忘记将“|0|”替换为正确的数字！
 
@@ -750,7 +760,6 @@
     %   Right brace   \}     Tilde         \~}
 \end{verbatim}
 
-\noindent
 成功消息的样式如下：
 
 \begin{verbatim}
@@ -759,7 +768,6 @@
     ***************************
 \end{verbatim}
 
-\noindent
 而错误消息的样式如下：
 
 \begin{verbatim}
@@ -827,8 +835,8 @@
 接下来，我们告诉 \DOC{} 解析 \usemacro{ProvidesPackage} 命令
 （第~\pageref{code:ProvidesPackage} 页），依次调用
 \usemacro{ProvidesPackage} 参数的三个组成部分，
-分别是“\usemacro{filedate}”、“\usemacro{fileversion}” 和
-“\usemacro{fileinfo}”：
+分别是“ \usemacro{filedate}”、“ \usemacro{fileversion}” 和
+“ \usemacro{fileinfo}”：
 
 \begin{verbatim}
     % \GetFileInfo{<package>.sty}
@@ -837,7 +845,7 @@
 \indexmacro{GetFileInfo}
 
 \noindent
-例如，\usemacro{ProvidesPackage} 的示例
+例如， \usemacro{ProvidesPackage} 的示例
 （见第~\vpageref{code:ProvidesPackage-example} 页）将被解析如下：
 
 |    |%
@@ -864,8 +872,8 @@
 这种自动化水平的问题在于，许多控制序列在理解代码的角度来看并不重要。例如，读者
 可能不想看到每个使用了 |\if|、|\the|、|\let|、|\begin| 或其他众多控制序列的地方。
 
-正如其名称所示，\usemacro{DoNotIndex} 命令给出了一个\index{control sequences}
-不应被索引的控制序列列表给 \DOC{}。\usemacro{DoNotIndex} 可以使用任意次数，
+正如其名称所示， \usemacro{DoNotIndex} 命令给出了一个\index{control sequences}
+不应被索引的控制序列列表给 \DOC{}。 \usemacro{DoNotIndex} 可以使用任意次数，
 并且每次调用可以接受任意数量的控制\index{control sequences}序列名称：
 
 \begin{verbatim}
@@ -896,7 +904,6 @@
 \indexmacro{author}
 \indexmacro{maketitle}
 
-\noindent
 \index{package|(}
 当然标题可以更有创意，但请注意，使用 \usemacro{textsf} 排版包名是常见的做法，而使用 \usemacro{thanks}
 来指定包的版本和日期。这样做带来了文学化编程\index{literate programming}的一个优点：每当你改变包的版本
@@ -922,7 +929,7 @@
 \m{macro} 加入索引，并格式化相应的页码，以表明这是描述该宏的位置（而不是
 宏在源代码中定义的地方）。
 
-\usemacro{DescribeEnv} 是描述环境的类似命令。\usemacro{DescribeMacro} 和
+\usemacro{DescribeEnv} 是描述环境的类似命令。 \usemacro{DescribeMacro} 和
 \usemacro{DescribeEnv} 都可以在同一段落中多次使用。
 
 \indexmacroEnd{DescribeEnv}
@@ -942,9 +949,9 @@
 \end{decl}
 
 \usething{ltxdoc} 文档类提供了三个命令来帮助排版宏和环境的语法
-（见表~\ref{tbl:argument-formatting}）。\usemacro{marg} 用于排版必选参数，
-\usemacro{oarg} 用于排版可选参数，\usemacro{parg} 用于排版图片参数。
-这三个命令都使用\usemacro{meta} 来排版参数内容。\usemacro{meta} 也可单独使用。
+（见表~\ref{tbl:argument-formatting}）。 \usemacro{marg} 用于排版必选参数，
+\usemacro{oarg} 用于排版可选参数， \usemacro{parg} 用于排版图片参数。
+这三个命令都使用 \usemacro{meta} 来排版参数内容。 \usemacro{meta} 也可单独使用。
 例如，“\texttt{This needs a} |\meta{dimen}|.” 会排版为“This needs a \m{dimen}.”。
 
 \begin{table}[htbp]
@@ -972,8 +979,7 @@
     \mymacro [<pos>] {<width>} {<text>}
 \end{verbatim}
 
-\noindent
-与\usemacro{verb}类似，\verb+|+\dots\verb+|+ 简写在\usemacro{footnote}
+与 \usemacro{verb} 类似，\verb+|+\dots\verb+|+ 简写在 \usemacro{footnote}
 或其他易碎的宏中无法使用。
 
 \indexmacroEnd{meta}
@@ -992,12 +998,12 @@
   \defmacro{Finale}
 \end{decl}
 
-该包的\index{package}源代码由\usemacro{StopEventually}和\usemacro{Finale}包围起来。
-请注意，\usemacro{CheckSum}（第~\pageref{decl:CheckSum} 页）仅适用于该包的\index{package}源代码。
+该包的\index{package}源代码由 \usemacro{StopEventually}和 \usemacro{Finale}包围起来。
+请注意， \usemacro{CheckSum}（第~\pageref{decl:CheckSum} 页）仅适用于该包的\index{package}源代码。
 \usemacro{StopEventually}接受一个参数，即一段要在代码后排版的文本。
-如果指定了\usemacro{OnlyDescription}（第~\pageref{desc:OnlyDescription} 页），
-那么\usemacro{StopEventually}后面的内容将不会输出——包括\usemacro{Finale}后面的文本。
-因此，\usemacro{StopEventually}的 \m{text} 参数是用于提供一段无论是否排版代码都应输出的文本的机制。
+如果指定了 \usemacro{OnlyDescription}（第~\pageref{desc:OnlyDescription} 页），
+那么 \usemacro{StopEventually}后面的内容将不会输出——包括 \usemacro{Finale}后面的文本。
+因此， \usemacro{StopEventually}的 \m{text} 参数是用于提供一段无论是否排版代码都应输出的文本的机制。
 通常包括参考文献部分和/或以下命令中的一个或多个。
 
 \indexmacroEnd{Finale}
@@ -1013,7 +1019,7 @@
 \index{change history|(}
 
 \usemacro{PrintChanges} 生成一个名为“变更历史”的无编号章节（见图~\vref{fig:change-history}）。
-变更历史部分汇总了 \dtxfile{}文件中所有\usemacro{changes}命令的各版本修改，这样就能轻松跟踪每个版本的变更内容。
+变更历史部分汇总了 \dtxfile{}文件中所有 \usemacro{changes}命令的各版本修改，这样就能轻松跟踪每个版本的变更内容。
 
 \usemacro{PrintChanges} 使用了 \latex 的术语表机制。在 |<package>.dtx| 上运行 |latex| 会在 |<package>.glo|
 中生成变更历史数据。要生成实际的变更历史（|<package>.gls|），用户应该按以下方式运行\usething{makeindex}程序：
@@ -1031,7 +1037,7 @@
 \usemacro{PrintIndex} 生成一个名为“索引”的无编号章节。索引会自动包含文档中使用、定义或描述的所有宏和环境条目。
 所有环境还会额外列在“环境”下。表~\ref{tbl:index-formatting} 演示了各种条目的格式。在该表中，“27”指的是页码，
 “123”指的是行号。\footnote{如果未使用 \texttt{\string\CodelineIndex}（第~\pageref{desc:CodelineIndex} 页），
-  则“123”将指的是页码。} 请注意，只有在文档包含代码列表（即未指定\usemacro{OnlyDescription}）时，
+  则“123”将指的是页码。} 请注意，只有在文档包含代码列表（即未指定 \usemacro{OnlyDescription}）时，
 宏/环境的定义和使用才会包含在索引中。
 
 \begin{table}[htbp]
@@ -1053,8 +1059,8 @@
   \end{tabular}
 \end{table}
 
-对于显式\usemacro{index}命令的默认格式化使用了罗马页码。这会导致混淆，因为在包源代码中罗马页码通常
-表示行号。解决方案是向\usemacro{index}命令指定``|usage|''格式化：
+对于显式 \usemacro{index}命令的默认格式化使用了罗马页码。这会导致混淆，因为在包源代码中罗马页码通常
+表示行号。解决方案是向 \usemacro{index}命令指定``|usage|''格式化：
 
 \begin{verbatim}
     \index{explicit indexing|usage}
@@ -1108,7 +1114,6 @@
     %    \end{macrocode}
 \end{verbatim}
 
-\noindent
 \DOC{} 将前面的代码片段格式化为以下内容：
 
 \begin{tabbing}
@@ -1117,10 +1122,9 @@
   \> {\tiny 2} \> |  a \LaTeX{} macro.}|
 \end{tabbing}
 
-\noindent
 请注意，行号在整个程序中是唯一的（而不是在每一页顶部重置）。如果在包含前述 |\mymacro| 定义的 \dtxfile{}
-文件中使用\usemacro{PrintIndex}，索引将自动包含 |\newcommand|、|\mymacro| 和 |\LaTeX| 的条目，除非
-其中任何一个被\usemacro{DoNotIndex}排除。
+文件中使用 \usemacro{PrintIndex}，索引将自动包含 |\newcommand|、|\mymacro| 和 |\LaTeX| 的条目，除非
+其中任何一个被 \usemacro{DoNotIndex}排除。
 
 \indexthingEnd{macrocode}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1138,8 +1142,8 @@
     |\end{environment}| \\
 \end{decl}
 
-\usething{macro} 和 \usething{environment} 环境用于界定完整的宏或环境定义。
-\usething{macro}/\usething{environment} 环境通常包含一个或多个\usething{macrocode} 环境，其中穿插着代码文档。
+\usething{macro}  和 \usething{environment} 环境用于界定完整的宏或环境定义。
+\usething{macro} /\usething{environment} 环境通常包含一个或多个\usething{macrocode} 环境，其中穿插着代码文档。
 以下是\usething{macrocode}示例的更完整版本，见~\vpageref{code:mymacro}。
 
 \begin{verbatim}
@@ -1153,13 +1157,12 @@
     % \end{macro}
 \end{verbatim}
 
-\noindent
 以下是排版后的版本：
 
 \begin{tabbing}
   |    \mymacro|\qquad\={\tiny 9} \= \kill
   |    \mymacro| \> We define a trivial macro, |\mymacro|, to illustrate the \\
-  \> use of the \usething{macro} environment. \\
+  \> use of the \usething{macro}  environment. \\
   \> {\tiny 1} \> |\newcommand{\mymacro}{This is| \\
   \> {\tiny 2} \> |  a \LaTeX{} macro.}|
 \end{tabbing}
@@ -1180,7 +1183,7 @@
 \end{verbatim}%
 \indexthing{macrocode}
 
-\usething{macro} 和 \usething{environment} 环境可以嵌套。这种能力不仅对于定义其他宏的宏很有用，
+\usething{macro}  和 \usething{environment} 环境可以嵌套。这种能力不仅对于定义其他宏的宏很有用，
 而且在定义一组共享描述的相关数据类型时也很有用：
 
 \begin{verbatim}
@@ -1202,8 +1205,7 @@
 \indexthing{macro}%
 \indexthing{macrocode}
 
-\noindent
-通常应避免没有描述的\usething{macro}环境，因为格式有些丑陋；宏名称单独出现在一行上，位于一个“空白”
+通常应避免没有描述的\usething{macro} 环境，因为格式有些丑陋；宏名称单独出现在一行上，位于一个“空白”
 描述的左侧，但代码直到下一行才开始。
 
 在|\begin{macro}|\dotsbrk|\end{macro}|或|\begin{environment}|\dotsbrk|\end{environment}|块内
@@ -1249,12 +1251,12 @@
 \index{class file|(}
 
 \paragraph{类文件}
-从 \dtxfile{}文件生成类文件的过程比生成样式文件的过程复杂得多。问题在于\usemacro{DocInput}依赖于
-|\usepackage{|\m{package}|}|行（更准确地说，依赖于\m{package}|.sty|中的\usemacro{ProvidesPackage}行）来设置
-\usemacro{fileversion}和\usemacro{filedate}宏。然而，类文件无法使用|\usepackage|加载。我们也不能简单地用
+从 \dtxfile{}文件生成类文件的过程比生成样式文件的过程复杂得多。问题在于 \usemacro{DocInput}依赖于
+|\usepackage{|\m{package}|}|行（更准确地说，依赖于\m{package}|.sty|中的 \usemacro{ProvidesPackage}行）来设置
+\usemacro{fileversion}和 \usemacro{filedate}宏。然而，类文件无法使用|\usepackage|加载。我们也不能简单地用
 |\documentclass{|\m{package}|}|加载，因为一个文档只能加载一个类，并且我们需要加载的类是\usething{ltxdoc}。
 
-解决方法是使用\usemacro{ProvidesFile}来使文件版本和日期可供 \dtxfile{}文件使用。
+解决方法是使用 \usemacro{ProvidesFile}来使文件版本和日期可供 \dtxfile{}文件使用。
 附录~\ref{sec:skeleton-dtx-file-class} 列出了一个完整的、包含 \clsfile{} 文件及其文档的 \dtxfile{} 文件的框架。
 它类似于附录~\ref{sec:skeleton-dtx-file-style} 中展示的框架文件，但头部部分结构不同。
 
@@ -1331,7 +1333,7 @@
         \index{"@@\texttt{"@}!in macro names|)}
         \index{package|)}
 
-  \item 除了宏和环境之外，你可以像通常一样使用\usemacro{index}索引其他内容。
+  \item 除了宏和环境之外，你可以像通常一样使用 \usemacro{index}索引其他内容。
 
   \item 因为宏名称可能很长，考虑使用\defthing{idxlayout}包来减少索引中的列数。（它还提供了对索引格式的其他
         方面的控制。）
@@ -1373,26 +1375,25 @@
 \DOC{}支持包含多个 \dtxfile{}文件的“主”文档文件。其优点在于，可以使用连续的节编号和单一的统一索引对一组相关的 \dtxfile{}文件进行排版。
 事实上， \latex[\LaTeXe{}]源代码本身就是使用一个主文档（|source2e.tex|）排版的，其中包含了构成 \latex[\LaTeXe{}]的众多 \dtxfile{}文件。
 
-为了帮助生成主文档，\usething{ltxdoc}类提供了一个命令称为“\usemacro{DocInclude}”。
-\usething{ltxdoc}的\usemacro{DocInclude}与 \DOC{} 的\usemacro{DocInput}非常相似——它甚至在内部使用它——但具有以下附加功能。
+为了帮助生成主文档，\usething{ltxdoc}类提供了一个命令称为“ \usemacro{DocInclude}”。
+\usething{ltxdoc}的 \usemacro{DocInclude}与 \DOC{} 的 \usemacro{DocInput}非常相似——它甚至在内部使用它——但具有以下附加功能。
 
 \begin{itemize}
   \item \usemacro{PrintIndex}会被自动正确处理。
 
-  \item 每个\usemacro{DocInclude}的文件都会有一个标题页。
+  \item 每个 \usemacro{DocInclude}的文件都会有一个标题页。
 
   \item \usemacro{tableofcontents}按预期工作。 \dtxfile{}文件名被用作“章节”名称。
 \end{itemize}
 
-\noindent
-注意，与\usemacro{DocInput}不同，\usemacro{DocInclude}假定使用 \dtxfile{}扩展名。
+注意，与 \usemacro{DocInput}不同， \usemacro{DocInclude}假定使用 \dtxfile{}扩展名。
 
-附录~\ref{sec:skeleton-master-file} 提供了一个主文档的框架，使用\usemacro{DocInclude}将
+附录~\ref{sec:skeleton-master-file} 提供了一个主文档的框架，使用 \usemacro{DocInclude}将
 |<file1>.dtx|、|<file2>.dtx| 和 |<file3>.dtx|排版为单个文档。如果你更喜欢手动操作（例如，
-如果你不喜欢\usemacro{DocInclude}为每个文件生成标题页），你仍然可以使用\usemacro{DocInput}。
+如果你不喜欢 \usemacro{DocInclude}为每个文件生成标题页），你仍然可以使用 \usemacro{DocInput}。
 \index{indexing|(}
-只需确保重新定义\usemacro{PrintIndex}为空操作；否则，每个文件都会有自己的索引。
-在所有 \dtxfile{}文件都排版完之后，调用原始的\usemacro{PrintIndex}命令以打印一个统一的索引：
+只需确保重新定义 \usemacro{PrintIndex}为空操作；否则，每个文件都会有自己的索引。
+在所有 \dtxfile{}文件都排版完之后，调用原始的 \usemacro{PrintIndex}命令以打印一个统一的索引：
 
 \begin{verbatim}
     \begin{document}
@@ -1424,14 +1425,13 @@
   %\string</batchfile\string>
 \end{alltt}
 
-\noindent
-省略\usemacro{endbatchfile}以允许 \latex{}继续处理 \dtxfile{}文件的其余部分。
+省略 \usemacro{endbatchfile}以允许 \latex{}继续处理 \dtxfile{}文件的其余部分。
 另外，为了避免出现“\texttt{File} \m{sty-file} \texttt{already exists on the system.  Overwrite it?
-[y/n]}”的消息，你可以在第一个\usemacro{generate}命令之前加上“\usemacro{askforoverwritefalse}”。
-（这将自动覆盖现有的 \styfile{}文件。将\usemacro{generate}命令放在
-“\usemacro{IfFileExists}|{|\m{sty-file}|}{}{|\dots|}|”中将会阻止覆盖。）
+[y/n]}”的消息，你可以在第一个 \usemacro{generate}命令之前加上“ \usemacro{askforoverwritefalse}”。
+（这将自动覆盖现有的 \styfile{}文件。将 \usemacro{generate}命令放在
+“ \usemacro{IfFileExists}|{|\m{sty-file}|}{}{|\dots|}|”中将会阻止覆盖。）
 你还应该将 \styfile{}的安装说明移到 \dtxfile{}文件的末尾，这样用户就不会将其滚动到屏幕外。你需要使用
-\usemacro{typeout}，因为\usemacro{Msg}不会被定义：
+\usemacro{typeout}，因为 \usemacro{Msg}不会被定义：
 
 \begin{verbatim}
     % \Finale
@@ -1454,7 +1454,7 @@
 \subsection{具有共享版本信息的类和样式文件}
 
 某些包包含 \clsfile{}和 \styfile{}文件。希望从同一个 \insfile{}文件中提取这两个文件，并共享相同的
-版本信息字符串。《 \ds{} 程序》文档解释了如何从单个\usemacro{generate}调用中提取多个文件：
+版本信息字符串。《 \ds{} 程序》文档解释了如何从单个 \usemacro{generate}调用中提取多个文件：
 
 \begin{verbatim}
     \generate{\file{<package>.cls}{\from{<package>.dtx}{class}}
