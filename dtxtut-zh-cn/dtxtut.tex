@@ -1,0 +1,2107 @@
+%%% ====================================================================
+%%%  @LaTeX-file{
+%%%     author          = "Scott Pakin",
+%%%     version         = "2.1",
+%%%     date            = "13 September 2015",
+%%%     time            = "23:06:32 MDT",
+%%%     filename        = "dtxtut.tex",
+%%%     checksum        = "38789 2107 7734 71546"
+%%%     email           = "scott+dtx@pakin.org (Internet)",
+%%%     codetable       = "ISO/ASCII",
+%%%     keywords        = "LaTeX, packages, .ins files, .dtx files,
+%%%                        literate programming",
+%%%     supported       = "yes",
+%%%     abstract        = "This tutorial is intended for advanced
+%%%                        LaTeX 2e users who want to learn how to
+%%%                        create .ins and .dtx files for distributing
+%%%                        their homebrewed classes and style files.",
+%%%     docstring       = "The checksum field above contains a CRC-16
+%%%                        checksum as the first value, followed by
+%%%                        the equivalent of the standard UNIX wc
+%%%                        (word count) utility output of lines,
+%%%                        words, and characters.  This is produced by
+%%%                        Robert Solovay's checksum utility.  This file
+%%%                        header was produced with the help of Nelson
+%%%                        Beebe's filehdr utility.  Both checksum and
+%%%                        filehdr are available from CTAN
+%%%                        (http://www.ctan.org)."
+%%%
+%%%  }
+%%% ====================================================================
+
+\documentclass[11pt]{ltxguide}
+\usepackage{varioref}
+\usepackage{makeidx}
+\usepackage{alltt}
+\usepackage{tocbibind}
+\usepackage[bookmarksopen]{hyperref}
+\usepackage{hyperxmp}
+
+% Define this document's metadata.
+\title{How to Package Your \LaTeX{} Package}
+\author{Scott Pakin \texttt{<scott+dtx@pakin.org>}}
+\date{13 September 2015}
+\hypersetup{%
+  pdftitle={How to Package Your LaTeX Package},
+  pdfauthor={Scott Pakin},
+  pdfcontactemail={scott+dtx@pakin.org},
+  pdfcontacturl={http://www.pakin.org/\xmptilde scott},
+  pdfsubject={Writing .ins and .dtx files for LaTeX},
+  pdfkeywords={LaTeX package documentation, literate programming, typesetting, installer files},
+  pdfcaptionwriter={Scott Pakin},
+  pdfcopyright={Copyright (C) 2015 Scott Pakin},
+  pdflicenseurl={http://latex-project.org/lppl/},
+  pdflang={en-US}
+}
+
+% Define a term.
+\newcommand{\defn}[2][X]{%
+  \ifx#1X
+    \emph{#2}\index{#2}%
+  \else
+    \emph{#2}\index{#1}%
+  \fi
+}
+
+% Make a version of \dots that allows a subsequent line break.
+\newcommand{\dotsbrk}{\dots\linebreak[0]}
+
+% If we have url.sty loaded, use that for formatting URLs.
+\ifx\url\undefined
+\else
+  \let\URL=\url
+\fi
+
+% Define formatting for various packages.
+\newcommand{\DOC}{\textsf{Doc}\index{Doc@\textsf{Doc}}}
+\newcommand{\ds}{\textsf{DocStrip}\index{DocStrip@\textsf{DocStrip}}}
+\newcommand{\svrb}{\texttt{shortvrb}\index{shortvrb@\texttt{shortvrb}}}
+
+% Customize varioref's messages.
+\def\reftextbefore{on the preceding page}
+\def\reftextfacebefore{on the preceding page}
+\def\reftextcurrent{above}   % We promise not to make any forward references.
+
+% Define some macros to help automate indexing.
+\makeindex
+{\catcode`\|=0 \catcode`\\=12
+ |gdef|bslash{\}}
+\newcommand{\defmacro}[1]{%                   % Define a macro.
+  \texttt{\bslash#1}%
+  \index{#1@\texttt{\string\bslash{}#1}}%
+}
+\newcommand{\usemacro}[1]{%                   % Use a macro.
+  \texttt{\bslash#1}%
+  \index{#1@\texttt{\string\bslash{}#1}}%
+}
+\newcommand{\indexmacro}[1]{%                 % Index a macro (no display).
+  \index{#1@\texttt{\string\bslash{}#1}}%
+}
+{\catcode`\|=12                               % Same as \indexmacro, but
+  \gdef\indexmacroBegin#1{%                   % for ranges of text
+    \index{#1@\texttt{\string\bslash{}#1}|(}%
+  }
+  \gdef\indexmacroEnd#1{%
+    \index{#1@\texttt{\string\bslash{}#1}|)}%
+  }
+}
+\newcommand{\defthing}[1]{%                   % Define a non-macro thing.
+  \texttt{#1}%
+  \index{#1@\texttt{#1}}%
+}
+\newcommand{\usething}[1]{%                   % Use a non-macro thing.
+  \texttt{#1}%
+  \index{#1@\texttt{#1}}%
+}
+\newcommand{\indexthing}[1]{%                 % Index a non-macro thing.
+  \index{#1@\texttt{#1}}%
+}
+{\catcode`\|=12                               % Same as \indexthing, but
+  \gdef\indexthingBegin#1{%                   % for ranges of text
+    \index{#1@\texttt{#1}|(}%
+  }
+  \gdef\indexthingEnd#1{%
+    \index{#1@\texttt{#1}|)}%
+  }
+}
+
+% Define shortcuts to index commonly used terms.
+\newcommand{\insfile}{%
+  \texttt{.ins}\index{installer file}}
+\newcommand{\dtxfile}{%
+  \texttt{.dtx}\index{documented LaTeX file@documented \string\LaTeX{} file}}
+\newcommand{\styfile}{%
+  \texttt{.sty}\index{style file}}
+\newcommand{\clsfile}{%
+  \texttt{.cls}\index{class file}}
+\newcommand{\CTAN}{%
+  CTAN\index{Comprehensive \string\TeX{} Archive Network}}
+\newcommand{\swiftexel}{%
+  \texttt{swiftex.el}\index{swiftex.el@\texttt{swiftex.el}}}
+\newcommand{\Emacs}{%
+  Emacs\index{Emacs}}
+\newcommand{\latex}[1][\LaTeX]{%
+  #1\index{LaTeX@\LaTeX}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\sloppy
+\maketitle
+
+\begin{abstract}
+  This tutorial is intended for advanced \latex[\LaTeXe]{} users who
+  want to learn how to create \insfile{} and \dtxfile{} files for
+  distributing their homebrewed classes and style files.
+\end{abstract}
+
+
+\section{Introduction}
+
+\paragraph{Requirements}
+We assume that you already know how to \emph{program} in \latex\@.
+That is, you should know how to use \usemacro{newcommand},
+\usemacro{newenvironment}, and preferably a smidgen of \TeX\@.  You
+should also be familiar with ``\clsguide'', which is available from
+\CTAN{} (\URL{http://www.ctan.org}) and comes with most
+\latex[\LaTeXe]{} distributions in a file called |clsguide.dvi|.
+Finally, you should know how to install packages\index{package} that
+are shipped as a \dtxfile{} file plus a \insfile{} file.
+
+\index{package|(}
+\paragraph{Terminology}
+A \defn[style file]{style \textnormal{(\styfile{})} file} is primarily a
+collection of macro and environment definitions.  One or more style
+files (\eg a main style file that \usemacro{input}s or
+\usemacro{RequirePackage}s multiple helper files) is called a
+\defn{package}.  Packages are loaded into a document with
+\usemacro{usepackage}|{<main .sty file>}|\index{style file}.  In the
+rest of this document, we use the notation ``\m{package}'' to
+represent the name of your package.
+\index{package|)}
+
+\paragraph{Motivation}
+The important parts of a package\index{package} are the code, the
+documentation of the code, and the user documentation.  Using the
+\DOC{} and \ds{} programs, it's possible to combine all three of these
+into a single, \defn[documented LaTeX file@documented \string\LaTeX{}
+file]{documented \LaTeX \textnormal{(\dtxfile{})} file}.  The primary
+advantage of a \dtxfile{} file is that it enables you to use arbitrary
+\latex{} constructs to comment\index{comments} your code.  Hence,
+macros, environments, code stanzas, variables, and so forth can be
+explained using tables, figures, mathematics, and font changes.  Code
+can be organized into sections using \latex's sectioning commands.
+\index{indexing|(}
+\DOC{} even facilitates generating a unified index that indexes both
+macro definitions (in the \latex{} code) and macro descriptions (in
+the user documentation).
+\index{indexing|)}
+This emphasis on writing verbose, nicely typeset
+comments\index{comments} for code---essentially treating a program as
+a book that describes a set of algorithms---is known as \defn{literate
+programming}~\cite{Knuth1984:literate} and has been in use since the
+early days of \TeX.
+
+This tutorial will teach you how to write basic \dtxfile{} files and
+the \insfile{} files that manipulate them.  Although there is much
+overlap with chapter~14 of \emph{The \latex{}
+Companion}~\cite{Goossens1994:companion}, this document is structured
+as a step-by-step tutorial, while \emph{The \latex{} Companion} is
+more reference-like.  Furthermore, this tutorial shows how to write a
+single file that serves as both documentation and driver file, which
+is a more typical usage of the \DOC{} system than using separate
+files.
+
+
+\index{installer file|(}
+
+\section{The \texttt{.ins} file}
+\label{sec:ins-file}
+
+The first step in preparing a package for distribution is to write an
+\defn[installer file]{installer \textnormal{(\insfile{})} file}.  An
+installer file extracts the code from a \dtxfile{} file, uses \ds{} to
+strip off the comments\index{comments} and documentation, and outputs
+a \styfile{} file.  The good news is that a \insfile{} file is
+typically fairly short and doesn't change significantly from one
+package\index{package} to another.
+
+\index{license|(}
+\insfile{} files usually start with comments\index{comments}
+specifying the copyright\index{copyright} and license information:
+
+\begin{verbatim}
+    %%
+    %% Copyright (C) <year> by <your name>
+    %%
+    %% This file may be distributed and/or modified under the
+    %% conditions of the LaTeX Project Public License, either
+    %% version 1.3 of this license or (at your option) any later
+    %% version.  The latest version of this license is in:
+    %%
+    %%    http://www.latex-project.org/lppl.txt
+    %%
+    %% and version 1.3 or later is part of all distributions of
+    %% LaTeX version 2005/12/01 or later.
+    %%
+\end{verbatim}
+
+\noindent
+\index{package|(}
+The \latex{} Project Public License\index{LaTeX Project Public
+License@\LaTeX{} Project Public License} (LPPL) is the license under
+which most packages---and \latex{} itself---are distributed.  Of
+course, you can release your package under any license you want; the
+LPPL is merely the most common license for \latex{} packages.  The
+LPPL specifies that a user can do whatever he wants with your
+package---including sell it and give you nothing in return.  The only
+restrictions are that he must give you credit for your work, and he
+must change the name of the package if he modifies anything to avoid
+versioning confusion.
+\index{package|)}
+\index{license|)}
+\index{LPPL|see{\LaTeX{} Project Public License}}
+
+The next step is to load \ds:
+
+\begin{verbatim}
+    \input docstrip.tex
+\end{verbatim}
+
+
+\indexmacroBegin{keepsilent} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{keepsilent}
+\end{decl}
+
+By default, \ds{} gives a line-by-line account of its activity.  These
+messages aren't terribly useful, so most people turn them off:
+
+\begin{verbatim}
+    \keepsilent
+\end{verbatim}
+
+\indexmacroEnd{keepsilent}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{usedir} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{usedir} \arg{directory}
+\end{decl}
+
+A system administrator can specify the base directory under which all
+\TeX-related files should be installed, \eg |/usr/share/texmf|.  (See
+``\usemacro{BaseDirectory}'' in the \ds{} manual.)  The \insfile{}
+file specifies where its files should be installed relative to that.
+The following is typical:
+
+\begin{verbatim}
+    \usedir{tex/latex/<package>}
+\end{verbatim}
+
+\indexmacroEnd{usedir}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{preamble} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{endpreamble}
+
+\begin{decl}
+  \defmacro{preamble}    \\
+  \m{text}               \\
+  \defmacro{endpreamble}
+\end{decl}
+
+\index{comments|(}
+The next step is to specify a \defn{preamble}, which is a block of
+commentary that will be written to the top of every generated file:
+
+\begin{verbatim}
+    \preamble
+
+    This is a generated file.
+
+    Copyright (C) <year> by <your name>
+
+    This file may be distributed and/or modified under the
+    conditions of the LaTeX Project Public License, either
+    version 1.3 of this license or (at your option) any later
+    version.  The latest version of this license is in:
+
+       http://www.latex-project.org/lppl.txt
+
+    and version 1.3 or later is part of all distributions of
+    LaTeX version 2005/12/01 or later.
+
+    \endpreamble
+\end{verbatim}
+
+\index{comments|)}
+
+\noindent
+The preceding preamble would cause |<package>.sty|\index{style file}
+to begin as follows:
+
+\begin{verbatim}
+    %%
+    %% This is file `<package>.sty',
+    %% generated with the docstrip utility.
+    %%
+    %% The original source files were:
+    %%
+    %% <package>.dtx  (with options: `package')
+    %%
+    %% This is a generated file.
+    %%
+    %% Copyright (C) <year> by <your name>
+    %%
+    %% This file may be distributed and/or modified under the
+    %% conditions of the LaTeX Project Public License, either
+    %% version 1.3 of this license or (at your option) any later
+    %% version.  The latest version of this license is in:
+    %%
+    %%    http://www.latex-project.org/lppl.txt
+    %%
+    %% and version 1.3 or later is part of all distributions of
+    %% LaTeX version 2005/12/01 or later.
+    %%
+\end{verbatim}
+
+\indexmacroEnd{endpreamble}
+\indexmacroEnd{preamble}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{generate} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{file}
+\indexmacroBegin{from}
+
+\begin{decl}
+  \defmacro{generate}
+    |{|\defmacro{file} |{<style-file>}|
+    |{|\defmacro{from} |{<dtx-file>}| |{<tag>}}}|
+\end{decl}
+
+We now reach the most important part of a \insfile{} file: the
+specification of what files to generate from the \dtxfile{} file.  The
+following tells \ds{} to generate |<package>.sty|\index{style file}
+from |<package>.dtx| by extracting only those parts marked as
+``|package|'' in the \dtxfile{} file.  (Marking parts of a \dtxfile{}
+file is described in Section~\ref{sec:dtx-file}.)
+
+\label{code:generate}
+\begin{verbatim}
+    \generate{\file{<package>.sty}{\from{<package>.dtx}{package}}}
+\end{verbatim}%
+\index{style file}
+
+\noindent
+\usemacro{generate} can extract any number of files from a given
+\dtxfile{} file.  It can even extract a single file from multiple
+\dtxfile{} files.  See the \ds{} manual for details.
+
+\indexmacroEnd{from}
+\indexmacroEnd{file}
+\indexmacroEnd{generate}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{Msg} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{Msg} \arg{text}
+\end{decl}
+
+The next part of a \insfile{} file consists of commands to output a
+message to the user, telling him what files need to be installed and
+reminding him how to produce the user documentation.  The following
+set of \usemacro{Msg} commands is typical:
+
+\begin{verbatim}
+    \obeyspaces
+    \Msg{****************************************************}
+    \Msg{*                                                  *}
+    \Msg{* To finish the installation you have to move the  *}
+    \Msg{* following file into a directory searched by TeX: *}
+    \Msg{*                                                  *}
+    \Msg{*     <package>.sty                                 *}
+    \Msg{*                                                  *}
+    \Msg{* To produce the documentation run the file        *}
+    \Msg{* <package>.dtx through LaTeX.                      *}
+    \Msg{*                                                  *}
+    \Msg{* Happy TeXing!                                    *}
+    \Msg{*                                                  *}
+    \Msg{****************************************************}
+\end{verbatim}%
+\index{style file}%
+
+\indexmacroEnd{Msg}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Note the use of \usemacro{obeyspaces} to inhibit \TeX{} from
+collapsing multiple spaces into one.
+
+
+\indexmacroBegin{endbatchfile} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \usemacro{endbatchfile}
+\end{decl}
+
+Finally, we tell \ds{} that we've reached the end of the \insfile{} file:
+
+\begin{verbatim}
+    \endbatchfile
+\end{verbatim}
+
+\indexmacroEnd{endbatchfile}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Appendix~\ref{sec:skeleton-ins-file-style} lists a complete, skeleton
+\insfile{} file.  Appendix~\ref{sec:skeleton-ins-file-class} is
+similar but contains slight modifications intended to produce a class
+(\clsfile) file instead of a style (\styfile) file.
+
+\index{installer file|)}
+\index{documented LaTeX file@documented \LaTeX{} file|(}
+
+
+\section{The \texttt{.dtx} file}
+\label{sec:dtx-file}
+
+\index{package|(}
+A \dtxfile{} file contains both the commented source code and the user
+documentation for the package.  Running a \dtxfile{} file through
+|latex| typesets the user documentation, which usually also includes a
+nicely typeset version of the commented\index{comments} source code.
+\index{package|)}
+
+Due to some \DOC{} trickery, a \dtxfile{} file is actually evaluated
+\emph{twice}.  The first time, only a small piece of \latex{} driver
+code is evaluated.  The second time, \emph{comments}\index{comments}
+in the \dtxfile{} file are evaluated, as if there were no ``|%|''
+preceding them.  This can lead to a good deal of confusion when
+writing \dtxfile{} files and occasionally leads to some awkward
+constructions.  Fortunately, once the basic structure of a \dtxfile{} file
+is in place, filling in the code is fairly straightforward.
+
+
+\subsection{Prologue}
+
+\index{comments|(}
+
+\dtxfile{} files generally begin with a copyright\index{copyright} and
+license\index{license} comment:
+
+\begin{verbatim}
+    % \iffalse meta-comment
+    %
+    % Copyright (C) <year> by <your name>
+    %
+    % This file may be distributed and/or modified under the
+    % conditions of the LaTeX Project Public License, either
+    % version 1.3 of this license or (at your option) any later
+    % version.  The latest version of this license is in:
+    %
+    %    http://www.latex-project.org/lppl.txt
+    %
+    % and version 1.3 or later is part of all distributions of
+    % LaTeX version 2005/12/01 or later.
+    %
+    % \fi
+\end{verbatim}
+
+\index{comments|)}
+
+\noindent
+The \usemacro{iffalse} and |\fi| are needed because the second time
+the \dtxfile{} file is processed, |%| characters at the beginning of lines
+are ignored.  To prevent the
+copyright\index{copyright}/license\index{license} from being evaluated
+as \latex{} code, we have to surround it with
+\usemacro{iffalse}\dotsbrk|\fi|.  Adding ``\usething{meta-comment}''
+after ``\usemacro{iffalse}'' is nothing more than a convention for
+indicating that the comment\index{comments} is intended to be read by
+a human, not by \DOC{}, \ds{}, or \latex.
+
+\indexmacroBegin{NeedsTeXFormat} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{ProvidesPackage}
+
+\begin{decl}
+  \defmacro{NeedsTeXFormat}  \arg{format-name} \oarg{release-date} \\
+  \defmacro{ProvidesPackage} \arg{package-name} \oarg{release-info}
+\end{decl}
+
+The next few lines are also surrounded by
+\usemacro{iffalse}\dotsbrk|\fi| so as not to be processed by |latex|
+on the second pass through the \dtxfile{} file.  However, these lines are
+intended not for a human reader, but for \ds{} (hence, no
+``\usething{meta-comment}''):
+
+\label{code:ProvidesPackage}
+\begin{verbatim}
+    % \iffalse
+    %<<package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    %<<package>>\ProvidesPackage{<package>}
+    %<<package>>   [<YYYY>/<MM>/<DD> v<version> <description>]
+    %
+\end{verbatim}%
+\indexmacro{NeedsTeXFormat}%
+\indexmacro{ProvidesPackage}
+
+\noindent
+(We'll encounter the |\fi| shortly.)
+
+Remember the \usemacro{generate} line in the \insfile{} file
+(page~\pageref{code:generate})?  It ended with the tag ``|package|''.
+This tells \ds{} to write lines that begin with ``|%<<package>>|'' to
+the \styfile{} file, stripping off the ``|%<<package>>|'' in the
+process.  Hence, our \styfile{} file will begin with the following:
+
+\begin{verbatim}
+    \NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    \ProvidesPackage{<package>}
+       [<YYYY>/<MM>/<DD> v<version> <description>]
+\end{verbatim}%
+\indexmacro{NeedsTeXFormat}%
+\indexmacro{ProvidesPackage}
+
+\noindent
+For example:
+
+\begin{verbatim}
+    \NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    \ProvidesPackage{skeleton}
+       [2002/03/25 v1.0 .dtx skeleton file]
+\end{verbatim}%
+\label{code:ProvidesPackage-example}%
+\indexmacro{NeedsTeXFormat}%
+\indexmacro{ProvidesPackage}
+
+\noindent
+\index{package|(}
+The \usemacro{NeedsTeXFormat} line ensures that the package won't run
+under a version of \latex[\LaTeXe]{} older than what the package was
+tested with.  The date and version strings in the
+\usemacro{ProvidesPackage} line are used by \DOC{} to set the
+\usemacro{filedate} and \usemacro{fileversion} macros.  Note the
+date\index{date format} format; \emph{YYYY/MM/DD} is used throughout
+\latex[\LaTeXe]{} and should be used in your packages as well.
+\index{package|)}
+
+\indexmacroEnd{ProvidesPackage}
+\indexmacroEnd{NeedsTeXFormat}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{EnableCrossrefs} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{CodelineIndex}
+\indexmacroBegin{RecordChanges}
+\indexmacroBegin{DocInput}
+
+\begin{decl}
+  \defmacro{EnableCrossrefs} \\
+  \defmacro{CodelineIndex}   \\
+  \defmacro{RecordChanges}   \\
+  \defmacro{DocInput} \arg{filename}   \label{desc:CodelineIndex}
+\end{decl}
+
+Next comes the only part of the \dtxfile{} file that isn't commented out
+(\ie doesn't begin each line with |%|):
+
+\begin{verbatim}
+    %<<*driver>>
+    \documentclass{ltxdoc}
+    \usepackage{<package>}
+    \EnableCrossrefs
+    \CodelineIndex
+    \RecordChanges
+    \begin{document}
+      \DocInput{<package>.dtx}
+    \end{document}
+    %<</driver>>
+    % \fi
+\end{verbatim}
+
+The preceding code stanza is what |latex| evaluates on its first pass
+through the \dtxfile{} file.  We'll now examine that stanza line-by-line:
+
+\begin{enumerate}
+  \item Putting code between ``|%<<*driver>>|'' and ``|%<</driver>>|''
+  is a \ds{} shorthand for prefixing each line with ``|%<<driver>>|''.
+  This demarcates the \DOC{} driver\index{driver code} code.
+
+  \item The \usemacro{documentclass} should almost always be
+  \usething{ltxdoc}, as that loads \DOC{} and provides a few useful
+  macros for formatting program documentation.
+
+\index{package|(}
+  \item You should always \usemacro{usepackage} your package.  If you
+  don't, \DOC{} won't see the package's \usemacro{ProvidesPackage}
+  line and won't know how to set \usemacro{filedate} and
+  \usemacro{fileversion} (see page~\pageref{code:GetFileInfo}).  This
+  is also where you should \usemacro{usepackage} any other packages
+  needed to typeset the user documentation.
+\index{package|)}
+
+  \item \usemacro{EnableCrossrefs} tells \DOC{} that you want it to
+  construct an index for your code---normally a good idea.  The
+  alternative is \usemacro{DisableCrossrefs}, which speeds up
+  processing by a negligible amount.
+
+  \item \usemacro{CodelineIndex} tells \DOC{} that the index should
+  refer to program line numbers instead of page numbers.  (The
+  alternative is \usemacro{PageIndex}.)  \usemacro{CodelineIndex}
+  makes index entries easier to find at the expense of making the
+  index less self-consistent (because descriptions of macros and
+  environments are always indexed by page number).  The index does,
+  however, begin with a note of explanation.
+
+  \item \label{item:RecordChanges} On page~\pageref{code:changes},
+  we'll see how to log the changes made in each revision of the
+  package\index{package}.  \usemacro{RecordChanges} tells \DOC{} that
+  it should keep and aggregate the log entries.
+
+  \item There should be only one command between the
+  |\begin{document}| and |\end{document}|: a \usemacro{DocInput} call
+  with which the \dtxfile{} file inputs itself.  This enables a master
+  file to \usemacro{DocInput} multiple files in order to produce a
+  single document that covers more than one package\index{package} but
+  contains a unified index\index{indexing}.  Master documentation
+  files are described~\vpageref{sec:master-files}.
+\end{enumerate}
+
+\indexmacroEnd{DocInput}
+\indexmacroEnd{RecordChanges}
+\indexmacroEnd{CodelineIndex}
+\indexmacroEnd{EnableCrossrefs} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{OnlyDescription} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{OnlyDescription} \label{desc:OnlyDescription}
+\end{decl}
+
+Another command that sometimes appears in the preamble (\ie before the
+|\begin{document}|) is \usemacro{OnlyDescription}, which tells \DOC{}
+to typeset only the user documentation, not the package\index{package}
+code/comments\index{comments}.  It's usually best to omit
+\usemacro{OnlyDescription} (or add it commented out).  A user can
+always add it manually or even enable \usemacro{OnlyDescription} for
+\emph{all} \dtxfile{} files by adding the following to his
+\defthing{ltxdoc.cfg} file:
+
+\begin{verbatim}
+     \AtBeginDocument{\OnlyDescription}
+\end{verbatim}%
+\indexmacro{AtBeginDocument}
+
+\indexmacroEnd{OnlyDescription}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bigskip
+The remainder of this section covers |latex|'s second pass through the
+\dtxfile{} file.  Consequently, all subsequent examples are prefixed
+with percent signs.
+
+\indexmacroBegin{CheckSum} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\index{checksumming|(}
+
+\begin{decl}
+  \defmacro{CheckSum} \arg{number} \label{decl:CheckSum}
+\end{decl}
+
+\DOC{} supports a very simplistic form of document checksumming, to
+help ensure that a package\index{package} didn't get corrupted in
+transport.  \DOC{} merely counts the number of backslashes that occur
+in the code.  If the number matches the checksum, \DOC{} gives a
+success message:
+
+\begin{verbatim}
+    *******************
+    * Checksum passed *
+    *******************
+\end{verbatim}
+
+\noindent
+Otherwise, it says what the correct checksum should be:
+
+\begin{verbatim}
+    ! Package doc Error: Checksum not passed (<incorrect><<>><correct>).
+\end{verbatim}%
+\indexthing{Checksum not passed}
+
+\noindent
+To specify the checksum in a \dtxfile{} file, merely add a \usemacro{CheckSum}
+statement:
+
+\begin{verbatim}
+    % \CheckSum{<number>}
+\end{verbatim}
+
+\noindent
+If \m{number} is~|0|, or if the \dtxfile{} file lacks a
+\usemacro{CheckSum} line entirely, then \DOC{} outputs the following
+warning message:
+
+\begin{verbatim}
+    **********************************
+    * This macro file has no checksum!
+    * The checksum should be <number>!
+    **********************************
+\end{verbatim}
+
+\noindent
+During code development it is convenient to specify |\CheckSum{0}| so
+you don't receive an error message every time you run |latex|.  But
+don't forget to replace ``|0|'' with the correct number before
+releasing your package\index{package}!
+
+\index{checksumming|)}
+\indexmacroEnd{CheckSum}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{CharacterTable} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{CharacterTable} \arg{text}
+\end{decl}
+
+The second mechanism that \DOC{} uses to ensure that a \dtxfile{} file
+is uncorrupted is a character table.  If you put the following command
+verbatim into your \dtxfile{} file, then \DOC{} will ensure that no
+unexpected character translation took place in transport:\footnote{The
+character table is commonly prefixed with double percent signs so that
+it gets written to the \texttt{.sty}\index{style file} file.  This
+seems unnecessary and is therefore shown here with single percent
+signs.}
+
+\begin{verbatim}
+    % \CharacterTable
+    %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+    %   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+    %   Digits        \0\1\2\3\4\5\6\7\8\9
+    %   Exclamation   \!     Double quote  \"     Hash (number) \#
+    %   Dollar        \$     Percent       \%     Ampersand     \&
+    %   Acute accent  \'     Left paren    \(     Right paren   \)
+    %   Asterisk      \*     Plus          \+     Comma         \,
+    %   Minus         \-     Point         \.     Solidus       \/
+    %   Colon         \:     Semicolon     \;     Less than     \<<
+    %   Equals        \=     Greater than  \>>     Question mark \?
+    %   Commercial at \@     Left bracket  \[     Backslash     \\
+    %   Right bracket \]     Circumflex    \^     Underscore    \_
+    %   Grave accent  \`     Left brace    \{     Vertical bar  \|
+    %   Right brace   \}     Tilde         \~}
+\end{verbatim}
+
+\noindent
+A success message looks like this:
+
+\begin{verbatim}
+    ***************************
+    * Character table correct *
+    ***************************
+\end{verbatim}
+
+\noindent
+and an error message looks like this:
+
+\begin{verbatim}
+    ! Package doc Error: Character table corrupted.
+\end{verbatim}%
+\indexthing{Character table corrupted}
+
+\indexmacroEnd{CharacterTable}     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{changes} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{changes} \arg{version} \arg{date} \arg{description}
+    \label{code:changes}
+\end{decl}
+
+\index{package|(}
+
+On page~\pageref{item:RecordChanges} we learned that \DOC{} has a
+mechanism for recording changes to the package.  The command is
+``|\changes{<version>}{<date>}{<description>}|'', and it's common to
+use \usemacro{changes} for the initial version of the package to log
+the package's creation date:
+
+\index{package|)}
+
+\begin{verbatim}
+    % \changes{v1.0}{2002/03/25}{Initial version}
+\end{verbatim}
+
+One nice feature of the \usemacro{changes} command is that it knows
+whether it was used internally to a macro/environment definition.  As
+Figure~\ref{fig:change-history} shows, top-level changes are prefixed
+with ``General:'', and internal changes are prefixed with the name of
+the enclosing macro or environment.
+
+\begin{figure}[htbp]
+  \centering
+  \index{change history}
+  \fbox{%
+    \begin{minipage}[t]{0.75\textwidth}
+      {\normalfont\Large\bfseries Change History\vskip 2.3ex plus 0.2ex}
+      v1.0 \\
+      \hspace*{2em} General: Top-level comment \dotfill 1 \\
+      v1.2j \\
+      \hspace*{2em} \texttt{myMacro}: Internal macro comment \dotfill 5
+    \end{minipage}%
+  }%
+  \caption{Sample change history}
+  \label{fig:change-history}
+\end{figure}
+
+\indexmacroEnd{changes}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{GetFileInfo} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{filedate}
+\indexmacroBegin{fileversion}
+\indexmacroBegin{fileinfo}
+
+\begin{decl}
+  \defmacro{GetFileInfo} \arg{style-file}   \label{code:GetFileInfo} \\[1ex]
+  \defmacro{filedate}    \\
+  \defmacro{fileversion} \\
+  \defmacro{fileinfo}
+\end{decl}
+
+Next, we tell \DOC{} to parse the \usemacro{ProvidesPackage} command
+(page~\pageref{code:ProvidesPackage}), calling the three components of
+\usemacro{ProvidesPackage}'s argument, respectively,
+``\usemacro{filedate}'', ``\usemacro{fileversion}'', and
+``\usemacro{fileinfo}'':
+
+\begin{verbatim}
+    % \GetFileInfo{<package>.sty}
+\end{verbatim}%
+\index{style file}%
+\indexmacro{GetFileInfo}
+
+\noindent
+For instance, the \usemacro{ProvidesPackage} example
+shown~\vpageref{code:ProvidesPackage-example} would be parsed as
+follows:
+
+|    |%
+\begin{tabular}{@{}l@{\qquad$\equiv$\qquad}l@{}}
+  \usemacro{filedate}    & 2002/03/25         \\
+  \usemacro{fileversion} & v1.0               \\
+  \usemacro{fileinfo}    & .dtx skeleton file
+\end{tabular}
+
+\indexmacroEnd{fileinfo}
+\indexmacroEnd{fileversion}
+\indexmacroEnd{filedate}
+\indexmacroEnd{GetFileInfo} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{DoNotIndex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\index{indexing|(}
+
+\begin{decl}
+  \defmacro{DoNotIndex} \arg{macro-name \textnormal{, \dots}}
+\end{decl}
+
+When producing an index, \DOC{} normally indexes \emph{every} control
+sequence (\ie backslashed word or symbol) in the code.  The problem
+with this level of automation is that many control sequences are
+uninteresting from the perspective of understanding the code.  For
+example, a reader probably doesn't want to see every location where
+|\if| is used---or |\the| or |\let| or |\begin| or any of numerous
+other control sequences.
+
+As its name implies, the \usemacro{DoNotIndex} command gives \DOC{} a
+list of control\index{control sequences} sequences that should not be
+indexed.  \usemacro{DoNotIndex} can be used any number of times, and
+it accepts any number of control\index{control sequences} sequence
+names per invocation:
+
+\begin{verbatim}
+    % \DoNotIndex{\#,\$,\%,\&,\@,\\,\{,\},\^,\_,\~,\ }
+    % \DoNotIndex{\@ne}
+    % \DoNotIndex{\advance,\begingroup,\catcode,\closein}
+    % \DoNotIndex{\closeout,\day,\def,\edef,\else,\empty,\endgroup}
+\end{verbatim}
+\centerline{$\vdots$}
+
+\index{indexing|)}
+\indexmacroEnd{DoNotIndex}     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsection{User documentation}
+
+We can finally start writing the user documentation.  A typical
+beginning looks like this:
+
+\begin{verbatim}
+    % \title{The \textsf{<package>} package\thanks{This document
+    %   corresponds to \textsf{<package>}~\fileversion,
+    %   dated~\filedate.}}
+    % \author{<your name> \\ \texttt{<your e-mail address>}}
+    %
+    % \maketitle
+\end{verbatim}%
+\indexmacro{title}
+\indexmacro{author}
+\indexmacro{maketitle}
+
+\noindent
+\index{package|(}
+The title can certainly be more creative, but note that it's common
+for package names to be typeset with \usemacro{textsf} and for
+\usemacro{thanks} to be used to specify the package version and date.
+This yields one of the advantages of literate\index{literate
+programming} programming: Whenever you change the package version (the
+optional second argument to \usemacro{ProvidesPackage}), the user
+documentation is updated accordingly.  Of course, you still have to
+ensure manually that the user documentation accurately describes the
+updated package.
+\index{package|)}
+
+Write the user documentation as you would any \latex{} document,
+except that you have to precede each line with a ``|%|''.  Note that
+the \usething{ltxdoc} document class is derived from |article|, so the
+top-level sectioning command is \usemacro{section}, not
+\usemacro{chapter}.
+
+
+\indexmacroBegin{DescribeMacro} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{DescribeEnv}
+
+\begin{decl}
+  \defmacro{DescribeMacro} \arg{macro} \\
+  \defmacro{DescribeEnv} \arg{environment}
+\end{decl}
+
+\DOC{} provides a couple of commands to help format user
+documentation.  If you include
+``|\DescribeMacro{<macro>}|''\footnote{``\m{macro}'' should include
+the backslash.} within a paragraph, \DOC{} will stick ``\m{macro}'' in
+the margin to make it easy for a reader to see.  \DOC{} will also add
+\m{macro} to the index and format the corresponding page number to
+indicate that this is where the macro is described (as opposed to the
+place in the source code where the macro is defined).
+
+\usemacro{DescribeEnv} is the analogous command for describing an
+environment.  Both \usemacro{DescribeMacro} and \usemacro{DescribeEnv}
+can be used multiple times within a paragraph.
+
+\indexmacroEnd{DescribeEnv}
+\indexmacroEnd{DescribeMacro}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexmacroBegin{marg} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{oarg}
+\indexmacroBegin{parg}
+\indexmacroBegin{meta}
+
+\begin{decl}
+  \defmacro{marg} \arg{argument} \\
+  \defmacro{oarg} \arg{argument} \\
+  \defmacro{parg} \arg{argument} \\
+  \defmacro{meta} \arg{text}
+\end{decl}
+
+The \usething{ltxdoc} document class provides three commands to help
+typeset macro and environment syntax
+(Table~\ref{tbl:argument-formatting}).  \usemacro{marg} formats
+mandatory arguments, \usemacro{oarg} formats optional arguments, and
+\usemacro{parg} formats picture arguments.  All three of these utilize
+\usemacro{meta} to typeset the argument proper.  \usemacro{meta} is
+also useful on its own.  For example, ``\texttt{This needs a}
+|\meta{dimen}|.'' is typeset as ``This needs a \m{dimen}.''
+
+\begin{table}[htbp]
+  \centering
+  \caption{Argument-formatting commands}
+  \label{tbl:argument-formatting}
+  \begin{tabular}{@{}ll@{}}
+    \hline
+    \multicolumn{1}{@{}c}{Command} &
+    \multicolumn{1}{c@{}}{Result} \\
+    \hline
+    \usemacro{marg}|{text}| & |{<text>}| \\
+    \usemacro{oarg}|{text}| & |[<text>]| \\
+    \usemacro{parg}|{text}| & |(<text>)| \\
+    \hline
+  \end{tabular}
+\end{table}
+
+In addition to those commands, \DOC{} facilitates the typesetting of
+macro descriptions by automatically loading the \svrb{}
+package\index{package}.  \svrb{} lets you use \verb+|+\dots\verb+|+
+as a convenient shorthand for |\verb|\verb+|+\dots\verb+|+.  For
+instance, ``\verb+|\mymacro|+ |\oarg{pos}| |\marg{width}|
+|\marg{text}|'' is typeset as follows:
+
+\begin{verbatim}
+    \mymacro [<pos>] {<width>} {<text>}
+\end{verbatim}
+
+\noindent
+Like \usemacro{verb}, the \verb+|+\dots\verb+|+ shorthand does not
+work within \usemacro{footnote} or other fragile macros.
+
+\indexmacroEnd{meta}
+\indexmacroEnd{parg}
+\indexmacroEnd{oarg}
+\indexmacroEnd{marg}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsection{Code and commentary}
+
+\indexmacroBegin{StopEventually} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{Finale}
+
+\begin{decl}
+  \defmacro{StopEventually} |{<text>}| \\
+  \defmacro{Finale}
+\end{decl}
+
+The package's\index{package} source code is delineated by putting it
+between \usemacro{StopEventually} and \usemacro{Finale}.  Note that
+\usemacro{CheckSum} (page~\pageref{decl:CheckSum}) applies only to the
+package's\index{package} source code.  \usemacro{StopEventually} takes
+an argument, which is a block of text to typeset after the code.  If
+\usemacro{OnlyDescription} (page~\pageref{desc:OnlyDescription}) is
+specified, then nothing after the \usemacro{StopEventually} will be
+output---including text that follows \usemacro{Finale}.
+\usemacro{StopEventually}'s \m{text} parameter is therefore the
+mechanism for providing a piece of text that should be output
+regardless of whether or not a code listing is typeset.  It commonly
+includes a bibliography section and/or one or more of the following
+commands.
+
+\indexmacroEnd{Finale}
+\indexmacroEnd{StopEventually}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{decl}
+  \defmacro{PrintChanges} \\
+  \defmacro{PrintIndex}
+\end{decl}
+
+\indexmacroBegin{PrintChanges} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\index{change history|(}
+
+\usemacro{PrintChanges} produces an unnumbered section called ``Change
+History''.  (See Figure~\vref{fig:change-history}).  The Change
+History section aggregates all of the \usemacro{changes} commands in
+the \dtxfile{} file into a single list of per-version modifications.
+This makes it easy to keep track of what changed from version to
+version.
+
+\usemacro{PrintChanges} uses \latex's glossary mechanism.  Running
+|latex| on |<package>.dtx| produces change-history data in
+|<package>.glo|.  To produce the actual change history
+(|<package>.gls|), the user should run the \usething{makeindex}
+program as follows:
+
+\begin{verbatim}
+    makeindex -s gglo.ist -o <package>.gls <package>.glo
+\end{verbatim}
+
+\index{change history|)}
+\indexmacroEnd{PrintChanges}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\indexmacroBegin{PrintIndex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\index{indexing|(}
+
+\usemacro{PrintIndex} produces an unnumbered section called ``Index''.
+The index automatically includes entries for all macros and
+environments that are used, defined, or described in the document.
+All environments are additionally listed under ``environments''.
+Table~\ref{tbl:index-formatting} illustrates the way that various
+entries are formatted.  In that table, ``27'' refers to a page number,
+and ``123'' refers to a line number.\footnote{If
+\texttt{\string\CodelineIndex} (page~\pageref{desc:CodelineIndex})
+were not used then ``123'' would refer to a page number.}  Note that
+macro/environment definitions and uses are included in the index only
+if the document includes a code listing (\ie
+\usemacro{OnlyDescription} was not specified).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Formatting of entries in the index}
+  \label{tbl:index-formatting}
+  \begin{tabular}{@{}llp{6cm}@{}}
+  \hline
+  Item        & Function  & Formatting in index                            \\
+  \hline
+  Macro       & Used      & |\myMacro| \dotfill~123                        \\
+  Macro       & Defined   & |\myMacro| \dotfill~\underline{123}            \\
+  Macro       & Described & |\myMacro| \dotfill~\textit{27}                \\
+  Environment & Defined   & |myEnv| (environment) \dotfill~\underline{123} \\
+  Environment & Described & |myEnv| (environment) \dotfill~\textit{27}     \\
+  \multicolumn{2}{@{}l}{Other (\ie an explicit \texttt{\string\index})}
+                          & myItem \dotfill~27                             \\
+  \hline
+  \end{tabular}
+\end{table}
+
+The default formatting for an explicit \usemacro{index} command uses a
+roman page number.  This leads to confusion, as roman page numbers
+otherwise indicate line numbers in the package source code.  The
+solution is to specify ``|usage|'' formatting to the \usemacro{index}
+command:
+
+\begin{verbatim}
+    \index{explicit indexing|usage}
+\end{verbatim}
+
+Running |latex| on |<package>.dtx| produces index data in
+|<package>.idx|.  To produce the actual index (|<package>.ind|), the
+user should run the \usething{makeindex} program as follows:
+
+\begin{verbatim}
+    makeindex -s gind.ist -o <package>.ind <package>.idx
+\end{verbatim}
+
+A code index is a nice ``value added'' made possible by
+literate\index{literate programming} programming.  It requires
+virtually no extra effort and greatly helps code maintainers to find
+macro definitions and see what other macros a package\index{package}
+depends upon.
+
+\index{indexing|)}
+\indexmacroEnd{PrintIndex}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexthingBegin{macrocode} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  |\begin{macrocode}| \\
+  \m{code}            \\
+  |\end{macrocode}|
+\end{decl}
+
+Code fragments listed between |\begin{macrocode}| and
+|\end{macrocode}| are extracted verbatim into the \styfile{} file.
+When typeset, the code fragments are shown with a running line counter
+to make it easy to refer to a specific line.  Here are some key points
+to remember about the \usething{macrocode} environment:
+
+\begin{enumerate}
+  \item There must be \emph{exactly} four spaces between the ``|%|''
+  and the ``|\begin{macrocode}|'' or ``|\end{macrocode}|''.
+  Otherwise, \DOC{} won't detect the end of the code
+  fragment.\footnote{Trivia: Only the
+  \texttt{\string\end\string{macrocode\string}} needs this precise
+  spacing and then, only for typesetting the documentation.
+  Nevertheless, it's good practice to use
+  ``\texttt{\%\textvisiblespace\textvisiblespace\textvisiblespace\textvisiblespace}''
+  for the \texttt{\string\begin\string{macrocode\string}}, as well.}
+
+  \item The lines of code within
+  |\begin{macrocode}|\dotsbrk|\end{macrocode}| should not begin with
+  ``|%|''.  The code gets written exactly as it is to the \insfile{}
+  file, with no |%|-stripping.
+\end{enumerate}
+
+The following is a sample code fragment.  It happens to be a complete
+macro definition, but this is not necessary; any fragment of \latex{}
+code can appear within a \usething{macrocode} environment.
+
+\label{code:mymacro}
+\begin{verbatim}
+    %    \begin{macrocode}
+    \newcommand{\mymacro}{This is
+      a \LaTeX{} macro.}
+    %    \end{macrocode}
+\end{verbatim}
+
+\noindent
+\DOC{} formats the preceding code fragment as follows:
+
+\begin{tabbing}
+|    |\={\tiny 9} \=\kill
+       \> {\tiny 1} \> |\newcommand{\mymacro}{This is| \\
+       \> {\tiny 2} \> |  a \LaTeX{} macro.}|
+\end{tabbing}
+
+\noindent
+Note that line numbers are unique across the entire program (as
+opposed to being reset at the top of each page).  If
+\usemacro{PrintIndex} is used in the \dtxfile{} file containing the
+preceding definition of |\mymacro|, the index will automatically
+include entries for |\newcommand|, |\mymacro|, and |\LaTeX|, unless
+any of these are \usemacro{DoNotIndex}'ed.
+
+\indexthingEnd{macrocode}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\indexthingBegin{macro} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexthingBegin{environment}
+
+\begin{decl}
+  |\begin{macro}{<macro>}| \\
+  \qquad $\vdots$ \\
+  |\end{macro}| \\
+  \\
+  |\begin{environment}{<environment>}| \\
+  \qquad $\vdots$ \\
+  |\end{environment}| \\
+\end{decl}
+
+The \usething{macro} and \usething{environment} environments are used
+to delineate a complete macro or environment definition.
+\usething{macro}/\usething{environment} environments generally contain
+one or more \usething{macrocode} environments interspersed with code
+documentation.  The following is a more complete version of the
+\usething{macrocode} example shown~\vpageref{code:mymacro}.
+
+\begin{verbatim}
+    % \begin{macro}{\mymacro}
+    % We define a trivial macro, |\mymacro|, to illustrate
+    % the use of the |macro| environment.
+    %    \begin{macrocode}
+    \newcommand{\mymacro}{This is
+      a \LaTeX{} macro.}
+    %    \end{macrocode}
+    % \end{macro}
+\end{verbatim}
+
+\noindent
+The typeset version is shown below:
+
+\begin{tabbing}
+|    \mymacro|\qquad\={\tiny 9} \= \kill
+|    \mymacro| \> We define a trivial macro, |\mymacro|, to illustrate the \\
+               \> use of the \usething{macro} environment. \\
+               \> {\tiny 1} \> |\newcommand{\mymacro}{This is| \\
+               \> {\tiny 2} \> |  a \LaTeX{} macro.}|
+\end{tabbing}
+
+\DOC{} typesets the macro/environment name in the margin for increased
+visibility.  \DOC{} also adds the appropriate entries to the index.
+(See Table~\vref{tbl:index-formatting} for examples of how these
+entries are formatted.)  Note that
+|\begin{macro}|\dotsbrk|\end{macro}| is not required to indicate a
+macro definition.  It can also be used to indicate definitions of
+\latex{} datatypes, such as counters, lengths, and boxes:
+
+\begin{verbatim}
+    % \begin{macro}{myCounter}
+    % This is an example of using the |macro| environment to format
+    % something other than a macro.
+    %    \begin{macrocode}
+    \newcounter{myCounter}
+    %    \end{macrocode}
+    % \end{macro}
+\end{verbatim}%
+\indexthing{macrocode}
+
+\usething{macro} and \usething{environment} environments can be
+nested.  This capability is useful not only for macros that define
+other macros, but also when defining a group of related datatypes that
+share a description:
+
+\begin{verbatim}
+    % \begin{macro}{\thingheight}
+    % \begin{macro}{\thingwidth}
+    % \begin{macro}{\thingdepth}
+    % These lengths keep track of the dimensions of our |\thing|
+    % box.  (Actually, we're just trying to show how to nest
+    % |macro| environments.)
+    %    \begin{macrocode}
+    \newlength{\thingheight}
+    \newlength{\thingwidth}
+    \newlength{\thingdepth}
+    %    \end{macrocode}
+    % \end{macro}
+    % \end{macro}
+    % \end{macro}
+\end{verbatim}%
+\indexthing{macro}%
+\indexthing{macrocode}
+
+\noindent
+Descriptionless \usething{macro} environments should generally be
+avoided, as the formatting is a little ugly; the macro name appears on
+its own line, to the left of an ``empty'' description, but the code
+doesn't start until the next line.
+
+There can be multiple \usething{macrocode} environments within a
+|\begin{macro}|\dotsbrk|\end{macro}| or
+|\begin{environment}|\dotsbrk|\end{environment}| block.
+\index{comments|(} This is the mechanism by which code can be
+commented internally to a macro/environment.  (It's considered bad
+style to use ``|%|'' for comments within a \usething{macrocode}
+block.)  Here's an example of the way that a nontrivial macro might be
+commented:
+
+\begin{verbatim}
+    % \begin{macro}{\complexMacro}
+    % Pretend that this is a very complex macro that needs
+    % to have its various pieces documented.
+    %    \begin{macrocode}
+    \newcommand{\complexMacro}{%
+    %    \end{macrocode}
+    % Initialize all of our counters to zero.
+    %    \begin{macrocode}
+      \setcounter{count@i}{0}%
+      \setcounter{count@ii}{0}%
+      \setcounter{count@iii}{0}%
+      \setcounter{count@iv}{0}%
+    %    \end{macrocode}
+    % Do some really complicated processing.
+    %    \begin{macrocode}
+\end{verbatim}%
+\indexthing{macrocode}
+|                  |$\vdots$
+\begin{verbatim}
+    %    \end{macrocode}
+    % We're all finished now.
+    %    \begin{macrocode}
+    }
+    %    \end{macrocode}
+    % \end{macro}
+\end{verbatim}%
+\indexthing{macrocode}
+
+\indexthingEnd{environment}
+\indexthingEnd{macro}   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\index{comments|)}
+
+Appendix~\ref{sec:skeleton-dtx-file-style} lists a complete, skeleton
+\dtxfile{} file that encapsulates a \styfile{} file and its
+documentation.
+
+\index{class file|(}
+
+\paragraph{Class files}
+The procedure to produce a class file from a \dtxfile{} file is far
+less straightforward than the procedure to produce a style file.  The
+problem is that \usemacro{DocInput} relies on the
+|\usepackage{|\m{package}|}| line (more precisely, the
+\usemacro{ProvidesPackage} line within \m{package}|.sty|) to set the
+\usemacro{fileversion} and \usemacro{filedate} macros.  However, a
+class file can't be loaded with |\usepackage|.  Nor can we simply load
+it with |\documentclass{|\m{package}|}| because only one class can be
+loaded per document and we need that class to be \usething{ltxdoc}.
+
+The solution is to use \usemacro{ProvidesFile} to make the file
+version and date available to the \dtxfile{} file.
+Appendix~\ref{sec:skeleton-dtx-file-class} lists a complete, skeleton
+\dtxfile{} file that encapsulates a \clsfile{} file and its
+documentation.  It resembles the skeleton file shown in
+Appendix~\ref{sec:skeleton-dtx-file-style} but has a differently
+structured header section.
+
+\index{class file|)}
+
+
+\index{documented LaTeX file@documented \LaTeX{} file|)}
+
+
+\section{Tips, tricks, and recommendations}
+
+\begin{itemize}
+  \item Write lots of good documentation!  It really helps others
+  understand your code and the package\index{package} as a whole.
+
+  \item If you believe the \latex{} community at large would be
+  interested in your package then you should upload it to \CTAN{} at
+  \URL{http://www.ctan.org/upload}.  As a central repository of all
+  things \TeX-related, \CTAN{} makes it easier for others to find your
+  \latex{} package than if it were located on your personal home page.
+
+\index{documentation, prebuilt PDF|(}
+  \item When distributing your package, be sure to include a
+  |README|\index{README file@\texttt{README} file} file describing
+  what your package does as well as \emph{prebuilt} documentation,
+  preferably as a PDF file.  Prebuilt documentation saves users the
+  bother of having to download your package, install it, and build the
+  documentation before even knowing what the package is supposed to do
+  or if it meets their needs.
+\index{documentation, prebuilt PDF|)}
+
+  \item Use \latex's sectioning commands to organize the code and
+  clarify its structure (\eg |\subsection{|\texttt{Initialization
+  macros}|}|, |\subsection{|\texttt{Helper functions}|}|,
+  |\subsection{|\texttt{Exported macros and environments}|}|,~\dots).
+
+\index{comments|(}
+
+  \item Although commentary really belongs only in the typeset
+  documentation, it is also possible to write comments that are
+  visible only in the \styfile{} file, in both the typeset
+  documentation and the \styfile{} file, or only in the \dtxfile{}
+  source.  Table~\ref{tbl:comment-visibility} shows how to control
+  comment visibility.
+
+\index{comments|)}
+
+    \begin{table}[hbp]
+      \centering
+      \caption{Comment visibility}
+      \label{tbl:comment-visibility}
+      \newcommand{\yes}{Y}%
+      \newcommand{\no}{N}%
+      \index{style file}%
+      \index{comments}%
+      \begin{tabular}{@{}ccl@{}}
+        \hline
+        Appears  & Appears   \\
+        in docs  & in \styfile{} & \raisebox{1.5ex}[0pt]{Mechanism} \\
+        \hline
+
+        \no  & \no  & |% ^^A <comment>| \\[2ex]
+
+        \no  & \yes & |% \iffalse|      \\
+             &      & |%% <comment>|    \\
+             &      & |% \fi|           \\[2ex]
+
+        \yes & \no  & |% <comment>|     \\[2ex]
+
+        \yes & \yes & |%% <comment>|    \\
+        \hline
+      \end{tabular}
+    \end{table}
+
+  \item All lines between |<<*package>>| and |<</package>>|, except
+  those within a \usething{macrocode} environment, should begin with
+  ``|%|''.  Don't use any blank lines; these would get written to the
+  \styfile{} file (and oughtn't).
+
+
+\index{package|(}
+\index{"@@\texttt{"@}!in macro names|(}
+  \item It is good practice for \latex{} programs to use ``|@|''
+  within the names of macros, lengths, counters, etc.\ that are
+  declared globally, but intended to be used only internally to the
+  package.  This prevents a user from corrupting package state by
+  inadvertently redefining package internals.\footnote{Within a
+  \LaTeX{} document, ``|@|'' is set to category code~12 (``other''),
+  not category code~11 (``letter''), so the user can't easily define
+  or use a macro with ``|@|'' in its name.}  Another good practice is
+  to prefix all global names that are internal to the package with the
+  name of the package (\eg ``|\<package>@thing|'' instead of
+  ``|\@thing|'' or---even worse---just ``|\thing|'').  This helps
+  avoid inter-package naming conflicts.  Finally, because decimal
+  digits are not normally allowed in macro names, it is common to use
+  roman\index{roman numerals} numerals instead, for example: |\arg@i|,
+  |\arg@ii|, |\arg@iii|, |\arg@iv|, etc.
+\index{"@@\texttt{"@}!in macro names|)}
+\index{package|)}
+
+  \item You can use \usemacro{index} in the normal way to index things
+  other than macros and environments.
+
+  \item Because macro names can be long, consider using the
+  \defthing{idxlayout} package to reduce the number of columns in
+  the index.  (It provides control over other aspects of index
+  formatting, as well.)
+  
+  \item If you use \Emacs{} as your text editor, try out \swiftexel's
+  |doctex-mode|\index{doctex-mode@\texttt{doctex-mode}}, an \Emacs{}
+  mode designed specifically for writing \dtxfile{} files.
+  \swiftexel{} is available from \CTAN{}.
+
+  As a more primitive alternative, look up \Emacs's |string-rectangle|
+  and |kill-rectangle| commands.  These help a great deal with adding
+  and removing a ``|%|'' at the beginning of every line in a region.
+
+  \item Be sure to read ``The \ds{} Program'' and ``The \DOC{} and
+  \svrb{} Packages'', the documentation for \ds{} and \DOC{},
+  respectively (provided in \dtxfile{} format, of course).  These
+  explain how to do more advanced things with \insfile{} and
+  \dtxfile{} files than this tutorial covered.  Some advanced topics
+  include the following:
+
+    \begin{itemize} \item Extracting multiple \styfile{}
+    files from a single \dtxfile{} file.
+
+      \item Putting different preambles in different
+      \styfile{} files.
+
+      \item Extracting something other than a \styfile{} file (\eg a
+      configuration file or a Perl script) from a \dtxfile{} file.
+
+      \item Changing the formatting of the typeset documentation.
+    \end{itemize}
+\end{itemize}
+
+
+\section{Advanced packaging techniques}
+
+This section describes various bits of wizardry that can be
+accomplished with \DOC{} and \ds.  Few packages require these
+techniques but they are included here for convenient reference.
+
+\subsection{Master documentation files}
+\label{sec:master-files}
+
+\DOC{} supports ``master'' documentation files that typeset multiple
+\dtxfile{} files.  The advantage is that a set of related \dtxfile{}
+files can be typeset with continuous section numbering and a single,
+unified index.  In fact, the \latex[\LaTeXe]{} source code itself is
+typeset using a master document (|source2e.tex|) that includes all of
+the myriad \dtxfile{} files that comprise \latex[\LaTeXe].
+
+To help produce master documents, the \usething{ltxdoc} class
+provides a command called ``\usemacro{DocInclude}''.
+\usething{ltxdoc}'s \usemacro{DocInclude} is much like \DOC's
+\usemacro{DocInput}---it even uses it internally---but has the
+following additional features.
+
+  \begin{itemize}
+    \item \usemacro{PrintIndex} is automatically handled properly.
+
+    \item Every \usemacro{DocInclude}'d file is given a title page.
+
+    \item \usemacro{tableofcontents} works as expected.  \dtxfile{}
+    filenames are used as ``chapter'' names.
+  \end{itemize}
+
+\noindent
+Note that \usemacro{DocInclude}, unlike \usemacro{DocInput}, assumes
+a \dtxfile{} extension.
+
+Appendix~\ref{sec:skeleton-master-file} presents a master-document
+skeleton that uses \usemacro{DocInclude} to typeset |<file1>.dtx|,
+|<file2>.dtx|, and |<file3>.dtx| as a single document.  If you prefer
+a more manual approach (\eg if you dislike \usemacro{DocInclude}'s
+per-file title pages), you can still use \usemacro{DocInput}.
+\index{indexing|(}
+Just make sure to redefine \usemacro{PrintIndex} to do nothing;
+otherwise, each file will get its own index.  After all of the
+\dtxfile{} files have been typeset, call the original
+\usemacro{PrintIndex} command to print a unified index:
+
+\begin{verbatim}
+    \begin{document}
+      \let\origPrintIndex=\PrintIndex \let\PrintIndex=\relax
+      \DocInput{<file1>.dtx}
+      \DocInput{<file2>.dtx}
+      \DocInput{<file3>.dtx}
+      \origPrintIndex
+    \end{document}
+\end{verbatim}%
+\indexmacro{PrintIndex}%
+\indexmacro{DocInput}
+
+\index{indexing|)}
+
+\subsection{Single-file package distributions}
+\label{sec:single-file}
+
+Although \latex{} packages are typically distributed as both
+a~\insfile{} and a \dtxfile{} file, it is possible to distribute a
+package as a single file.  The trick is to include the entire
+\insfile{} at the top of the \dtxfile{} file, right after the
+|%<package>| lines:
+
+\begin{alltt}
+    %\string<*batchfile\string>
+    \string\begingroup
+          \(\vdots\)
+    <Entire contents of the {\normalfont\texttt{.ins}} file>
+          \(\vdots\)
+    \string\endgroup
+    %\string</batchfile\string>
+\end{alltt}
+
+\noindent
+Omit the \usemacro{endbatchfile} to allow \latex{} to continue on with
+the rest of the \dtxfile{} file.  Also, to avoid the ``\texttt{File}
+\m{sty-file} \texttt{already exists on the system.  Overwrite it?
+[y/n]}'' message you can put ``\usemacro{askforoverwritefalse}''
+before the first \usemacro{generate} command.  (This will
+automatically overwrite the existing \styfile{} file.  Wrapping the
+\usemacro{generate} command(s) within
+``\usemacro{IfFileExists}|{|\m{sty-file}|}{}{|\dots|}|'' will suppress
+the overwriting.)  You should also move the \styfile{} installation
+instructions to the end of the \dtxfile{} file so they don't scroll
+off the user's screen.  You'll need to use \usemacro{typeout} as
+\usemacro{Msg} won't be defined:
+
+\begin{verbatim}
+    % \Finale
+    %
+    % \typeout{**************************************************}
+    % \typeout{*}
+    % \typeout{* To finish the installation you have to move the}
+    % \typeout{* following file into a directory searched by TeX:}
+    % \typeout{*}
+    % \typeout{* \space\space skeleton.sty}
+    % \typeout{*}
+    % \typeout{* Documentation is in skeleton.dvi.}
+    % \typeout{*}
+    % \typeout{* Happy TeXing!}
+    % \typeout{**************************************************}
+    \endinput
+\end{verbatim}
+
+
+\subsection{Class and style files with shared versioning information}
+
+Some packages contain both a \clsfile{} and \styfile{} file.  It may
+be desirable to have these extracted from the same \insfile{} file and
+share the same versioning string.  The \ds{} documentation explains
+how to extract multiple files from a single \usemacro{generate} call:
+
+\begin{verbatim}
+    \generate{\file{<package>.cls}{\from{<package>.dtx}{class}}
+              \file{<package>.sty}{\from{<package>.dtx}{package}}}
+\end{verbatim}
+
+Using a single versioning string for both the \clsfile{} and
+\styfile{} files can be accomplished by changing the following lines
+in the \dtxfile{} file shown in
+Appendix~\ref{sec:skeleton-dtx-file-class}:
+
+\begin{verbatim}
+    %<<class>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    %<<class>>\ProvidesClass{<package>}
+    %<<*class>>
+        [<YYYY>/<MM>/<DD> v<version> <brief description>]
+    %<</class>>
+\end{verbatim}
+
+The replacement code specifies which lines belong to the class file
+and which belong to the style file:
+
+\begin{verbatim}
+    %<<class|package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    %<<class>>\ProvidesClass{<package>}
+    %<<package>>\ProvidesPackage{<package>}
+    %<<*class|package>>
+        [<YYYY>/<MM>/<DD> v<version> <brief description>]
+    %<</class|package>>
+\end{verbatim}
+
+\subsection{Gallery of advanced packaging techniques}
+
+See the \dtxfile\ gallery on
+\CTAN\ \URL{https://www.ctan.org/tex-archive/info/dtxgallery} for
+examples of various packaging possibilities, including the following:
+
+\begin{itemize}
+  \item single-file package distributions (cf.~Section~\ref{sec:single-file})
+
+  \item conditional code inclusion (cf.~Table~\ref{tbl:comment-visibility})
+
+  \item rearranging code for presentation in the documentation
+\end{itemize}
+
+
+\appendix
+
+\section{Skeleton files}
+
+This section contains complete skeletons of the types of files
+discussed in the rest of the document.  These skeletons can be used as
+templates for creating your own packages.\index{package}
+
+\index{installer file|(}
+
+\subsection{A skeleton \texttt{.ins} file to generate a \texttt{.sty} file}
+\label{sec:skeleton-ins-file-style}
+
+\begin{verbatim}
+%%
+%% Copyright (C) <year> by <your name>
+%%
+%% This file may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3 of this license or (at your option) any later
+%% version.  The latest version of this license is in:
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%%
+
+\input docstrip.tex
+\keepsilent
+
+\usedir{tex/latex/<package>}
+
+\preamble
+
+This is a generated file.
+
+Copyright (C) <year> by <your name>
+
+This file may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either
+version 1.3 of this license or (at your option) any later
+version.  The latest version of this license is in:
+
+   http://www.latex-project.org/lppl.txt
+
+and version 1.3 or later is part of all distributions of
+LaTeX version 2005/12/01 or later.
+
+\endpreamble
+
+\generate{\file{<package>.sty}{\from{<package>.dtx}{package}}}
+
+\Msg{*********************************************************}
+\Msg{*}
+\Msg{* To finish the installation you have to move the}
+\Msg{* following file into a directory searched by TeX:}
+\Msg{*}
+\Msg{* \space\space <package>.sty}
+\Msg{*}
+\Msg{* To produce the documentation run the file <package>.dtx}
+\Msg{* through LaTeX.}
+\Msg{*}
+\Msg{* Happy TeXing!}
+\Msg{*********************************************************}
+
+\endbatchfile
+\end{verbatim}
+
+
+\subsection{A skeleton \texttt{.ins} file to generate a \texttt{.cls} file}
+\label{sec:skeleton-ins-file-class}
+
+\begin{verbatim}
+%%
+%% Copyright (C) <year> by <your name>
+%%
+%% This file may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3 of this license or (at your option) any later
+%% version.  The latest version of this license is in:
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%%
+
+\input docstrip.tex
+\keepsilent
+
+\usedir{tex/latex/<package>}
+
+\preamble
+
+This is a generated file.
+
+Copyright (C) <year> by <your name>
+
+This file may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either
+version 1.3 of this license or (at your option) any later
+version.  The latest version of this license is in:
+
+   http://www.latex-project.org/lppl.txt
+
+and version 1.3 or later is part of all distributions of
+LaTeX version 2005/12/01 or later.
+
+\endpreamble
+
+\generate{\file{<package>.cls}{\from{<package>.dtx}{class}}}
+
+\Msg{*********************************************************}
+\Msg{*}
+\Msg{* To finish the installation you have to move the}
+\Msg{* following file into a directory searched by TeX:}
+\Msg{*}
+\Msg{* \space\space <package>.cls}
+\Msg{*}
+\Msg{* To produce the documentation run the file <class>.dtx}
+\Msg{* through LaTeX.}
+\Msg{*}
+\Msg{* Happy TeXing!}
+\Msg{*********************************************************}
+
+\endbatchfile
+\end{verbatim}
+
+\index{installer file|)}
+\index{documented LaTeX file@documented \LaTeX{} file|(}
+
+
+\subsection{A skeleton \texttt{.dtx} file to generate a \texttt{.sty} file}
+\label{sec:skeleton-dtx-file-style}
+
+\begin{verbatim}
+% \iffalse meta-comment
+%
+% Copyright (C) <year> by <your name>
+% -----------------------------------
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% \fi
+%
+% \iffalse
+%<<package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+%<<package>>\ProvidesPackage{<package>}
+%<<package>>   [<YYYY>/<MM>/<DD> v<version> <brief description>]
+%
+%<<*driver>>
+\documentclass{ltxdoc}
+\usepackage{<package>}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{<package>.dtx}
+\end{document}
+%<</driver>>
+% \fi
+%
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<<
+%   Equals        \=     Greater than  \>>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{v1.0}{<YYYY>/<MM>/<DD>}{Initial version}
+%
+% \GetFileInfo{<package>.sty}
+%
+% \DoNotIndex{<list of control sequences>}
+%
+% \title{The \textsf{<package>} package\thanks{This document
+%   corresponds to \textsf{<package>}~\fileversion,
+%   dated \filedate.}}
+% \author{<your name> \\ \texttt{<your e-mail address>}}
+%
+% \maketitle
+%
+% \begin{abstract}
+%   Put text here.
+% \end{abstract}
+%
+% \section{Introduction}
+%
+% Put text here.
+%
+% \section{Usage}
+%
+% \DescribeMacro{\YOURMACRO}
+% Put description of |\YOURMACRO| here.
+%
+% \DescribeEnv{YOURENV}
+% Put description of |YOURENV| here.
+%
+% \StopEventually{\PrintIndex}
+%
+% \section{Implementation}
+%
+% \begin{macro}{\YOURMACRO}
+% Put explanation of |\YOURMACRO|'s implementation here.
+%    \begin{macrocode}
+\newcommand{\YOURMACRO}{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{YOURENV}
+% Put explanation of |YOURENV|'s implementation here.
+%    \begin{macrocode}
+\newenvironment{YOURENV}{}{}
+%    \end{macrocode}
+% \end{environment}
+%
+% \Finale
+\endinput
+\end{verbatim}
+
+
+\subsection{A skeleton \texttt{.dtx} file to generate a \texttt{.cls} file}
+\label{sec:skeleton-dtx-file-class}
+
+\begin{verbatim}
+% \iffalse meta-comment
+%
+% Copyright (C) <year> by <your name>
+% -----------------------------------
+%
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% \fi
+%
+% \iffalse
+%<<*driver>>
+\ProvidesFile{<package>.dtx}
+%<</driver>>
+%<<class>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+%<<class>>\ProvidesClass{<package>}
+%<<*class>>
+    [<YYYY>/<MM>/<DD> v<version> <brief description>]
+%<</class>>
+%
+%<<*driver>>
+\documentclass{ltxdoc}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{<package>.dtx}
+\end{document}
+%<</driver>>
+% \fi
+%
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<<
+%   Equals        \=     Greater than  \>>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{v1.0}{<YYYY>/<MM>/<DD>}{Initial version}
+%
+% \GetFileInfo{<package>.dtx}
+%
+% \DoNotIndex{<list of control sequences>}
+%
+% \title{The \textsf{<package>} class\thanks{This document
+%   corresponds to \textsf{<package>}~\fileversion,
+%   dated \filedate.}}
+% \author{<your name> \\ \texttt{<your e-mail address>}}
+%
+% \maketitle
+%
+% \begin{abstract}
+%   Put text here.
+% \end{abstract}
+%
+% \section{Introduction}
+%
+% Put text here.
+%
+% \section{Usage}
+%
+% \DescribeMacro{\YOURMACRO}
+% Put description of |\YOURMACRO| here.
+%
+% \DescribeEnv{YOURENV}
+% Put description of |YOURENV| here.
+%
+% \StopEventually{\PrintIndex}
+%
+% \section{Implementation}
+%
+% \begin{macro}{\YOURMACRO}
+% Put explanation of |\YOURMACRO|'s implementation here.
+%    \begin{macrocode}
+\newcommand{\YOURMACRO}{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{YOURENV}
+% Put explanation of |YOURENV|'s implementation here.
+%    \begin{macrocode}
+\newenvironment{YOURENV}{}{}
+%    \end{macrocode}
+% \end{environment}
+%
+% \Finale
+\endinput
+\end{verbatim}
+
+\index{documented LaTeX file@documented \LaTeX{} file|)}
+
+\subsection{A skeleton master-document file (\texttt{.tex})}
+\label{sec:skeleton-master-file}
+
+\begin{verbatim}
+\documentclass{ltxdoc}
+\usepackage{<file1>}
+\usepackage{<file2>}
+\usepackage{<file3>}
+
+\title{<title>}
+\author{<you>}
+
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+
+\begin{document}
+  \maketitle
+
+  \begin{abstract}
+    <abstract>
+  \end{abstract}
+
+  \tableofcontents
+
+  \DocInclude{<file1>}
+  \DocInclude{<file2>}
+  \DocInclude{<file3>}
+\end{document}
+\end{verbatim}
+
+
+% The following was generated by BibTeX and slightly touched up by hand.
+\vfill
+\begin{thebibliography}{1}
+  \bibitem{Goossens1994:companion}
+  Michel Goossens, Frank Mittelbach, and Alexander Samarin.
+  \newblock \emph{The {\LaTeX} Companion}.
+  \newblock Addison~Wesley, Reading, Massachusetts, October~1, 1994.
+  \newblock ISBN~\mbox{0-201-54199-8}.
+
+  \bibitem{Knuth1984:literate}
+  Donald~E. Knuth.
+  \newblock Literate programming.
+  \newblock \emph{The Computer Journal}, 27(2):97--111, May 1984.
+  \newblock British Computer Society. Available from
+    \URL{http://www.literateprogramming.com/knuthweb.pdf}.
+\end{thebibliography}
+
+% Print an index.
+\index{sty@\texttt{.sty}|see{style file}}
+\index{cls@\texttt{.cls}|see{class file}}
+\index{ins@\texttt{.ins}|see{installer file}}
+\index{dtx@\texttt{.dtx}|see{documented \LaTeX{} file}}
+\index{CTAN|see{Comprehensive \TeX{} Archive Network}}
+\printindex
+
+\end{document}
