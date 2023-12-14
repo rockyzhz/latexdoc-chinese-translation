@@ -4,6 +4,7 @@ etoolbox-zh-cn/*.sty
 etoolbox-zh-cn/*.cfg
 etoolbox-zh-cn/ltxdockit.def
 etoolbox-zh-cn/*.txt
+ltxguide.cls
 
 ## Repository Related Files:
 ref/*
