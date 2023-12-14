@@ -1,9 +1,13 @@
 # LaTeX 文档中文翻译项目
 本项目目前主要收录一些本人在学习 LaTeX 过程中，阅读到的一些LaTeX基础性的文档。随手翻译出来，方便中文 TeXer 对照原文阅读。
 
+*2023年12月13日更新*
+经过与赣医一附院神经科的黄旭华本人确认，本项目今后会收录部分由黄旭华翻译的优秀作品。后期可能会做部分增量更新。
+
 为方便阅读，部分中文版的翻译文档在部分内容颜色上做了一定的区分，宏命令和标题以及其它带链接的部分（比如目录和引用等）用蓝色，抄录（verbatim）环境和类似的环境用的是绿色，宏包代码用的是褐色。
 
 ## 目前已有的文档包含有：
+* **clsguide-historic.pdf** 的中文文档 **clsguide-historic-zh-cn.pdf** , clsguide 即《LATEX2ε for class and package writers》，中文版译名《用于类和包作者的 LATEX2ε》。在 LaTeX 世界可谓历史悠久相当经典，可谓算作学习编写类与包的作者入门必读系列之一了。本文由赣医一附院神经科的黄旭华翻译，该文自2006年以来，一直到2022年都未有任何改变，但是在今年最新的 TeXlive 仓库中，clsguide 加入了非常多的更新，并且把该文分作两个版本做分别更新，分别为 historic-version 和 current-version 。在 historic-version 中，未再做任何修订。
 * **doc.pdf** 的中文文档 **doc-zh-cn.pdf** 以及 **doc-code.pdf** （增加了代码实现部分说明）的中文文档 **doc-code-zh-cn.pdf** ，doc & shortvrb 宏包是一个用于为 TeX 代码提供代码文档的包。从那时起，它被广泛用于记录 LaTeX 核心和现在大多数可用的包。该文档详情请查看相应的[说明文档][5]。
 * **docstrip.pdf** 的中文文档 **docstrip-zh-cn.pdf** ，该文档从另一个[项目][4]转移过来的，原项目已归档，后续的更新（如果有的话）放在本项目下继续维护。该文档主要描述了 DocStrip 程序的实现，DocStrip 程序是 TeX 实现文学编程的一个重要的工具。
 * **dtxtut.pdf** 的中文文档 **dtxtut-zh-cn.pdf** ，原文《How To Package Your LaTeX Packages》是一篇综合介绍 doc 宏包与 DocStrip 程序的教程。与 doc.pdf 和 docstrip.pdf 不同的是，那两份是说明手册的性质，而这份 dtxtut.pdf 则是一篇手把手教你如何利用 doc 宏包与 DocStrip 程序为工具，在 LaTeX 中实现初步的文学编程，打包你的代码。详情请参阅相应的[说明文档][6]。
@@ -11,9 +15,9 @@
 * **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。
 
 ## 中文文档编译方法
-有的中文文档源文件是 .tex ，有的是 .dtx ，但是都可以直接在命令行下使用 XeLaTeX 来编译。
+有的中文文档源文件是 .tex ，有的是 .dtx ，但是都可以直接在命令行下使用 XeLaTeX 来编译（ latexmk 比较智能化，可以利用 latexmk 来调用 xelatex ）。
 ```
-xelatex <source-filename-with-ext>
+latexmk -xelatex <source-filename-with-ext>
 ```
 理论上， CTeX 宏集支持的编译方式((pdf)LaTeX, XeLaTeX, LuaLaTeX, upLaTeX)理论上都可以编译，但是除了 XeLaTeX 引擎，其它的编译引擎我并未尝试过，有兴趣的朋友可以自行查阅 CTeX 宏集说明文档自行设置。
 ## 字体选择
