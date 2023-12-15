@@ -41,4 +41,4 @@ latexmk -xelatex <source-filename-with-ext>
 [5]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/doc-zh-cn/doc-zh-cn.md
 [6]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/dtxtut-zh-cn/dtxtut-zh-cn.md
 [7]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-historic-zh-cn/clsguide-historic-zh-cn.md
-[6]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-current-zh-cn/clsguide-current-zh-cn.md
+[8]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-current-zh-cn/clsguide-current-zh-cn.md
