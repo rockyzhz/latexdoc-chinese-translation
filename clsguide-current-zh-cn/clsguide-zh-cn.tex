@@ -169,108 +169,86 @@
 相比之下，|graphics| 宏包提供了将图像包含到 \LaTeX{} 文档中的命令。由于这些命令可以与任何文档类
 一起使用，我们有了 |graphics.sty| 而不是 |graphics.cls|。
 
-\subsection{Using `docstrip' and `doc'}
+\subsection{使用 `docstrip' 和 `doc'}
 
-If you are going to write a large class or package for \LaTeX{} then
-you should consider using the |doc| software which comes with
-\LaTeX{}.
-\LaTeX{} classes and packages written using this can be
-processed in two ways: they can be run through \LaTeX{}, to produce
-documentation; and they can be processed with |docstrip|, to produce
-the |.cls| or |.sty| file.
+如果您打算为 \LaTeX{} 编写一个大型的文档类或宏包，您应该考虑使用
+随 \LaTeX{} 一起提供的 |doc| 软件。
+使用 |doc| 编写的 \LaTeX{} 文档类和宏包可以以两种方式进行处理：
+它们可以通过 \LaTeX{} 运行以生成文档；也可以通过 |docstrip| 运行以生成
+|.cls| 或 |.sty| 文件。
 
-The |doc| software can automatically generate indexes of definitions,
-indexes of command use, and change-log lists.  It is very useful for
-maintaining and documenting large \TeX{} sources.
+|doc| 软件可以自动生成定义索引、命令使用索引和变更记录列表。它对于维护和
+记录大型 \TeX{} 源文件非常有用。
 
-The documented sources of the \LaTeX{} kernel itself, and of the
-standard classes, etc., are |doc| documents; they are in the |.dtx|
-files in the distribution.  You can, in fact, typeset the source code
-of the kernel as one long document, complete with index, by running
-\LaTeX{} on |source2e.tex|.  Typesetting these documents uses the
-class file |ltxdoc.cls|.
+\LaTeX{} 核心本身以及标准文档类等的文档化源代码都是 |doc| 文档；它们位于
+分发中的 |.dtx| 文件中。实际上，您可以通过在 |source2e.tex| 上运行
+\LaTeX{} 来排版核心源代码作为一个长文档，包括索引。排版这些文档使用了
+类文件 |ltxdoc.cls|。
 
-For more information on |doc| and |docstrip|, consult the files
-|docstrip.dtx|, |doc.dtx|, and \emph{\LaTeXcomp}.  For examples of its
-use, look at the |.dtx| files.
+有关 |doc| 和 |docstrip| 的更多信息，请参阅文件 |docstrip.dtx|、|doc.dtx|
+和 \emph{\LaTeXcomp}。要了解其用法示例，请查看 |.dtx| 文件。
 
-\subsection{Policy on standard classes}
+\subsection{标准文档类的政策}
 
-Many of the problem reports we receive concerning the standard classes
-are not concerned with bugs but are suggesting, more or less politely,
-that the design decisions embodied in them are `not optimal' and
-asking us to modify them.
+我们收到的有关标准文档类的问题报告中，很多并不涉及错误，而是更或
+多或少地礼貌地暗示这些类中体现的设计决策“不够优秀”，并要求我们
+对其进行修改。
 
-There are several reasons why we should not make such changes to these
-files.
+有几个原因我们不应该对这些文件进行此类更改：
 \begin{itemize}
    \item
-         However misguided, the current behavior is clearly what was
-         intended when these classes were designed.
+         不管多么误导，当前的行为显然是设计这些类时所预期的。
    \item
-         It is not good practice to change such aspects of `standard classes'
-         because many people will be relying on them.
+         更改“标准类”的这些方面并不是一个好的做法，因为许多人将依赖
+         于它们。
 \end{itemize}
 
-We have therefore decided not to even consider making such
-modifications, nor to spend time justifying that decision.  This does
-not mean that we do not agree that there are many deficiencies in the
-design of these classes, but we have many tasks with higher priority
-than continually explaining why the standard classes for \LaTeX{}
-cannot be changed.
+因此，我们决定甚至不考虑进行这种修改，也不花时间来证明这个决定。
+这并不意味着我们不同意这些类的设计存在许多缺陷，但是我们有许多更
+重要的任务，而不是不断解释为什么 \LaTeX{} 的标准文档类不能改变。
 
-We would, of course, welcome the production of better classes, or of
-packages that can be used to enhance these classes.  So your first
-thought when you consider such a deficiency will, we hope, be ``what
-can I do to improve this?''
+当然，我们欢迎更好的类的产生，或者用于增强这些类的包的出现。因此，
+当您考虑到这样的不足时，我们希望您首先的想法是“我能做些什么来改
+善这个？”
 
-\subsection{Command names}
+\subsection{命令名称}
 
-Prior to the introduction of the L3~programming layer described in the next
-section, \LaTeX{} had three types of command.
+在介绍下一节中描述的 L3 编程层引入之前，\LaTeX{} 有三种类型的命令。
 
-There are the author commands, such as |\section|, |\emph| and
-|\times|:  most of these have short names, all in lower case.
+第一种是作者命令，比如 |\section|、|\emph| 和 |\times|：这些命令
+通常有简短的名称，全部是小写。
 
-There are also the class and package writer commands:
-most of these have long mixed-case names such as the following.
+第二种是类和宏包编写者命令：
+这些命令通常有长的混合大小写名称，例如以下几个。
 \begin{verbatim}
    \InputIfFileExists  \RequirePackage  \PassOptionsToClass
 \end{verbatim}
 
-Finally, there are the internal commands used in the \LaTeX{}
-implementation, such as |\@tempcnta|, |\@ifnextchar| and |\@eha|:
-most of these commands contain |@| in their name, which means they
-cannot be used in documents, only in class and package files.
+最后一种是用于 \LaTeX{} 实现的内部命令，比如 |\@tempcnta|、|\@ifnextchar| 和
+|\@eha|：其中大多数命令的名称中包含 |@|，这意味着它们不能在文档中使用，
+只能在类和宏包文件中使用。
 
-Unfortunately, for historical reasons the distinction between these
-commands is often blurred.  For example, |\hbox| is an internal
-command which should only be used in the \LaTeX{} kernel, whereas
-|\m@ne| is the constant $-1$ and could have been |\MinusOne|.
+不幸的是，出于历史原因，这些命令之间的区别通常很模糊。例如，|\hbox| 是
+一个内部命令，只应在 \LaTeX{} 核心中使用，而 |\m@ne| 是常数 $-1$，本来
+可以命名为 |\MinusOne|。
 
-However, this rule of thumb is still useful: if a command has |@| in
-its name then it is not part of the supported \LaTeX{} language---and
-its behavior may change in future releases!  If a command is
-mixed-case, or is described in \emph{\LaTeXbook}, then you can rely on
-future releases of \LaTeX{} supporting the command.
+然而，这个经验法则仍然有用：如果一个命令的名称中包含 |@|，那么它不是
+支持的 \LaTeX{} 语言的一部分——它的行为可能在未来版本中改变！如果一个
+命令是混合大小写的，或者在 \emph{\LaTeXbook} 中有描述，那么您可以依赖
+于未来版本的 \LaTeX{} 支持该命令。
 
-\subsection{Programming support}
+\subsection{编程支持}
 
-As noted in the introduction, the \LaTeX{} kernel today loads dedicated support
-from programming, here referred to as the L3 programming layer but also often
-called \pkg{expl3}. Details of the general approach taken by the L3
-programming layer are given in the document \texttt{expl3}, while a reference
-for all current code interfaces is available as \texttt{interface3}. This layer
-contains two types of command: a documented set of commands making up the API
-and a large number of private internal commands. The latter all start with two
-underscores and should not be used outside of the code module which defines
-them. This more structured approach means that using the L3 programming layer
-does not suffer from the somewhat fluid situation mentioned above with
-`\texttt{@} commands'.
+正如在介绍中所指出的，\LaTeX{} 核心今天加载了来自编程的专用支持，这里
+称为 L3 编程层，通常也称为 \pkg{expl3}。L3 编程层的一般方法的详细信息
+在文档 \texttt{expl3} 中给出，而当前所有代码接口的参考可以在
+\texttt{interface3} 中找到。这个层包含两种类型的命令：一个由 API 组成的
+文档化命令集，和大量的私有内部命令。后者都以两个下划线开头，不应在定义
+它们的代码模块之外使用。这种更有结构的方法意味着使用 L3 编程层不会像使用
+`\texttt{@} 命令' 那样受到上面提到的某种程度上的不稳定情况的影响。
 
-We do not cover the detail of using the L3 programming layer here. A good
-introduction to the approach is provided at
-\url{https://www.alanshawn.com/latex3-tutorial/}.
+在这里我们不涉及使用 L3 编程层的细节。关于该方法的良好介绍可在
+\url{https://www.alanshawn.com/latex3-tutorial/} 找到。
 
 \subsection{Box commands and color}
 \label{Sec:color}
