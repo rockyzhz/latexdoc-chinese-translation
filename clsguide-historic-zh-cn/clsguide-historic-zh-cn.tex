@@ -81,7 +81,7 @@
 \usepackage{indentfirst} %%% 首行缩进
 \setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
 \linespread{1.28} %%% 设置行间距
-\renewcommand{\contentsname}{\heiti 目\ 录}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\renewcommand{\contentsname}{\centerline{目\quad 录}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
 \renewcommand{\refname}{\heiti 参考文献}
 \renewcommand{\tablename}{表}
 %%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,7 +108,7 @@
   pdfview=FitH}
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{\color{spot}\Huge\bfseries 用于类和包作者的~\LaTeXe\\\LARGE\ ——历史版本}
+\title{\color{spot}\huge\bfseries 用于类和包作者的~\LaTeXe\\\Large\ ——历史版本}
 
 \author{Copyright \copyright~1995--2006 \LaTeX\ 项目\\
    版权所有\\[6pt]赣医一附院神经科\ \ \ 黄旭华\ \ \ \ \ \ 翻译}
@@ -124,8 +124,6 @@
 \newpage
 
 \section{\heiti 介绍}
-
- {\emph{文档类}}
 
 本文档介绍了如何编写 \LaTeX{} 的类(classes)和包(packages)，并特别关注了如何将现有的 \LaTeX~2.09\ 包升级到 \LaTeXe{}\ 包。约翰内斯 · 布拉姆斯(Johannes Braams)在 TUGboat~15.3 上发表的一篇文章也提到了后一个主题。
 
@@ -170,10 +168,11 @@ Frank Mittelbach (弗兰克·米特巴赫)和 Michel Goossens (米歇尔·古森
 文档化的源代码(documented source code)(来自用于生成内核格式文件的文件，生成内核格式文件是通过 |latex.ltx|)现在可作为\ {\color{blue}{\emph{The \LaTeXe\ Sources}}}\ 【{\color{blue}{《\LaTeXe\ 源代码》}}】。这个非常大的文档还包括一个 \LaTeX{}\ 命令的索引(index)。它可以从 |base| 目录中的 \LaTeX{}\ 文件 |source2e.tex| 进行排版；这使用文档类文件 |ltxdoc.cls|。
 
 欲了解更多关于\TeX{} 和 \LaTeX{}\ 的信息，请联系您当地的 \TeX{}\ 用户组或国际 \TeX{}\ 用户组。地址及其他详情，请浏览：
+\vspace*{-2ex}
 \begin{quote}\small\label{addrs}
-   \texttt{http://www.tug.org/lugs.html}
+   \url{http://www.tug.org/lugs.html}
 \end{quote}
-
+\vspace*{-5ex}
 
 \subsection[标准类中的策略]{\heiti 标准类中的策略}
 
@@ -863,7 +862,7 @@ Frank Mittelbach (弗兰克·米特巴赫)和 Michel Goossens (米歇尔·古森
 要详细了解 |\ProcessOptions| 在包文件中的作用，您必须了解{\kaiti 局部}(\emph{local})选项和{\kaiti 全局}(\emph{global})选项之间的区别。
 \begin{itemize}
    \item {\heiti 局部选项}(\textbf{Local options})是在其中任何一个的 \m{options}\ 参数中为这个特定包明确指定的选项：
-         \begin{quote}
+         \begin{quote}\color{verb}
             |\PassOptionsToPackage{<options>}| \ |\usepackage[<options>]|\\
             |\RequirePackage[<options>]|
          \end{quote}
