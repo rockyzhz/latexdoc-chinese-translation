@@ -7,6 +7,7 @@
 为方便阅读，部分中文版的翻译文档在部分内容颜色上做了一定的区分，宏命令和标题以及其它带链接的部分（比如目录和引用等）用蓝色，抄录（verbatim）环境和类似的环境用的是绿色，宏包代码用的是褐色。
 
 ## 目前已有的文档包含有：
+* **clsguide.pdf**(current-version) 的中文文档 **clsguide-zh-cn.pdf**（当前版本） , clsguide 即《LATEX for class and package writers》，中文版译名《面向宏包与类文件编写者的 LATEX》。clsguide 作为 LaTeX 各种发行版中必带的一个基础文档之一，已经有接近 30 年的历史了。从 TeXLive 2023 版开始，LaTeX 项目团队把主要以介绍 LaTeX2ε 的宏包与类文件开发语法的旧版 clsguide 转为 clsguide(historic version) ，而把加入了新的 LaTeX3 开发成果的更加方便快捷的开发语法介绍的新版文档作为 clsguide(current version) 。该中文翻译文档即以新的当前版本作为原文翻译的，详情可查看相应的[说明文档][8]。
 * **clsguide-historic.pdf** 的中文文档 **clsguide-historic-zh-cn.pdf** , clsguide 即《LATEX2ε for class and package writers》，中文版译名《用于类和包作者的 LATEX2ε》。在 LaTeX 世界可谓历史悠久相当经典，可谓算作学习编写类与包的作者入门必读系列之一了。本文由赣医一附院神经科的黄旭华翻译，该文自2006年以来，一直到2022年都未有任何改变，但是在今年最新的 TeXlive 仓库中，clsguide 加入了非常多的更新，并且把该文分作两个版本做分别更新，分别为 historic-version 和 current-version 。在 historic-version 中，未再做任何修订。该文档详情请查看相应的[说明文档][7]。
 * **doc.pdf** 的中文文档 **doc-zh-cn.pdf** 以及 **doc-code.pdf** （增加了代码实现部分说明）的中文文档 **doc-code-zh-cn.pdf** ，doc & shortvrb 宏包是一个用于为 TeX 代码提供代码文档的包。从那时起，它被广泛用于记录 LaTeX 核心和现在大多数可用的包。该文档详情请查看相应的[说明文档][5]。
 * **docstrip.pdf** 的中文文档 **docstrip-zh-cn.pdf** ，该文档从另一个[项目][4]转移过来的，原项目已归档，后续的更新（如果有的话）放在本项目下继续维护。该文档主要描述了 DocStrip 程序的实现，DocStrip 程序是 TeX 实现文学编程的一个重要的工具。
@@ -40,3 +41,4 @@ latexmk -xelatex <source-filename-with-ext>
 [5]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/doc-zh-cn/doc-zh-cn.md
 [6]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/dtxtut-zh-cn/dtxtut-zh-cn.md
 [7]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-historic-zh-cn/clsguide-historic-zh-cn.md
+[6]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-current-zh-cn/clsguide-current-zh-cn.md
