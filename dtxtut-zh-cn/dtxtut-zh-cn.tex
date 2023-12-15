@@ -35,7 +35,7 @@
 \usepackage{varioref}
 \usepackage{makeidx}
 \usepackage{alltt}
-\usepackage{tocbibind}
+\usepackage[nottoc]{tocbibind}
 \usepackage[bookmarksopen]{hyperref}
 \usepackage{hyperxmp}
 
@@ -64,6 +64,7 @@
 \renewcommand{\abstractname}{摘\quad 要}
 \renewcommand{\refname}{参考文献}
 \renewcommand{\indexname}{索引}
+\renewcommand{\contentsname}{\centerline{目\quad 录}}
 \renewcommand{\clsguide}{面向宏包与类文件编写者的\ \LaTeXe}
 \setlength{\parindent}{2em}
 \usepackage{indentfirst}
@@ -203,6 +204,8 @@
   以便分发他们自己编写的类和样式文件的高级 \latex[\LaTeXe]{} 用户。
 \end{abstract}
 
+\pdfbookmark[1]{目录}{Contents}
+\tableofcontents
 
 \section{介绍}
 
