@@ -56,8 +56,8 @@
   Extension   = .otf,
   UprightFont = *-regular
 ]
-\newCJKfontfamily[song]\songti{SourceHanSerifSC-regular.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
-\newCJKfontfamily[hei]\heiti{SourceHanSansSC-regular.otf} %%自定义宋体 \sognti ，作为文章中文主字体
+\newCJKfontfamily[song]\songti{SourceHanSerifSC-regular.otf} %%自定义宋体 \sognti ，作为文章中文主字体
+\newCJKfontfamily[hei]\heiti{SourceHanSansSC-regular.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
 \newCJKfontfamily[kai]\kaiti{FandolKai-regular.otf} %%设置中文字体楷体 \kaiti ，用于强调
 %%%%%%%%%%%%%%%%%%%% Windows系统自带字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \newCJKfontfamily[song]\songti{SimSun} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
@@ -79,8 +79,8 @@
 \usepackage{indentfirst} %%% 首行缩进
 \setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
 \linespread{1.242} %%% 设置行间距
-\renewcommand{\contentsname}{\heiti 目\ 录}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
-\renewcommand{\refname}{\heiti 参考文献}
+\renewcommand{\contentsname}{\centerline{目\quad 录}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\renewcommand{\refname}{参考文献}
 \renewcommand{\tablename}{表}
 %%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -107,7 +107,7 @@
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ========================================================================
 
-\title{\color{spot}\Huge\bfseries 面向宏包与类文件编写者\\[3pt]的\ \LaTeX\LARGE\ ——当前版本}
+\title{\color{spot}\huge\bfseries 面向宏包与类文件编写者\\[3pt]的\ \LaTeX\Large\ ——当前版本}
 \author{\copyright~Copyright 2023, \LaTeX\ Project Team.\\
    版权所有%
    \footnote{本文件可以在\LaTeX{}项目公共许可证 ( the \LaTeX{} Project Public License, 即 LPPL v1.3c ) 的条件下进行分发和/或修改，可以选择遵循
@@ -134,6 +134,7 @@
 
 \maketitle
 
+\pdfbookmark[1]{目录}{Contents}
 \tableofcontents
 
 \section{介绍}
@@ -250,402 +251,350 @@
 在这里我们不涉及使用 L3 编程层的细节。关于该方法的良好介绍可在
 \url{https://www.alanshawn.com/latex3-tutorial/} 找到。
 
-\subsection{Box commands and color}
+\subsection{盒子命令和颜色}
 \label{Sec:color}
 
-Even if you do not intend to use color in your own documents, by taking note of
-the points in this section you can ensure that your class or package is
-compatible with the |color| package. This may benefit people using your class
-or package and wish to use color.
+即使您不打算在自己的文档中使用颜色，通过注意本节中的要点，您可以确保您的
+文档类或宏包与 |color| 宏包兼容。这可能有利于使用您的文档类或宏包并希望
+使用颜色的人。
 
-The simplest way to ensure `color safety' is to always use \LaTeX{} box
-commands rather than \TeX{} primitives, that is use |\sbox| rather than
-|\setbox|, |\mbox| rather than |\hbox| and |\parbox| or the |minipage|
-environment rather than |\vbox|. The \LaTeX{} box commands have new options
-which mean that they are now as powerful as the \TeX{} primitives.
+确保“颜色安全”的最简单方法是始终使用 \LaTeX{} 的盒子命令而不是 \TeX{}
+的原始命令，即使用 |\sbox| 而不是 |\setbox|，|\mbox| 而不是 |\hbox|，
+|\parbox| 或 |minipage| 环境而不是 |\vbox|。现在，\LaTeX{} 的盒子命令具
+有新的选项，使其与 \TeX{} 的原始命令一样强大。
 
-As an example of what can go wrong, consider that in |{\ttfamily <text>}| the
-font is restored just \emph{before} the |}|, whereas in the similar looking
-construction |{\color{green} <text>}| the color is restored just \emph{after}
-the final |}|. Normally this distinction does not matter at all; but consider a
-primitive \TeX{} box assignment such as:
+举例说明可能出现的问题，考虑 |{\ttfamily <text>}| 中字体恢复的时间点在
+最后的 |}| \emph{之前}，而在类似的结构 |{\color{green} <text>}| 中颜色
+恢复的时间点在最后的 |}| \emph{之后}。通常，这种区别并不重要；但是考虑一
+个类似于原始 \TeX{} 盒子赋值的命令，比如：
 \begin{verbatim}
    \setbox0=\hbox{\color{green} <text>}
 \end{verbatim}
-Now the color-restore occurs after the |}| and so is \emph{not} stored in the
-box. Exactly what bad effects this can have depends on how color is
-implemented: it can range from getting the wrong colors in the rest of the
-document, to causing errors in the dvi-driver used to print the document.
+现在，颜色恢复在 |}| 之后发生，因此\emph{不会}存储在盒子中。这可能会
+产生的坏影响取决于颜色的实现方式：从文档其余部分出现错误的颜色到导致用
+于打印文档的 dvi 驱动程序出现错误。
 
-Also of interest is the command |\normalcolor|. This is normally just |\relax|
-(i.e., does nothing) but you can use it rather like |\normalfont| to set
-regions of the page such as captions or section headings to the `main document
-color'.
+另一个有趣的命令是 |\normalcolor|。通常它只是 |\relax|（即什么也不做），
+但您可以像使用 |\normalfont| 那样将其用于设置页面上的区域，比如标题或节
+标题的“主文档颜色”。
 
-\subsection{General style}
+\subsection{通用风格}
 \label{Sec:general}
 
-\LaTeX{} provides many commands designed to help you produce well-structured
-class and package files that are both robust and portable. This section
-outlines some ways to make intelligent use of these.
+\LaTeX{} 提供了许多命令，旨在帮助您生成结构良好、健壮且可移植的文档类
+和宏包文件。本节概述了一些使用这些命令的智能方式。
 
-\subsubsection{Loading other files}
+\subsubsection{加载其他文件}
 \label{Sec:loading}
 
-\LaTeX{} provides these commands:
+\LaTeX{} 提供了以下命令：
 \begin{verbatim}
    \LoadClass        \LoadClassWithOptions
    \RequirePackage   \RequirePackageWithOptions
 \end{verbatim}
-for using classes or packages inside other classes or packages. We recommend
-strongly that you use them, rather than the primitive |\input| command, for a
-number of reasons.
+用于在其他文档类或宏包中使用类或宏包。我们强烈建议您使用这些命令，而不是
+原始的 |\input| 命令，原因有几个。
 
-Files loaded with |\input <filename>| will not be listed in the |\listfiles|
-list.
+使用 |\input <filename>| 加载的文件不会列在 |\listfiles| 列表中。
 
-If a package is always loaded with |\RequirePackage...| or |\usepackage| then,
-even if its loading is requested several times, it will be loaded only once. By
-contrast, if it is loaded with |\input| then it can be loaded more than once;
-such an extra loading may waste time and memory and it may produce strange
-results.
+如果一个宏包始终使用 |\RequirePackage...| 或 |\usepackage| 加载，
+即使请求多次加载，它也只会被加载一次。相比之下，如果使用 |\input| 加载，
+则可以加载多次；多余的加载可能会浪费时间和内存，并且可能会产生奇怪的结果。
 
-If a package provides option-processing then, again, strange results are
-possible if the package is |\input| rather than loaded by means of
-|\usepackage| or |\RequirePackage...|.
+如果一个宏包提供选项处理，那么如果不是使用 |\usepackage| 或 |\RequirePackage...|
+加载，而是使用 |\input|，则可能会产生奇怪的结果。
 
-If the package |foo.sty| loads the package |baz.sty| by use of |\input baz.sty|
-then the user will get a warning:
+如果宏包 |foo.sty| 使用 |\input baz.sty| 加载了宏包 |baz.sty|，则用户会得到警告：
 \begin{verbatim}
    LaTeX Warning: You have requested package `foo',
                   but the package provides `baz'.
 \end{verbatim}
-Thus, for several reasons, using |\input| to load packages is not a good idea.
+因此，由于几个原因，使用 |\input| 加载宏包并不是一个好主意。
 
-For example, |article.sty| contains just the following lines:
+例如，|article.sty| 只包含以下几行：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \@obsoletefile{article.cls}{article.sty}
    \LoadClass{article}
 \end{verbatim}
-You may wish to do the same or, if you think that it is safe to do so, you may
-decide to just remove |myclass.sty|.
+您可能希望做相同的事情，或者如果认为安全的话，可以决定移除 |myclass.sty|。
 
-\subsubsection{Make it robust}
+\subsubsection{使它健壮}
 
-We consider it good practice, when writing packages and classes, to use
-\LaTeX{} commands as much as possible.
+在编写宏包和文档类时，我们认为尽可能使用 \LaTeX{} 命令是一种良好的做法。
 
-Thus, instead of using |\def...| we recommend using one of |\newcommand|,
-|\renewcommand| or |\providecommand| for programming and for defining document
-interfaces |\NewDocumentCommand|, etc. (see \texttt{usrguide} for details of
-these commands).
+因此，我们建议在编程和定义文档接口时，使用 |\newcommand|、|\renewcommand|
+或 |\providecommand|，以及 |\NewDocumentCommand| 等命令（有关这些命令的详细
+信息，请参阅 \texttt{usrguide}）。
 
-When you define an environment, use |\NewDocumentEnvironment|, etc., (or
-|\newenvironment|, etc., for simple cases) instead of using |\def\foo{...}| and
-|\def\endfoo{...}|.
+当定义环境时，请使用 |\NewDocumentEnvironment| 等命令（对于简单情况也可以使
+用 |\newenvironment| 等），而不是使用 |\def\foo{...}| 和 |\def\endfoo{...}|。
 
-If you need to set or change the value of a \m{dimen} or \m{skip} register, use
-|\setlength|.
+如果需要设置或更改 \m{dimen} 或 \m{skip} 寄存器的值，请使用 |\setlength|。
 
-To manipulate boxes, use \LaTeX{} commands such as |\sbox|, |\mbox| and
-|\parbox| rather than |\setbox|, |\hbox| and |\vbox|.
+要操作盒子，请使用诸如 |\sbox|、|\mbox| 和 |\parbox| 等 \LaTeX{} 命令，而
+不是 |\setbox|、|\hbox| 和 |\vbox|。
 
-Use |\PackageError|, |\PackageWarning| or |\PackageInfo| (or the equivalent
-class commands) rather than |\@latexerr|, |\@warning| or |\wlog|.
+使用 |\PackageError|、|\PackageWarning| 或 |\PackageInfo|（或相应的类命令），
+而不是 |\@latexerr|、|\@warning| 或 |\wlog|。
 
-The advantage of this kind of practice is that your code is more readable and
-accessible to other experienced \LaTeX{} programmers.
+这种做法的优点是您的代码更易读，并且更容易让其他有经验的 \LaTeX{} 程序员理解。
 
-\subsubsection{Make it portable}
+\subsubsection{增强可移植性}
 
-It is also sensible to make your files are as portable as possible. To ensure
-this, files must not have the same name as a file in the standard \LaTeX{}
-distribution, however similar its contents may be to one of these files. It is
-also still lower risk to stick to file names which use only the ASCII range:
-whilst \LaTeX{} works natively with UTF-8, the same cannot be said with
-certainty for all tools. For the same reason, avoid spaces in file names.
+使您的文件尽可能具有可移植性也是明智的。为了确保这一点，文件不能与标准
+\LaTeX{} 发行版中的文件同名，即使其内容可能与这些文件之一非常相似也不行。
+而且，最好仍然只使用 ASCII 范围内的文件名：尽管 \LaTeX{} 原生支持 UTF-8，
+但并不能肯定所有工具都支持。出于同样的原因，避免文件名中出现空格。
 
-It is also useful if local classes or packages have a common prefix, for
-example the University of Nowhere classes might begin with |unw|. This helps to
-avoid every University having its own thesis class, all called |thesis.cls|.
+如果本地的文档类或宏包有一个共同的前缀，例如 Nowhere 大学的类可能以 |unw|
+开头。这有助于避免每个大学都拥有自己的名为 |thesis.cls| 的论文类。
 
-If you rely on some features of the \LaTeX{} kernel, or on a package,
-please specify the release-date you need.  For example, the package
-error commands were introduced in the June 2022 release so, if you use
-them then you should put:
+如果您依赖于 \LaTeX{} 核心的某些功能，或者依赖于某个宏包，请指定您所需的
+发布日期。例如，错误处理宏包是在 2022 年 6 月的发布中引入的，所以如果您使
+用它们，应该加上：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \end{verbatim}
 
-\subsubsection{Useful hooks}
+\subsubsection{有用的钩子}
 
-It is sometimes necessary for a package to arrange for code to be
-executed at the start or end of the preamble, at the end of the document
-or at the start of every use of an environment. This can be carried
-out by using hooks. As a document author, you will likely be familiar with
-|\AtBeginDocument|, a wrapper around the more powerful command |\AddToHook|.
-The \LaTeX{} kernel provides a large number of dedicated hooks (applying in
-a pre-defined location) and generic hooks (applying to arbitrary commands):
-the interface for using these is described in \texttt{lthooks} . There are
-also hooks to apply to files, described in \texttt{ltfilehooks}.
+有时候，一个宏包需要安排在导言区的开头或结尾、文档末尾或每次使用某个
+环境的开头执行一些代码。这可以通过使用钩子来实现。作为文档作者，您可能
+熟悉 |\AtBeginDocument|，它是一个对更强大的 |\AddToHook| 的包装。
+\LaTeX{} 核心提供了大量专用钩子（应用于预定义位置）和通用钩子（适用于
+任意命令）：使用这些钩子的接口在 \texttt{lthooks} 中有描述。还有用于
+文件的钩子，在 \texttt{ltfilehooks} 中有描述。
 
-\section{The structure of a class or package}
+\section{文档类或宏包的结构}
 \label{Sec:structure}
 
-The outline of a class or package file is:
+文档类或宏包文件的大纲如下：
 \begin{description}
-   \item[Identification] The file says that it is a \LaTeXe{} package or
-         class, and gives a short description of itself.
-   \item[Preliminary declarations]
-         Here the file declares some commands and can also load
-         other files.  Usually these commands will be just those needed for
-         the code used in the declared options.
-   \item[Options] The file declares and processes its options.
-   \item[More declarations] This is where the file does most of its work:
-         declaring new variables, commands and fonts; and loading other files.
+   \item[标识] 文件声明自己是一个 \LaTeXe{} 宏包或文档类，并简要描述自身。
+   \item[初步声明] 在这里，文件声明一些命令，并可以加载其他文件。
+         通常，这些命令将只是声明所用选项中需要的代码。
+   \item[选项] 文件声明并处理其选项。
+   \item[更多声明] 这是文件执行大部分工作的地方：
+         声明新变量、命令和字体；以及加载其他文件。
 \end{description}
 
-\subsection{Identification}
+\subsection{标识}
 
-The first thing a class or package file does is identify itself.
-Package files do this as follows:
+文档类或宏包文件的第一件事是标识自己。宏包文件的标识如下：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesPackage{<package>}[<date> <other information>]
 \end{verbatim}
-For example:
+例如：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesPackage{latexsym}[1998-08-17 Standard LaTeX package]
 \end{verbatim}
-Class files do this as follows:
+文档类文件的标识如下：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesClass{<class-name>}[<date> <other information>]
 \end{verbatim}
-For example:
+例如：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesClass{article}[2022-06-01 Standard LaTeX class]
 \end{verbatim}
-The \m{date} should be given in the form `\textsc{yyyy-mm-dd}' and must be
-present if the optional argument is used (this is also true for the
-|\NeedsTeXFormat| command). Any derivation from this syntax will result in
-low-level \TeX{} errors---the commands expect a valid syntax to speed up the
-daily usage of the package or class and make no provision for the case that the
-developer made a mistake!
+\m{date} 应以 `\textsc{yyyy-mm-dd}' 的形式给出，如果使用了可选参数，必
+须存在（这对于 |\NeedsTeXFormat| 命令也是如此）。任何偏离此语法的情况都
+会导致低级别的 \TeX{} 错误——这些命令期望有效的语法以加快宏包或文档类的
+日常使用，并不考虑开发者犯错的情况！
 
-This date is checked whenever a user specifies a date in their |\documentclass|
-or |\usepackage| command. For example, if you wrote:
+每当用户在其 |\documentclass| 或 |\usepackage| 命令中指定日期时，都会检
+查此日期。例如，如果您写了：
 \begin{verbatim}
    \documentclass{article}[2022-06-01]
 \end{verbatim}
-then users at a different location would get a warning that their copy of
-|article| was out of date.
+那么在不同位置的用户会收到警告，指出他们的 |article| 副本已过时。
 
-The description of a class is displayed when the class is used. The description
-of a package is put into the log file. These descriptions are also displayed by
-the |\listfiles| command. The phrase \texttt{Standard LaTeX} \textbf{must not}
-be used in the identification banner of any file other than those in the
-standard \LaTeX{} distribution.
+当使用类时，类的描述会显示出来。宏包的描述会被放入日志文件中。这些描述也
+会被 |\listfiles| 命令显示。短语 \texttt{Standard LaTeX} \textbf{绝对不应}
+出现在除标准 \LaTeX{} 发行版之外的任何文件的标识中。
 
-\subsection{Using classes and packages}
+\subsection{使用类和宏包}
 
-A \LaTeX{} package or class can load a package as follows:
+一个 \LaTeX{} 宏包或文档类可以加载另一个宏包，方法如下：
 \begin{verbatim}
    \RequirePackage[<options>]{<package>}[<date>]
 \end{verbatim}
-For example:
+例如：
 \begin{verbatim}
    \RequirePackage{ifthen}[2022-06-01]
 \end{verbatim}
-This command has the same syntax as the author command |\usepackage|. It allows
-packages or classes to use features provided by other packages. For example, by
-loading the |ifthen| package, a package writer can use the `if\dots then\dots
-else\dots' commands provided by that package.
+此命令与作者命令 |\usepackage| 具有相同的语法。它允许宏包或文档类使用其他
+宏包提供的功能。例如，通过加载 |ifthen| 宏包，宏包作者可以使用该宏包提供的
+“if\dots then\dots else\dots” 命令。
 
-A \LaTeX{} class can load one other class as follows:
+一个 \LaTeX{} 文档类可以加载另一个类，方法如下：
 \begin{verbatim}
    \LoadClass[<options>]{<class-name>}[<date>]
 \end{verbatim}
-For example:
+例如：
 \begin{verbatim}
    \LoadClass[twocolumn]{article}
 \end{verbatim}
-This command has the same syntax as the author command |\documentclass|. It
-allows classes to be based on the syntax and appearance of another class. For
-example, by loading the |article| class, a class writer only has to change the
-bits of |article| they don't like, rather than writing a new class from
-scratch.
+此命令与作者命令 |\documentclass| 具有相同的语法。它允许类基于另一个类的
+语法和外观。例如，通过加载 |article| 类，类作者只需更改他们不喜欢的 |article|
+的部分，而不是从头开始编写一个新的类。
 
-The following commands can be used in the common case that you want to
-simply load a class or package file with exactly those options that
-are being used by the current class.
+以下命令可以在常见情况下使用，即您希望简单地加载一个具有当前类所使用的确切
+选项的类或宏包文件。
 \begin{verbatim}
    \LoadClassWithOptions{<class-name>}[<date>]
    \RequirePackageWithOptions{<package>}[<date>]
 \end{verbatim}
-For example:
+例如：
 \begin{verbatim}
    \LoadClassWithOptions{article}
    \RequirePackageWithOptions{graphics}[1995/12/01]
 \end{verbatim}
 
-\subsection{Declaring options}
+\subsection{声明选项}
 
-Packages and classes can declare options and these can be specified by authors;
-for example, the |twocolumn| option is declared by the |article| class. Note
-that the name of an option should contain only those characters allowed in a
-`\LaTeX{} name'; in particular it must not contain any control sequences.
+宏包和文档类可以声明选项，作者可以指定这些选项；例如，|twocolumn|
+选项由 |article| 类声明。注意，选项的名称应仅包含“\LaTeX{} 名称”
+中允许的字符；特别地，不能包含任何控制序列。
 
-\LaTeX{} supports two methods for creating options: a key--value system and a
-`simple text' approach. The key--value system is recommended for new classes
-and packages, and is more flexible in handling of option classes than the
-simple text approach. Both option methods use the same basic structure within
-the \LaTeX{} source: declaration of options first then processing options in a
-second step. Both also allow options to be passed on to other packages or an
-underlying class. As the `classical' simple text approach is conceptually more
-straight-forward to illustrate, it is used here to show the general structure:
-see Section~\ref{Sec:opt:keyval} for full details of the key--value approach.
+\LaTeX{} 支持两种创建选项的方法：键-值系统和“简单文本”方式。键-值系统
+推荐用于新的类和宏包，并且在处理选项类方面比简单文本方式更灵活。这两种
+选项方法在 \LaTeX{} 源文件中使用相同的基本结构：首先声明选项，然后在第
+二步处理选项。两者都允许将选项传递给其他宏包或底层类。由于“经典”的简
+单文本方式在概念上更直观，用于展示一般结构；详细的键-值方法请参阅第
+\ref{Sec:opt:keyval} 节。
 
-An option is declared as follows:
+声明一个选项如下：
 \begin{verbatim}
    \DeclareOption{<option>}{<code>}
 \end{verbatim}
-For example, the |dvips| option (slightly simplified)
-to the |graphics| package is implemented as:
+例如，|graphics| 宏包中的 |dvips| 选项（略作简化）的实现如下：
 \begin{verbatim}
    \DeclareOption{dvips}{\input{dvips.def}}
 \end{verbatim}
-This means that when an author writes |\usepackage[dvips]{graphics}|, the file
-|dvips.def| is loaded. As another example, the |a4paper| option is declared in
-the |article| class to set the |\paperheight| and |\paperwidth| lengths:
+这意味着当作者写 |\usepackage[dvips]{graphics}| 时，文件 |dvips.def|
+会被加载。再举个例子，|article| 类中声明了 |a4paper| 选项以设置
+|\paperheight| 和 |\paperwidth| 长度：
 \begin{verbatim}
    \DeclareOption{a4paper}{%
       \setlength{\paperheight}{297mm}%
       \setlength{\paperwidth}{210mm}%
    }
 \end{verbatim}
-Sometimes a user will request an option which the class or package has not
-explicitly declared. By default this will produce a warning (for classes) or
-error (for packages); this behavior can be altered as follows:
+有时用户会请求类或宏包未明确声明的选项。默认情况下，这将产生警告（对
+于类）或错误（对于宏包）；此行为可以通过以下方式更改：
 \begin{verbatim}
    \DeclareOption*{<code>}
 \end{verbatim}
-For example, to make the package |fred| produce a warning rather than an error
-for unknown options, you could specify:
+例如，为使宏包 |fred| 对未知选项产生警告而不是错误，您可以指定：
 \begin{verbatim}
    \DeclareOption*{%
       \PackageWarning{fred}{Unknown option `\CurrentOption'}%
    }
 \end{verbatim}
-Then, if an author writes |\usepackage[foo]{fred}|, they will get a warning
-\texttt{Package fred Warning: Unknown option `foo'.} As another example, the
-|fontenc| package tries to load a file |<ENC>enc.def| whenever the \m{ENC}
-option is used. This can be done by writing:
+这样，如果作者写了 |\usepackage[foo]{fred}|，他们会收到警告
+\texttt{Package fred Warning: Unknown option `foo'.} 再举个例子，|fontenc|
+宏包在使用 \m{ENC} 选项时会尝试加载文件 |<ENC>enc.def|。这可以通过如下
+方式完成：
 \begin{verbatim}
    \DeclareOption*{%
       \input{\CurrentOption enc.def}%
    }
 \end{verbatim}
 
-It is possible to pass options on to another package or class, using the
-command |\PassOptionsToPackage| or |\PassOptionsToClass| (note that this is a
-specialised operation that works only for option names): see
-Section~\ref{Sec:opmove}. For example, to pass every unknown option on to the
-|article| class, you can use:
+可以使用 |\PassOptionsToPackage| 或 |\PassOptionsToClass| 命令将选项传递
+给另一个宏包或类（请注意，这是一种专门的操作，仅适用于选项名称）：
+请参阅第 \ref{Sec:opmove} 节。例如，要将每个未知选项传递给 |article|
+类，可以使用：
 \begin{verbatim}
    \DeclareOption*{%
       \PassOptionsToClass{\CurrentOption}{article}%
    }
 \end{verbatim}
-If you do this then you should make sure you load the class at some later
-point, otherwise the options will never be processed!
+如果这样做，您应该确保在稍后某个时刻加载该类，否则选项将永远不会被处
+理！
 
-So far, we have explained only how to declare options, not how to execute them.
-To process the options with which the file was called, you should use:
+到目前为止，我们只解释了如何声明选项，而不是如何执行它们。要处理文件调
+用时使用的选项，应使用：
 \begin{verbatim}
    \ProcessOptions\relax
 \end{verbatim}
-This executes the \m{code} for each option that was both specified and declared
-(see Section~\ref{Sec:commands.options} for details of how this is done).
+这将为每个已指定和已声明的选项执行相应的 \m{code}（请参阅第
+\ref{Sec:commands.options} 节以了解详细信息）。
 
-For example, if the |jane| package file contains:
+例如，如果 |jane| 宏包文件包含：
 \begin{verbatim}
    \DeclareOption{foo}{\typeout{Saw foo.}}
    \DeclareOption{baz}{\typeout{Saw baz.}}
    \DeclareOption*{\typeout{What's \CurrentOption?}}
    \ProcessOptions\relax
 \end{verbatim}
-and an author writes |\usepackage[foo,bar]{jane}|, then they will see the
-messages \texttt{Saw foo.} and \texttt{What's bar?}
+并且作者写了 |\usepackage[foo,bar]{jane}|，那么他们将看到消息
+\texttt{Saw foo.} 和 \texttt{What's bar?}。
 
-\subsection{A minimal class file}
+\subsection{一个最小的文档类文件}
 
-Most of the work of a class or package is in defining new commands, or
-changing the appearance of documents.  This is done in the body of the
-package, using commands such as |\newcommand| or |\setlength|.
+一个文档类或宏包的大部分工作在于定义新命令或更改文档的外观。这是在
+文档类的主体中完成的，使用诸如 |\newcommand| 或 |\setlength| 等命令。
 
-There are four things that every class file \emph{must} contain: these
-are a definition of |\normalsize|, values for |\textwidth| and
-|\textheight| and a specification for page-numbering.  So a minimal
-document class file\footnote {This class is now in the standard
-   distribution, as \texttt{minimal.cls}.} looks like this:
+每个文档类文件\emph{必须}包含四个内容：定义 |\normalsize|、设置
+|\textwidth| 和 |\textheight| 的值，以及指定页码。因此，一个最小的文档
+类文件\footnote{这个类现在已经在标准发行版中，名为 \texttt{minimal.cls}。}
+看起来像这样：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesClass{minimal}[2022-06-01 Standard LaTeX minimal class]
    \renewcommand{\normalsize}{\fontsize{10pt}{12pt}\selectfont}
    \setlength{\textwidth}{6.5in}
    \setlength{\textheight}{8in}
-   \pagenumbering{arabic}       % needed even though this class will
-                                % not show page numbers
+   \pagenumbering{arabic}       % 即使这个类不显示页码也需要
 \end{verbatim}
-However, this class file will not support footnotes, marginals,
-floats, etc., nor will it provide any of the 2-letter font commands
-such as |\rm|; thus most classes will contain more than this minimum!
+然而，这个类文件不支持脚注、边注、浮动对象等，也不提供像 |\rm| 这样
+的两个字母的字体命令；因此，大多数文档类会包含比这更多的内容！
 
-\subsection{Example: a local letter class}
+\subsection{示例：一个本地信函类}
 
-A company may have its own letter class, for setting letters in the
-company style.  This section shows a simple implementation of such a
-class, although a real class would need more structure.
+一家公司可能有自己的信函类，用于按公司风格设置信函。本节展示了这
+样一个类的简单实现，实际的类需要更多的结构。
 
-The class begins by announcing itself as |neplet.cls|.
+该类首先以 |neplet.cls| 的身份宣布自己。
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesClass{neplet}[2022-06-01 NonExistent Press letter class]
 \end{verbatim}
-Then this next bit passes any options on to the |letter| class, which is loaded
-with the |a4paper| option.
+然后，下面的部分将任何选项传递给 |letter| 类，并使用 |a4paper|
+选项加载它。
 \begin{verbatim}
    \DeclareOption*{\PassOptionsToClass{\CurrentOption}{letter}}
    \ProcessOptions\relax
    \LoadClass[a4paper]{letter}
 \end{verbatim}
-In order to use the company letter head, it redefines the |firstpage| page
-style: this is the page style that is used on the first page of letters.
+为了使用公司信头，重新定义了 |firstpage| 页样式：这是用于信函第一
+页的页样式。
 \begin{verbatim}
    \renewcommand{\ps@firstpage}{%
       \renewcommand{\@oddhead}{<letterhead goes here>}%
       \renewcommand{\@oddfoot}{<letterfoot goes here>}%
    }
 \end{verbatim}
-And that's it!
+就是这样！
 
-\subsection{Example: a newsletter class}
+\subsection{示例：一个新闻简报类}
 
-A simple newsletter can be typeset with \LaTeX{}, using a variant of the
-|article| class. The class begins by announcing itself as |smplnews.cls|.
+可以使用 \LaTeX{} 来排版简单的新闻简报，使用的是 |article| 类的变体。
+该类首先以 |smplnews.cls| 的身份宣布自己。
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}
    \ProvidesClass{smplnews}[2022-06-01 The Simple News newsletter class]
 
    \newcommand{\headlinecolor}{\normalcolor}
 \end{verbatim}
-It passes most specified options on to the |article| class: apart from the
-|onecolumn| option, which is switched off, and the |green| option, which sets
-the headline in green.
+它将大多数指定的选项传递给 |article| 类：除了 |onecolumn| 选项被关闭，
+|green| 选项将标题设置为绿色。
 \begin{verbatim}
    \DeclareOption{onecolumn}{\OptionNotUsed}
    \DeclareOption{green}{\renewcommand{\headlinecolor}{\color{green}}}
@@ -654,18 +603,17 @@ the headline in green.
 
    \ProcessOptions\relax
 \end{verbatim}
-It then loads the class |article| with the option |twocolumn|.
+然后加载 |article| 类，使用 |twocolumn| 选项。
 \begin{verbatim}
    \LoadClass[twocolumn]{article}
 \end{verbatim}
-Since the newsletter is to be printed in colour, it now loads the |color|
-package. The class does not specify a device driver option since this should be
-specified by the user of the |smplnews| class.
+由于新闻简报将以彩色打印，它现在加载 |color| 宏包。该类不指定设备驱动
+程序选项，因为这应由 |smplnews| 类的使用者指定。
 \begin{verbatim}
    \RequirePackage{color}
 \end{verbatim}
-The class then redefines |\maketitle| to produce the title in 72\,pt Helvetica
-bold oblique, in the appropriate colour.
+然后重新定义 |\maketitle|，以 72\,pt Helvetica 粗斜体显示标题，使用合适
+的颜色。
 \begin{verbatim}
    \renewcommand{\maketitle}{%
       \twocolumn[%
@@ -675,7 +623,7 @@ bold oblique, in the appropriate colour.
       ]%
    }
 \end{verbatim}
-It redefines |\section| and switches off section numbering.
+它重新定义了 |\section| 并关闭了章节编号。
 \begin{verbatim}
    \renewcommand{\section}{%
       \@startsection
@@ -685,71 +633,57 @@ It redefines |\section| and switches off section numbering.
 
    \setcounter{secnumdepth}{0}
 \end{verbatim}
-It also sets the three essential things.
+它还设置了三个基本要素。
 \begin{verbatim}
    \renewcommand{\normalsize}{\fontsize{9}{10}\selectfont}
    \setlength{\textwidth}{17.5cm}
    \setlength{\textheight}{25cm}
 \end{verbatim}
-In practice, a class would need more than this: it would provide commands for
-issue numbers, authors of articles, page styles and so on; but this skeleton
-gives a start. The |ltnews| class file is not much more complex than this one.
+在实践中，一个类需要比这更多：它将提供用于期号、文章作者、页面样式等的命
+令；但是这个框架已经提供了一个开始。|ltnews| 类文件和这个类文件相比也没
+有更复杂多少。
 
-\section{Commands for class and package writers}
+\section{用于类和宏包编写者的命令}
 \label{Sec:commands}
 
-This section describes briefly each of the commands for class and package
-writers. To find out about other aspects of the system,
-you should also read \emph{\LaTeXbook}, \emph{\LaTeXcomp} and
-\emph{\usrguide}.
+本节简要描述了用于类和宏包编写者的每个命令。要了解系统的其他方面，
+您还应阅读 \emph{\LaTeXbook}、\emph{\LaTeXcomp} 和 \emph{\usrguide}。
 
-\subsection{Identification}
+\subsection{识别}
 
-The first group of commands discussed here are those used to identify your
-class or package file.
+首先讨论的一组命令是用于识别您的类或宏包文件的命令。
 
 \begin{decl}
    |\NeedsTeXFormat| \arg{format-name} \oarg{release-date}
 \end{decl}
-This command tells \TeX{} that this file should be processed using a format
-with name \m{format-name}. You can use the optional argument \m{release-date}
-to further specify the earliest release date of the format that is needed. When
-the release date of the format is older than the one specified a warning will
-be generated. The standard \m{format-name} is \texttt{LaTeX2e}. The date, if
-present, must be in the form \textsc{yyyy-mm-dd}.
+该命令告诉 \TeX{} 应使用名称为 \m{format-name} 的格式处理此文件。您
+可以使用可选参数 \m{release-date} 进一步指定所需格式的最早发布日期。
+当格式的发布日期早于指定的日期时，将生成警告。标准的 \m{format-name}
+是 \texttt{LaTeX2e}。如果存在日期，则必须采用 \textsc{yyyy-mm-dd} 的
+形式。
 
-Example:
+示例：
 \begin{verbatim}
    \NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \end{verbatim}
-People often don't know what date to put here. For the kernel, you can find out
-the right one by consulting |changes.txt| and select the release date of a new
-feature you are interested in. This is slightly different for packages as they
-are released throughout the year: you will need to consult their change
-history.
 
 \begin{decl}
    |\ProvidesClass| \arg{class-name} \oarg{release-info} \\
    |\ProvidesPackage| \arg{package-name} \oarg{release-info}
 \end{decl}
-This declares that the current file contains the definitions for the document
-class \m{class-name} or package \m{package-name}.
+此声明当前文件包含文档类 \m{class-name} 或宏包 \m{package-name} 的定义。
 
-The optional \m{release-info}, if used, must contain:
+可选的 \m{release-info}，如果使用，必须包含：
 \begin{itemize}
-   \item the release date of this version of the file, in the form
-         \textsc{yyyy-mm-dd};
-   \item optionally followed by a space and a short description, possibly
-         including a version number.
+   \item 此版本文件的发布日期，形式为 \textsc{yyyy-mm-dd}；
+   \item 可选地跟着一个空格和一个简短描述，可能包括版本号。
 \end{itemize}
-The above syntax must be followed exactly so that this information can be used
-by |\LoadClass| or |\documentclass| (for classes) or |\RequirePackage| or
-|\usepackage| (for packages) to test that the release is not too old.
+上述语法必须严格遵循，以便 |\LoadClass| 或 |\documentclass|（对于类）
+或 |\RequirePackage| 或 |\usepackage|（对于宏包）测试发布是否太旧。
 
-The whole of this \m{release-info} information is displayed by |\listfiles| and
-should therefore not be too long.
+整个 \m{release-info} 信息将由 |\listfiles| 显示，因此不应太长。
 
-Example:
+示例：
 \begin{verbatim}
    \ProvidesClass{article}[2022-06-01 v1.0 Standard LaTeX class]
    \ProvidesPackage{ifthen}[2022-06-01 v1.0 Standard LaTeX package]
@@ -758,34 +692,32 @@ Example:
 \begin{decl}
    |\ProvidesFile| \arg{file-name} \oarg{release-info}
 \end{decl}
-This is similar to the two previous commands except that here the full
-filename, including the extension, must be given. It is used for declaring any
-files other than main class and package files.
+这类似于前两个命令，只是这里必须给出完整的文件名，包括扩展名。用于
+声明除主类和宏包文件以外的任何文件。
 
-Example:
+示例：
 \begin{verbatim}
    \ProvidesFile{T1enc.def}[2022-06-01 v1.0 Standard LaTeX file]
 \end{verbatim}
 
-Note that the phrase \texttt{Standard LaTeX} \textbf{must not} be used in the
-identification banner of any file other than those in the standard \LaTeX{}
-distribution.
+请注意，在除了标准 \LaTeX{} 发行版之外的任何文件的标识横幅中，
+\texttt{Standard LaTeX} \textbf{绝不能} 使用。
 
-\subsection{Loading files}
+\subsection{加载文件}
 \label{Sec:loadf}
 
-This group of commands can be used to create your own document class or package
-by building on existing classes or packages.
+这组命令可用于通过基于现有类或宏包来创建自己的文档类或宏包。
+
 \begin{decl}
    |\RequirePackage| \oarg{options-list} \arg{package-name}
    \oarg{release-info}\\
    |\RequirePackageWithOptions| \arg{package-name}
    \oarg{release-info}
 \end{decl}
-Packages and classes should use these commands to load other packages.
+宏包和文档类应使用这些命令加载其他宏包。
 
-The use of |\RequirePackage| is the same as the author command |\usepackage|.
-Examples:
+使用 |\RequirePackage| 与作者命令 |\usepackage| 相同。
+示例：
 \begin{verbatim}
    \RequirePackage{ifthen}[2022-06-01]
    \RequirePackageWithOptions{graphics}[2022-06-01]
@@ -797,99 +729,82 @@ Examples:
    |\LoadClassWithOptions| \arg{class-name}
    \oarg{release-info}
 \end{decl}
-These commands are for use \emph{only} in class files, they cannot be used in
-packages files; they can be used at most once within a class file.
+这些命令仅用于类文件中，不能用于宏包文件；在类文件中最多只能使用一次。
 
-The use of |\LoadClass| is the same as the use of |\documentclass| to load a
-class file.
+使用 |\LoadClass| 与使用 |\documentclass| 加载类文件相同。
 
-Examples:
+示例：
 \begin{verbatim}
    \LoadClass{article}[2022-06-01]
    \LoadClassWithOptions{article}[2022-06-01]
 \end{verbatim}
 
-The two |WithOptions| versions simply load the class (or package) file with
-exactly those options that are being used by the current file (class or
-package). See below, in \ref{Sec:opmove}, for further discussion of their use.
+两个带 |WithOptions| 的版本仅加载具有当前文件（类或宏包）使用的选项的类
+（或宏包）文件。有关其用法的进一步讨论，请参见下文，\ref{Sec:opmove} 节。
 
-\subsection{Delaying code}
+\subsection{延迟代码}
 \label{Sec:delays}
 
-As noted earlier, a sophisticated hook system is available and described in
-\texttt{lthooks}. Here, we document a small set of convenient short names for
-common hooks.
+如前所述，\texttt{lthooks} 中提供了一个复杂的钩子系统。这里我们记录了一
+小组常见钩子的便捷简短名称。
 
-These first two commands are also intended primarily for use within the
-\m{code} argument of |\DeclareOption| or |\DeclareOption*|.
+这前两个命令也主要用于 |\DeclareOption| 或 |\DeclareOption*| 的 \m{code}
+参数内。
 
 \begin{decl}
    |\AtEndOfClass| \arg{code}\\
    |\AtEndOfPackage| \arg{code}
 \end{decl}
-These commands declare \m{code} that is saved away internally and then executed
-after processing the whole of the current class or package file.
+这些命令声明了 \m{code}，会在整个当前类或宏包文件处理完毕后保存并执行。
 
-Repeated use of these commands is permitted: the code in the arguments is
-stored (and later executed) in the order of their declarations.
+允许重复使用这些命令：参数中的代码按声明顺序存储（并后续执行）。
 
 \begin{decl}
    |\AtBeginDocument| \arg{code}\\
    |\AtEndDocument| \arg{code}
 \end{decl}
-These commands declare \m{code} to be saved internally and executed while
-\LaTeX{} is executing |\begin{document}| or |\end{document}|.
+这些命令声明了将在 \LaTeX{} 执行 |\begin{document}| 或 |\end{document}|
+期间保存并执行的 \m{code}。
 
-The \m{code} specified in the argument to |\AtBeginDocument| is executed near
-the end of the |\begin{document}| code, \emph{after} the font selection tables
-have been set up. It is therefore a useful place to put code which needs to be
-executed after everything has been prepared for typesetting and when the normal
-font for the document is the current font.
+|\AtBeginDocument| 中的参数指定的 \m{code} 在 |\begin{document}| 代码的末
+尾执行，\emph{在}设置字体选择表之后。因此，这是放置需要在所有内容准备好
+进行排版，并且正常字体为当前字体时执行的代码的有用位置。
 
-The |\AtBeginDocument| hook should not be used for code that does any
-typesetting since the typeset result would be unpredictable.
+|\AtBeginDocument| 钩子不应用于进行任何排版，因为排版结果将是不可预测的。
 
-The \m{code} specified in the argument to |\AtEndDocument| is executed at the
-beginning of the |\end{document}| code, \emph{before} the final page is
-finished and before any leftover floating environments are processed. If some
-of the \m{code} is to be executed after these two processes, you should include
-a |\clearpage| at the appropriate point in \m{code}.
+|\AtEndDocument| 中的参数指定的 \m{code} 在 |\end{document}| 代码的开头执
+行，\emph{在}最终页面完成之前，也在处理任何剩余的浮动环境之前。如果某些
+\m{code} 需要在这两个过程之后执行，应在 \m{code} 的适当位置包含 |\clearpage|。
 
-Repeated use of these commands is permitted: the code in the arguments is
-stored (and later executed) in the order of their declarations.
+允许重复使用这些命令：参数中的代码按声明顺序存储（并后续执行）。
 
-\subsection{Creating and using keyval options}
+\subsection{创建和使用键值选项}
 \label{Sec:opt:keyval}
 
-As with any key--value input, using key--value pairs as package or class
-options has two parts: creating the key options and setting (using) them.
-Options created in this way \emph{may} be used after package loading as general
-key--value settings: this will depend on the nature of the underlying code.
+与任何键-值输入一样，使用键-值对作为宏包或类选项有两部分：创建键选项和设置（使用）它们。
+以这种方式创建的选项 \emph{可能} 作为一般键-值设置在加载宏包后使用：这将取决于底层代码的性质。
 
 \begin{decl}
    |\DeclareKeys| \oarg{family} \arg{declarations}
 \end{decl}
-This command creates a series of options from a comma-separated
-\m{declarations} list. Each entry in this list is a key--value pair, with the
-\m{key} having one or more \m{properties}. A small number of `basic'
-\m{properties} are described below. The full range of properties, provided by
-\texttt{l3keys}, can also be used for more powerful processing. See
-\texttt{interface3} for the full details.
+此命令从逗号分隔的 \m{declarations} 列表中创建一系列选项。列表中的每个条目都是键-值对，
+其中 \m{key} 具有一个或多个 \m{properties}。下面介绍了一小部分“基本”的
+\m{properties}。由 \texttt{l3keys} 提供的完整范围的属性也可用于更强大的处理。
+有关完整细节，请参见 \texttt{interface3}。
 
-The basic properties provided here are
+这里提供的基本属性包括：
 \begin{itemize}
-   \item \texttt{.code} --- execute arbitrary code
-   \item \texttt{.if} --- sets a \TeX{} |\if...| switch
-   \item \texttt{.ifnot} --- sets an inverted \TeX{} |\if...| switch
-   \item \texttt{.store} --- stores a value in a macro
-   \item \texttt{.usage} -- defines whether the option can be given only
-         when loading (\texttt{load}), in the preamble (\texttt{preamble}) or
-         has no limitation on scope (\texttt{general})
+   \item \texttt{.code} --- 执行任意代码
+   \item \texttt{.if} --- 设置一个 \TeX{} |\if...| 开关
+   \item \texttt{.ifnot} --- 设置一个反转的 \TeX{} |\if...| 开关
+   \item \texttt{.store} --- 将值存储到宏中
+   \item \texttt{.usage} -- 定义选项是否仅能在加载时使用（\texttt{load}）、在导言区使用
+         （\texttt{preamble}）或在范围上没有限制（\texttt{general}）
 \end{itemize}
-The part of the \meta{key} before the \m{property} is the \m{name}, with the
-\m{value} working with the \m{property} to define the behavior of the option.
+在 \m{property} 之前的 \meta{key} 部分是 \m{name}，\m{value} 与 \m{property} 一起定义了
+选项的行为。
 
-For example, with
+例如，使用以下声明：
 \begin{verbatim}
 \DeclareKeys[mypkg]
  {
@@ -900,25 +815,21 @@ For example, with
    second-name.store = \@mypkg@other@name
  }
 \end{verbatim}
-three options would be created. The option \texttt{draft} can be given anywhere
-in the preamble, and will set a switch called |\if@mypkg@draft|. The option
-\texttt{name} can only be given during package loading, and will save whatever
-value it is given in |\@mypkg@name|. Finally, the option \texttt{second-name}
-can be given anywhere, and will save its value in |\@mypkg@other@name|.
+将创建三个选项。选项 \texttt{draft} 可以在导言区的任何位置给出，并将设置一个名为 |\if@mypkg@draft|
+的开关。
+选项 \texttt{name} 只能在加载宏包时给出，并将保存给定的任何值到 |\@mypkg@name| 中。最后，选项
+\texttt{second-name} 可以在任何位置给出，并将其值保存到 |\@mypkg@other@name| 中。
 
-Keys created \emph{before} the use of |\ProcessKeyOptions| act as package
-options.
+在使用 |\ProcessKeyOptions| 之前创建的键将作为宏包选项。
 
 \begin{decl}
    |\DeclareUnknownKeyHandler| \oarg{family} \arg{code}
 \end{decl}
-The command |\DeclareUnknownKeyHandler| may be used to define the behavior when
-an undefined key is encountered. The \m{code} will receive the unknown key name
-as |#1| and the value as |#2|. These can then be processed as appropriate,
-e.g.~by forwarding to another package. The entire option is available as
-\cs{CurrentOption}, should it be necessary to pass on options which may or
-may not contain an |=|~sign. For example, this may be used to pass an
-unknown option on to a non-keyval class such as \pkg{article}:
+命令 |\DeclareUnknownKeyHandler| 用于定义遇到未定义键时的行为。参数 \m{code} 将接收未知键名为
+|#1|，值为 |#2|。
+然后可以根据需要处理它们，例如将其转发到另一个宏包。整个选项作为 \cs{CurrentOption} 可用，如果
+需要传递可能包含 |=| 符号的选项。
+例如，这可用于将未知选项传递给 \pkg{article} 等非键值类：
 \begin{verbatim}
 \DeclareUnknownKeyHandler{%
   \PassOptionsToClass{\CurrentOption}{article}
@@ -928,137 +839,118 @@ unknown option on to a non-keyval class such as \pkg{article}:
 \begin{decl}
    |\ProcessKeyOptions| \oarg{family}
 \end{decl}
-The |\ProcessKeyOptions| function is used to check the current option list
-against the keys defined for \m{family}. Global (class) options and local
-(package) options are checked when this function is called in a package.
-The command will process \emph{all} options given the the current
-package or class: there is no need to also apply \cs{ProcessOptions}.
+函数 |\ProcessKeyOptions| 用于检查当前选项列表与 \m{family} 定义的键。在包中调用此函数时将
+检查全局（类）选项和局部（宏包）选项。该命令将处理当前宏包或类给定的\emph{所有}选项：不需要
+额外应用 \cs{ProcessOptions}。
 
 \begin{decl}
    |\SetKeys| \oarg{family} \arg{keyvals}
 \end{decl}
-Sets (applies) the explicit list of \m{keyvals} for the \m{family}: if the
-latter is not given, the value of |\@currname| is used. This command may be used
-within a package to set options before or after using |\ProcessKeyOptions|.
+为 \m{family} 设置（应用）显式的 \m{keyvals} 列表：如果未给出后者，则使用 |\@currname|
+的值。此命令可用于在使用 |\ProcessKeyOptions| 之前或之后在宏包中设置选项。
 
-\subsection{Passing options around}
+\subsection{选项传递}
 \label{Sec:opmove}
 
-These two commands are also very useful within the \m{code} argument of
-options.
+这两个命令也在选项的 \m{code} 参数中非常有用。
 \begin{decl}
    |\PassOptionsToPackage| \arg{options-list} \arg{package-name}\\
    |\PassOptionsToClass| \arg{options-list} \arg{class-name}
 \end{decl}
-The command |\PassOptionsToPackage| passes the option names in \m{options-list}
-to package \m{package-name}. This means that it adds the \m{option-list} to the
-list of options used by any future |\RequirePackage| or |\usepackage| command
-for package \m{package-name}.
+命令 |\PassOptionsToPackage| 将 \m{options-list} 中的选项名称传递给宏包 \m{package-name}。
+这意味着它将 \m{option-list} 添加到任何未来对宏包 \m{package-name} 的 |\RequirePackage|
+或 |\usepackage| 命令所使用的选项列表中。
 
-Example:
+示例：
 \begin{verbatim}
    \PassOptionsToPackage{foo,bar}{fred}
    \RequirePackage[baz]{fred}
 \end{verbatim}
-is the same as:
+等同于：
 \begin{verbatim}
    \RequirePackage[foo,bar,baz]{fred}
 \end{verbatim}
 
-Similarly, |\PassOptionsToClass| may be used in a class file to pass options to
-another class to be loaded with |\LoadClass|.
+类似地，|\PassOptionsToClass| 可以在类文件中用于将选项传递给另一个要由 |\LoadClass| 加载的类。
 
-The effects and use of these two commands should be contrasted with those of
-the following two (documented above, in \ref{Sec:loadf}):
+这两个命令的效果和用法应与上文（\ref{Sec:loadf}）中的以下两个命令进行对比：
 \begin{verbatim}
    \LoadClassWithOptions
    \RequirePackageWithOptions
 \end{verbatim}
-The command |\RequirePackageWithOptions| is similar to |\RequirePackage|, but
-it always loads the required package with exactly the same option list as that
-being used by the current class or package, rather than with any option
-explicitly supplied or passed on by |\PassOptionsToPackage|.
+命令 |\RequirePackageWithOptions| 类似于 |\RequirePackage|，但它始终使用与当前类或宏包使用
+的选项列表完全相同的选项列表加载所需的包，而不是使用由 |\PassOptionsToPackage| 明确提供或传递
+的选项。
 
-The main purpose of |\LoadClassWithOptions| is to allow one class to simply
-build on another, for example:
+|\LoadClassWithOptions| 的主要目的是允许一个类简单地建立在另一个类之上，例如：
 \begin{verbatim}
   \LoadClassWithOptions{article}
 \end{verbatim}
-This should be compared with the slightly different construction
+这应该与略有不同的构造进行比较：
 \begin{verbatim}
   \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
   \ProcessOptions\relax
   \LoadClass{article}
 \end{verbatim}
-As used above, the effects are more or less the same, but the first is a lot
-less to type; also the |\LoadClassWithOptions| method runs slightly quicker.
+如上所用，效果几乎相同，但第一个命令要输入的内容较少；同时，\hfil\break
+|\LoadClassWithOptions| 方法稍微更快一些。
 
-If, however, the class declares options of its own then the two constructions
-are different. Compare, for example:
+然而，如果类声明了自己的选项，则这两种构造是不同的。例如比较：
 \begin{verbatim}
   \DeclareOption{landscape}{\@landscapetrue}
   \ProcessOptions\relax
   \LoadClassWithOptions{article}
 \end{verbatim}
-with:
+和：
 \begin{verbatim}
   \DeclareOption{landscape}{\@landscapetrue}
   \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
   \ProcessOptions\relax
   \LoadClass{article}
 \end{verbatim}
-In the first example, the \textsf{article} class will be loaded with option
-|landscape| precisely when the current class is called with this option. By
-contrast, in the second example it will never be called with option |landscape|
-as in that case \textsf{article} is passed options only by the default option
-handler, but this handler is not used for |landscape| because that option is
-explicitly declared.
+在第一个示例中，只有当当前类以此选项调用时，\textsf{article} 类将使用选项 |landscape| 加载。
+相比之下，第二个示例中，它永远不会使用选项 |landscape|，因为在这种情况下，\textsf{article}
+仅通过默认选项处理程序传递选项，但该处理程序不用于 |landscape|，因为该选项已明确声明。
 
-\subsection{Safe file commands}
+\subsection{安全文件命令}
 
-These commands deal with file input; they ensure that the non-existence of a
-requested file can be handled in a user-friendly way.
+这些命令处理文件输入；它们确保以用户友好的方式处理请求的文件不存在的情况。
 
 \begin{decl}
    |\IfFileExists| \arg{file-name} \arg{true} \arg{false}
 \end{decl}
-If the file exists then the code specified in \m{true} is executed.
+如果文件存在，则执行 \m{true} 中指定的代码。
 
-If the file does not exist then the code specified in \m{false} is executed.
+如果文件不存在，则执行 \m{false} 中指定的代码。
 
-This command does \emph{not} input the file.
+此命令\emph{不会}输入文件。
 
 \begin{decl}
    |\InputIfFileExists| \arg{file-name} \arg{true} \arg{false}
 \end{decl}
-This inputs the file \m{file-name} if it exists and, immediately before the
-input, the code specified in \m{true} is executed.
+如果文件存在，则输入文件 \m{file-name}，并在输入之前立即执行 \m{true} 中指定的代码。
 
-If the file does not exist then the code specified in \m{false} is executed.
+如果文件不存在，则执行 \m{false} 中指定的代码。
 
-It is implemented using |\IfFileExists|.
+它是使用 |\IfFileExists| 实现的。
 
-\subsection{Reporting errors, etc}
+\subsection{报告错误等}
 
-These commands should be used by third party classes and packages to report
-errors, or to provide information to authors.
+这些命令应由第三方类和宏包用于报告错误或向作者提供信息。
 
 \begin{decl}
    |\ClassError| \arg{class-name} \arg{error-text} \arg{help-text}\\
    |\PackageError| \arg{package-name} \arg{error-text} \arg{help-text}
 \end{decl}
-These produce an error message. The \m{error-text} is displayed and the |?|
-error prompt is shown. If the user types |h|, they will be shown the
-\m{help-text}.
+这些命令产生一个错误消息。显示 \m{error-text}，并显示 |?| 错误提示符。如果用户键入
+|h|，则会显示 \m{help-text}。
 
-Within the \m{error-text} and \m{help-text}: |\protect| can be used to stop a
-command from expanding; |\MessageBreak| causes a line-break; and |\space|
-prints a space.
+在 \m{error-text} 和 \m{help-text} 中：|\protect| 可用于阻止命令展开；\hfil\break
+|\MessageBreak| 导致换行；|\space| 打印空格。
 
-Note that the \m{error-text} will have a full stop added to it, so do not put
-one into the argument.
+请注意，\m{error-text} 将添加一个句号，因此不要在参数中放入句号。
 
-For example:
+例如：
 \begin{verbatim}
    \newcommand{\foo}{FOO}
    \PackageError{ethel}{%
@@ -1070,14 +962,14 @@ For example:
       \space to proceed, ignoring \protect\foo.
    }
 \end{verbatim}
-produces this display:
+将显示：
 \begin{verbatim}
    ! Package ethel Error: Your hovercraft is full of eels,
    (ethel)                and \foo is FOO.
 
    See the ethel package documentation for explanation.
 \end{verbatim}
-If the user types |h|, this will be shown:
+如果用户键入 |h|，则将显示：
 \begin{verbatim}
    Oh dear! Something's gone wrong.
      Try typing  <<return>>  to proceed, ignoring \foo.
@@ -1091,35 +983,29 @@ If the user types |h|, this will be shown:
    |\ClassInfo| \arg{class-name} \arg{info-text}\\
    |\PackageInfo| \arg{package-name} \arg{info-text}
 \end{decl}
-The four |Warning| commands are similar to the error commands, except that they
-produce only a warning on the screen, with no error prompt.
+四个 |Warning| 命令类似于错误命令，但仅在屏幕上产生警告，没有错误提示。
 
-The first two, |Warning| versions, also show the line number where the warning
-occurred, whilst the second two, |WarningNoLine| versions, do not.
+前两个 |Warning| 版本还显示发生警告的行号，而后两个 |WarningNoLine| 版本不显示行号。
 
-The two |Info| commands are similar except that they log the information only
-in the transcript file, including the line number. There are no |NoLine|
-versions of these two.
+两个 |Info| 命令类似，但仅在传输文件中记录信息，包括行号。这两个命令没有 |NoLine| 版本。
 
-Within the \m{warning-text} and \m{info-text}: |\protect| can be used to stop a
-command from expanding; |\MessageBreak| causes a line-break; and |\space|
-prints a space. Also, these should not end with a full stop as one is
-automatically added.
+在 \m{warning-text} 和 \m{info-text} 中：|\protect| 可用于阻止命令展开；
+|\MessageBreak| 导致换行；|\space| 打印空格。同时，这些内容不应该以句号结尾，因为会
+自动添加。
 
-\section{Miscellaneous commands, etc.}
+\section{杂项命令等}
 \label{Sec:commands.misc}
 
-\subsection{Layout parameters}
+\subsection{版面参数}
 
 \begin{decl}
    |\paperheight|\\
    |\paperwidth|
 \end{decl}
-These two parameters are usually set by the class to be the size of the paper
-being used. This should be actual paper size, unlike |\textwidth| and
-|\textheight| which are the size of the main text body within the margins.
+这两个参数通常由文档类设置为所使用的纸张尺寸。这应该是实际的纸张尺寸，不同于 |\textwidth|
+和 |\textheight|，它们是页面边距内主文本区域的尺寸。
 
-\subsection{Case changing}
+\subsection{大小写转换}
 \label{sec:case}
 
 \begin{decl}
@@ -1128,21 +1014,18 @@ being used. This should be actual paper size, unlike |\textwidth| and
    |\MakeTitlecase| \arg{text}
 \end{decl}
 
-As described in \texttt{usrguide}, case changing for text should be carried out
-using the commands |\MakeUppercase|, |\MakeLowercase| and
-|\MakeTitlecase|. If you need to change the case of programmatic material, the
-team strongly suggest using the L3 programming layer commands in the
-\texttt{str} module. If you do not wish to do this, you should use the \TeX{}
-|\uppercase| and |\lowercase| primitives \emph{in this situation only}.
+如 \texttt{usrguide} 所述，对文本进行大小写转换应使用命令 |\MakeUppercase|、
+|\MakeLowercase| 和 |\MakeTitlecase|。如果需要更改编程材料的大小写，团队强烈建议使用
+\texttt{str} 模块中 L3 编程层的命令。如果不希望这样做，在这种情况下应仅使用 \TeX{} 的
+|\uppercase| 和 |\lowercase| 原语。
 
-\subsection{Better user-defined math display environments}
+\subsection{更好的用户定义的数学显示环境}
 
 \begin{decl}
    |\ignorespacesafterend|
 \end{decl}
 
-Suppose that you want to define an environment for displaying text that is
-numbered as an equation. A straightforward way to do this is as follows:
+假设你想定义一个以方程编号的文本显示环境。一个直接的方法是：
 \begin{verbatim}
   \newenvironment{texteqn}
     {\begin{equation}
@@ -1150,13 +1033,10 @@ numbered as an equation. A straightforward way to do this is as follows:
       {\end{minipage}
      \end{equation}}
 \end{verbatim}
-However, if you have tried this then you will probably have noticed that it
-does not work perfectly when used in the middle of a paragraph because an
-inter-word space appears at the beginning of the first line after the
-environment.
+然而，如果你尝试过，你可能会注意到在段落中使用时并不完美，因为在环境之后的第一行开头会出现
+单词间的空格。
 
-You can avoid this problem using |\ignorespacesafterend|; it should be
-inserted as shown here:
+你可以使用 |\ignorespacesafterend| 避免这个问题；它应该如下所示插入：
 \begin{verbatim}
   \newenvironment{texteqn}
     {\begin{equation}
@@ -1166,175 +1046,132 @@ inserted as shown here:
      \ignorespacesafterend}
 \end{verbatim}
 
-This command may also have other uses.
+此命令可能还有其他用途。
 
-\subsection{Normalising spacing}
+\subsection{规范化间距}
 
 \begin{decl}
    |\normalsfcodes|
 \end{decl}
 
-This command should be used to restore the normal settings of the
-parameters that affect spacing between words, sentences, etc.
+应该使用此命令来恢复影响单词间、句子间等间距的参数的正常设置。
 
-An important use of this feature is to correct a problem, reported by Donald
-Arseneau, that punctuation in page headers has always (in all known \TeX{}
-formats) been potentially wrong whenever a page break happens while a local
-setting of the space codes is in effect. These space codes are changed by, for
-example, the command \verb|\frenchspacing|) and the \textsf{verbatim}
-environment.
+这个特性的一个重要用途是纠正 Donald Arseneau 报告的问题，在局部设置空格代码生效时，
+页面标题中的标点可能出现问题。这些空格代码会被改变，比如由命令 \verb|\frenchspacing|
+和 \textsf{verbatim} 环境引起。
 
-It is normally given the correct definition automatically in |\begin{document}|
-and so need not be explicitly set; however, if it is explicitly made non-empty
-in a class file then automatic default setting will be over-ridden.
+通常在 |\begin{document}| 中会自动给出正确的定义，所以不需要显式设置；但是，如果在
+类文件中显式地使其非空，则默认的自动设置将被覆盖。
 
-\subsection{Querying localisation}
+\subsection{查询本地化信息}
 
-Localisation information is needed to customise a range of outputs. The
-\LaTeX{} kernel does not itself manage localisation, which is well-served by
-the bundles \pkg{babel} and \pkg{polyglossia}. To allow the kernel and other
-packages to access the current localisation information provided by \pkg{babel}
-or \pkg{polyglossia}, the command \cs{BCPdata} is defined by the kernel. The
-initial kernel definition expands to tag parts for \texttt{en-US}, as the
-kernel does not track localisation but does start out with a broadly US~English
-setup. However, if \pkg{babel} or \pkg{polyglossia} are loaded, it is redefined
-expand to the BCP-47 information from the appropriate package. The supported
-arguments are the BCP-47 tag breakdowns:
+自定义一系列输出需要本地化信息。\LaTeX{} 核心本身不管理本地化，而是由 \pkg{babel} 和
+\pkg{polyglossia} 来提供良好的支持。为了允许核心和其他宏包访问由 \pkg{babel} 或
+\pkg{polyglossia} 提供的当前本地化信息，核心定义了命令 \cs{BCPdata}。初始核心定义会
+扩展到 \texttt{en-US} 的标记部分，因为核心不追踪本地化，但是会使用基本的美国英语设置。
+但是，如果加载了 \pkg{babel} 或 \pkg{polyglossia}，它会重新定义为相应包中的 BCP-47
+信息。支持的参数是 BCP-47 标记的拆分：
 \begin{itemize}
-   \item \texttt{tag} The full BCP-47 tag (e.g.~\texttt{en-US})
-   \item \texttt{language} (e.g.,~\texttt{de})
-   \item \texttt{region} (e.g.,~\texttt{AT})
-   \item \texttt{script} (e.g.,~\texttt{Latn})
-   \item \texttt{variant} (e.g.,~\texttt{1901})
-   \item \texttt{extension.t} (transformation, e.g.,~\texttt{en-t-ja})
-   \item \texttt{extension.u} (additional locale
-         information, e.g.,~\texttt{ar-u-nu-latn})
-   \item \texttt{extension.x} (private use area, e.g.,~\texttt{la-x-classic})
+   \item \texttt{tag} 完整的 BCP-47 标记（例如 \texttt{en-US}）
+   \item \texttt{language}（例如 \texttt{de}）
+   \item \texttt{region}（例如 \texttt{AT}）
+   \item \texttt{script}（例如 \texttt{Latn}）
+   \item \texttt{variant}（例如 \texttt{1901}）
+   \item \texttt{extension.t}（转换，例如 \texttt{en-t-ja}）
+   \item \texttt{extension.u}（附加区域信息，例如 \texttt{ar-u-nu-latn}）
+   \item \texttt{extension.x}（私有使用区域，例如 \texttt{la-x-classic}）
 \end{itemize}
-The information for the \emph{main} language for a document is be provided
-if these are prefixed by \texttt{main.}, e.g.~\texttt{main.language} will
-expand to the main language even if another language is currently active.
+如果这些参数以 \texttt{main.} 为前缀，则会提供文档的\emph{主要}语言信息，例如
+\texttt{main.language} 将扩展为主要语言，即使当前活动的语言是其他语言也是如此。
 
-In addition to the tag breakdown, the following semantic arguments are
-supported
+除了标记拆分，还支持以下语义参数
 \begin{itemize}
-   \item \texttt{casing} The tag for case changing, e.g.~\texttt{el-x-iota}
-         could be selected rather than \texttt{el} to select a capital adscript
-         iota on uppercasing an \emph{ypogegrammeni}
+   \item \texttt{casing} 用于更改大小写的标记，例如 \texttt{el-x-iota} 可以被选择，
+         而不是 \texttt{el}，以在大写时选择大写 adscript iota 的希腊字母
 \end{itemize}
 
-For example, the case changing command \cs{MakeUppercase} is (conceptually)
-defined as
+例如，大小写转换命令 \cs{MakeUppercase} 的（概念上的）定义如下：
 \begin{verbatim}
 \ExpandArgs{e}\MakeUppercaseAux{\BCPdata{casing}}{#1}
 \end{verbatim}
-where |#1| is the user input and the first argument to
-\cs{MakeUppercaseAux} takes two arguments, the locale and input text.
+其中 |#1| 是用户输入，\cs{MakeUppercaseAux} 的第一个参数接受两个参数，即地区和输入文本。
 
-\subsection{Extended and expandable references of properties}
+\subsection{属性的扩展和可扩展引用}
 
-A property is something that \LaTeX{} can track while processing
-the document, such as a page
-number, a heading number, other counter values, a heading title,
-a position on the page, etc.
-The current value of such properties can be labeled and
-written to the \texttt{aux}-file. It can then be referenced in
-the next compilation, similar to the way the standard \cs{label}/\cs{ref}
-commands work (they record/reference a fixed set of properties:
-label, page, title, and target).
+属性是 \LaTeX{} 在处理文档时可以追踪的内容，比如页面编号、标题编号、其他计数器数值、标题名称、
+页面位置等等。这类属性的当前值可以被标记并写入 \texttt{aux} 文件。然后在下一次编译时，可以像
+标准的 \cs{label}/\cs{ref} 命令一样引用这些值（它们记录/引用一组固定的属性：标签、页面、标题
+和目标）。
 
 \begin{decl}
    |\RecordProperties|\arg{label}\arg{list of properties}
 \end{decl}
-This command writes the value(s) of the \meta{list of properties}
-\texttt{aux}-file labeled by \meta{label}.  Recorded are either the
-values current when \cs{RecordProperties} is called or the value
-current when the next shipout happens---which depends on the
-declaration for each property.
+这个命令将\meta{list of properties}的值写入 \texttt{aux} 文件，并标记为\meta{label}。记录的值要么是在
+调用 \cs{RecordProperties} 时的当前值，要么是在下次输出时的当前值——这取决于每个属性的声明方式。
 %
-The arguments \meta{label} and \meta{list of properties} can contain
-commands that are expanded. \meta{label} can expand to an arbitrary
-string (as long as it can safely be written to the \texttt{aux}-file)
-but note that the label names of \cs{label} and \cs{RecordProperties}
-share a singe namespace. This means that you get a \texttt{Label `A'
-   multiply defined} warning with the following code:
+\meta{label}和\meta{list of properties}中的参数可以包含被展开的命令。虽然\meta{label}可以展开为任意字符串
+（只要它可以安全地写入 \texttt{aux} 文件），但需要注意的是 \cs{label} 和 \cs{RecordProperties}
+的标签名共享一个命名空间。这意味着使用以下代码会收到 \texttt{Label `A'  multiply defined}的警告：
 \begin{verbatim}
 \label{A}\RecordProperties{A}{abspage}
 \end{verbatim}
 
-
 \begin{decl}
    |\RefProperty|\arg{label}\arg{property}
 \end{decl}
-This command allows to reference the value of the property
-\meta{property} recorded in the previous run and labeled by \meta{label}.
-Differently to the standard
-\cs{ref} command the command is expandable and the value can for
-example---if it is a number---be used in an assignment.\footnote{For
-   this to work the default value for the property would need to be a number too,
-   because recorded values aren't known in the first \LaTeX{} run.}
+这个命令允许引用在上一次运行时记录并被\meta{label}标记的\meta{property}的值。与标准的 \cs{ref} 命令不同，
+这个命令是可展开的，并且该值可以例如——如果是数字——在赋值中使用。\footnote{为了使其工作，属性的默认值
+   也需要是一个数字，因为在第一次 \LaTeX{} 运行时无法得知记录的值。}
 
 \begin{verbatim}
 \section{A section}
 \RecordProperties{mylabel}{pagenum,counter}
-\RefProperty{mylabel}{counter} % outputs section
+\RefProperty{mylabel}{counter} % 输出章节
 \setcounter{mycounter}{\RefProperty{mylabel}{pagenum}} 
 \end{verbatim}
 
-
-
-As \cs{RefProperty} is expandable it can not issue a rerun warning if
-a label is not found. If needed such a warning can be forced by the
-following command:
+由于 \cs{RefProperty} 是可展开的，如果找不到标签，它将不会发出重新运行的警告。如果需要，可以通过
+以下命令强制发出这样的警告：
 \begin{decl}
    |\RefUndefinedWarn|\arg{label}\arg{property}
 \end{decl}
 
-\LaTeX{} predefines a set of properties, this set contains also the
-properties stored by the standard \cs{label} command. In the list
-below \enquote{default} indicates the value returned when the value is
-not yet known (i.e., if it wasn't recorded in the previous run and
-\enquote{at shipout} means that this property is not recorded
-immediately when \cs{RecordProperties} is used but during the next
-\cs{shipout}.
+\LaTeX{} 预定义了一组属性，这个集合也包括标准 \cs{label} 命令存储的属性。在下面的列表中，“默认”
+表示当值尚未知道时返回的值（即，如果它在上一次运行中没有被记录并在输出时），“在输出时”表示该属性在使用
+\cs{RecordProperties} 时不会立即记录，而是在下一个输出时记录。
 
 \begin{description}
-   \item[\texttt{abspage} (default: \texttt{0}, at shipout)] The absolute value of the current page:
-         starts at $1$ and increases monotonically at each shipout.
+   \item[\texttt{abspage}（默认值：\texttt{0}，在输出时）] 当前页面的绝对值：从 $1$ 开始并在每次
+         输出时单调递增。
 
-   \item[\texttt{page} (default: \texttt{0}, at shipout)] The current page as given by \cs{thepage}: this may or
-         may not be a numerical value, depending on the current
-         style. Contrast with \texttt{abspage}. You get this value also with
-         the standard \cs{label}/\cs{pageref}.
+   \item[\texttt{page}（默认值：\texttt{0}，在输出时）] 由 \cs{thepage} 给出的当前页面：这可能是
+         一个数字值，也可能不是，这取决于当前的样式。与 \texttt{abspage} 相对比。你也可以用标准的
+         \cs{label}/\cs{pageref} 得到这个值。
 
-   \item[\texttt{pagenum} (default: \texttt{0}, at shipout)] The current page as arabic number. This is
-         suitable for integer operations and comparisions.
+   \item[\texttt{pagenum}（默认值：\texttt{0}，在输出时）] 当前页面的阿拉伯数字。这适用于整数操作
+         和比较。
 
-   \item[\texttt{label} (default: \texttt{??})] The content of \cs{@currentlabel}. This is the value
-         that you get also with the standard \cs{label}/\cs{ref}.
+   \item[\texttt{label}（默认值：\texttt{??}）] \cs{@currentlabel} 的内容。这就是你使用标准的
+         \cs{label}/\hfil\break\cs{ref} 得到的值。
 
-   \item[\texttt{title} (default: \texttt{\cs{textbf}\{??\}})] The content of \cs{@currentlabelname}.  This
-         command is filled beside others by the \pkg{nameref} package and
-         some classes (e.g.~\pkg{memoir}) and typically gives
-         the title defined in the document by some sectioning command
+   \item[\texttt{title}（默认值：\texttt{\cs{textbf}\{??\}}）] \cs{@currentlabelname} 的内容。
+         这个命令由 \pkg{nameref} 包和一些类（例如 \pkg{memoir}）填充，通常给出文档中由某些节命令
+         定义的标题。
 
-   \item[\texttt{target} (default: \meta{\mdseries empty})] The content of \cs{@currentHref}.  This
-         command is normally filled by \pkg{hyperref} and holds the name of
-         the last destination it created.
+   \item[\texttt{target}（默认值：\meta{\mdseries empty}）] \cs{@currentHref} 的内容。这个命令
+         通常由 \pkg{hyperref} 填充，并保存它所创建的最后一个目标的名称。
 
-   \item[\texttt{pagetarget} (default: \meta{\mdseries empty}, at shipout)]
-         The content of \cs{@currentHpage}.  This command is filled by
-         \pkg{hyperref} (version v7.01c or newer) and holds the name of the last
-         page anchor it created.
+   \item[\texttt{pagetarget}（默认值：\meta{\mdseries empty}，在输出时）] \cs{@currentHpage}
+         的内容。这个命令由 \pkg{hyperref}（版本 v7.01c 或更新）填充，并保存它所创建的最后一个页面
+         锚点的名称。
 
-   \item[\texttt{counter} (default: \meta{\mdseries empty})] The content of \cs{@currentcounter}.  This
-         command contains after a \cs{refstepcounter} the name of the
-         counter.
+   \item[\texttt{counter}（默认值：\meta{\mdseries empty}）] \cs{@currentcounter} 的内容。这个
+         命令在\hfil\break \cs{refstepcounter} 后包含计数器的名称。
 
-   \item[\texttt{xpos}, \texttt{ypos} (default: \texttt{0}, at shipout)] These properties records the
-         $x$~and $y$ coordinates of a point previously stored with
-         \cs{pdfsavepos}/\cs{savepos}.  E.g.~(if \pkg{bidi} is used it can
-         be necessary to save the position before and after the label):
+   \item[\texttt{xpos}、\texttt{ypos}（默认值：\texttt{0}，在输出时）] 这些属性记录了先前使用
+         \cs{pdfsavepos}\hfil\break/\cs{savepos} 存储的一个点的 $x$ 和 $y$ 坐标。例如（如果使用
+         了 \pkg{bidi}，可能需要在标签之前和之后保存位置）：
+
          \begin{verbatim}
      \pdfsavepos 
      \RecordProperties{myposition}{xpos,ypos}%
@@ -1342,80 +1179,60 @@ immediately when \cs{RecordProperties} is used but during the next
    \end{verbatim}
 \end{description}
 
-Class and package authors can define more properties to store other
-values they are interested in.
+类和宏包的作者可以定义更多属性来存储他们感兴趣的其他值。
 \begin{decl}
    |\NewProperty|\arg{name}\arg{setpoint}\arg{default}\arg{code}\\
    |\SetProperty|\arg{name}\arg{setpoint}\arg{default}\arg{code}
 \end{decl}
-These commands declare or change a property \meta{name}\footnote{Only change
-   properties that you have declared. The declarations of standard properties of \LaTeX{} and
-   properties of other packages should never be altered!}. If a new property is
-declared within a package it is suggested that its name is always structured
-as follows: \meta{package-name}\texttt{/}\meta{property-name}.
-\meta{setpoint} is either |now| or |shipout| and decides if the value is
-written directly or at the next shipout. \meta{default} is used if the
-property is referenced but not yet known, e.g., in the first run.
-\meta{code} is the code executed when storing the value. For example, the
-\texttt{pagenum} property is declared as
+这些命令声明或更改一个属性 \meta{name}\footnote{只更改你声明过的属性。绝对不要更改 \LaTeX{} 的标准
+   属性和其他包的属性声明！}。如果在一个包中声明一个新的属性，建议将其命名为\meta{package-name}\texttt{/}
+\meta{property-name}。 \meta{setpoint} 是 \texttt{now} 或 \texttt{shipout}，决定值是直接写入还是在下次
+输出时写入。如果属性被引用但尚未知道，则使用\meta{default}，例如，在第一次运行时。 \meta{code} 是存
+储值时执行的代码。例如，\texttt{pagenum} 属性被声明为：
 \begin{verbatim}
 \NewProperty{pagenum}{shipout}{0}{\the\value{page}}
 \end{verbatim}
 
-The commands related to properties are offered as a set of CamelCase
-commands for traditional \LaTeXe{} packages (and for use in the
-document preamble if needed) as well as \texttt{expl3} commands for
-modern packages, that use the L3 programming layer of \LaTeX{}. The
-\texttt{expl3} commands and more details can be found in
-\texttt{ltproperties-doc.pdf}.
+与属性相关的命令提供了一组传统 \LaTeXe{} 包的驼峰命令（如果需要，可以在文档导言部分使用）以及现代包
+的 \texttt{expl3} 命令，它们使用了 \LaTeX{} 的 L3 编程层。 \texttt{expl3} 命令和更多细节可以在
+\texttt{ltproperties-doc.pdf} 中找到。
 
-\subsection{Preparing link targets}
+\subsection{准备链接目标}
 
-Active links in a document need targets to which they can jump to. Such
-targets are often created automatically (if the package \pkg{hyperref}
-is loaded) by the \cs{refstepcounter} command but there are also cases
-where class or package authors need to add a target manually, for
-example, in unnumbered sectioning commands or in environments. For this
-\LaTeX{} provides the following commands. \emph{Without}
-\pkg{hyperref} they do nothing or insert only a whatsits
-(to ensure that spacing doesn't change when hyperref is loaded), \emph{with}
-\pkg{hyperref} they add the necessary targets. Details about the
-behavior and the arguments of the following commands can by found in
-the \pkg{hyperref} package in \texttt{hyperref-linktarget.pdf}.
+文档中的活动链接需要跳转到的目标。这些目标通常是自动创建的（如果加载了 \pkg{hyperref} 包），
+通过 \cs{refstepcounter} 命令实现。但也存在类或包的作者需要手动添加目标的情况，
+例如，在无编号的节命令或环境中。为此，\LaTeX{} 提供了以下命令。在 \emph{无}
+\pkg{hyperref} 的情况下，它们不会执行任何操作或者仅插入一个 whatsits（确保在加载 hyperref 时不会更改间距）；
+在 \emph{有} \pkg{hyperref} 的情况下，它们会添加必要的目标。有关以下命令的行为和参数的详细信息，
+可以在 \pkg{hyperref} 包的 \texttt{hyperref-linktarget.pdf} 中找到。
 
 \begin{decl}
    |\MakeLinkTarget|\oarg{prefix}\arg{counter}\\
    |\MakeLinkTarget|\oarg{prefix}\{\}\\
    |\MakeLinkTarget|*\arg{target name}
 \end{decl}
-This command prepares the creations of targets.
+这个命令准备创建目标。
 
 \begin{decl}
    |\LinkTargetOn|\\
    |\LinkTargetOff|
 \end{decl}
-These commands allow to enable and disable locally the creation of
-targets. This can be useful to suppress targets otherwise created automatically
-by \cs{refstepcounter}.
+这些命令允许在局部启用和禁用目标的创建。这对于抑制通过 \cs{refstepcounter} 自动创建的目标非常有用。
 
 \begin{decl}
    |\NextLinkTarget|\arg{target name}
 \end{decl}
-This changes the name of the next target that will be created.
+这会改变下一个将被创建的目标的名称。
 
-\section{Commands superseded for new material}
+\section{被新材料所取代的命令}
 
-A small number of commands were introduced as part of \LaTeXe{} in the
-mid-1990s, are widely used but have been superseded by more modern
-methods.  These are covered here as they are likely to be encountered
-routinely in existing classes and packages.
+少量命令是在 \LaTeXe{} 于 1990 年代中期引入的，被广泛使用，但已被更现代的方法所取代。
+这些命令在这里被介绍，因为它们很可能会在现有的类和包中被频繁遇到。
 
-\subsection{Defining commands}
+\subsection{定义命令}
 
-The \texttt{*}-forms of these commands should be used to define
-commands that are not, in \TeX{} terms, long.  This can be useful for
-error-trapping with commands whose arguments are not intended to
-contain whole paragraphs of text.
+这些命令的 \texttt{*} 形式应该用于定义在 \TeX{} 术语中不是长命令的命令。
+这对于带有不打算包含整段文本的参数的命令进行错误捕获非常有用。
 
 \begin{decl}
    |\DeclareRobustCommand| \arg{cmd} \oarg{num} \oarg{default}
@@ -1423,13 +1240,10 @@ contain whole paragraphs of text.
    |\DeclareRobustCommand*| \arg{cmd} \oarg{num} \oarg{default}
    \arg{definition}
 \end{decl}
-This command takes the same arguments as |\newcommand| but it declares a robust
-command, even if some code within the \m{definition} is fragile. You can use
-this command to define new robust commands, or to redefine existing commands
-and make them robust. A log is put into the transcript file if a command is
-redefined.
+这个命令与 |\newcommand| 接受相同的参数，但它声明了一个强韧命令，即使 \m{definition} 中的某些代码是脆弱的。
+你可以使用此命令来定义新的强韧命令，或重新定义现有命令并使其强韧。如果重新定义了一个命令，会在转录文件中放入日志。
 
-For example, if |\seq| is defined as follows:
+例如，如果 |\seq| 定义如下：
 \begin{verbatim}
    \DeclareRobustCommand{\seq}[2][n]{%
      \ifmmode
@@ -1439,15 +1253,13 @@ For example, if |\seq| is defined as follows:
      \fi
    }
 \end{verbatim}
-Then the command |\seq| can be used in moving arguments, even though
-|\ifmmode| cannot, for example:
+那么命令 |\seq| 可以在移动参数中使用，即使 |\ifmmode| 不能，例如：
 \begin{verbatim}
    \section{Stuff about sequences $\seq{x}$}
 \end{verbatim}
 
-Note also that there is no need to put a |\relax| before the |\ifmmode| at the
-beginning of the definition; this is because the protection given by this
-|\relax| against expansion at the wrong time will be provided internally.
+还要注意，在定义的开头没有必要在 |\ifmmode| 前加上 |\relax|；
+这是因为该 |\relax| 提供的保护，防止在错误的时候扩展，将在内部提供。
 
 \begin{decl}
    |\CheckCommand| \arg{cmd} \oarg{num} \oarg{default}
@@ -1455,35 +1267,29 @@ beginning of the definition; this is because the protection given by this
    |\CheckCommand*| \arg{cmd} \oarg{num} \oarg{default}
    \arg{definition}
 \end{decl}
-This takes the same arguments as |\newcommand| but, rather than define \m{cmd},
-it just checks that the current definition of \m{cmd} is exactly as given by
-\m{definition}. An error is raised if these definitions differ.
+这与 |\newcommand| 接受相同的参数，但它不会定义 \m{cmd}，而是检查当前的 \m{cmd} 定义是否与 \m{definition} 完全相同。
+如果这些定义不同，则会引发错误。
 
-This command is useful for checking the state of the system before your package
-starts altering the definitions of commands. It allows you to check, in
-particular, that no other package has redefined the same command.
+此命令对于在你的包开始更改命令定义之前检查系统状态非常有用。
+特别是它允许你检查是否有其他包重新定义了相同的命令。
 
-\subsection{Option declaration}
+\subsection{选项声明}
 \label{Sec:commands.options.dec}
 
-The following commands deal with the declaration and handling of options to
-document classes and packages using a classical `simple text' approach. Every
-option name must be a `\LaTeX{} name'.
+以下命令处理文档类和包使用经典的“简单文本”方法声明和处理选项。
+每个选项名称必须是一个“\LaTeX{} 名称”。
 
-There are some commands designed especially for use within the \m{code}
-argument of these commands (see below).
+有一些命令特别设计用于这些命令的 \m{code} 参数中（见下文）。
 
 \begin{decl}
    |\DeclareOption| \arg{option-name} \arg{code}
 \end{decl}
-This makes \m{option-name} a `declared option' of the class or package in which
-it is put.
+这将 \m{option-name} 设为放置其中的类或包的“声明选项”。
 
-The \m{code} argument contains the code to be executed if that option is
-specified for the class or package; it can contain any valid \LaTeXe{}
-construct.
+\m{code} 参数包含了如果为该类或包指定了该选项时要执行的代码；
+它可以包含任何有效的 \LaTeXe{} 结构。
 
-Example:
+示例：
 \begin{verbatim}
    \DeclareOption{twoside}{\@twosidetrue}
 \end{verbatim}
@@ -1491,99 +1297,80 @@ Example:
 \begin{decl}
    |\DeclareOption*| \arg{code}
 \end{decl}
-This declares the \m{code} to be executed for every option which is specified
-for, but otherwise not explicitly declared by, the class or package; this code
-is called the `default option code' and it can contain any valid \LaTeXe{}
-construct.
+这声明了一个对于每个为类或包指定但未显式声明的选项要执行的 \m{code}；
+这段代码称为“默认选项代码”，它可以包含任何有效的 \LaTeXe{} 结构。
 
-If a class file contains no |\DeclareOption*| then, by default, all specified
-but undeclared options for that class will be silently passed to all packages
-(as will the specified and declared options for that class).
+如果一个类文件没有包含 |\DeclareOption*|，那么默认情况下，为该类指定但未显式声明的所有选项将悄悄地传递给所有的包
+（就像对于该类指定并声明的选项一样）。
 
-If a package file contains no |\DeclareOption*| then, by default, each
-specified but undeclared option for that package will produce an error.
+如果一个包文件没有包含 |\DeclareOption*|，那么默认情况下，为该包指定但未显式声明的每个选项都将产生错误。
 
-\subsection{Commands within option code}
+\subsection{选项代码中的命令}
 \label{Sec:within.code}
 
-These two commands can be used only within the \m{code} argument of either
-|\DeclareOption| or |\DeclareOption*|. Other commands commonly used within
-these arguments can be found in the next few subsections.
+这两个命令只能在 |\DeclareOption| 或 |\DeclareOption*| 的 \m{code} 参数中使用。
+其他通常在这些参数中使用的命令可以在接下来的几个子节中找到。
 
 \begin{decl}
    |\CurrentOption|
 \end{decl}
-This expands to the name of the current option.
+这个命令展开为当前选项的名称。
 
 \begin{decl}
    |\OptionNotUsed|
 \end{decl}
-This causes the current option to be added to the list of `unused options'.
+这会将当前选项添加到“未使用选项”的列表中。
 
-\subsection{Option processing}
+\subsection{选项处理}
 \label{Sec:commands.options}
 
 \begin{decl}
    |\ProcessOptions|
 \end{decl}
-This command executes the \m{code} for each selected option.
+这个命令会执行每个选择的选项的 \m{code}。
 
-We shall first describe how |\ProcessOptions| works in a package file, and then
-how this differs in a class file.
+我们首先描述在包文件中 |\ProcessOptions| 的工作原理，然后介绍在类文件中的区别。
 
-To understand in detail what |\ProcessOptions| does in a package file, you have
-to know the difference between \emph{local} and \emph{global} options.
+要详细了解在包文件中 |\ProcessOptions| 的工作原理，您需要了解“局部选项”和“全局选项”的区别。
 \begin{itemize}
-   \item \textbf{Local options} are those which have been explicitly
-         specified for this particular package in the \m{options} argument of
-         any of these:
+   \item \textbf{局部选项} 是在任何以下情况的 \m{options} 参数中为特定包明确指定的选项：
          \begin{quote}
             |\PassOptionsToPackage{<options>}| \ |\usepackage[<options>]|\\
             |\RequirePackage[<options>]|
          \end{quote}
-   \item \textbf{Global options} are any other options that are specified
-         by the author in the \m{options} argument of
-         |\documentclass[<options>]|.
+   \item \textbf{全局选项} 是作者在 |\documentclass[<options>]| 的 \m{options} 参数中指定的其他选项。
 \end{itemize}
-For example, suppose that a document begins:
+例如，假设文档开头是：
 \begin{verbatim}
    \documentclass[german,twocolumn]{article}
    \usepackage{gerhardt}
 \end{verbatim}
-whilst package |gerhardt| calls package |fred| with:
+而包 |gerhardt| 使用以下方式调用包 |fred|：
 \begin{verbatim}
    \PassOptionsToPackage{german,dvips,a4paper}{fred}
    \RequirePackage[errorshow]{fred}
 \end{verbatim}
-then:
+那么：
 \begin{itemize}
-   \item |fred|'s local options are |german|, |dvips|, |a4paper|
-         and |errorshow|;
-   \item |fred|'s only global option is |twocolumn|.
+   \item |fred| 的局部选项是 |german|、|dvips|、|a4paper| 和 |errorshow|；
+   \item |fred| 的全局选项只有 |twocolumn|。
 \end{itemize}
 
-When |\ProcessOptions| is called, the following happen.
+当调用 |\ProcessOptions| 时，会发生以下情况。
 \begin{itemize}
-   \item \emph{First}, for each option so far declared in |fred.sty|
-         by |\DeclareOption|, it looks to see if that option is either a
-         global or a local option for |fred|: if it is then the corresponding
-         code is executed.
+   \item \emph{首先}，对于 |fred.sty| 中到目前为止由 |\DeclareOption| 声明的每个选项，
+         它会查看该选项是否是 |fred| 的全局或局部选项：如果是，就会执行相应的代码。
 
-         This is done in the order in which these options
-         were declared in |fred.sty|.
-   \item \emph{Then}, for each remaining \emph{local} option, the command
-         |\ds@<option>| is executed if it has been defined somewhere (other
-         than by a |\DeclareOption|); otherwise, the `default option code' is
-         executed.  If no default option code has been declared then an error
-         message is produced.
+         这是按照这些选项在 |fred.sty| 中声明的顺序进行的。
+   \item \emph{然后}，对于每个剩余的\emph{局部}选项，如果它已在某处定义（而不是由 |\DeclareOption| 定义），
+         则会执行命令 |\ds@<option>|；否则，会执行“默认选项代码”。
+         如果没有声明默认选项代码，则会产生错误消息。
 
-         This is done in the order in which these
-         options were specified.
+         这是按照这些选项被指定的顺序进行的。
 \end{itemize}
-Throughout this process, the system ensures that the code declared for
-an option is executed at most once.
+在整个过程中，系统确保对于一个选项，其声明的代码最多执行一次。
 
-Returning to the example, if |fred.sty| contains:
+返回到示例，如果 |fred.sty| 包含以下内容：
 \begin{verbatim}
    \DeclareOption{dvips}{\typeout{DVIPS}}
    \DeclareOption{german}{\typeout{GERMAN}}
@@ -1591,51 +1378,35 @@ Returning to the example, if |fred.sty| contains:
    \DeclareOption*{\PackageWarning{fred}{Unknown `\CurrentOption'}}
    \ProcessOptions\relax
 \end{verbatim}
-then the result of processing this document will be:
+那么处理此文档的结果将是：
 \begin{verbatim}
    DVIPS
    GERMAN
    Package fred Warning: Unknown `a4paper'.
    Package fred Warning: Unknown `errorshow'.
 \end{verbatim}
-Note the following:
+请注意以下几点：
 
 \begin{itemize}
-   \item the code for the |dvips| option is executed before that for the
-         |german| option, because that is the order in which they are declared
-         in |fred.sty|;
-   \item the code for the |german| option is executed only once, when the
-         declared options are being processed;
-   \item the |a4paper| and |errorshow| options produce the warning from
-         the code declared by |\DeclareOption*| (in the order in which they
-         were specified), whilst the |twocolumn| option does not: this is
-         because |twocolumn| is a global option.
+   \item |dvips| 选项的代码在 |german| 选项之前执行，因为它们在 |fred.sty| 中声明的顺序是如此；
+   \item 只有在处理声明的选项时，才会执行 |german| 选项的代码一次；
+   \item |a4paper| 和 |errorshow| 选项产生了 |\DeclareOption*| 中声明的警告（按照它们被指定的顺序），而 |twocolumn| 选项没有：因为 |twocolumn| 是一个全局选项。
 \end{itemize}
 
-In a class file, |\ProcessOptions| works in the same way, except that:
-\emph{all} options are local; and the default value for |\DeclareOption*| is
-|\OptionNotUsed| rather than an error.
+在类文件中，|\ProcessOptions| 的工作方式相同，除了：\emph{所有}选项都是局部的；而 |\DeclareOption*| 的默认值是 |\OptionNotUsed| 而不是错误。
 
-Note that, because |\ProcessOptions| has a |*|-form, it is wise to follow the
-non-star form with |\relax|, as in the previous examples, since this prevents
-unnecessary look ahead and possibly misleading error messages being issued.
+请注意，因为 |\ProcessOptions| 有一个 |*| 形式，最好像前面的示例一样在非星号形式后面加上 |\relax|，这可以防止不必要的预读和可能引发误导性错误消息。
 
 \begin{decl}
    |\ProcessOptions*|
 \end{decl}
-This is like |\ProcessOptions| but it executes the options in the order
-specified in the calling commands, rather than in the order of declaration in
-the class or package. For a package this means that the global options are
-processed first.
+这与 |\ProcessOptions| 类似，但它按照调用命令中指定的顺序执行选项，而不是按照类或包中声明的顺序。对于包，这意味着首先处理全局选项。
 
 \begin{decl}
    |\ExecuteOptions| \arg{options-list}
 \end{decl}
 
-It can be used to provide a `default option list' just before
-|\ProcessOptions|. For example, suppose that in a class file you want to set up
-the default design to be: two-sided printing; 11pt fonts; in two columns. Then
-it could specify:
+它可用于在 |\ProcessOptions| 之前提供“默认选项列表”。例如，在类文件中，如果您希望设置默认设计为：双面打印；11pt 字体；两栏排版。那么可以这样指定：
 \begin{verbatim}
    \ExecuteOptions{11pt,twoside,twocolumn}
 \end{verbatim}
