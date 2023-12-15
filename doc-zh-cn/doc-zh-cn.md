@@ -22,6 +22,10 @@
   ```
 理论上， CTeX 宏集支持的编译方式((pdf)LaTeX, XeLaTeX, LuaLaTeX, upLaTeX)理论上都可以编译，但是除了 XeLaTeX 引擎，其它的编译引擎我并未尝试过，有兴趣的朋友可以自行查阅 CTeX 宏集说明文档自行设置。
 
+---
+翻译难免有所疏漏，请对照原文参阅，并欢迎提出意见或者提交 **PR** ，大家共同进步！
+**Happy TeXing!**
+
 [1]:https://github.com/rockyzhz/latexdoc-chinese-translation/raw/main/etoolbox-zh-cn/ctex-fontset-source.def
 [2]:https://texer.cn/wp-content/uploads/Source.rar
 [3]:https://source.typekit.com/

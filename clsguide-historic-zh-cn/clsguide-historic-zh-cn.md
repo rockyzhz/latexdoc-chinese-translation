@@ -18,6 +18,8 @@
 latexmk -xelatex clsguide-historic-zh-cn.tex
 ```
 
+---
+翻译难免有所疏漏，请对照原文参阅，并欢迎提出意见或者提交 **PR** ，大家共同进步！
 **Happy TeXing!**
 
 [1]:https://texer.cn/wp-content/uploads/Source.rar

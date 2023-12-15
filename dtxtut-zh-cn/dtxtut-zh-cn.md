@@ -13,6 +13,8 @@ latexmk -xelatex dtxtut-zh-cn.tex
 ## 文档字体的选择
 由于上面所述的原因，本文档暂时无法使用本项目其它文档类似的方法（即：利用 `ctex` 宏包的 `[fontset=source]` 选项），因此源文件中的第 44 ~ 61 行利用 `xeCJK` 宏包的命令分别设置了中文主要字体为[思源字体][1]，若想使用 Fandol 字体，可以直接把这一段代码删除， `xeCJK` 宏包默认使用了 Fandol 字体。
 
+---
+翻译难免有所疏漏，请对照原文参阅，并欢迎提出意见或者提交 **PR** ，大家共同进步！
 **Happy TeXing!**
 
 [1]:https://texer.cn/wp-content/uploads/Source.rar
