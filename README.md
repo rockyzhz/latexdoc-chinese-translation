@@ -13,6 +13,7 @@
 * **docstrip.pdf** 的中文文档 **docstrip-zh-cn.pdf** ，该文档从另一个[项目][4]转移过来的，原项目已归档，后续的更新（如果有的话）放在本项目下继续维护。该文档主要描述了 DocStrip 程序的实现，DocStrip 程序是 TeX 实现文学编程的一个重要的工具。
 * **dtxtut.pdf** 的中文文档 **dtxtut-zh-cn.pdf** ，原文《How To Package Your LaTeX Packages》是一篇综合介绍 doc 宏包与 DocStrip 程序的教程。与 doc.pdf 和 docstrip.pdf 不同的是，那两份是说明手册的性质，而这份 dtxtut.pdf 则是一篇手把手教你如何利用 doc 宏包与 DocStrip 程序为工具，在 LaTeX 中实现初步的文学编程，打包你的代码。详情请参阅相应的[说明文档][6]。
 * **etoolbox.pdf** 的中文文档 **etoolbox-zh-cn.pdf** ，etoolbox 宏包是一个编程工具箱，主要面向 LaTeX 类和宏包作者。它提供了一些 e-TeX 提供的新原语的 LaTeX 前端，以及一些与 e-TeX 无关但与本宏包的特性相匹配的通用工具。
+* **usrguide.pdf** 的中文文档 **usrguide-zh-cn.pdf** 以及 **usrguide-historic.pdf** 的中文文档 **usrguide-historic-zh-cn.pdf**，与 clsguide 类似的是，在 TeXLive 2023 中, usrguide 也同样分化出了两个版本：usrguide-current（即当前版本，简称 usrguide ） 和 usrguide-historic （历史版本），前者更加集中地体现了最近这十几年中，由于 LaTeX 特别是 LaTeX3 的迅猛发展而带来的新的用法用途；而后者则与之前的版本相差不大，重点介绍了 LaTeX2e 的用法以及与 LaTeX2.09 的用法区别。详情请查看相应的[说明文档][10]。
 * **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。详情请参阅相应的[说明文档][9]。
 
 ## 中文文档编译方法
@@ -44,3 +45,4 @@ latexmk -xelatex <source-filename-with-ext>
 [7]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-historic-zh-cn/clsguide-historic-zh-cn.md
 [8]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-current-zh-cn/clsguide-current-zh-cn.md
 [9]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/xparse-zh-cn/xparse-zh-cn.md
+[10]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/usrguide-zh-cn/usrguide-zh-cn.md
