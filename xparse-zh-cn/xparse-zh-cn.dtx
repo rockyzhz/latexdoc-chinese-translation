@@ -43,8 +43,48 @@
 %</driver|package>
 %<*driver>
 \documentclass[full]{l3doc}
-\usepackage[fontset=fandol]{ctex}
-\usepackage{amstext}
+% ^^A ======================== 中文版特定设置 ========================
+\usepackage[fontset=source]{ctex}
+\ctexset{
+  contentsname = {\centerline{目\quad 录}}
+}
+\usepackage{xcolor}
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\let\OriginMF\MacroFont
+\def\MacroFont{\color{spot}\OriginMF}
+\pretocmd{\macrocode}{\color{code}\def\MacroFont{\color{code}\OriginMF}}{}{}
+\AtBeginEnvironment{macrocode}{\def\MacroFont{\color{code}\OriginMF}}
+\AtEndEnvironment{macrocode}{\def\MacroFont{\color{spot}\OriginMF}}
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
+\AtEndEnvironment{verbatim}{\let\MacroFont\MF}
+\ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
+\ExplSyntaxOff
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false,
+  pdfview=FitH}
+\IndexPrologue
+  {
+    \section*{索引}
+    \markboth{索引}{索引}
+    \addcontentsline{toc}{part}{索引}
+    斜体数字指向相应条目描述的页面，
+    下划线数字指向定义的代码行，
+    其它的都指向使用条目的页面。
+  }
+% ^^A ======================== 中文版设置结束 ========================
+%
+  \usepackage{amstext}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -56,24 +96,32 @@
 %   \begin{itemize}\def\makelabel##1{\hss\llap{\bfseries##1}}}{\end{itemize}}
 %
 % \title{^^A
-%   \textsf{xparse} 宏包\\ 文档命令解析^^A
+%   \color{spot}\bfseries{\huge\textsf{xparse} 宏包}\\\Large 文档命令解析器^^A
 % }
 %
 % \author{^^A
+%   \begin{tabular}{r@{\qquad}l}
 %  The \LaTeX{} Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
 %          {latex-team@latex-project.org}^^A
 %    }^^A
-%   \\
-%   \and
-%   \centerline{张泓知~翻译}
+%   & 2023年10月10日
+%   \\[2ex]
+%   张泓知 & \zhtoday 翻译
+%   \end{tabular}
 % }
 %
-% \date{原文版本 2023-10-10}
+% \date{}
 %
 % \maketitle
+%
+% \addtocontents{toc}{\protect\begin{multicols}{2}}
+%
+% \tableofcontents
+%
+% \newpage
 %
 % \begin{documentation}
 %
@@ -106,7 +154,7 @@
 %
 % \section{指定参数}
 %
-% 在介绍用于创建文档命令的功能之前，将展示使用 \pkg{xparse} 
+% 在介绍用于创建文档命令的功能之前，将展示使用 \pkg{xparse}
 % 指定参数的方法。为了允许每个参数独立定义，
 % \pkg{xparse} 不仅需要知道函数的参数数量，还需要知道每个参数的性质。
 % 这是通过构建一个\emph{参数规范}来完成的，该规范定义了参数的数量、每个参数的类型
@@ -186,7 +234,7 @@
 % 还要注意，|{| 和 |}| 不能用作分隔符，因为它们被 \TeX{} 用作分组标记。
 % 隐式的开始或结束组标记（比如 |\bgroup| 和 |\egroup|）不允许用于分隔参数类型。
 % 在这些标记内部抓取的参数必须创建为 \texttt{m} 或 \texttt{g} 类型参数。
-% 
+%
 % 在分隔参数内部，非平衡或其他尴尬的标记可以通过用花括号保护整个参数来包含：
 % \begin{verbatim}
 %   \NewDocumentCommand{\foobar}{o}{#1}
@@ -203,15 +251,15 @@
 % （接受段落标记）。与 \LaTeXe{} 的 \cs{newcommand} 不同的是，这是基于每个参数的设定。
 % 因此，将示例修改为 `|s o o +m O{default}|' 意味着强制参数现在是 \cs{long}，
 % 而可选参数则不是。
-% 
+%
 % 第二，字符 \texttt{>} 用于声明所谓的\enquote{参数处理器}，可用于修改参数内容，然后将其传递给宏定义。
 % 参数处理器的使用是一个稍微高级的主题（或者至少是一个不太常用的功能），在第~\ref{sec:processors} 节进行了介绍。
-% 
+%
 % 当可选参数后跟着具有相同分隔符的强制参数时，\pkg{xparse} 会发出警告，因为用户无法省略
 % 可选参数，实际上变成了强制参数。这适用于 \texttt{o}、\texttt{d}、\texttt{O}、\texttt{D}、
 % \texttt{s}、\texttt{t}、\texttt{e} 和 \texttt{E} 类型的参数，后面跟着 \texttt{r} 或 \texttt{R} 类型
 % 的必选参数，还适用于 \texttt{g} 或 \texttt{G} 类型的参数，后面跟着 \texttt{m} 类型参数。
-% 
+%
 % 由于 \pkg{xparse} 还用于描述出现在更广泛的 \LaTeXe{} 生态系统中的接口，它还定义了额外的参数类型，
 % 在第~\ref{sec:backwards} 节描述：强制类型 \texttt{l} 和 \texttt{u}，以及可选大括号组类型
 % \texttt{g} 和 \texttt{G}。不建议使用它们，因为如果所有包都使用类似的语法，对用户来说会更简单。
@@ -221,24 +269,24 @@
 % 后面跟着一些强制参数 \texttt{m}（或 \texttt{+m}）。
 %
 % \subsection{间距和可选参数}
-% 
+%
 % \TeX{} 将会找到函数名后的第一个参数，而不管中间有多少空格。这对于强制参数和
 % 可选参数都适用。因此，|\foo[arg]| 和 \verb*|\foo   [arg]| 是等价的。当收集参数
 % 到最后一个必须收集的强制参数时（因为它必须存在），在收集参数期间，空格也会被忽略。
-% 
+%
 % 因此，在
 % \begin{verbatim}
 %   \NewDocumentCommand \foo { m o m } { ... }
 % \end{verbatim}
 % 用户输入 |\foo{arg1}[arg2]{arg3}| 和 \verb*|\foo{arg1}  [arg2]   {arg3}| 将以
 % 相同的方式解析。
-% 
+%
 % 可选参数在任何必选参数之后的行为是可选择的。标准设置允许在此处使用空格，因此在
 % \begin{verbatim}
 %   \NewDocumentCommand \foobar { m o } { ... }
 % \end{verbatim}
 % |\foobar{arg1}[arg2]| 和 \verb*|\foobar{arg1} [arg2]| 都会找到一个可选参数。
-% 
+%
 % 这可以通过在参数规范中加入修改后的 |!| 来改变：
 % \begin{verbatim}
 %   \NewDocumentCommand \foobar { m !o } { ... }
@@ -386,7 +434,7 @@
 % 在编写宏包时应尽量避免使用，因为使用它们会导致用户接口不一致。最简单的语法通常是最好的，
 % 使用参数说明符如 |mmmm| 或 |ommmm|，即一个可选参数后跟一些标准的必选参数。可以使用 \pkg{l3keys}
 % 提供的工具使可选参数支持键-值语法。
-
+%
 % 不再推荐使用的参数类型包括：
 % \begin{itemize}[font=\ttfamily]
 %   \item[l] 读取直到第一个开始组标记之前的所有内容的必选参数：在标准 \LaTeX{} 中，这是左花括号。
@@ -503,7 +551,7 @@
 %     ~~\Arg{start code} \Arg{end code}
 %   \end{syntax}
 %   这些命令与 \cs{NewDocumentCommand} 等类似，但创建环境（\cs{begin}\Arg{environment} \ldots{}
-%   \cs{end}\Arg{environment}）。 \meta{start code} 和 \meta{end code} 都可以访问由 \meta{arg spec} 
+%   \cs{end}\Arg{environment}）。 \meta{start code} 和 \meta{end code} 都可以访问由 \meta{arg spec}
 %   定义的参数。参数将在 \cs{begin}\Arg{environment} 之后给出。
 % \end{function}
 %
@@ -754,7 +802,7 @@
 %     \cs{GetDocumentEnvironmentArgSpec} \Arg{environment}
 %   \end{syntax}
 %   这些函数将请求的 \meta{function} 或 \meta{environment} 的当前参数规范转移
-%   到记号列表变量 \cs{ArgumentSpecification} 中。如果 \meta{function} 或 
+%   到记号列表变量 \cs{ArgumentSpecification} 中。如果 \meta{function} 或
 %   \meta{environment} 没有已知的参数规范，则会发出错误。对 \cs{ArgumentSpecification}
 %   的赋值局限于当前的 \TeX{} 组。
 % \end{function}
@@ -773,8 +821,8 @@
 %
 % \DescribeOption{log-declarations}
 % 该包识别加载时选项 \texttt{log-declarations}，这是一个键-值选项，
-% 接受值 \texttt{true} 和 \texttt{false}。默认情况下，该选项设置为 
-% \texttt{false}，意味着不记录任何声明的命令或环境。通过使用以下方式加载 
+% 接受值 \texttt{true} 和 \texttt{false}。默认情况下，该选项设置为
+% \texttt{false}，意味着不记录任何声明的命令或环境。通过使用以下方式加载
 % \pkg{xparse}：
 % \begin{verbatim}
 %   \usepackage[log-declarations=true]{xparse}
@@ -784,34 +832,34 @@
 % \end{documentation}
 %
 % \begin{implementation}
-
+%
 % \section{\pkg{xparse}实现}
-
+%
 %    \begin{macrocode}
 %<*2ekernel|package>
 %    \end{macrocode}
-
+%
 %    \begin{macrocode}
 %<@@=cmd>
 %    \end{macrocode}
-
+%
 % 该包文件与 \pkg{xparse-2018-04-12}、\pkg{xparse-2020-10-01} 和
 % |xparse-generic.tex| 中的冻结版本旨在跨不同的 \LaTeX{} 发布版本中工作，
 % 符合 \pkg{xparse} 所需的最小 \pkg{expl3} 版本。
-
+%
 % 我们无法在这里使用 \cs{DeclareRelease} 的 \pkg{latexrelease} 机制，
 % 因为前进或后退的情况不同，由于从 |xparse| 到 |cmd| 的前缀更改，所以
 % 我们自行检查以确保加载了正确的版本。
-
+%
 % 所有这些加载假设，如果应加载 \pkg{latexrelease}，那么它应该在 \pkg{xparse}
 % 之前加载。反之则完全没有进行测试，很可能会导致故障。
-
+%
 % 在 2020-10-01 之前的发布版中，\cs{NewDocumentCommand} 未定义，因此未
 % 加载 \pkg{xparse}，因此我们可以从 \pkg{xparse-2018-04-12} 加载完整版本。
 % 否则，我们将仅从 \pkg{xparse-2020-10-01} 加载已弃用的参数类型。如果我们
 % 处于 |2ekernel| 模式，则意味着向前滚动，因此仅加载来自 |xparse-generic.tex|
-% 的代码代码。
-
+% 的代码。
+%
 % 在 |2ekernel| 模式中，我们预期定义了两个宏来解析日期，以便我们可以正确比较
 % \cs{fmtdate}。
 %    \begin{macrocode}
@@ -841,14 +889,14 @@
     \fi
     \file_input_stop:
   }
-%    \begin{macrocode}
+%    \end{macrocode}
 %
 % 如果 \cs{NewDocumentCommand} 已经定义，我们要么处于 \LaTeX{} 2020-10-01
 % 或更新版本。在前一种情况下，内核中加载的代码具有 |__xparse| 前缀，因此我们
 % 将加载 \pkg{xparse-2020-10-01}；否则，我们将继续使用 |xparse.sty|，其中
 % 包含带有 |__cmd| 前缀的 \pkg{xparse} 的最后残余部分。要检查这一点，我们只需
 % 查看一个带有 |__cmd| 前缀的内部命令。
-%    \end{macrocode}
+%    \begin{macrocode}
   {
     \ExplSyntaxOff
     \cs_if_exist:NF \@@_start:nNNnnn
@@ -858,6 +906,7 @@
       }
   }
 \ExplSyntaxOff
+%    \end{macrocode}
 %
 %    \begin{macrocode}
 %</2ekernel|package>
@@ -1312,3 +1361,6 @@
 % \end{implementation}
 %
 % \PrintIndex
+%
+% \addtocontents{toc}{\protect\end{multicols}}
+%
