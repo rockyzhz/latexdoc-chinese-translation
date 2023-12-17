@@ -1,10 +1,6 @@
 ## Customization
-etoolbox-zh-cn/*.cls
-etoolbox-zh-cn/*.sty
-etoolbox-zh-cn/*.cfg
-etoolbox-zh-cn/ltxdockit.def
-etoolbox-zh-cn/*.txt
-ltxguide.cls
+auxiliary-files
+auxiliary-files/*
 
 ## Repository Related Files:
 ref/*
