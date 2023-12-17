@@ -31,9 +31,11 @@
 
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 
+\PassOptionsToPackage{quiet}{fontspec}
 \documentclass{ltxguide}[2001/05/28]
 % ================== 中文版特殊设置 ==============================
 \usepackage{xeCJK}
+\usepackage{zhnumber,zhspacing}
 %%%%%%%%%%%%%%% 思源字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setCJKmainfont {SourceHanSerifSC}
 [
@@ -79,13 +81,14 @@
 \renewcommand{\contentsname}{\centerline{目\quad 录}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
 \renewcommand{\refname}{参考文献}
 \renewcommand{\tablename}{表}
-\NewDocumentCommand{\booktitle}{ m }{《\bgroup\color{blue}\sffamily#1\egroup》}
+\NewDocumentCommand{\booktitle}{ m }{《\bgroup\color{blue}\sffamily#1 \egroup》}
 \catcode`《 = \active
 \def《#1》{\booktitle{#1}}
 %%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{xcolor}
+\usepackage{url}
 \usepackage{hyperref}
 \definecolor{spot}{HTML}{003399}
 \definecolor{code}{HTML}{a25e26}
@@ -94,7 +97,9 @@
 \patchcmd{\NEWfeature}{New feature}{\kaiti\color{spot}新的特色}{}{}
 \patchcmd{\NEWdescription}{New description}{\kaiti\color{spot}新的说明}{}{}
 \AtBeginEnvironment{verbatim}{\color{verb}}
-\AtBeginEnvironment{alltt}{\color{verb}}
+\AtBeginEnvironment{quote}{\tt\color{verb}}
+\AtBeginEnvironment{quotation}{\tt\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
 \hypersetup{%
   colorlinks=true,
   linkcolor=spot,
@@ -107,17 +112,17 @@
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ================== 中文版设置结束 ==============================
 
-\title{\LaTeX\ for authors --- historic version}
+\title{\color{spot}\huge\bfseries 面向作者的\LaTeX{}\Large--- 历史版本}
 
-\author{\copyright~Copyright 1995--2022, \LaTeX\ Project Team.\\
-   All rights reserved.%
-   \footnote{This file may be distributed and/or modified under the
-     conditions of the \LaTeX{} Project Public License, either version 1.3c
-     of this license or (at your option) any later version. See the source
-    \texttt{usrguide.tex} for full details.}%
+\author{\copyright~版权 2020-2023, \LaTeX\ Project Team.\\
+   版权所有%
+   \footnote{本文件可根据\LaTeX{}项目公共许可证的条件进行分发和/或修改，可以选择本许可证
+   的1.3c版本或（自选）以后的版本 (LPPL v1.3c)。请参阅源文件 \texttt{usrguide.tex} 以获取完整详情。}%
+   \\[6pt]
+   张泓知\qquad 翻译
 }
 
-\date{30 August 2022}
+\date{2022年08月30日}
 
 
 \begin{document}
@@ -126,232 +131,160 @@
 
 \tableofcontents
 
-\section{Introduction}
+\section{介绍}
 
-Welcome to \LaTeXe, the new standard version of the \LaTeX{} Document
-Preparation System.
+欢迎使用 \LaTeXe，这是 \LaTeX{} 文档准备系统的新标准版本。
 
-This document describes how to take advantage of the new features of
-\LaTeX, and how to process your old \LaTeX{} documents with
-\LaTeXe. However, this document is only a brief introduction to the
-new facilities and is intended for authors who are already familiar
-with the old version of \LaTeX{}.  It is \emph{not} a reference manual
-for \LaTeXe{} nor is it a complete introduction to \LaTeX.
+本文档描述了如何利用 \LaTeX 的新特性，以及如何使用 \LaTeXe 处理你的旧 \LaTeX{} 文档。
+但是，本文档只是对新功能的简要介绍，面向已经熟悉旧版 \LaTeX{} 的作者。这并不是 \LaTeXe{} 的
+参考手册，也不是对 \LaTeX{} 的完整介绍。
 
-It is somewhat of an historical document now, since \LaTeXe{} came into
-existence in 1994.
+因为 \LaTeXe{} 在 1994 年问世，所以它现在有点成为了历史文档。
 
-\subsection[\LaTeXe---The new \LaTeX~release]
-{\LaTeXe---The new \LaTeX~release\\ (well, for more than 10 years now)}
+\subsection[\LaTeXe---全新的 \LaTeX~版本]
+{\LaTeXe---全新的 \LaTeX~版本\\（已经超过 10 年了）}
 
-The previous version of \LaTeX{} was known as \LaTeX~2.09.  Over the
-years many extensions have been developed for \LaTeX.  This is, of
-course, a sure sign of its continuing popularity but it has had one
-unfortunate result: incompatible \LaTeX{} formats came into use at
-different sites.  This included `standard \LaTeX~2.09', \LaTeX{} built
-with the \emph{New Font Selection Scheme}~(\NFSS), \SLiTeX, \AmSLaTeX,
-and so on.  Thus, to process documents from various places, a site
-maintainer was forced to keep multiple versions of the \LaTeX{}
-program.  In addition, when looking at a source file it was not always
-clear for which format the document was written.
+之前的 \LaTeX{} 版本被称为 \LaTeX~2.09。多年来，为 \LaTeX{} 开发了许多扩展。这当然是它
+持续受欢迎的一个明确迹象，但也导致了一个不幸的结果：在不同地点出现了不兼容的 \LaTeX{} 格式。
+这包括了“标准 \LaTeX~2.09”、使用 \emph{New Font Selection Scheme}~(\NFSS) 构建的 \LaTeX{}、
+\SLiTeX、\AmSLaTeX 等。因此，为了处理来自不同地点的文档，站点维护者被迫保留多个版本的 \LaTeX{}
+程序。此外，查看源文件时并不总是清楚文档是为哪种格式编写的。
 
-To put an end to this unsatisfactory situation, \LaTeXe{} has been
-produced; it brings all such extensions back under a single format and
-thus prevents the proliferation of mutually incompatible dialects of
-\LaTeX~2.09.  With \LaTeXe{} the `new font selection scheme' is
-standard and, for example, \textsf{amsmath} (formerly the \AmSLaTeX{}
-format) or \textsf{slides} (formerly the \SLiTeX{} format) are simply
-extensions, which may be loaded by documents using the same base format.
+为了结束这种不令人满意的局面，产生了 \LaTeXe{}；它将所有这些扩展重新统一到一个格式下，防止了
+相互不兼容的 \LaTeX~2.09 方言的蔓延。在 \LaTeXe{} 中，“新字体选择方案”是标准的，例如，
+\textsf{amsmath}（原为 \AmSLaTeX{} 格式）或者 \textsf{slides}（原为 \SLiTeX{} 格式）只是
+扩展，可以被使用相同基础格式的文档加载。
 
-The introduction of a new release also made it possible to add a small
-number of often-requested features and to make the task of writing
-packages and classes simpler.
+新版本的引入也使得添加了少量经常请求的功能成为可能，并使得编写宏包和文档类的任务更加简单。
 
-\subsection{\LaTeX3---The long-term future of \LaTeX}
+\subsection{\LaTeX3---\LaTeX 的长期未来}
 \label{Sec:ltx3}
 
-\LaTeXe{} is the consolidation step in a comprehensive
-reimplementation of the \LaTeX{} system.  The next major release of
-\LaTeX{} will be \LaTeX3, which will include a radical overhaul of the
-document designers' and package writers' interface to \LaTeX.
+\LaTeXe{} 是对 \LaTeX{} 系统全面重新实现的巩固步骤。下一个主要版本的 \LaTeX{} 将是 \LaTeX3，
+它将包括对文档设计者和宏包编写者接口的彻底改造。
 
-\LaTeX3 is a long-term research project but, until it is completed,
-the project team are committed to the active maintenance of \LaTeXe{}.
-Thus the experience gained from the production and maintenance of
-\LaTeXe{} will be a major influence on the design of \LaTeX3.
-A brief description of the project can be found in the document
-|ltx3info.tex|.
+\LaTeX3 是一个长期的研究项目，但在它完成之前，项目团队致力于积极维护 \LaTeXe{}。因此，
+从生产和维护 \LaTeXe{} 中获得的经验将对 \LaTeX3 的设计产生重大影响。该项目的简要描述可在文档
+|ltx3info.tex| 中找到。
 
-If you would like to support the project then you are welcome to send
-donations to the \LaTeX\ Project Fund; this has been set up to help
-the research team by financing various expenses associated with this
-voluntary work of maintaining the current \LaTeX{} and developing
-\LaTeX\ further.
+如果您想支持该项目，欢迎向 \LaTeX 项目基金捐款；这个基金旨在通过资助与当前 \LaTeX{} 的维护
+和进一步开发相关的各种费用来帮助研究团队进行这项自愿工作。
 
-The fund is administered by The \TeX{} Users Group and by various
-local user groups.  Information about making donations and joining
-these groups is available from:
+该基金由 \TeX{} 用户组和各地区用户组管理。有关捐款和加入这些组织的信息，请访问：
 \begin{quote}\small\label{addrs}
    \texttt{http://www.tug.org/lugs.html}
 \end{quote}
 
-The \LaTeX3{} project has its home page
-on the World Wide Web at:
+\LaTeX3{} 项目在万维网上有它的首页：
 \begin{verbatim}
   http://www.latex-project.org/
 \end{verbatim}
-This page describes \LaTeX{} and the \LaTeX3 project, and contains
-pointers to other \LaTeX{} resources, such as the user guides, the
-\TeX{} Frequently Asked Questions, and the \LaTeX{} bugs database.
+该页面描述了 \LaTeX{} 和 \LaTeX3 项目，并包含指向其他 \LaTeX{} 资源的链接，例如用户指南、
+\TeX{} 常见问题解答和 \LaTeX{} 错误数据库。
 
-Older articles covering aspects of the \LaTeX3 project are also
-available for anonymous ftp from the Comprehensive \TeX{} Archive, in
-the directory:
+早期涵盖 \LaTeX3 项目各个方面的文章也可通过 Comprehensive \TeX{} Archive 的匿名 ftp 获取，位于
+以下目录：
 \begin{verbatim}
   ctan:info/ltx3pub
 \end{verbatim}
-The file |ltx3pub.bib| in that directory contains an abstract of each
-of the files.
+该目录中的文件 |ltx3pub.bib| 包含每个文件的摘要。
 
-\subsection{Overview}
+\subsection{概述}
 
-This document contains an overview of the new structure and features
-of \LaTeX.  It is \emph{not} a self-contained document, as it contains
-only the features of \LaTeX{} which have changed since version 2.09.
-You should read this document in conjunction with an introduction to
-\LaTeX{}.
+本文档包含了 \LaTeX{} 新结构和新特性的概述。它\emph{并非}一个独立的文档，因为它仅包含了自 2.09 版本
+以来发生变化的 \LaTeX{} 特性。您应该结合一个 \LaTeX{} 的介绍来阅读本文档。
 
 \begin{description}
 
-   \item[Section~\ref{Sec:class+packages}]
-         contains an overview of the new structure of
-         \LaTeX{} documents.  It describes how classes and packages work and
-         how class and package options can be used.  It lists the standard
-         packages and classes which come with \LaTeX.
+   \item[第\ref{Sec:class+packages}节] 包含了 \LaTeX{} 文档的新结构概述。描述了类和宏包的工作原理，
+         以及如何使用类和宏包选项。列出了随 \LaTeX{} 一同提供的标准宏包和类。
 
-   \item[Section~\ref{Sec:commands}] describes the new commands available
-         to authors in \LaTeXe.
+   \item[第\ref{Sec:commands}节] 描述了 \LaTeXe{} 中作者可以使用的新命令。
 
-   \item[Section~\ref{Sec:209}] shows how to process old \LaTeX{}
-         documents with \LaTeXe.
+   \item[第\ref{Sec:209}节] 展示了如何用 \LaTeXe{} 处理旧的 \LaTeX{} 文档。
 
-   \item[Section~\ref{Sec:problems}] contains advice on dealing with
-         problems you may encounter in running \LaTeXe.
-         It lists some error messages which are new in \LaTeXe{} and
-         it describes some of the more common problems and how to cure them,
-         or where to find further information.
+   \item[第\ref{Sec:problems}节] 包含了处理在运行 \LaTeXe{} 时可能遇到的问题的建议。列出了
+         \LaTeXe{} 中的一些新错误消息，并描述了一些常见问题的解决方法，或者可以找到进一步信息的位置。
 
 \end{description}
 
-\subsection{Further information}
+\subsection{更多信息}
 
-For a general introduction to \LaTeX, including the new features of
-\LaTeXe, you should read \emph{\LaTeXbook}
-by Leslie Lamport~\cite{A-W:LLa94}.
+要了解 \LaTeX{} 的一般介绍，包括 \LaTeXe{} 的新特性，您应该阅读 Leslie Lamport 的著作《 \LaTeXbook 》
+\cite{A-W:LLa94}。
 
-A more detailed description of the new features of \LaTeX, including an
-overview of more than 200 packages and nearly 1000 ready to run examples, is
-to be found in \emph{\LaTeXcomp second edition} by Frank Mittelbach and
-Michel Goossens~\cite{A-W:MG2004}.
+关于 \LaTeX{} 新特性的更详细描述，包括对 200 多个宏包和近 1000 个示例的概述，可在 Frank Mittelbach
+和 Michel Goossens 的著作《 \LaTeXcomp, second edition 》\cite{A-W:MG2004} 中找到。
 
-Packages and programs for producing and manipulating graphics are
-discussed at length in \emph{\LaTeXGcomp} by Michel Goossens,
-Sebastian Rahtz and Frank Mittelbach~\cite{A-W:GRM97}.
+有关生成和处理图形的宏包和程序的详细讨论可在 Michel Goossens、Sebastian Rahtz 和 Frank Mittelbach 的著作
+《 \LaTeXGcomp 》\cite{A-W:GRM97} 中找到。
 
-Solutions for publishing with \LaTeX{} on the World Wide Web are given
-in \emph{\LaTeXWcomp} by Michel Goossens and Sebastian
-Rahtz~\cite{A-W:GR99}.
+在《 \LaTeXWcomp 》\cite{A-W:GR99} 中提供了使用 \LaTeX{} 在万维网上发布的解决方案。
 
-For more information about the many new \LaTeX{} packages you should
-read the package documentation, which should be available from the
-same source as your copy of \LaTeX.
+要了解更多关于众多新的 \LaTeX{} 宏包的信息，您应该阅读宏包的文档，这些文档应该从您的 \LaTeX{} 复制品
+的同一来源获取。
 
-There are a number of documentation files which accompany every copy
-of \LaTeX.  A copy of \emph{\LaTeX{} News} will come out with each
-six-monthly release of \LaTeX; it will be found in the files
-|ltnews*.tex|.  The class- and package-writer's guide \emph{\clsguide}
-describes the new \LaTeX{} features for writers of document classes
-and packages; it is in |clsguide.tex|.  The guide \emph{\fntguide}
-describes the \LaTeX{} font selection scheme for class- and
-package-writers; it is in |fntguide.tex|. Support for Cyrillic languages
-in \LaTeX{} is described in \emph{\cyrguide}.
+每份 \LaTeX{} 复制品都附带了一些文档文件。每六个月发布的 《 \LaTeX{} News 》 将与之同行；它会在文件
+|ltnews*.tex| 中找到。类和宏包编写者指南 《 \clsguide 》 描述了写文档类和宏包的新 \LaTeX{} 特性；
+它在 |clsguide.tex| 中。指南 《 \fntguide 》 描述了文档类和宏包作者的 \LaTeX{} 字体选择方案；
+它在 |fntguide.tex| 中。关于在 \LaTeX{} 中支持西里尔语言的信息描述在 《 \cyrguide 》 中。
 
-The documented source code (from the files used to produce the kernel
-format via |latex.ltx|) is now available as
-\emph{The \LaTeXe\ Sources}.  ]
-This very large document also includes an index of
-\LaTeX{} commands.  It can be typeset from the \LaTeX{} file
-|source2e.tex| in the |base| directory, using the source files and
-the class file |ltxdoc.cls| from this directory.
+现在已经可以获取文档化的源代码（通过用于生成核心格式的文件 |latex.ltx|）。它被命名为
+《 The \LaTeXe\ Sources 》。这个非常庞大的文档还包含了 \LaTeX{} 命令的索引。您可以使用
+|base| 目录中的源文件和类文件 |ltxdoc.cls|，从文件 |source2e.tex| 中排版它。
 
-For more information about \TeX{} and \LaTeX{}, please contact your
-local \TeX{} Users Group, or the international \TeX{} Users Group (see
-page \pageref{addrs}).
+要了解更多关于 \TeX{} 和 \LaTeX{} 的信息，请联系您所在地的 \TeX{} 用户组，或国际 \TeX{} 用户组
+（见第 \pageref{addrs} 页）。
 
 
-\section{Classes and packages}
+\section{类与宏包}
 \label{Sec:class+packages}
 
-This section describes the new structure of \LaTeX{} documents and the
-new types of file: \emph{classes} and \emph{packages}.
+本节描述了 \LaTeX{} 文档的新结构以及新类型的文件：\emph{类}和\emph{宏包}。
 
-\subsection{What are classes and packages?}
+\subsection{什么是类和宏包？}
 
-The main difference between \LaTeX~2.09 and \LaTeXe{} is in the
-commands before |\begin{document}|.
+\LaTeX~2.09 和 \LaTeXe{} 之间的主要区别在于 |\begin{document}| 之前的命令。
 
-In \LaTeX~2.09, documents had \emph{styles},
-such as \textsf{article} or \textsf{book}, and \emph{options},
-such as \textsf{twoside} or \textsf{epsfig}.
-These were indicated by the |\documentstyle| command:
+在 \LaTeX~2.09 中，文档具有\emph{样式}，比如 \textsf{article} 或 \textsf{book}，以及\emph{选项}，
+比如 \textsf{twoside} 或 \textsf{epsfig}。这些由 |\documentstyle| 命令表示：
 \begin{quote}
    |\documentstyle|\oarg{options}\arg{style}
 \end{quote}
-For example, to specify a two-sided article with encapsulated
-PostScript figures, you said:
+例如，要指定一个双面的带有封装的 PostScript 图形的文章，您可以这样写：
 \begin{verbatim}
    \documentstyle[twoside,epsfig]{article}
 \end{verbatim}
-However, there were two different types of document style option:
-\emph{built-in options} such as |twoside|; and \emph{packages} such as
-|epsfig.sty|.  These were very different, since any \LaTeX{} document
-style could use the \textsf{epsfig} package but only document styles
-which declared the \textsf{twoside} option could use that option.
+然而，文档样式选项有两种不同的类型：\emph{内置选项}比如 |twoside|；以及\emph{宏包}比如 |epsfig.sty|。
+这些非常不同，因为任何 \LaTeX{} 文档样式都可以使用 \textsf{epsfig} 宏包，但只有声明了 \textsf{twoside} 选项的
+文档样式才能使用该选项。
 
-To avoid this confusion, \LaTeXe{} differentiates between built-in
-options and packages.  These are given by the new |\documentclass| and
-|\usepackage| commands:
+为了避免这种混淆，\LaTeXe{} 在内置选项和宏包之间做了区分。这由新的 |\documentclass| 和 |\usepackage| 命令给出：
 \begin{quote}
    |\documentclass|\oarg{options}\arg{class} \\
    |\usepackage|\oarg{options}\arg{packages}
 \end{quote}
-For example, to specify a two-sided article with encapsulated
-PostScript figures, you now write:
+例如，要指定一个双面的文章并包含封装的 PostScript 图形，您现在应该这样写：
 \begin{verbatim}
    \documentclass[twoside]{article}
    \usepackage{epsfig}
 \end{verbatim}
-You can load more than one package with a single |\usepackage|
-command; for example, rather than writing:
+您可以使用单个 |\usepackage| 命令加载多个宏包；例如，而不是写成：
 \begin{verbatim}
    \usepackage{epsfig}
    \usepackage{multicol}
 \end{verbatim}
-you can specify:
+您可以指定为：
 \begin{verbatim}
    \usepackage{epsfig,multicol}
 \end{verbatim}
-Note that \LaTeXe{} still understands the \LaTeX~2.09 |\documentstyle|
-command.  This command causes \LaTeXe{} to enter \emph{\LaTeX~2.09
-   compatibility mode}, which is described in Section~\ref{Sec:209}.
+请注意，\LaTeXe{} 仍然理解 \LaTeX~2.09 的 |\documentstyle| 命令。这个命令会使 \LaTeXe{} 进入
+\emph{\LaTeX~2.09 兼容模式}，该模式在第\ref{Sec:209}节中描述。
 
-You should not, however, use the |\documentstyle| command for new
-documents because this compatibility mode is very slow and the new
-features of \LaTeXe{} are not available in this mode.
+然而，您不应该为新文档使用 |\documentstyle| 命令，因为这个兼容模式非常慢，并且在这种模式下无法使用 \LaTeXe{} 的新特性。
 
-To help differentiate between classes and packages, document classes
-now end with |.cls| rather than |.sty|.  Packages still end with
-|.sty|, since most \LaTeX~2.09 packages work well with \LaTeXe.
+为了帮助区分类和宏包，文档类现在以 |.cls| 结尾，而不是 |.sty|。宏包仍然以 |.sty| 结尾，因为大多数 \LaTeX~2.09
+宏包与 \LaTeXe{} 配合良好。
 
 \subsection{Class and package options}
 
