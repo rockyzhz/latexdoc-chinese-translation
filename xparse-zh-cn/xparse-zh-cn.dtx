@@ -131,7 +131,7 @@
 % 内部形式提供了一个规范化的输入，独立于文档级别的参数排列。
 %
 % 目前，\pkg{xparse}中被认为是
-% \enquote{稳定的（stable）} 有：
+% \enquote{稳定的 (stable) } 有：
 % \begin{itemize}
 %   \item \cs{NewDocumentCommand}\\
 %     \cs{RenewDocumentCommand}\\
@@ -169,18 +169,18 @@
 %     记。无论输入是什么，参数都将被传递到内部代码，但不带有外部花括号。这是 \pkg{
 %     xparse} 中用于普通 \TeX{} 参数的类型说明符。
 %   \item[r] 给出为 \texttt{r}\meta{token1}\meta{token2}，表示一个“必需”的分隔
-%     参数，其分隔符为 \meta{token1} 和 \meta{token2}。如果缺少开始分隔符 \meta{t
-%     oken1}，将在适当的错误后插入默认标记 |-NoValue-|。
+%     参数，其分隔符为 \meta{token1} 和 \meta{token2}。如果缺少开始分隔符 
+%     \meta{token1}，将在适当的错误后插入默认标记 |-NoValue-|。
 %   \item[R] 给出为 \texttt{R}\meta{token1}\meta{token2}\marg{default}，这是一个
 %     “必需”的分隔参数，与 \texttt{r} 类似，但具有用户可定义的恢复值 \meta{default}
 %     ，而不是 |-NoValue-|。
 %   \item[v] 以“verbatim”方式读取参数，介于以下字符和其下一个出现之间，类似于 \L
 %     aTeXe{} 命令 \cs{verb} 的参数。因此，\texttt{v} 类型的参数在两个相同的字
-%     符之间读取，但这些字符不能是 |%|、|\|、|#|、|{|、|}| 或 \verb*| |。verbati
-%     m 参数也可以被括在花括号 |{| 和 |}| 中。拥有 verbatim 参数的命令在另一个函
+%     符之间读取，但这些字符不能是 |%|、|\|、|#|、|{|、|}| 或 \verb*| |。verbatim
+%     参数也可以被括在花括号 |{| 和 |}| 中。拥有 verbatim 参数的命令在另一个函
 %     数的参数中出现时会产生错误。
-%   \item[b] 只适用于环境的参数规范，表示环境的主体部分，位于 |\begin|\marg{
-%     environment} 和 |\end|\marg{environment} 之间。详见第~\ref{sec:body} 节。
+%   \item[b] 只适用于环境的参数规范，表示环境的主体部分，位于 |\begin|
+%     \marg{environment} 和 |\end|\marg{environment} 之间。详见第~\ref{sec:body} 节。
 % \end{itemize}
 % 定义可选参数的类型有：
 % \begin{itemize}[font=\ttfamily]
@@ -203,7 +203,7 @@
 %     每个修饰给出一个参数，顺序与参数规范中 \meta{tokens} 列表的顺序相同。
 %     所有 \meta{tokens} 必须是不同的。\emph{这是一个实验性质的类型}。
 %   \item[E] 与 \texttt{e} 相同，但如果没有给出值，则返回一个或多个 \meta{defaults}：
-%     \texttt{E}\marg{tokens}\marg{defaults}。详见第~\ref{sec:embellishment} 节。
+%     \texttt{E}\marg{tokens} \marg{defaults}。详见第~\ref{sec:embellishment} 节。
 % \end{itemize}
 %
 % 利用这些说明符，可以非常容易地创建复杂的输入语法。例如，给定参数定义
