@@ -13,7 +13,7 @@
 * **docstrip.pdf** 的中文文档 **docstrip-zh-cn.pdf** ，该文档从另一个[项目][4]转移过来的，原项目已归档，后续的更新（如果有的话）放在本项目下继续维护。该文档主要描述了 DocStrip 程序的实现，DocStrip 程序是 TeX 实现文学编程的一个重要的工具。
 * **dtxtut.pdf** 的中文文档 **dtxtut-zh-cn.pdf** ，原文《How To Package Your LaTeX Packages》是一篇综合介绍 doc 宏包与 DocStrip 程序的教程。与 doc.pdf 和 docstrip.pdf 不同的是，那两份是说明手册的性质，而这份 dtxtut.pdf 则是一篇手把手教你如何利用 doc 宏包与 DocStrip 程序为工具，在 LaTeX 中实现初步的文学编程，打包你的代码。详情请参阅相应的[说明文档][6]。
 * **etoolbox.pdf** 的中文文档 **etoolbox-zh-cn.pdf** ，etoolbox 宏包是一个编程工具箱，主要面向 LaTeX 类和宏包作者。它提供了一些 e-TeX 提供的新原语的 LaTeX 前端，以及一些与 e-TeX 无关但与本宏包的特性相匹配的通用工具。
-* **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。
+* **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。详情请参阅相应的[说明文档][9]。
 
 ## 中文文档编译方法
 有的中文文档源文件是 .tex ，有的是 .dtx ，但是都可以直接在命令行下使用 XeLaTeX 来编译（ latexmk 比较智能化，可以利用 latexmk 来调用 xelatex ）。
@@ -32,7 +32,8 @@ latexmk -xelatex <source-filename-with-ext>
 ## 意见和建议
 欢迎在issue区提出宝贵的修改意见及建议，也欢迎提交 **PR** 共同进步。文档翻译难免有所疏漏，请对照原文阅读。原文已经包含在相应的目录下了，既方便对照阅读，也方便之后的增量更新。
 
-*Happy TeXing!*
+---
+***Happy TeXing!***
 
 [1]:https://github.com/rockyzhz/latexdoc-chinese-translation/raw/main/etoolbox-zh-cn/ctex-fontset-source.def
 [2]:https://texer.cn/wp-content/uploads/Source.rar
@@ -42,3 +43,4 @@ latexmk -xelatex <source-filename-with-ext>
 [6]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/dtxtut-zh-cn/dtxtut-zh-cn.md
 [7]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-historic-zh-cn/clsguide-historic-zh-cn.md
 [8]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-current-zh-cn/clsguide-current-zh-cn.md
+[9]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/xparse-zh-cn/xparse-zh-cn.md
