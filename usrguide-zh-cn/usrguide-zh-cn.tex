@@ -29,12 +29,20 @@
 % \fi
 % Filename: usrguide.tex
 
+\PassOptionsToPackage{quiet}{fontspec}
 \documentclass{ltxguide}
 
 \usepackage[T1]{fontenc}  % needed for \textbackslash in tt
 \usepackage{csquotes}
 \usepackage{url}
 % ================== 中文版特殊设置 ==============================
+\usepackage{multicol}
+\makeatletter
+\patchcmd{\l@section}
+  {\hfil}
+  {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+  {}{}
+\makeatother
 \usepackage{xeCJK}
 %%%%%%%%%%%%%%% 思源字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setCJKmainfont {SourceHanSerifSC}
@@ -96,7 +104,9 @@
 \patchcmd{\NEWfeature}{New feature}{\kaiti\color{spot}新的特色}{}{}
 \patchcmd{\NEWdescription}{New description}{\kaiti\color{spot}新的说明}{}{}
 \AtBeginEnvironment{verbatim}{\color{verb}}
-\AtBeginEnvironment{alltt}{\color{verb}}
+\AtBeginEnvironment{quote}{\tt\color{verb}}
+\AtBeginEnvironment{quotation}{\tt\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
 \hypersetup{%
   colorlinks=true,
   linkcolor=spot,
@@ -110,13 +120,6 @@
 % ================== 中文版设置结束 ==============================
 
 \title{\color{spot}\huge\bfseries 面向作者的\LaTeX{}\Large--- 当前版本}
-\author{\copyright~版权 2023, \LaTeX\ Project Team.\\
-   版权所有%
-   \footnote{本文件可根据\LaTeX{}项目公共许可证的条件进行分发和/或修改，可以选择本许可证
-   的1.3c版本或（自选）以后的版本 (LPPL v1.3c)。请参阅源文件 \texttt{clsguide.tex} 以获取完整详情。}%
-   \\[6pt]
-   张泓知\qquad 翻译
-}
 \author{\copyright~版权 2020-2023, \LaTeX\ Project Team.\\
    版权所有%
    \footnote{本文件可根据\LaTeX{}项目公共许可证的条件进行分发和/或修改，可以选择本许可证
@@ -153,142 +156,93 @@
 
 \maketitle
 
+\addtocontents{toc}{\protect\begin{multicols}{2}}
+    \AtEndDocument{\addtocontents{toc}{\protect\end{multicols}}}
 \tableofcontents
+\newpage
 
-\section{Introduction}
+\section{介绍}
 
-\LaTeXe{} was released in 1994 and added a number of then-new concepts to
-\LaTeX{}. These are described in \texttt{usrguide-historic}, which has largely remained
-unchanged. Since then, the \LaTeX{} team have worked on a number of ideas,
-firstly a programming language for \LaTeX{} (\pkg{expl3}) and then a range of
-tools for document authors which build on that language. Here, we describe
-\emph{stable} and \emph{widely-usable} concepts that have resulted from that
-work. These `new' ideas have been transferred from development packages
-into the \LaTeXe{} kernel. As such, they are now available to \emph{all}
-\LaTeX{} users and have the \emph{same stability} as any other part of the
-kernel. The fact that `behind the scenes' they are built on \pkg{expl3}
-is useful for the development team, but is not directly important to users.
+\LaTeXe{}于1994年发布，并为\LaTeX{}增添了许多当时的新概念。这些概念在\texttt{usrguide-historic}中有描述，
+并且在很大程度上保持不变。自那时起，\LaTeX{}团队已经致力于许多想法，首先是\LaTeX{}的编程语言（\pkg{expl3}），
+然后是一系列建立在该语言基础上的文档作者工具。在这里，我们描述了从这项工作中产生的\emph{稳定}且
+\emph{广泛可用}的概念。这些`新'概念已从开发包转移到\LaTeXe{}内核中。因此，它们现在对\emph{所有}的\LaTeX{}
+用户都可用，并且具有与内核的任何其他部分一样的\emph{稳定性}。它们`幕后'建立在\pkg{expl3}上的事实对于开发团
+队很有用，但对用户来说并不直接重要。
 
-\section{Creating document commands and environments}
+\section{创建文档命令和环境}
 
-\subsection{Overview}
+\subsection{概述}
 
-Creating document commands and environments using the \LaTeX3 toolset is based
-around the idea that a common set of descriptions can be used to cover almost
-all argument types used in real documents. Thus parsing is reduced to a simple
-description of which arguments a command takes: this description provides the
-`glue' between the document syntax and the implementation of the
-command.
+使用\LaTeX3工具集创建文档命令和环境的基本思想是，可以使用一组通用描述来涵盖几乎所有实际文档中使用的参数类型。
+因此，解析被简化为对命令接受哪些参数的简单描述：这个描述提供了文档语法与命令实现之间的`粘合剂'。
 
-First, we will describe the argument types, then move on to explain how these
-can be used to create both document commands and environments. Various more
-specialized features are then described, which allow an even richer application
-of a simple interface set up.
+首先，我们将描述参数类型，然后介绍如何使用这些参数类型来创建文档命令和环境。随后描述了各种更专门化的特性，这些
+特性允许更丰富地应用简单的接口设置。
 
-The details here are intended to help users create document commands in
-general. More technical detail, suitable for \TeX{} programmers, is included
-in \texttt{interface3}.
+这里的细节旨在帮助用户总体上创建文档命令。适合\TeX{}程序员的更多技术细节在\texttt{interface3}中有介绍。
 
-\subsection{Describing argument types}
+\subsection{描述参数类型}
 
-In order to allow each argument to be defined independently, the parser does
-not simply need to know the number of arguments for a function, but also the
-nature of each one. This is done by constructing an \emph{argument
-  specification}, which defines the number of arguments, the type of each
-argument and any additional information needed for the parser to read the user
-input and properly pass it through to internal functions.
+为了允许每个参数独立定义，解析器不仅需要知道函数的参数数量，还需要了解每个参数的性质。这是通过构建一个
+\emph{参数规范}来实现的，它定义了参数的数量、每个参数的类型以及解析器读取用户输入并正确传递给内部函数所需的
+任何附加信息。
 
-The basic form of the argument specifier is a list of letters, where each
-letter defines a type of argument. As will be described below, some of the
-types need additional information, such as default values. The argument types
-can be divided into two, those which define arguments that are mandatory
-(potentially raising an error if not found) and those which define optional
-arguments. The mandatory types
+参数规范的基本形式是一个字母列表，其中每个字母定义了一个参数类型。正如下面将描述的那样，某些类型需要额外的信
+息，比如默认值。参数类型可以分为两类，一类定义了必须的参数（如果未找到可能会引发错误），另一类定义了可选参数。
+必须的类型有：
 \begin{itemize}
-  \item[\texttt{m}] A standard mandatory argument, which can either be a single token
-        alone or multiple tokens surrounded by curly braces |{}|. Regardless of the
-        input, the argument will be passed to the internal code without the outer
-        braces. This is the type specifier for a normal \TeX{} argument.
-  \item[\texttt{r}] Given as \texttt{r}\meta{token1}\meta{token2}, this denotes a
-        `required' delimited argument, where the delimiters are
-        \meta{token1} and \meta{token2}. If the opening delimiter \meta{token1} is
-        missing, the default marker |-NoValue-| will be inserted after a suitable
-        error.
-  \item[\texttt{R}] Given as \texttt{R}\meta{token1}\meta{token2}\marg{default},
-        this is a `required' delimited argument as for~\texttt{r},
-        but it has a user-definable recovery \meta{default} instead of
-        |-NoValue-|.
-  \item[\texttt{v}] Reads an argument `verbatim', between the following
-        character and its next occurrence, in a way similar to the argument
-        of the \LaTeXe{} command \cs{verb}. Thus a \texttt{v}-type argument
-        is read between two identical characters, which cannot be any of |%|, |\|,
-        |#|, |{|, |}| or \verb*| |. The verbatim argument can also be enclosed
-        between braces, |{| and |}|. A command with a verbatim argument will
-        produce an error when it appears within an argument of another command.
-  \item[\texttt{b}] Only suitable in the argument specification of an
-        environment, it denotes the body of the environment, between
-        |\begin|\marg{environment} and |\end|\marg{environment}.  See
-        Section~\ref{sec:cmd:body} for details.
+  \item[\texttt{m}] 标准必须参数，可以是单个独立的标记，也可以是用花括号 |{}| 包围的多个标记。无论输入如何，
+        参数都将被传递到内部代码中而不带有外部花括号。这是用于普通\TeX{}参数的类型说明符。
+  \item[\texttt{r}] 给定为 \texttt{r}\meta{token1}\meta{token2}，表示`必需'定界参数，其中分界符为
+        \meta{token1} 和 \meta{token2}。如果缺少起始分界符 \meta{token1}，在合适的错误后将插入默认标记
+        |-NoValue-|。
+  \item[\texttt{R}] 给定为 \texttt{R}\meta{token1}\meta{token2}\marg{default}，这是与~\texttt{r} 类似
+        的`必需'定界参数，但具有用户可定义的恢复 \meta{default}，而不是 |-NoValue-|。
+  \item[\texttt{v}] 以`verbatim'方式读取参数，在以下字符及其下一个出现之间，类似于\LaTeXe{}命令\cs{verb}
+        的参数。因此，\texttt{v}-类型参数在两个相同字符之间读取，这些字符不能是 |%|、|\|、|#|、|{|、|}| 或 
+        \verb*| |。verbatim参数也可以用大括号 |{| 和 |}| 括起来。带有verbatim参数的命令在另一个命令的参数
+        中出现时会产生错误。
+  \item[\texttt{b}] 仅适用于环境的参数规范，表示环境的主体，在 |\begin|\marg{environment} 和
+        |\end|\marg{environment} 之间。详见第~\ref{sec:cmd:body} 节。
 \end{itemize}
-The types which define optional arguments are:
+定义可选参数的类型包括：
 \begin{itemize}
-  \item[\texttt{o}] A standard \LaTeX{} optional argument, surrounded with square
-        brackets, which will supply the special |-NoValue-| marker if not given
-        (as described later).
-  \item[\texttt{d}] Given as \texttt{d}\meta{token1}\meta{token2}, an optional
-        argument which is delimited by \meta{token1} and \meta{token2}. As with
-        \texttt{o}, if no value is given the special marker |-NoValue-| is
-        returned.
-  \item[\texttt{O}] Given as \texttt{O}\marg{default}, is like \texttt{o}, but returns
-        \meta{default} if no value is given.
-  \item[\texttt{D}] Given as \texttt{D}\meta{token1}\meta{token2}\marg{default}, it is
-        as for \texttt{d}, but returns \meta{default} if no value is given.
-        Internally, the \texttt{o}, \texttt{d} and \texttt{O} types are
-        short-cuts to an appropriated-constructed \texttt{D} type argument.
-  \item[\texttt{s}] An optional star, which will result in a value
-        \cs{BooleanTrue} if a star is present and \cs{BooleanFalse}
-        otherwise (as described later).
-  \item[\texttt{t}] An optional \meta{token}, which will result in a value
-        \cs{BooleanTrue} if \meta{token} is present and \cs{BooleanFalse}
-        otherwise. Given as \texttt{t}\meta{token}.
-  \item[\texttt{e}] Given as \texttt{e}\marg{tokens}, a set of optional
-        \emph{embellishments}, each of which requires a \emph{value}.
-        If an embellishment is not present, |-NoValue-| is returned.  Each
-        embellishment gives one argument, ordered as for the list of
-        \meta{tokens} in the argument specification.  All \meta{tokens}
-        must be distinct.
-  \item[\texttt{E}] As for \texttt{e} but returns one or more \meta{defaults}
-        if values are not given: \texttt{E}\marg{tokens}\marg{defaults}. See
-        Section~\ref{sec:cmd:embellishment} for more details.
+  \item[\texttt{o}] 标准的\LaTeX{}可选参数，用方括号括起来，如果未提供参数值，则提供特殊的 |-NoValue-| 标记
+        （后面会描述）。
+  \item[\texttt{d}] 给定为 \texttt{d}\meta{token1}\meta{token2}，表示由 \meta{token1} 和 \meta{token2}
+        定界的可选参数。与 \texttt{o} 类似，如果未给出值，则返回特殊标记 |-NoValue-|。
+  \item[\texttt{O}] 给定为 \texttt{O}\marg{default}，类似于 \texttt{o}，但如果未提供值，则返回 \meta{default}。
+  \item[\texttt{D}] 给定为 \texttt{D}\meta{token1}\meta{token2}\marg{default}，类似于 \texttt{d}，但如果
+        未提供值，则返回 \meta{default}。在内部，\texttt{o}、\texttt{d} 和 \texttt{O} 类型是适当构造的
+        \texttt{D} 类型参数的简化方式。
+  \item[\texttt{s}] 一个可选星号，如果存在星号则返回值为 \cs{BooleanTrue}，否则返回值为 \cs{BooleanFalse}
+        （后面会描述）。
+  \item[\texttt{t}] 一个可选的 \meta{token}，如果存在 \meta{token} 则返回值为 \cs{BooleanTrue}，否则返回值
+        为 \cs{BooleanFalse}。给定为 \texttt{t}\meta{token}。
+  \item[\texttt{e}] 给定为 \texttt{e}\marg{tokens}，一组可选的\emph{修饰符}，每个修饰符需要一个\emph{值}。
+        如果某个修饰符不存在，则返回 |-NoValue-|。每个修饰符都给出一个参数，按照参数规范中\meta{tokens}列表的
+        顺序排列。所有\meta{tokens}必须是不同的。
+  \item[\texttt{E}] 类似于 \texttt{e}，但如果未提供值，则返回一个或多个
+        \meta{defaults}:\texttt{E}\marg{tokens} \marg{defaults}。更多细节参见第~\ref{sec:cmd:embellishment} 节。
 \end{itemize}
 
-\subsection{Modifying argument descriptions}
+\subsection{修改参数描述}
 
-In addition to the argument \emph{types} discussed above, the argument
-description also gives special meaning to three other characters.
+除了上面讨论的参数\emph{类型}外，参数描述还赋予另外三个字符特殊含义。
 
-First, \texttt{+} is used to make an argument long (to accept paragraph
-tokens). In contrast to \cs{newcommand}, this applies on an
-argument-by-argument basis. So modifying the example to `|s o o +m O{default}|'
-means that the mandatory argument is now \cs{long}, whereas the optional
-arguments are not.
+首先，\texttt{+} 用于将参数设置为长参数（接受段落标记）。与 \cs{newcommand} 不同，这适用于每个参数。因此，将示例
+修改为 `|s o o +m O{default}|' 表示必需参数现在是 \cs{long}，而可选参数不是。
 
-Secondly, \texttt{!} is used to control whether spaces are allowed before
-optional arguments. There are some subtleties to this, as \TeX{} itself
-has some restrictions on where spaces can be `detected': more detail
-is given in Section~\ref{sec:cmd:opt-space}.
+其次，\texttt{!} 用于控制在可选参数之前是否允许空格。这涉及到一些微妙之处，因为\TeX{}本身对空格的`检测'位置有一些
+限制：更多细节参见第~\ref{sec:cmd:opt-space} 节。
 
-Thirdly, \texttt{=} is used to declare that the following argument should
-be interpreted as a series of keyvals. See Section~\ref{sec:cmd:keyval}
-for more details.
+第三，\texttt{=} 用于声明后续参数应被解释为一系列关键键值。更多细节参见第~\ref{sec:cmd:keyval} 节。
 
-Finally, the character \texttt{>} is used to declare so-called
-`argument processors', which can be used to modify the contents of an
-argument before it is passed to the macro definition. The use of argument
-processors is a somewhat advanced topic, (or at least a less commonly used
-feature) and is covered in Section~\ref{sec:cmd:processors}.
+最后，字符 \texttt{>} 用于声明所谓的`参数处理器'，它们可用于修改传递到宏定义之前的参数内容。使用参数处理器是一个相对
+高级的主题（或者至少是一个较少使用的特性），详见第~\ref{sec:cmd:processors} 节。
 
-\subsection{Creating document commands and environments}
+\subsection{创建文档命令和环境}
 
 \begin{decl}
   |\NewDocumentCommand|     \arg{cmd} \arg{arg spec} \arg{code} \\
@@ -296,12 +250,10 @@ feature) and is covered in Section~\ref{sec:cmd:processors}.
   |\ProvideDocumentCommand| \arg{cmd} \arg{arg spec} \arg{code} \\
   |\DeclareDocumentCommand| \arg{cmd} \arg{arg spec} \arg{code}
 \end{decl}
-This family of commands are used to create a \meta{cmd}. The argument
-specification for the function is given by \meta{arg spec}, and the command
-uses the \meta{code} with |#1|, |#2|, etc.\ replaced by the arguments found
-by the parser.
+这组命令用于创建一个 \meta{cmd}。函数的参数规范由 \meta{arg spec} 给出，命令使用 \meta{code}，其中 |#1|、|#2| 等
+被解析器找到的参数替换。
 
-An example:
+一个示例：
 \begin{verbatim}
 \NewDocumentCommand\chapter{s o m}
   {%
@@ -310,32 +262,21 @@ An example:
       {\typesetnormalchapter{#2}{#3}}%
   }
 \end{verbatim}
-would be a way to define a \cs{chapter} command which would essentially behave
-like the current \LaTeXe{} command (except that it would accept an optional
-argument even when a \texttt{*} was parsed). The \cs{typesetnormalchapter}
-could test its first argument for being |-NoValue-| to see if an optional
-argument was present. (See Section~\ref{sec:cmd:special} for details of
-\cs{IfBooleanTF} and testing for |-NoValue-|.)
+这将是定义一个 \cs{chapter} 命令的方法，其基本行为与当前的 \LaTeXe{} 命令相同（除了在解析到 \texttt{*} 时也能接受
+可选参数）。命令 \cs{typesetnormalchapter} 可以测试其第一个参数是否为 |-NoValue-|，以确定可选参数是否存在（详见第~
+\ref{sec:cmd:special} 节中的 \cs{IfBooleanTF} 和 |-NoValue-| 的测试细节）。
 
-The difference between the \cs{New...} \cs{Renew...}, \cs{Provide...}
-and \cs{Declare...} versions is the behavior if \meta{cmd} is already
-defined.
+\cs{New...}、\cs{Renew...}、\cs{Provide...} 和 \cs{Declare...} 版本之间的区别在于如果 \meta{cmd} 已经被定义的行
+为。
 \begin{itemize}
-  \item \cs{NewDocumentCommand} will issue an error if \meta{cmd}
-        has already been defined.
-  \item \cs{RenewDocumentCommand} will issue an error if \meta{cmd}
-        has not previously been defined.
-  \item \cs{ProvideDocumentCommand} creates a new definition for
-        \meta{cmd} only if one has not already been given.
-  \item \cs{DeclareDocumentCommand} will always create the new
-        definition, irrespective of any existing \meta{cmd} with the
-        same name.  This should be used sparingly.
+  \item \cs{NewDocumentCommand} 如果 \meta{cmd} 已经被定义，将会报错。
+  \item \cs{RenewDocumentCommand} 如果 \meta{cmd} 之前未被定义，将会报错。
+  \item \cs{ProvideDocumentCommand} 仅在未给出定义时为 \meta{cmd} 创建新定义。
+  \item \cs{DeclareDocumentCommand} 将始终创建新的定义，而不考虑是否已存在同名的 \meta{cmd}。这应该谨慎使用。
 \end{itemize}
 
-If the \meta{cmd} can't be provided as a single token but needs
-\enquote{constructing}, you can use \cs{ExpandArgs} as explained in
-Section~\ref{sec:preconstructing-csnames} which also gives an example
-in which this is needed.
+如果 \meta{cmd} 不能作为单个标记提供而需要\enquote{构建}，你可以使用 \cs{ExpandArgs}，如第~\ref{sec:preconstructing-csnames}
+节中所解释的那样。该节还提供了一个需要这种方法的示例。
 
 \begin{decl}
   |\NewDocumentEnvironment|     \arg{env} \arg{arg spec} \arg{beg-code} \arg{end-code} \\
@@ -343,116 +284,90 @@ in which this is needed.
   |\ProvideDocumentEnvironment| \arg{env} \arg{arg spec} \arg{beg-code} \arg{end-code} \\
   |\DeclareDocumentEnvironment| \arg{env} \arg{arg spec} \arg{beg-code} \arg{end-code}
 \end{decl}
-These commands work in the same way as \cs{NewDocumentCommand}, etc.\@, but
-create environments (\cs{begin}\arg{env} \ldots{}
-\cs{end}\arg{env}). Both the \meta{beg-code} and \meta{end-code}
-may access the arguments as defined by \meta{arg spec}. The arguments will be
-given following \cs{begin}\arg{env}.
+这些命令的工作方式与 \cs{NewDocumentCommand} 等相同，但创建环境（\cs{begin}\marg{env} \ldots{} \cs{end}\marg{env}）。
+\meta{beg-code} 和 \meta{end-code} 都可以访问由 \meta{arg spec} 定义的参数。这些参数将在 \cs{begin}\marg{env} 之后
+给出。
 
-\subsection{Optional arguments}
+\subsection{可选参数}
 \label{sec:cmd:opt}
 
-In contrast to commands created using \LaTeXe{}'s \cs{newcommand}, optional
-arguments created using \cs{NewDocumentCommand} may safely be nested. Thus for
-example, following
+与使用 \LaTeXe{} 的 \cs{newcommand} 创建的命令不同，使用 \cs{NewDocumentCommand} 创建的可选参数可以安全地嵌套。因此，
+例如，在以下示例之后，
 \begin{verbatim}
 \NewDocumentCommand\foo{om}{I grabbed `#1' and `#2'}
 \NewDocumentCommand\baz{o}{#1-#1}
 \end{verbatim}
-using the command as
+使用如下命令：
 \begin{verbatim}
 \foo[\baz[stuff]]{more stuff}
 \end{verbatim}
-will print
+会显示
 \begin{quote}
   I grabbed `stuff-stuff' and `more stuff'
 \end{quote}
-This is particularly useful when placing a command with an optional argument
-\emph{inside} the optional argument of a second command.
+这在将一个带有可选参数的命令\emph{嵌套}在第二个命令的可选参数中时特别有用。
 
-When an optional argument is followed by a mandatory argument with the same
-delimiter, the parser issues a warning because the optional argument could not
-be omitted by the user, thus becoming in effect mandatory. This can apply to
-\texttt{o}, \texttt{d}, \texttt{O}, \texttt{D}, \texttt{s}, \texttt{t},
-\texttt{e}, and \texttt{E} type arguments followed by \texttt{r} or
-\texttt{R}-type required arguments.
+当一个可选参数后面紧跟着使用相同定界符的必选参数时，解析器会发出警告，因为用户无法省略
+可选参数，实际上变成了必选参数。这适用于 \texttt{o}、\texttt{d}、\texttt{O}、
+\texttt{D}、\texttt{s}、\texttt{t}、\texttt{e} 和 \texttt{E} 类型的参数后面跟着
+\texttt{r} 或 \texttt{R} 类型的必选参数。
 
-The default for \texttt{O}, \texttt{D} and \texttt{E} arguments can be
-the result of grabbing another argument. Thus for example
+对于 \texttt{O}、\texttt{D} 和 \texttt{E} 类型参数的默认值可以是获取另一个参数的结果。
+因此，例如
 \begin{verbatim}
 \NewDocumentCommand\foo{O{#2} m}
 \end{verbatim}
-would use the mandatory argument as the default for the leading optional
-one.
+会将必选参数作为前导可选参数的默认值。
 
-\subsection{Spacing and optional arguments}
+\subsection{间距和可选参数}
 \label{sec:cmd:opt-space}
 
-\TeX{} will find the first argument after a function name irrespective of any
-intervening spaces. This is true for both mandatory and optional arguments. So
-|\foo[arg]| and \verb*|\foo [arg]| are equivalent. Spaces are also ignored when
-collecting arguments up to the last mandatory argument to be collected (as it
-must exist). So after
+\TeX{} 会在函数名称后找到第一个参数，无论中间是否有空格。这适用于必选参数和可选参数。
+因此，|\foo[arg]| 和 \verb*|\foo [arg]| 是等价的。当收集参数直到最后一个必选参数时
+（因为必选参数必须存在），空格也会被忽略。因此，在以下示例之后
 \begin{verbatim}
 \NewDocumentCommand\foo{m o m}{ ... }
 \end{verbatim}
-the user input |\foo{arg1}[arg2]{arg3}| and \verb*|\foo{arg1} [arg2] {arg3}|
-will both be parsed in the same way.
+用户输入 |\foo{arg1}[arg2]{arg3}| 和 \verb*|\foo{arg1} [arg2] {arg3}| 将被解析为相同的方式。
 
-The behavior of optional arguments \emph{after} any mandatory arguments is
-selectable. The standard settings will allow spaces here, and thus with
+可选参数在任何必选参数之后的行为是可选择的。标准设置允许这里的空格，因此在以下示例之后
 \begin{verbatim}
 \NewDocumentCommand\foobar{m o}{ ... }
 \end{verbatim}
-both |\foobar{arg1}[arg2]| and \verb*|\foobar{arg1} [arg2]| will find an
-optional argument. This can be changed by giving the modified |!| in the
-argument specification:
+|\foobar{arg1}[arg2]| 和 \verb*|\foobar{arg1} [arg2]| 都将找到一个可选参数。可以通过在参数规范中使用修改后的 |!| 来
+更改这种行为：
 \begin{verbatim}
 \NewDocumentCommand\foobar{m !o}{ ... }
 \end{verbatim}
-where \verb*|\foobar{arg1} [arg2]| will not find an optional argument.
+在这里，\verb*|\foobar{arg1} [arg2]| 将不会找到可选参数。
 
-There is one subtlety here due to the difference in handling by \TeX{} of
-`control symbols', where the command name is made up of a single
-character, such as `\texttt{\textbackslash\textbackslash}'.
-Spaces are not ignored by \TeX{} here,
-and thus it is possible to require an optional argument directly follow such a
-command. The most common example is the use of \texttt{\textbackslash\textbackslash}
-in \pkg{amsmath} environments, which in the terms here would be defined as
+这里有一个微妙之处，因为 \TeX{} 对`控制符号'的处理不同，其中命令名由单个字符组成，比如 `\texttt{\textbackslash\textbackslash}'。
+在这种情况下，\TeX{} 不会忽略空格，因此可以要求可选参数直接跟随这样的命令。最常见的例子是在 \pkg{amsmath} 环境中使用
+\texttt{\textbackslash\textbackslash}，按照这种方式的定义将是
 \begin{verbatim}
 \NewDocumentCommand\\{!s !o}{ ... }
 \end{verbatim}
 
-Also notable when using optional arguments in the last position is that \TeX{}
-will necessarily look ahead for the argument opening token. This means that
-the value of |\inputlineno| will be `out by one' if such a trailing optional
-argument is \emph{not} present and the command ends a line; it will be one
-greater than the line number containing the last mandatory argument.
+还需要注意的是，当在最后位置使用可选参数时，\TeX{} 必然会预先查找参数的开启标记。这意味着如果这样的尾随可选参数\emph{不存在}
+并且命令结束于一行时，|\inputlineno| 的值将`有所偏差'；它将比包含最后一个必选参数的行号大一。
 
-\subsection{`Embellishments'}
+\subsection{`修饰符'}
 \label{sec:cmd:embellishment}
 
-The \texttt{E}-type argument allows one default value per test token. This is
-achieved by giving a list of defaults for each entry in the list, for example:
+\texttt{E} 类型参数允许每个测试标记一个默认值。这可以通过为列表中的每个条目提供默认值列表来实现，例如：
 \begin{verbatim}
 E{^_}{{UP}{DOWN}}
 \end{verbatim}
-If the list of default values is \emph{shorter} than the list of test tokens,
-the special |-NoValue-| marker will be returned (as for the \texttt{e}-type
-argument). Thus for example
+如果默认值列表比测试标记列表要\emph{短}，则将返回特殊的 |-NoValue-| 标记（与 \texttt{e} 类型参数一样）。因此，例如
 \begin{verbatim}
 E{^_}{{UP}}
 \end{verbatim}
-has default \texttt{UP} for the |^| test character, but will return the
-|-NoValue-| marker as a default for |_|. This allows mixing of explicit
-defaults with testing for missing values.
+对于 |^| 测试字符有默认值 \texttt{UP}，但对于 |_| 则会返回 |-NoValue-| 标记作为默认值。这允许混合使用显式默认值和测试缺失值。
 
-
-\subsection{Testing special values}
+\subsection{测试特殊值}
 \label{sec:cmd:special}
 
-Optional arguments make use of dedicated variables to return information about
-the nature of the argument received.
+可选参数利用专用变量返回有关接收到的参数性质的信息。
 
 
 
@@ -461,8 +376,7 @@ the nature of the argument received.
   |\IfNoValueT|  \arg{arg} \arg{true code} \\
   |\IfNoValueF|  \arg{arg} \arg{false code}
 \end{decl}
-The \cs{IfNoValue(TF)} tests are used to check if \meta{argument} (|#1|,
-|#2|, \emph{etc.}) is the special |-NoValue-| marker. For example
+\cs{IfNoValue(TF)} 测试用于检查 \meta{argument}（|#1|、|#2| 等）是否为特殊的 |-NoValue-| 标记。例如
 \begin{verbatim}
 \NewDocumentCommand\foo{o m}
   {%
@@ -471,43 +385,27 @@ The \cs{IfNoValue(TF)} tests are used to check if \meta{argument} (|#1|,
       {\DoSomethingWithBothArguments{#1}{#2}}%
   }
 \end{verbatim}
-will use a different internal function if the optional argument
-is given than if it is not present.
+将在可选参数存在与否时使用不同的内部函数。
 
-Note that three tests are available, depending on which outcome
-branches are required: \cs{IfNoValueTF}, \cs{IfNoValueT} and
-\cs{IfNoValueF}.
+需要注意的是，根据所需的结果分支，有三种测试可用：\cs{IfNoValueTF}、\cs{IfNoValueT} 和 \cs{IfNoValueF}。
 
-As the \cs{IfNoValue(TF)} tests are expandable, it is possible to
-test these values later, for example at the point of typesetting or
-in an expansion context.
+由于 \cs{IfNoValue(TF)} 测试是可展开的，因此可以在稍后的时候进行测试，例如在排版的时候或扩展上下文中。
 
-It is important to note that |-NoValue-| is constructed such that it
-will \emph{not} match the simple text input |-NoValue-|, i.e.~that
+需要重要注意的是，|-NoValue-| 被构造成不会与简单的文本输入 |-NoValue-| 匹配，即
 \begin{verbatim}
 \IfNoValueTF{-NoValue-}
 \end{verbatim}
-will be logically \texttt{false}.
-When two optional arguments follow each other (a syntax we typically
-discourage), it can make sense to allow users of the command to
-specify only the second argument by providing an empty first
-argument.
+逻辑上将是 \texttt{false}。
+当两个可选参数连续出现时（我们通常不鼓励这种语法），允许命令的使用者只提供第二个参数可能是有意义的，这时可以提供一个空的第一个参数。
 \NEWdescription{2022/06/01}
-Rather than testing separately for emptiness and for
-|-NoValue-| it is then best to use the argument type~|O| with an
-empty default value, and then test for emptiness using the
-conditional \cs{IfBlankTF} (described below) instead.
+与单独测试空值和 |-NoValue-| 相比，最好使用带有空默认值的参数类型~|O|，然后使用条件 \cs{IfBlankTF}（下面描述）来测试空值。
 
 \begin{decl}
   |\IfValueTF| \arg{arg} \arg{true code} \arg{false code} \\
   |\IfValueT|  \arg{arg} \arg{true code} \\
   |\IfValueF|  \arg{arg} \arg{false code}
 \end{decl}
-The reverse form of the \cs{IfNoValue(TF)} tests are also available
-as \cs{IfValue(TF)}. The context will determine which logical
-form makes the most sense for a given code scenario.
-
-
+\cs{IfNoValue(TF)} 测试的反向形式也可用作 \cs{IfValue(TF)}。根据给定代码情境，上下文将决定哪种逻辑形式对于特定的代码情况最有意义。
 
 
 
@@ -518,12 +416,8 @@ form makes the most sense for a given code scenario.
 \end{decl}
 
 
-The \cs{IfNoValueTF} command chooses the \meta{true code} if the optional argument has not
-been used at all (and it returns the special \texttt{-NoValue-}
-marker), but not if it has been given an empty value. In contrast
-\cs{IfBlankTF} returns true if its argument is either truly empty or
-only contains one or more normal blanks.
-For example
+\cs{IfNoValueTF} 命令在可选参数根本没有被使用（并返回特殊的 \texttt{-NoValue-} 标记）时选择 \meta{true code}，但如果
+给出了空值，则不会选择。相比之下，\cs{IfBlankTF} 会在其参数真正为空或仅包含一个或多个普通空格时返回 true。例如
 \begin{verbatim}
 \NewDocumentCommand\foo{m!o}{\par #1:
   \IfNoValueTF{#2}
@@ -536,8 +430,7 @@ For example
   \space argument!}
 \foo{1}[bar] \foo{2}[  ] \foo{3}[] \foo{4}[\space] \foo{5} [x]
 \end{verbatim}
-results
-in the following output:
+结果如下输出：
 \begin{quote}
   \NewDocumentCommand\foo{m!o}{\par #1:
     \IfNoValueTF{#2}{No optional}%
@@ -547,11 +440,8 @@ in the following output:
   \foo{1}[bar] \foo{2}[  ] \foo{3}[] \foo{4}[\space] \foo{5} [x]
 \end{quote}
 
-Note that the \cs{space} in (4) is considered real content---because it is
-a command and not a \enquote{space} character---even though it results
-in producing a space. You can also observe in (5) the effect of the
-\texttt{!} specifier, preventing the last \cs{foo}
-from interpreting \texttt{[x]} as its optional argument.
+请注意，(4) 中的 \cs{space} 被视为真正的内容——因为它是一个命令而不是一个“空格”字符——即使它产生一个空格。你还可以在 (5)
+中观察到 \texttt{!} 修饰符的效果，它阻止最后一个 \cs{foo} 将 \texttt{[x]} 解释为其可选参数。
 
 
 
@@ -560,17 +450,15 @@ from interpreting \texttt{[x]} as its optional argument.
   |\BooleanFalse|  \\
   |\BooleanTrue|
 \end{decl}
-The \texttt{true} and \texttt{false} flags set when searching for
-an optional character (using \texttt{s} or \texttt{t\meta{char}}) have
-names which are accessible outside of code blocks.
+在搜索可选字符时设置的 \texttt{true} 和 \texttt{false} 标志（使用 \texttt{s} 或 \texttt{t\meta{char}}）具有在代码块
+外部可访问的名称。
 
 \begin{decl}
   |\IfBooleanTF| \arg{arg} \arg{true code} \arg{false code} \\
   |\IfBooleanT|  \arg{arg} \arg{true code} \\
   |\IfBooleanF|  \arg{arg} \arg{false code}
 \end{decl}
-Used to test if \meta{argument} (|#1|, |#2|, \emph{etc.}) is
-\cs{BooleanTrue} or \cs{BooleanFalse}. For example
+用于测试 \meta{argument}（|#1|、|#2| 等）是否为 \cs{BooleanTrue} 或 \cs{BooleanFalse}。例如
 \begin{verbatim}
 \NewDocumentCommand\foo{sm}
   {%
@@ -579,28 +467,20 @@ Used to test if \meta{argument} (|#1|, |#2|, \emph{etc.}) is
       {\DoSomethingWithoutStar{#2}}%
   }
 \end{verbatim}
-checks for a star as the first argument, then chooses the action to
-take based on this information.
+检查第一个参数是否为星号，然后根据此信息选择要采取的动作。
 
-\subsection{Auto-converting to key--value format}
+\subsection{自动转换为键-值格式}
 \label{sec:cmd:keyval}
 
-Some document commands have a long history of accepting a `free text' optional
-argument, for example \cs{caption} and the sectioning commands \cs{section},
-etc. Introducing more sophisticated (keyval) options to these commands
-therefore needs a method to interpret the optional argument \emph{either} as
-free text \emph{or} as a series of keyvals. This needs to take place
-during argument grabbing as there is a need for careful treatment of
-braces to obtain the correct result.
+一些文档命令长期以来接受“自由文本”可选参数，例如\cs{caption}和章节命令\cs{section}等。因此，
+要向这些命令引入更复杂的（keyval）选项，需要一种方法将可选参数\emph{同时}解释为自由文本\emph{或}
+一系列键值对。这需要在参数抓取期间进行，因为需要仔细处理大括号以获得正确的结果。
 
-The \texttt{=} modifier is available to allow \pkg{ltcmd} to correctly
-implement this process. The modifier guarantees that the argument will be
-passed to further code as a series of keyvals. To do that, the \texttt{=}
-should be followed by an argument containing the default key name. This is used
-as the key in a key--value pair \emph{if} the `raw' argument does \emph{not}
-have the correct form to be interpreted as a set of keyvals.
+\texttt{=} 修饰符可用于允许 \pkg{ltcmd} 正确实现此过程。该修饰符保证参数将作为一系列键值对传
+递给后续代码。为了做到这一点，\texttt{=} 后面应该跟一个包含默认键名称的参数。如果“原始”参数形
+式不正确以被解释为一组键值对，那么此默认键名称将用作键名，形成键-值对。
 
-Taking \cs{caption} as an example, with the demonstration implementation
+以\cs{caption}为例，演示实现如下：
 \begin{verbatim}
 \DeclareDocumentCommand
   \caption
@@ -609,25 +489,24 @@ Taking \cs{caption} as an example, with the demonstration implementation
     \showtokens{Grabbed arguments:^^J(#2)^^Jand^^J(#3)}%
   }
 \end{verbatim}
-the default key name is \texttt{short-text}. When the command \cs{caption} is
-then used, if the optional argument is free text such as
+默认键名称为 \texttt{short-text}。当使用命令 \cs{caption} 时，如果可选参数是自由文本，例如
 \begin{verbatim}
 \caption[Some short text]{A much longer and more detailed text for
   demonstration purposes}
 \end{verbatim}
-then the output will be
+则输出将为
 \begin{verbatim}
 Grabbed arguments:
 (short-text={Some short text})
 and
 (A much longer and more detailed text for demonstration purposes)
 \end{verbatim}
-On the other hand, if the caption is given with a keyval-form argument
+另一方面，如果使用键值形式的标题
 \begin{verbatim}
 \caption[label = cap:demo]%
   {A much longer and more detailed text for demonstration purposes}
 \end{verbatim}
-then this will be respected
+则会被正确处理为
 \begin{verbatim}
 Grabbed arguments:
 (label = cap:demo)
@@ -635,101 +514,74 @@ and
 (A much longer and more detailed text for demonstration purposes)
 \end{verbatim}
 
-Interpretation as keyval form is determined by the presence of \texttt{=}
-characters within the argument. Those in inline math mode (enclosed within
-\verb|$...$| or \verb|\(...\)|) are ignored. An argument can be forced to be
-read as keyvals by including an empty entry at the start
+是否解释为键值形式取决于参数中是否存在 \texttt{=} 字符。在行内数学模式中（在 \verb|$...$| 或
+\verb|\(...\)| 中），这些字符将被忽略。可以通过在开头包含一个空条目来强制将参数读取为键值对
 \begin{verbatim}
 \caption[=,This is now a keyval]%
 % ...
 \caption[This is not $=$ keyval]%
 \end{verbatim}
 
-This empty entry is \emph{not} passed to the underlying code, so will not lead
-to issues with keyval parsers that do not allow an empty key name. Any text-mode
-\texttt{=} signs will need to be braced to avoid being misinterpreted: this
-is likely most conveniently handled by bracing the entire argument
+这个空条目\emph{不}会传递给底层代码，因此不会导致不允许空键名的键值解析器出现问题。任何文本模
+式的 \texttt{=} 符号都需要加上大括号以避免被错误解释：最方便的做法可能是将整个参数放入大括号中
 \begin{verbatim}
 \caption[{Not = to a keyval!}]%
 \end{verbatim}
-which will be passed correctly as
+这将被正确传递为
 \begin{verbatim}
 Grabbed arguments:
 (short-text = {Not = to a keyval!})
 \end{verbatim}
 
-\subsection{Argument processors}
+\subsection{参数处理器}
 \label{sec:cmd:processors}
 
-Argument processor are applied to an argument \emph{after} it has been grabbed
-by the underlying system but before it is passed to \meta{code}. An argument
-processor can therefore be used to regularize input at an early stage, allowing
-the internal functions to be completely independent of input form. Processors
-are applied to user input and to default values for optional arguments, but
-\emph{not} to the special |-NoValue-| marker.
+参数处理器在底层系统抓取参数\emph{后}但在传递给 \meta{code} 前应用于参数。因此，参数处理器可用于
+在早期阶段规范化输入，使内部函数完全独立于输入形式。处理器应用于用户输入和可选参数的默认值，
+但\emph{不}应用于特殊的 |-NoValue-| 标记。
 
-Each argument processor is specified by the syntax \texttt{>}\marg{processor}
-in the argument specification. Processors are applied from right to left, so
-that
+每个参数处理器由语法 \texttt{>}\marg{processor} 在参数规范中指定。处理器从右向左应用，因此
 \begin{verbatim}
 >{\ProcessorB} >{\ProcessorA} m
 \end{verbatim}
-would apply \cs{ProcessorA} followed by \cs{ProcessorB} to the tokens grabbed
-by the \texttt{m} argument.
+将 \cs{ProcessorA} 后跟 \cs{ProcessorB} 应用于由 \texttt{m} 参数抓取的标记。
 
 \begin{decl}
   |\SplitArgument| \arg{number} \arg{token(s)}
 \end{decl}
-This processor splits the argument given at each occurrence of the
-\meta{tokens} up to a maximum of \meta{number} tokens (thus
-dividing the input into $\text{\meta{number}} + 1$ parts).
-An error is given if too many \meta{tokens} are present in the
-input. The processed input is placed inside
-$\text{\meta{number}} + 1$ sets of braces for further use.
-If there are fewer than \arg{number} of \arg{tokens} in the argument
-then |-NoValue-| markers are added at the end of the processed
-argument.
+此处理器在给定的参数中每次出现 \meta{tokens} 时拆分参数，最多拆分为 \meta{number} 个标记
+（因此将输入分成 $\text{\meta{number}} + 1$ 部分）。如果输入中出现了太多的 \meta{tokens}，
+则会报错。处理后的输入将放置在 $\text{\meta{number}} + 1$ 组大括号中供进一步使用。
+如果参数中的 \arg{tokens} 少于 \arg{number}，则在处理后的参数末尾添加 |-NoValue-| 标记。
 \begin{verbatim}
 \NewDocumentCommand \foo {>{\SplitArgument{2}{;}} m}
   {\InternalFunctionOfThreeArguments#1}
 \end{verbatim}
-If only a single character \meta{token} is used for the split, any
-category code $13$ (active) character matching the \meta{token} will
-be replaced before the split takes place.
-Spaces are trimmed at each end of each item parsed.
+如果拆分仅使用了单个字符 \meta{token}，则在进行拆分之前，任何与 \meta{token} 匹配的类别码 $13$
+（活动）字符将被替换。
+每个项解析时两端的空格都被修剪。
 
-The \texttt{E} argument type is somewhat special, because with a single
-\texttt{E} in the command declaration you may end up with several
-arguments in a command (one formal argument per embellishment token).
-Therefore, when an argument processor is applied to an
-\texttt{e}/\texttt{E}-type
-argument, all the arguments pass through that processor before being fed
-to the \meta{code}.  For example, this command
+\texttt{E} 参数类型有点特殊，因为在命令声明中只有一个 \texttt{E} 时，您可能会得到多个参数
+（每个修饰符标记一个形式参数）。因此，当参数处理器应用于 \texttt{e}/\texttt{E}-类型的参数时，
+所有参数在被传递给 \meta{code} 前都通过该处理器。例如，这个命令
 \begin{verbatim}
 \NewDocumentCommand \foo { >{\TrimSpaces} e{_^} }
   { [#1](#2) }
 \end{verbatim}
-applies \cs{TrimSpaces} to both arguments.
+将 \cs{TrimSpaces} 应用于两个参数。
 
 \begin{decl}
   |\SplitList| \arg{token(s)}
 \end{decl}
-This processor splits the argument given at each occurrence of the
-\meta{token(s)} where the number of items is not fixed. Each item is
-then wrapped in braces within |#1|. The result is that the
-processed argument can be further processed using a mapping function
-(see below).
+这个处理器将给定的参数在每次出现 \meta{token(s)} 处分割，项目数量不固定。然后将每个项目包裹在
+|#1| 中的大括号中。处理后的参数可使用映射函数进一步处理（见下文）。
 \begin{verbatim}
 \NewDocumentCommand \foo {>{\SplitList{;}} m}
   {\MappingFunction#1}
 \end{verbatim}
-If only a single character \meta{token} is used for the split, it will
-take account of the possibility that the \meta{token} has been made active
-(category code~$13$) and will split at such tokens.
-Spaces are trimmed at each end of each item parsed. Exactly one set
-of braces will be stripped if an entire item is surrounded by them,
-i.e.~the following inputs and outputs result (each separte item as
-a brace group).
+如果拆分仅使用了单个字符 \meta{token}，它将考虑到 \meta{token} 可能已被设为活动状态（类别码为
+$13$），并在这些标记处进行拆分。每个解析的项目两端的空格都被修剪。如果一个完整项目被大括号包围，
+则将剥去一组大括号，即以下输入和输出结果（每个单独项目都是一个大括号组）。
 \begin{verbatim}
 a      ==> {a}
 {a}    ==> {a}
@@ -743,9 +595,8 @@ a,{b}c ==> {a}{{b}c}
 \begin{decl}
   |\ProcessList| \arg{list} \arg{cmd}
 \end{decl}
-To support \cs{SplitList}, the function \cs{ProcessList} is available
-to apply a \meta{cmd} to every entry in a \meta{list}. The
-\meta{cmd} should absorb one argument: the list entry. For example
+为了支持 \cs{SplitList}，函数 \cs{ProcessList} 可应用于 \meta{list} 中的每个条目，对每个条目
+执行一次 \meta{cmd}。 \meta{cmd} 应吸收一个参数：列表条目。例如
 \begin{verbatim}
 \NewDocumentCommand \foo {>{\SplitList{;}} m}
   {\ProcessList{#1}{\SomeDocumentCommand}}
@@ -754,8 +605,7 @@ to apply a \meta{cmd} to every entry in a \meta{list}. The
 \begin{decl}
   |\ReverseBoolean|
 \end{decl}
-This processor reverses the logic of \cs{BooleanTrue} and
-\cs{BooleanFalse}, so that the example from earlier would become
+该处理器颠倒了 \cs{BooleanTrue} 和 \cs{BooleanFalse} 的逻辑，因此前面的示例将变为
 \begin{verbatim}
 \NewDocumentCommand\foo{>{\ReverseBoolean} s m}
   {%
@@ -768,32 +618,25 @@ This processor reverses the logic of \cs{BooleanTrue} and
 \begin{decl}
   |\TrimSpaces|
 \end{decl}
-Removes any leading and trailing spaces (tokens with character code~$32$
-and category code~$10$) for the ends of the argument. Thus for example
-declaring a function
+删除参数两端的任何前导和尾随空格（字符编码为 $32$、类别码为 $10$ 的标记）。例如，声明一个函数
 \begin{verbatim}
 \NewDocumentCommand\foo {>{\TrimSpaces} m}
   {\showtokens{#1}}
 \end{verbatim}
-and using it in a document as
+并在文档中使用它如下
 \begin{flushleft}
   \verb=  =\verb*=\foo{ hello world }=
 \end{flushleft}
-will show `\verb*=hello world=' at the terminal, with the space at each
-end removed. \cs{TrimSpaces} will remove multiple spaces from the ends of
-the input in cases where these have been included such that the standard
-\TeX{} conversion of multiple spaces to a single space does not apply.
+将在终端显示 `\verb*=hello world='，两端的空格已被移除。在输入中，\cs{TrimSpaces} 将删除多个空格，
+这些空格被包含以使得标准 \TeX{} 的多个空格转换为单个空格不适用的情况下。
 
-\subsection{Body of an environment}
+\subsection{环境的主体}
 \label{sec:cmd:body}
 
-While environments |\begin|\marg{environment}\ \dots{}\,|\end|\marg{environment}
-are typically used in cases where the code implementing the \meta{environment}
-does not need to access the contents of the environment (its `body'),
-it is sometimes useful to have the body as a standard argument.
+尽管环境 |\begin|\marg{environment}\ \dots{}\,|\end|\marg{environment} 通常用于实现 \meta{environment}
+的代码不需要访问环境的内容（它的“主体”），但有时将主体作为标准参数是很有用的。
 
-This is achieved by ending the argument specification with~\texttt{b}, which is
-a dedicated argument type for this situation. For instance
+通过以~\texttt{b} 结尾的参数规范来实现这一点，\texttt{b} 是专门用于这种情况的参数类型。例如
 \begin{verbatim}
 \NewDocumentEnvironment{twice} {O{\ttfamily} +b}
   {#2#1#2} {}
@@ -801,32 +644,23 @@ a dedicated argument type for this situation. For instance
   Hello world!
 \end{twice}
 \end{verbatim}
-typesets `Hello world!{\itshape Hello world!}'.
+排版为 `Hello world!{\itshape Hello world!}'。
 
-The prefix |+| is used to allow multiple paragraphs in the environment's body.
-Argument processors can also be applied to \texttt{b}~arguments. By default,
-spaces are trimmed at both ends of the body: in the example there would
-otherwise be spaces coming from the ends the lines after |[\itshape]| and
-|world!|. Putting the prefix |!| before \texttt{b} suppresses space-trimming.
+前缀 |+| 用于允许环境主体中包含多个段落。参数处理器也可以应用于 \texttt{b} 参数。默认情况下，
+在主体两端修剪空格：在示例中，否则会有来自 |[\itshape]| 和 |world!| 后行末的空格。在 \texttt{b}
+前放置前缀 |!| 可以取消空格修剪。
 
-When \texttt{b} is used in the argument specification, the last
-argument of the environment declaration (e.g.,
-\cs{NewDocumentEnvironment}), which consists of an \meta{end code} to
-insert at |\end|\marg{environment}, is redundant since one can simply
-put that code at the end of the \meta{start code}. Nevertheless this
-(empty) \meta{end code} must be provided.
+当参数规范中使用 \texttt{b} 时，环境声明的最后一个参数（例如，\cs{NewDocumentEnvironment} 中的
+一个 \meta{end code}，要插入到 |\end|\marg{environment} 处）是多余的，因为可以简单地将该代码
+放在 \meta{start code} 的末尾。尽管如此，这个（空的）\meta{end code} 必须提供。
 
-Environments that use this feature can be nested.
+使用此功能的环境可以被嵌套。
 
-\subsection{Fully-expandable document commands\label{sec:ltcmd:expandable}}
+\subsection{完全展开的文档命令\label{sec:ltcmd:expandable}}
 
-Document commands created using \cs{NewDocumentCommand}, etc.\@, are normally
-created so that they do not expand unexpectedly. This is done using engine
-features, so is more powerful than \LaTeXe{}'s \cs{protect} mechanism. There
-are \emph{very rare} occasion when it may be useful to create functions using a
-expansion-only grabber. This imposes a number of restrictions on the
-nature of the arguments accepted by a function, and the code it implements.
-This facility should only be used when \emph{necessary}.
+使用 \cs{NewDocumentCommand} 等创建的文档命令通常被创建为不会意外展开。这是通过引擎特性实现的，
+因此比 \LaTeXe{} 的 \cs{protect} 机制更强大。只有在\emph{非常罕见}的情况下，才可能有必要使用
+仅展开的抓取器创建函数。这对函数接受的参数类型以及其实现的代码施加了许多限制。此功能只应在\emph{必要}时使用。
 
 \begin{decl}
   |\NewExpandableDocumentCommand|     \arg{cmd} \arg{arg spec} \arg{code} \\
@@ -834,40 +668,26 @@ This facility should only be used when \emph{necessary}.
   |\ProvideExpandableDocumentCommand| \arg{cmd} \arg{arg spec} \arg{code} \\
   |\DeclareExpandableDocumentCommand| \arg{cmd} \arg{arg spec} \arg{code}
 \end{decl}
-This family of commands is used to create a document-level \meta{cmd},
-which will grab its arguments in a fully-expandable manner. The
-argument specification for the function is given by \meta{arg spec},
-and the \meta{cmd} will execute \meta{code}. In  general, \meta{code} will
-also be fully expandable, although it is possible that this will
-not be the case (for example, a function for use in a table might
-expand so that \cs{omit} is the first non-expandable non-space token).
+此命令族用于创建一个文档级别的 \meta{cmd}，该命令将以完全展开的方式抓取其参数。函数的参数规范由
+\meta{arg spec} 给出，而 \meta{cmd} 将执行 \meta{code}。通常，\meta{code} 也应该是完全展开的，
+尽管有可能不是这种情况（例如，用于表格的函数可能展开到第一个非展开且非空格的标记为 \cs{omit}）。
 
-Parsing arguments by pure expansion imposes a number of restrictions on
-both the type of arguments that can be read and the error checking
-available:
+纯展开方式解析参数施加了许多限制，既有关于可以读取的参数类型，也有关于错误检查的限制：
 \begin{itemize}
-  \item The last argument (if any are present) must be one of the
-        mandatory types \texttt{m}, \texttt{r} or \texttt{R}.
-  \item The `verbatim' argument type \texttt{v} is not available.
-  \item Argument processors (using \texttt{>}) are not available.
-  \item It is not possible to differentiate between, for example
-        |\foo[| and |\foo{[}|: in both cases the \texttt{[} will be
-        interpreted as the start of an optional argument. As a
-        result, checking for optional arguments is less robust than
-        in the standard version.
+  \item 最后一个参数（如果有的话）必须是强制类型 \texttt{m}、\texttt{r} 或 \texttt{R} 中的一个。
+  \item “verbatim” 参数类型 \texttt{v} 不可用。
+  \item 参数处理器（使用 \texttt{>}）不可用。
+  \item 不可能区分，例如，|\foo[| 和 |\foo{[}|：在这两种情况下，\texttt{[} 都会被解释为可选参数
+        的开始。因此，可选参数的检查比标准版本不够健壮。
 \end{itemize}
 
-\subsection{Commands at the start of tabular cells}
+\subsection{表格单元起始处的命令}
 
-Creating commands that are used at the start of tabular cells imposes
-some restrictions on the underlying implementation. The standard \LaTeX{}
-tabular environments (\texttt{tabular}, etc.)  use a mechanism which requires
-that any command wrapping \cs{multicolumn} or similar must be
-`expandable'. This is \emph{not} the case for commands created using
-\cs{NewDocumentCommand}, etc., which as detailed in
-Section~\ref{sec:ltcmd:expandable} use an engine feature which prevents
-such `expansion'. Therefore, to create such wrappers for use at the start
-of tabular cells, you must use \cs{NewExpandableDocumentCommand}, for example
+在表格单元起始处使用命令会对底层实现施加一些限制。标准的 \LaTeX{} 表格环境（\texttt{tabular} 等）
+使用一种机制，要求任何包装 \cs{multicolumn} 或类似命令的命令必须是“可展开”的。但是使用
+\cs{NewDocumentCommand} 等创建的命令\emph{不}符合这种情况，因为正如在第~\ref{sec:ltcmd:expandable}
+节中详细说明的那样，它们使用了一个阻止这种“展开”的引擎特性。因此，要创建在表格单元起始处使用的
+这种包装器，你必须使用 \cs{NewExpandableDocumentCommand}，例如
 \begin{verbatim}
 \NewExpandableDocumentCommand\MyMultiCol{m}{\multicolumn{3}{c}{#1}}
 \begin{tabular}{lcr}
@@ -876,52 +696,38 @@ a & b & c \\
 \end{tabular}
 \end{verbatim}
 
-\subsection{Details about argument delimiters}
+\subsection{关于参数定界符的细节}
 
-In normal (non-expandable) commands, the delimited types look for the
-initial delimiter by peeking ahead (using \pkg{expl3}'s |\peek_...|
-functions) looking for the delimiter token.  The token has to have the
-same meaning and `shape' of the token defined as delimiter.
-There are three possible cases of delimiters: character tokens, control
-sequence tokens, and active character tokens.  For all practical purposes
-of this description, active character tokens will behave exactly as
-control sequence tokens.
+在普通（非可展开）命令中，定界类型通过向前查找初始定界符（使用 \pkg{expl3} 的 |\peek_...| 函数）
+来查找定界符标记。标记必须具有与定义为定界符的标记相同的含义和“形状”。定界符有三种可能的情况：
+字符标记、控制序列标记和活动字符标记。在此描述的所有实际情况中，活动字符标记的行为将完全与
+控制序列标记相同。
 
-\subsubsection{Character tokens}
+\subsubsection{字符标记}
 
-A character token is characterized by its character code, and its meaning
-is the category code~(|\catcode|).  When a command is defined, the meaning
-of the character token is fixed into the definition of the command and
-cannot change.  A command will correctly see an argument delimiter if
-the open delimiter has the same character and category codes as at the
-time of the definition.  For example in:
+字符标记的特征是其字符编码，其含义是其类别码（|\catcode|）。当定义命令时，字符标记的含义被固定到
+命令的定义中，不可更改。如果在定义时开放定界符具有与定义时相同的字符和类别码，则命令将正确看到
+参数定界符。例如：
 \begin{verbatim}
 \NewDocumentCommand { \foobar } { D<>{default} } {(#1)}
 \foobar <hello> \par
 \char_set_catcode_letter:N <
 \foobar <hello>
 \end{verbatim}
-the output would be:
+输出将是：
 \begin{verbatim}
 (hello)
 (default)<hello>
 \end{verbatim}
-as the open-delimiter |<| changed in meaning between the two calls to
-|\foobar|, so the second one doesn't see the |<| as a valid delimiter.
-Commands assume that if a valid open-delimiter was found, a matching
-close-delimiter will also be there.  If it is not (either by being
-omitted or by changing in meaning), a low-level \TeX{} error is raised
-and the command call is aborted.
+因为在两次调用 |\foobar| 之间，开放定界符 |<| 的含义发生了变化，所以第二次调用不会将 |<| 视为
+有效的定界符。命令假设如果找到了有效的开放定界符，那么匹配的闭合定界符也会存在。如果不是这样
+（要么省略了，要么含义发生了变化），就会引发低级 \TeX{} 错误，并中止命令调用。
 
-\subsubsection{Control sequence tokens}
+\subsubsection{控制序列标记}
 
-A control sequence (or control character) token is characterized by
-its name, and its meaning is its definition.
-A token cannot have two different meanings at the same time.
-When a control sequence is defined as delimiter in a command,
-it will be detected as delimiter whenever the control sequence name
-is found in the document regardless of its current definition.
-For example in:
+控制序列（或控制字符）标记的特征是其名称，其含义是其定义。一个标记不能同时具有两种不同的含义。
+当将控制序列定义为命令的定界符时，在文档中找到控制序列名称时，无论其当前定义如何，都会将其检测为
+定界符。例如：
 \begin{verbatim}
 \cs_set:Npn \x { abc }
 \NewDocumentCommand { \foobar } { D\x\y{default} } {(#1)}
@@ -929,23 +735,20 @@ For example in:
 \cs_set:Npn \x { def }
 \foobar \x hello\y
 \end{verbatim}
-the output would be:
+输出将是：
 \begin{verbatim}
 (hello)
 (hello)
 \end{verbatim}
-with both calls to the command seeing the delimiter |\x|.
+两次命令调用都将看到定界符 |\x|。
 
-\subsection{Creating new argument processors}
+\subsection{创建新的参数处理器}
 
 \begin{decl}
   |\ProcessedArgument|
 \end{decl}
-Argument processors allow manipulation of a grabbed argument before it is
-passed to the underlying code. New processor implementations may be created
-as functions which take one trailing argument, and which leave their result in
-the \cs{ProcessedArgument} variable. For example, \cs{ReverseBoolean} is
-defined as
+参数处理器允许在传递到底层代码之前操纵抓取的参数。新的处理器实现可以作为函数创建，
+它们接受一个尾随参数，并将结果留在 \cs{ProcessedArgument} 变量中。例如，\cs{ReverseBoolean} 被定义为
 \begin{verbatim}
 \ExplSyntaxOn
 \cs_new_protected:Npn \ReverseBoolean #1
@@ -956,24 +759,17 @@ defined as
   }
 \ExplSyntaxOff
 \end{verbatim}
-[As an aside: the code is written in \pkg{expl3}, so we don't have to
-worry about spaces creeping into the definition.]
+[顺便说一句：代码是用 \pkg{expl3} 编写的，所以我们不必担心空格渗入定义。]
 
-\section{Copying and showing (robust) commands and environments}
+\section[复制和显示（健壮的）\\ 命令和环境]{复制和显示（健壮的）命令和环境}
 
-If you want to (slightly) alter an existing command you may want to
-save the current definition under a new name and then use that in a
-new definition. If the existing command is robust, then the old trick of
-using the low-level \cs{let} for this doesn't work, because it only
-copies the top-level definition, but not the part that actually does
-the work. As most \LaTeX{} commands are nowadays robust, \LaTeX{}
-now offers some high-level declarations for this instead.
+如果你想（稍微）修改现有命令，你可能希望将当前定义保存为新名称，然后在新定义中使用它。
+如果现有命令是健壮的，那么使用低级的 \cs{let} 技巧将无法实现复制，因为它只复制了顶层定义，
+而未复制实际执行工作的部分。由于现在大多数的 \LaTeX{} 命令都是健壮的，\LaTeX{} 现在提供了
+一些高级声明来完成这个任务。
 
-However, please note that it is usually better to make use of
-available hooks (e.g., the generic command or environment hooks),
-instead of copying the current definition and thereby freezing it; see
-the hook management documentation \texttt{lthooks-doc.pdf} for
-details.
+然而，请注意，通常最好利用可用的钩子（例如，通用命令或环境钩子），而不是复制当前定义，
+从而使其固定化；有关详细信息，请参阅钩子管理文档 \texttt{lthooks-doc.pdf}。
 
 \begin{decl}
   |\NewCommandCopy|       \arg{cmd} \arg{existing-cmd} \\
@@ -981,41 +777,29 @@ details.
   |\DeclareCommandCopy|   \arg{cmd} \arg{existing-cmd}
 \end{decl}
 
-This copies the definition of \meta{existing-cmd} to \meta{cmd}. After
-this \meta{existing-cmd} can be redefined and \meta{cmd}
-still works! This allows you to then provide a new definition for
-\meta{existing-cmd} that makes use of \meta{cmd} (i.e., of its old
-definition). For example, after
+这将现有命令 \meta{existing-cmd} 的定义复制到 \meta{cmd} 中。在此之后，\meta{existing-cmd} 可以重新定义，
+而 \meta{cmd} 仍然有效！这使你可以为 \meta{existing-cmd} 提供一个新的定义，该定义可以使用 \meta{cmd}
+（即其旧的定义）。例如，在执行了以下代码之后：
 \begin{verbatim}
 \NewCommandCopy\LaTeXorig\LaTeX
 \RenewDocumentCommand\LaTeX{}{\textcolor{blue}{\LaTeXorig}}
 \end{verbatim}
-all \LaTeX{} logos generated with \cs{LaTeX} will come out in blue
-(assuming you have a color package loaded).
+所有使用 \cs{LaTeX} 生成的 \LaTeX{} 标志将以蓝色显示（假设你已加载了颜色包）。
 
-The differences between \cs{New...} and \cs{Renew...} are as
-elsewhere: i.e., you get an error depending on whether or not
-\meta{cmd} already exists, or in case of \cs{Declare...} it is copied
-regardless. Note that there is no \cs{Provide...} declaration, because
-that would be of limited value.
+\cs{New...} 和 \cs{Renew...} 之间的区别与其他地方一样：即，根据 \meta{cmd} 是否已存在来决定是否产生错误，
+或者在 \cs{Declare...} 的情况下，无论如何都会复制。请注意，没有 \cs{Provide...} 声明，因为这将具有
+有限的价值。
 
-
-If the \meta{cmd} or \meta{existing-cmd} can't be provided as a single
-token but need \enquote{constructing}, you can use \cs{ExpandArgs}
-as explained in
-Section~\ref{sec:preconstructing-csnames}.
+如果 \meta{cmd} 或 \meta{existing-cmd} 无法作为单个标记提供而需要“构造”，你可以使用 \cs{ExpandArgs}，
+如第~\ref{sec:preconstructing-csnames} 节中所解释的那样。
 
 \begin{decl}
   |\ShowCommand|       \arg{cmd}
 \end{decl}
 
-This displays the meaning of the \meta{cmd} on the terminal and then
-stops (just like the primitive \cs{show}). The difference is that it
-correctly shows the meaning of more complex commands, e.g., in case of
-robust commands it displays not only the top-level definition but
-also the actual payload code and in case of commands declared with
-\cs{NewDocumentCommand}, etc.\ it also gives you detailed information
-about the argument signature.
+这会在终端上显示 \meta{cmd} 的含义，然后停止（就像原始命令 \cs{show}）。不同之处在于，它会正确显示更复杂命令的含义，
+例如，对于健壮的命令，它不仅显示顶层定义，还显示实际的 payload 代码；对于使用 \cs{NewDocumentCommand} 等定义的命令，
+它还会提供有关参数签名的详细信息。
 
 \begin{decl}
   |\NewEnvironmentCopy|       \arg{env} \arg{existing-env} \\
@@ -1023,50 +807,37 @@ about the argument signature.
   |\DeclareEnvironmentCopy|   \arg{env} \arg{existing-env}
 \end{decl}
 
-This copies the definition for environment \meta{existing-env} to
-\meta{env} (both the beginning and end code), i.e., it is simply
-applying \cs{NewCommandCopy} twice to the internal commands that
-define an environment, i.e., \cs{}\meta{env} and \cs{end}\meta{env}.
-The differences between \cs{New...}, \cs{Renew...}, and
-\cs{Declare...} are the usual ones.
+这将环境 \meta{existing-env} 的定义（开始和结束代码）复制到 \meta{env} 中，即对定义环境的内部命令应用了
+两次 \cs{NewCommandCopy}，即 \cs{}\meta{env} 和 \cs{end}\meta{env}。 \cs{New...}、\cs{Renew...} 和
+\cs{Declare...} 之间的区别与往常一样。
 
 \begin{decl}
   |\ShowEnvironment|       \arg{env}
 \end{decl}
-This displays the meaning of the begin end end code for environment \meta{env}.
+这会显示环境 \meta{env} 的开始和结束代码的含义。
 
 
 
 
-\section[Preconstructing command names \\ (or otherwise expanding arguments)]
- {Preconstructing command names (or otherwise expanding arguments)}
+\section[预构造命令名称\\ （或展开参数）]{预构造命令名称（或展开参数）}
 \label{sec:preconstructing-csnames}
 
-When declaring new commands with \cs{NewDocumentCommand} or
-\cs{NewCommandCopy} or similar, it is sometimes necessary to
-``construct'' the csname. As a general mechanism the L3 programming
-layer has \cs{exp_args:N...} for this, but there is no mechanism for
-it if \cs{ExplSyntaxOn} is not active (and mixing programming and user
-interface level commands is not a good approach anyhow). We therefore
-offer a mechanism to access this ability using CamelCase naming.
+在使用 \cs{NewDocumentCommand}、\cs{NewCommandCopy} 或类似命令声明新命令时，有时需要“构造”csname。
+L3 编程层面通常有 \cs{exp_args:N...} 作为一种通用机制，但如果没有激活 \cs{ExplSyntaxOn}，则没有这样的机制
+（而且混合编程和用户界面级别的命令也不是一个好的方法）。因此，我们提供了一种使用 CamelCase 命名访问此功能的机制。
 
 \begin{decl}
   |\UseName|  \arg{string} \\
   |\ExpandArgs| \arg{spec} \arg{cmd} \arg{arg1} \dots
 \end{decl}
 
-\cs{UseName} turns the \meta{string} directly into a csname and
-then executes it: this is equivalent to the long-standing
-\LaTeXe{} internal command \cs{@nameuse}, or the L3 programming
-equivalent \cs{use:c}. \cs{ExpandArgs} takes a \meta{spec} which
-describes how to expand the \meta{arguments}, carries out these
-operations then executes the \meta{cmd}. The \meta{spec} uses
-the descriptions offered by the L3 programming layer, and the
-relevant \cs{exp_args:N...} function must exist. Common cases will
-have a \meta{spec} of \texttt{c}, \texttt{cc} or \texttt{Nc}: see below.
+\cs{UseName} 直接将 \meta{string} 转换为 csname，然后执行它：这相当于长期存在的 \LaTeXe{} 内部命令
+\cs{@nameuse} 或 L3 编程层面的 \cs{use:c}。 \cs{ExpandArgs} 接受一个 \meta{spec}，描述如何展开
+\meta{arguments}，执行这些操作，然后执行 \meta{cmd}。 \meta{spec} 使用 L3 编程层面提供的描述，
+相关的 \cs{exp_args:N...} 函数必须存在。常见情况下，\meta{spec} 可以是 \texttt{c}、\texttt{cc}
+或 \texttt{Nc}：见下文。
 
-As an example, the following declaration provides a method to generate
-copyedit commands:
+例如，以下声明提供了一种生成校对命令的方法：
 \begin{verbatim}
 \NewDocumentCommand\newcopyedit{mO{red}}
   {%
@@ -1080,116 +851,80 @@ copyedit commands:
       }%
   }
 \end{verbatim}
-Given that declaration you can then write
-\verb/\newcopyedit{note}[blue]/ which defines the command \cs{note}
-and the corresponding counter for you.
+有了这个声明，你就可以写 \verb/\newcopyedit{note}[blue]/，定义了一个名为 \cs{note} 的命令和相应的计数器。
 
-A second example is to copy a command by string name using
-\cs{NewCommandCopy}: here we might need to construct both command
-names.
+第二个例子是通过字符串名称复制命令使用 \cs{NewCommandCopy}：在这里，我们可能需要构造两个命令名称。
 \begin{verbatim}
 \NewDocumentCommand\savebyname{m}
   {\ExpandArgs{cc}\NewCommandCopy{saved#1}{#1}}
 \end{verbatim}
 
-In the \meta{spec} each \texttt{c} stands for one argument that is
-turned into a `\texttt{c}'ommand. An \texttt{n} represents a
-`\texttt{n}'ormal argument that is not altered and \texttt{N} stands for
-a `\texttt{N}'ormal argument which is also left unchanged, but one
-consisting only of a single token (and usually unbraced). Thus, to
-construct a command from a string only for the second argument of
-\cs{NewCommandCopy} you would write
+在 \meta{spec} 中，每个 \texttt{c} 代表一个被转换为 `\texttt{c}'ommand 的参数。一个 \texttt{n}
+表示不改变的 `\texttt{n}'ormal 参数，\texttt{N} 表示不变的 `\texttt{N}'ormal 参数，但是只包含一个
+单个标记（通常不带大括号）。因此，要构造命令名称，只需使用 \cs{NewCommandCopy} 的第二个参数：
 \begin{verbatim}
 \ExpandArgs{Nc}\NewCommandCopy\mysectionctr{c@section}
 \end{verbatim}
-There are several other single letters supported in the L3 programming
-layer that \emph{could} be used in the \meta{spec} to manipulate
-arguments in other ways.  If you are interested, take a look at the
-\enquote{Argument expansion} section in the L3 programming layer
-documentation in \texttt{interface3.pdf}.
+在 L3 编程层面还支持其他几个单个字母，可以在 \meta{spec} 中使用以其他方式操作参数。
+如果感兴趣，可以查看 \texttt{interface3.pdf} 中 L3 编程层面文档的“Argument expansion”部分。
 
 
 
-\section{Expandable floating point (and other) calculations}
+\section[可扩展的浮点数\\ （及其他）计算]{可扩展的浮点数（及其他）计算}
 
-The \LaTeX3 programming layer which is part of the format offers a
-rich interface to manipulate floating point variables and values. To
-allow for (simpler) applications to use this on document-level or in
-packages otherwise not making use of the L3 programming layer a few
-interface commands are made available.
+\LaTeX3 编程层是格式的一部分，提供了丰富的接口来操作浮点变量和值。为了让（更简单的）应用能够在文档级别或者在
+否则不使用 L3 编程层的包中使用这些功能，我们提供了一些接口命令。
 
 
 \begin{decl}
   |\fpeval| \arg{floating point expression}
 \end{decl}
 
-The expandable command \cs{fpeval} takes as its argument a floating
-point expression and produces a result using the normal rules of
-mathematics. As this command is expandable it can be used where \TeX{}
-requires a number and for example within a low-level \cs{edef} operation
-to give a purely numerical result.
+可扩展命令 \cs{fpeval} 接受一个浮点表达式作为参数，并根据数学的常规规则生成结果。由于这个命令是可扩展的，它可
+以用在 \TeX{} 需要数字的地方，例如在低级别的 \cs{edef} 操作中，给出纯粹的数值结果。
 
-
-
-Briefly, the floating point expressions may comprise:
+简而言之，浮点表达式可能包括：
 \begin{itemize}
-  \item Basic arithmetic: addition $x\fpbin{+}y$, subtraction $x\fpbin{-}y$,
-        multiplication $x\fpbin{*}y$, division $x\fpbin{/}y$, square root~$\sqrt{x}$,
-        and parentheses.
-  \item Comparison operators: $x\fprel{<}y$,
-        $x\fprel{<=}y$, $x\fprel{>?}y$,
-        $x\fprel{!=}y$ \emph{etc.}
-  \item Boolean logic: sign $\fpop{sign} x$,
-        negation $\fpop{!}x$, conjunction
-        $x\fprel{\&\&}y$, disjunction $x\fprel{\string|\string|}y$, ternary
-        operator $x\fprel{?}y\fprel{:}z$.
-  \item Exponentials: $\fpop{exp} x$, $\fpop{ln} x$, $x\mathord{\texttt{\^{}}}y$.
-  \item Integer factorial: $\fpop{fact} x$.
-  \item Trigonometry: $\fpop{sin} x$, $\fpop{cos} x$, $\fpop{tan} x$, $\fpop{cot} x$, $\fpop{sec}
-          x$, $\fpop{csc} x$ expecting their arguments in radians, and
-        $\fpop{sind} x$, $\fpop{cosd} x$,
-        $\fpop{tand} x$, $\fpop{cotd} x$,
-        $\fpop{secd} x$, $\fpop{cscd} x$ expecting their
-        arguments in degrees.
-  \item Inverse trigonometric functions: $\fpop{asin} x$,
-        $\fpop{acos} x$, $\fpop{atan} x$,
-        $\fpop{acot} x$, $\fpop{asec} x$,
-        $\fpop{acsc} x$ giving a result in radians, and
-        $\fpop{asind} x$, $\fpop{acosd} x$,
-        $\fpop{atand} x$, $\fpop{acotd} x$,
-        $\fpop{asecd} x$, $\fpop{acscd} x$ giving a result
-        in degrees.
-  \item Extrema: $\fpop{max}(x_{1},x_{2},\ldots)$, $\fpop{min}(x_{1},x_{2},\ldots)$,
-        $\fpop{abs}(x)$.
-  \item Rounding functions, controlled by two optional
-        values,  $n$ (number of places, $0$ by default) and
-        $t$ (behavior on a tie, $\nan$ by default):
+  \item 基本算术运算：加法 $x\fpbin{+}y$，减法 $x\fpbin{-}y$，乘法 $x\fpbin{*}y$，除法 $x\fpbin{/}y$，平方
+        根~$\sqrt{x}$，以及括号。
+  \item 比较运算符：$x\fprel{<}y$，$x\fprel{<=}y$，$x\fprel{>?}y$，$x\fprel{!=}y$ \emph{等等}。
+  \item 布尔逻辑：符号 $\fpop{sign} x$，否定 $\fpop{!}x$，合取 $x\fprel{\&\&}y$，析取 $x\fprel{\string|\string|}y$，
+        三元运算符 $x\fprel{?}y\fprel{:}z$。
+  \item 指数运算：$\fpop{exp} x$，$\fpop{ln} x$，$x\mathord{\texttt{\^{}}}y$。
+  \item 整数阶乘：$\fpop{fact} x$。
+  \item 三角函数：$\fpop{sin} x$，$\fpop{cos} x$，$\fpop{tan} x$，$\fpop{cot} x$，$\fpop{sec}
+          x$，$\fpop{csc} x$ 期望其参数为弧度，并且 $\fpop{sind} x$，$\fpop{cosd} x$，
+        $\fpop{tand} x$，$\fpop{cotd} x$，
+        $\fpop{secd} x$，$\fpop{cscd} x$ 期望其参数为角度。
+  \item 反三角函数：$\fpop{asin} x$，$\fpop{acos} x$，$\fpop{atan} x$，
+        $\fpop{acot} x$，$\fpop{asec} x$，
+        $\fpop{acsc} x$ 返回弧度单位的结果，并且 $\fpop{asind} x$，$\fpop{acosd} x$，
+        $\fpop{atand} x$，$\fpop{acotd} x$，
+        $\fpop{asecd} x$，$\fpop{acscd} x$ 返回角度单位的结果。
+  \item 极值：$\fpop{max}(x_{1},x_{2},\ldots)$，$\fpop{min}(x_{1},x_{2},\ldots)$，
+        $\fpop{abs}(x)$。
+  \item 四舍五入函数，由两个可选值控制，$n$（小数位数，默认为$0$）和
+        $t$（在遇到“平局”时的行为，默认为 $\nan$）：
         \begin{itemize}
-          \item $\fpop{trunc}(x,n)$ rounds towards zero,
-          \item $\fpop{floor}(x,n)$ rounds towards~$-\infty$,
-          \item $\fpop{ceil}(x,n)$ rounds towards~$+\infty$,
-          \item $\fpop{round}(x,n,t)$ rounds to the closest value, with
-                ties rounded to an even value by default, towards zero if $t=0$,
-                towards $+\infty$ if $t>0$ and towards $-\infty$ if $t<0$.
+          \item $\fpop{trunc}(x,n)$ 向零舍入，
+          \item $\fpop{floor}(x,n)$ 向$-\infty$舍入，
+          \item $\fpop{ceil}(x,n)$ 向$+\infty$舍入，
+          \item $\fpop{round}(x,n,t)$ 四舍五入到最接近的值，如果 $t=0$，则平局舍入为偶数值，如果 $t>0$，则向
+                $+\infty$舍入，如果 $t<0$，则向$-\infty$舍入。
         \end{itemize}
-  \item Random numbers: $\fpop{rand}()$, $\fpop{randint}(m,n)$.
-  \item Constants: \texttt{pi}, \texttt{deg} (one degree in radians).
-  \item Dimensions, automatically expressed in points, \emph{e.g.},
-        \texttt{pc} is~$12$.
-  \item Automatic conversion (no need for \cs{number}) of
-        integer, dimension, and skip variables to floating points numbers,
-        expressing dimensions in points and ignoring the stretch and
-        shrink components of skips.
-  \item Tuples: $(x_1,\ldots{},x_n)$ that can be added together,
-        multiplied or divided by a floating point number, and nested.
+  \item 随机数：$\fpop{rand}()$，$\fpop{randint}(m,n)$。
+  \item 常数：\texttt{pi}，\texttt{deg}（一度的弧度值）。
+  \item 尺寸，自动转换为点数表示，例如，\texttt{pc} 为$12$。
+  \item 整数、尺寸和间距变量的自动转换（无需 \cs{number}）为浮点数，用点数表示尺寸，并忽略间距的拉伸和收缩部分。
+  \item 元组：$(x_1,\ldots{},x_n)$，可以相加、乘以或除以浮点数，并且可以嵌套。
 \end{itemize}
 
-An example of use could be the following:
+一个使用的示例可能如下所示：
 \begin{verbatim}
 \LaTeX{} can now compute: $ \frac{\sin (3.5)}{2} + 2\cdot 10^{-3}
   = \fpeval{sin(3.5)/2 + 2e-3} $.
 \end{verbatim}
-which produces the following output:
+它产生以下输出：
 \begin{quote}
   \LaTeX{} can now compute: $ \frac{\sin (3.5)}{2} + 2\cdot 10^{-3}
     = \fpeval{sin(3.5)/2 + 2e-3} $.
@@ -1199,36 +934,27 @@ which produces the following output:
   |\inteval| \arg{integer expression}
 \end{decl}
 
-The expandable command \cs{inteval} takes as its argument an integer
-expression and produces a result using the normal rules of
-mathematics with some restrictions, see below. The operations
-recognized are |+|, |-|, |*| and |/| plus parentheses.  As this
-command is expandable it can be used where \TeX{} requires a number
-and for example within a low-level \cs{edef} operation to give a
-purely numerical result.
+\section[可扩展的整数\\ （和其他）计算]{可扩展的整数（和其他）计算}
 
-This is basically a thin wrapper for the primitive \cs{numexpr}
-command and therefore has some syntax restrictions. These are:
+可扩展命令 \cs{inteval} 接受一个整数表达式作为参数，并使用数学的常规规则生成结果，但有一些限制，见下文。它识别的
+操作符有 |+|、|-|、|*| 和 |/|，还有括号。由于这个命令是可扩展的，它可以用在 \TeX{} 需要数字的地方，例如在低级别
+的 \cs{edef} 操作中，给出纯粹的数值结果。
+
+这基本上是对原始命令 \cs{numexpr} 的一个薄包装，因此有一些语法限制。这些限制包括：
 \begin{itemize}
-  \item \texttt{/} denotes division rounded to the closest integer with
-        ties rounded away from zero;
-  \item there is an error and the overall expression evaluates to zero
-        whenever the absolute value of any intermediate result exceeds
-        $2^{31}-1$, except in the case of scaling operations
-        $a$\texttt{*}$b$\texttt{/}$c$, for which $a$\texttt{*}$b$ may be
-        arbitrarily large;
-  \item parentheses may not appear after unary \texttt{+} or
-        \texttt{-}, namely placing \texttt{+(} or \texttt{-(} at the start
-        of an expression or after \texttt{+}, \texttt{-}, \texttt{*},
-        \texttt{/} or~\texttt{(} leads to an error.
+  \item \texttt{/} 表示最接近整数的四舍五入除法，遇到平局时远离零方向舍入；
+  \item 当任何中间结果的绝对值超过 $2^{31}-1$ 时（除了缩放操作 $a$\texttt{*}$b$\texttt{/}$c$，其中 $a$\texttt{*}$b$
+        可能会任意大），会产生错误，整个表达式的结果将为零；
+  \item 括号不能出现在一元 \texttt{+} 或 \texttt{-} 的后面，即在表达式的开头或者在 \texttt{+}、\texttt{-}、
+        \texttt{*}、\texttt{/} 或 \texttt{(} 的后面放置 \texttt{+(} 或 \texttt{-(} 会导致错误。
 \end{itemize}
 
-An example of use could be the following.
+一个使用的示例可能如下所示。
 \begin{verbatim}
 \LaTeX{} can now compute: The sum of the numbers is $\inteval{1 + 2 + 3}$.
 \end{verbatim}
-which results in
-\enquote{\LaTeX{} can now compute: The sum of the numbers is $\inteval{1 + 2 + 3}$.}
+产生的结果为
+\enquote{\LaTeX{} 现在可以计算：这些数的和为 $\inteval{1 + 2 + 3}$。}
 
 
 \begin{decl}
@@ -1236,38 +962,25 @@ which results in
   |\skipeval| \arg{skip expression}
 \end{decl}
 
-Similar to \cs{inteval} but computing a length (\texttt{dimen}) or a
-rubber length (\texttt{skip}) value. Both are thin wrappers around
-the corresponding engine primitives, which makes them fast, but
-therefore shows the same syntax peculiars as discussed
-above. Nevertheless, in practice they are usually sufficient.  For
-example
+类似于 \cs{inteval}，但计算长度（\texttt{dimen}）或者伸缩长度（\texttt{skip}）的值。两者都是对应引擎原始命令的
+薄包装，这使它们速度很快，但因此显示了上述讨论的相同语法特点。不过，在实践中它们通常是足够的。例如
 \begin{verbatim}
 \newcommand\calculateheight[1]{%
   \setlength\textheight{\dimeval{\topskip+\baselineskip*\inteval{#1-1}}}}
 \end{verbatim}
-sets the \cs{textheight} to the appropriate value if a page should
-hold a specific number of text lines. Thus after |\calculateheight{40}|
-it is set to \dimeval{\topskip+\baselineskip*\inteval{40-1}}, given
-the values \cs{topskip} (\dimeval{\topskip}) and \cs{baselineskip}
-(\dimeval{\baselineskip}) in the current document.
+如果一个页面应该容纳特定数量的文本行，则将 \cs{textheight} 设置为相应值。因此，在 |\calculateheight{40}| 之后，
+它被设置为 \dimeval{\topskip+\baselineskip*\inteval{40-1}}，给出当前文档中 \cs{topskip} (\dimeval{\topskip})
+和 \cs{baselineskip} (\dimeval{\baselineskip}) 的值。
 
-\section{Case changing}
+\section{大小写转换}
 
-\TeX{} provides two primitives \cs{uppercase} and \cs{lowercase} for changing
-the case of text. However, these have a range of limitations: they only change
-the case of explicit characters, do not account for the surrounding context, do
-not support UTF-8 input with 8-bit engines, etc. To overcome this problem,
-\LaTeX{} provides the commands \cs{MakeUppercase}, \cs{MakeLowercase} and
-\cs{MakeTitlecase}: these offer significant enhancement over the \TeX{}
-primitives. These commands are engine-robust (\cs{protected}), and so
-can be used in moving arguments.
+\TeX{} 提供了两个原始命令 \cs{uppercase} 和 \cs{lowercase} 用于改变文本的大小写。然而，它们有许多限制：它们只改
+变显式字符的大小写，不考虑周围的上下文，不支持使用 8 位引擎的 UTF-8 输入等。为了解决这个问题，\LaTeX{} 提供了命令
+\cs{MakeUppercase}、\cs{MakeLowercase} 和 \cs{MakeTitlecase}：这些命令在 \TeX{} 原始命令的基础上有了显著的增强。
+这些命令是引擎稳定的（\cs{protected}），因此可以在移动参数中使用。
 
-Upper- and lower-casing are well-understood in general conversation.
-Titlecasing here follows the definition given by the Unicode Consortium: the
-first character of the input will be converted to (broadly) uppercase, and the
-rest of the input to lowercase. The full range of Unicode UTF-8 input can be
-supported.
+大小写转换在一般对话中是众所周知的。标题大写遵循 Unicode 联盟的定义：输入的第一个字符将转换为大写，其余字符转换为小写。
+可以支持 Unicode UTF-8 输入的全范围。
 \begin{quotation}
   \begin{tabular}{rl}
     |\MakeUppercase{hello WORLD ßüé}| & \MakeUppercase{hello WORLD ßüé} \\
@@ -1276,20 +989,12 @@ supported.
   \end{tabular}
 \end{quotation}
 
-The case-changing commands take an optional argument which can be used to
-tailor the output. This optional argument accepts the key \texttt{locale},
-also available under the alias \texttt{lang},
-which can be used to give a language identifier in BCP-47
-format. This is then applied to select language-specific features during
-case-changing.
+大小写转换命令接受一个可选参数，用于定制输出。此可选参数接受键 \texttt{locale}，也可以使用别名 \texttt{lang}，可以
+使用 BCP-47 格式给出语言标识符。然后，它被应用于在大小写转换过程中选择语言特定功能。
 
-The input given to these commands is `expanded' before case changing is
-applied. This means that any commands within the input that convert to pure
-text will be case changed. Mathematical content is automatically excluded, as
-are the arguments to the commands \cs{label}, \cs{ref}, \cs{cite}, \cs{begin}
-and \cs{end}. Additional exclusions can be added using the command
-\cs{AddToNoCaseChangeList}. Input can be excluded from case changing using the
-command \cs{NoCaseChange}.
+在对这些命令给定的输入进行大小写转换之前，该输入将被“展开”。这意味着输入中的任何命令，如果转换为纯文本，都将被大小写转
+换。数学内容会自动排除在外，以及命令 \cs{label}、\cs{ref}、\cs{cite}、\cs{begin} 和 \cs{end} 的参数。可以使用命令
+\cs{AddToNoCaseChangeList} 添加额外的排除项。还可以使用命令 \cs{NoCaseChange} 将输入排除在大小写转换之外。
 \begin{quotation}
   \begin{tabular}{rl}
     |\MakeUppercase{Some text $y = mx + c$}|
@@ -1299,40 +1004,31 @@ command \cs{NoCaseChange}.
   \end{tabular}
 \end{quotation}
 
-To allow robust commands to be used within case changing \emph{and} to produce
-the expected output, two additional control commands are available.
-\cs{CaseSwitch} allows the user to specify the result for the four possible
-cases
+为了允许在大小写转换中使用稳健的命令并产生预期的输出，还提供了两个额外的控制命令。\cs{CaseSwitch} 允许用户指定四种可能
+情况的结果：
 \begin{itemize}
-  \item No case changing
-  \item Uppercasing
-  \item Lowercasing
-  \item Titlecasing (only applies for the start of the input)
+  \item 不进行大小写转换
+  \item 转为大写
+  \item 转为小写
+  \item 标题大小写（仅适用于输入的开头）
 \end{itemize}
 
-The command \cs{DeclareCaseChangeEquivalent} provides a way to substitute a
-command by an alternative version when it is found inside a case changing
-situation. There are three commands for customising the case changing of
-codepoints
+命令 \cs{DeclareCaseChangeEquivalent} 提供了一种在大小写转换环境中替换命令为另一个
+版本的方法。有三个命令用于自定义代码点的大小写转换：
 \begin{decl}
   |\DeclareLowercaseMapping| \oarg{locale} \arg{codepoint} \arg{output} \\
   |\DeclareTitlecaseMapping| \oarg{locale} \arg{codepoint} \arg{output} \\
   |\DeclareUppercaseMapping| \oarg{locale} \arg{codepoint} \arg{output}
 \end{decl}
-All three take a \meta{codepoint} (as an integer expression) and will
-result in the \meta{output} being produced under the appropriate case changing
-operation. The optional \meta{locale} can be given if the mapping should only
-apply to a specific one: this is given in BCP-47 format
-(\url{https://en.wikipedia.org/wiki/IETF_language_tag}). For example,
-the kernel customises the mapping for U+01F0 (\v{j}) when uppercasing in
-8-bit engines:
+这三个命令接受一个 \meta{codepoint}（作为整数表达式），并会在相应的大小写转换操作下产生
+\meta{output}。可选的 \meta{locale} 参数用于指定映射仅适用于特定语言：它使用 BCP-47 格式
+给出（\url{https://en.wikipedia.org/wiki/IETF_language_tag}）。例如，内核在 8 位引擎中针对
+U+01F0 (\v{j}) 的大写映射进行了自定义：
 \begin{quotation}
   |\DeclareUppercaseMapping{"01F0}{\v{J}}|
 \end{quotation}
-as there is no pre-composed \v{J} character, and this is problematic if
-the engine does not support Unicode natively. Similarly, to set a locale
-\texttt{xx} to behave in the same way as Turkish and retain the difference
-between dotted- and dotless-i, one could use for example
+因为没有预组合的 \v{J} 字符，如果引擎不原生支持 Unicode，这会导致问题。类似地，要将一个
+\texttt{xx} 区域设置为像土耳其语一样行为，并保留带点和无点 i 的区别，可以使用以下示例：
 \begin{quotation}
   |\DeclareLowercaseMapping[xx]{"0049}{\i}|\\
   |\DeclareLowercaseMapping[xx]{"0130}{i}|\\
