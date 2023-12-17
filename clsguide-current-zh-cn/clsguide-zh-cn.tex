@@ -82,6 +82,9 @@
 \renewcommand{\contentsname}{\centerline{目\quad 录}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
 \renewcommand{\refname}{参考文献}
 \renewcommand{\tablename}{表}
+\NewDocumentCommand{\booktitle}{ m }{《\bgroup\color{blue}\sffamily#1\egroup》}
+\catcode`《 = \active
+\def《#1》{\booktitle{#1}}
 %%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -187,7 +190,7 @@
 类文件 |ltxdoc.cls|。
 
 有关 |doc| 和 |docstrip| 的更多信息，请参阅文件 |docstrip.dtx|、|doc.dtx|
-和 \emph{\LaTeXcomp}。要了解其用法示例，请查看 |.dtx| 文件。
+和 《\LaTeXcomp》。要了解其用法示例，请查看 |.dtx| 文件。
 
 \subsection{标准文档类的政策}
 
@@ -235,7 +238,7 @@
 
 然而，这个经验法则仍然有用：如果一个命令的名称中包含 |@|，那么它不是
 支持的 \LaTeX{} 语言的一部分——它的行为可能在未来版本中改变！如果一个
-命令是混合大小写的，或者在 \emph{\LaTeXbook} 中有描述，那么您可以依赖
+命令是混合大小写的，或者在 《\LaTeXbook》 中有描述，那么您可以依赖
 于未来版本的 \LaTeX{} 支持该命令。
 
 \subsection{编程支持}
@@ -647,7 +650,7 @@
 \label{Sec:commands}
 
 本节简要描述了用于类和宏包编写者的每个命令。要了解系统的其他方面，
-您还应阅读 \emph{\LaTeXbook}、\emph{\LaTeXcomp} 和 \emph{\usrguide}。
+您还应阅读 《\LaTeXbook》、《\LaTeXcomp》 和 《\usrguide》。
 
 \subsection{识别}
 

@@ -229,15 +229,15 @@
 
 \paragraph{动机}
 一个包\index{package}的重要部分包括代码、代码的文档和用户文档。
-使用 \DOC{} 和 \ds{} 程序，可以将这三者合并为一个单一的，带有说明的
-\defn[documented LaTeX file@documented \string\LaTeX{} file]{说明 \LaTeX{}
-  \textnormal{（ \dtxfile{}）}文件}。 \dtxfile{}文件的主要优势在于，
+使用 \DOC{} 和 \ds{} 程序，可以将这三者合并为一个单一的，
+\defn[documented LaTeX file@documented \string\LaTeX{} file]{带文档的 \LaTeX{}
+  \textnormal{（ \dtxfile{}）}文件}。 \dtxfile{} 文件的主要优势在于，
 它允许您使用任意的 \latex{} 构造来注释\index{comments}您的代码。
 因此，宏、环境、代码段、变量等都可以使用表格、图形、数学公式和字体变化来解释。
 代码可以使用 \latex 的分段命令进行组织。\index{indexing|(}
 \DOC{}甚至可以生成一个统一的索引，对宏定义（在 \latex{} 代码中）和
 宏描述（在用户文档中）进行索引。\index{indexing|)}
-这种注重为代码编写详细的、漂亮排版的注释\index{comments}的方法——
+这种注重为代码编写详细的、漂亮排版的注释\index{comments}方法——
 本质上将程序视为描述一组算法的书——被称为\defn{文学编程}~\cite{Knuth1984:literate}，
 并自早期的 \TeX{} 开始就被使用。
 
@@ -639,8 +639,8 @@
         另一种选择是 \usemacro{DisableCrossrefs}，它可以在处理速度上稍微提升一些，
         但影响微乎其微。
 
-  \item \usemacro{CodelineIndex} 告诉 \DOC{} 索引应该引用程序行号而不是页码。
-        （另一种选择是 \usemacro{PageIndex}。） \usemacro{CodelineIndex} 使得索引条目更易于查找，
+  \item \usemacro{CodelineIndex} 告诉 \DOC{} 索引应该引用程序行号而不是页码
+        （另一种选择是 \usemacro{PageIndex}）。 \usemacro{CodelineIndex} 使得索引条目更易于查找，
         但以索引的自洽性稍有损失（因为宏和环境的描述总是按页码索引）。
         索引，不过，会以一条说明性的注释开始。
 
@@ -954,7 +954,7 @@
 
 \usething{ltxdoc} 文档类提供了三个命令来帮助排版宏和环境的语法
 （见表~\ref{tbl:argument-formatting}）。 \usemacro{marg} 用于排版必选参数，
-\usemacro{oarg} 用于排版可选参数， \usemacro{parg} 用于排版图片参数。
+\usemacro{oarg} 用于排版可选参数， \usemacro{parg} 用于排版图形模式参数。
 这三个命令都使用 \usemacro{meta} 来排版参数内容。 \usemacro{meta} 也可单独使用。
 例如，“\texttt{This needs a} |\meta{dimen}|.” 会排版为“This needs a \m{dimen}.”。
 
