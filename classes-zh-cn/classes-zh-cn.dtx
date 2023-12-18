@@ -99,7 +99,29 @@
 
 %%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{xcolor}
-\usepackage[colorlinks=true,linkcolor=red]{hyperref}
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\usepackage{etoolbox}
+\let\OriginMF\MacroFont
+\def\MacroFont{\color{spot}\OriginMF}
+\pretocmd{\macrocode}{\color{code}\def\MacroFont{\color{code}\OriginMF}}{}{}
+\AtBeginEnvironment{macrocode}{\def\MacroFont{\color{code}\OriginMF}}
+\AtEndEnvironment{macrocode}{\def\MacroFont{\color{spot}\OriginMF}}
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
+\AtEndEnvironment{verbatim}{\let\MacroFont\MF}
+\usepackage{hyperref}
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false,
+  pdfview=FitH}
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
