@@ -114,8 +114,7 @@
   citecolor=spot,
   bookmarksopen=false,
   bookmarksnumbered=false,
-  plainpages=false,
-  pdfview=FitH}
+  plainpages=false}
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%% 以下在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
@@ -136,10 +135,10 @@
      \kern 2pt} %%%
 %%%%%%% 以上自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\filesection}[1]{\subsection{\sffamily{#1}}}
+\newcommand{\filesection}[1]{\addcontentsline{toc}{subsection}{\hspace{24pt}\sffamily{#1}}\subsection*{\sffamily{#1}}}
 \newcommand{\iniTeX}{ini\TeX}
 
-\setcounter{secnumdepth}{0}
+% \setcounter{secnumdepth}{0}
 
 \title{\huge\bfseries\color{spot}\LaTeXe 的配置选项}
 
