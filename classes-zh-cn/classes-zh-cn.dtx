@@ -82,20 +82,12 @@
 %%%%%%%%%%%%% 以下设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[fontset=source]{ctex}
 
-\setCJKfamilyfont{Heiti}{Source Han Sans Regular} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
-\newcommand{\Heiti}{\CJKfamily{Heiti}} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
-
-\setCJKfamilyfont{heiti}{Source Han Sans Light} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
-\newcommand{\heiti}{\CJKfamily{heiti}} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
-
-\setCJKfamilyfont{songti}{思源宋体 CN Light}  %%%% 自定义\songti命令，显示思源宋体，用于正文
-\newcommand{\songti}{\CJKfamily{songti}} %%%% 自定义\songti命令，显示思源宋体，用于正文
-
-\setCJKmainfont{思源宋体 CN Light} %%%% 设置中文的主字体为思源宋体 CN Light
-%\setmainfont{Source Serif Pro} %%%% 设置英文的主字体为Source Serif Pro，也可以设为Times New Roman
-
-\setCJKfamilyfont{kaiti}{KaiTi} %%设置中文字体楷体，用于强调
-\newcommand{\kaiti}{\CJKfamily{kaiti}} %%设置中文字体楷体，用于强调
+%^^A \newCJKfontfamily[song]\songti{SourceHanSerifSC-regular.otf} %%自定义宋体 \sognti ，作为文章中文主字体
+\newCJKfontfamily[Hei]\Heiti{SourceHanSansSC-regular.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+%^^A \newCJKfontfamily[hei]\heiti{SourceHanSansSC-Light.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+\newCJKfontfamily[kai]\kaiti{FandolKai-regular.otf} %%设置中文字体楷体 \kaiti ，用于强调
+\newCJKfontfamily[heitixt]\heitixt{思源黑体_CN_LightItalic.ttf} %% 自定义\heitixt命令，显示思源黑体斜体
+%^^A \setmainfont{URW Palladio L} %%%% 设置英文的主字体为URW Palladio L
 %%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%% 以下设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
