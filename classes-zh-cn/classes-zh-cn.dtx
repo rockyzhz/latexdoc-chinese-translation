@@ -1,0 +1,4184 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 1993-2023
+% The LaTeX Project and any individual authors listed elsewhere
+% in this file.
+%
+% This file is part of the LaTeX base system.
+% -------------------------------------------
+%
+% It may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%    https://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008 or later.
+%
+% This file has the LPPL maintenance status "maintained".
+%
+% The list of all files belonging to the LaTeX base distribution is
+% given in the file `manifest.txt'. See also `legal.txt' for additional
+% information.
+%
+% The list of derived (unpacked) files belonging to the distribution
+% and covered by LPPL is defined by the unpacking scripts (with
+% extension .ins) which are part of the distribution.
+%
+% \fi
+%
+% \iffalse
+% \section{Identification}
+%
+%    These document classes can only be used with \LaTeXe, so we make
+%    sure that an appropriate message is displayed when another \TeX{}
+%    format is used.
+% \changes{v1.3p}{1995/11/30}{Added date of \LaTeX\ format to argument
+%    of \cs{NeedsTeXFormat}}
+%    \begin{macrocode}
+%<article|report|book>\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+%    \end{macrocode}
+%
+%    Announce the Class name and its version:
+%    \begin{macrocode}
+%<article>\ProvidesClass{article}
+%<report>\ProvidesClass{report}
+%<book>\ProvidesClass{book}
+%<10pt&!bk>\ProvidesFile{size10.clo}
+%<11pt&!bk>\ProvidesFile{size11.clo}
+%<12pt&!bk>\ProvidesFile{size12.clo}
+%<10pt&bk>\ProvidesFile{bk10.clo}
+%<11pt&bk>\ProvidesFile{bk11.clo}
+%<12pt&bk>\ProvidesFile{bk12.clo}
+%<*driver>
+\ProvidesFile{classes.drv}
+%</driver>
+              [2023/05/17 v1.4n
+%<article|report|book> Standard LaTeX document class]
+%<10pt|11pt|12pt>      Standard LaTeX file (size option)]
+%    \end{macrocode}
+%
+% \section{A driver for this document}
+%
+% The next bit of code contains the documentation driver file for
+% \TeX{}, i.e., the file that will produce the documentation you are
+% currently reading. It will be extracted from this file by the
+% {\sc docstrip} program.
+%
+% \changes{1.0f}{1993/12/07}{Use class ltxdoc document class}
+% \changes{1.0r}{1994/02/28}{Moved driver code in order not to need a
+%    separate driver}
+%    \begin{macrocode}
+%<*driver>
+]
+\documentclass{ltxdoc}
+
+
+
+\usepackage[T1]{fontenc}
+\usepackage{tabularray}
+\usepackage{caption}
+
+%%%%%%%%%%%%% 以下设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[fontset=source]{ctex}
+
+\setCJKfamilyfont{Heiti}{Source Han Sans Regular} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
+\newcommand{\Heiti}{\CJKfamily{Heiti}} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
+
+\setCJKfamilyfont{heiti}{Source Han Sans Light} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
+\newcommand{\heiti}{\CJKfamily{heiti}} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
+
+\setCJKfamilyfont{songti}{思源宋体 CN Light}  %%%% 自定义\songti命令，显示思源宋体，用于正文
+\newcommand{\songti}{\CJKfamily{songti}} %%%% 自定义\songti命令，显示思源宋体，用于正文
+
+\setCJKmainfont{思源宋体 CN Light} %%%% 设置中文的主字体为思源宋体 CN Light
+%\setmainfont{Source Serif Pro} %%%% 设置英文的主字体为Source Serif Pro，也可以设为Times New Roman
+
+\setCJKfamilyfont{kaiti}{KaiTi} %%设置中文字体楷体，用于强调
+\newcommand{\kaiti}{\CJKfamily{kaiti}} %%设置中文字体楷体，用于强调
+%%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%% 以下设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{indentfirst} %%% 首行缩进
+\setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
+\linespread{1.35} %%% 设置行间距
+%%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=red]{hyperref}
+%%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%% 以下在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
+\makeatletter
+\def\hlinew#1{%
+\noalign{\ifnum0=`}\fi\hrule \@height #1 \futurelet
+\reserved@a\@xhline}
+\makeatother%
+%%%%%%% 以上在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
+
+%%%%%%% 以下自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\footnotesep}{0.5cm} %%%设置几第脚注之间的距离
+\setlength{\skip\footins}{3em} %%%设置脚注与正文之间的距离
+%%\renewcommand\footnoterule{} %%%定义脚注线为空
+\renewcommand\footnoterule{
+     \kern -3pt                         % This -3 is negative
+     \hrule width 0.6\textwidth height 0.6pt % of the sum of this 1
+     \kern 2pt} %%%
+%%%%%%% 以上自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%% 以下制作索引 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage {makeidx}
+\makeindex
+%%%%%%% 以上制作索引 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\renewcommand{\contentsname}{\heiti 目\ 录}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\renewcommand{\refname}{\heiti 参考文献}
+\renewcommand{\tablename}{表}
+\renewcommand{\abstractname}{\heiti 摘\ 要}
+
+
+%
+%%    \end{macrocode}
+%
+%    We don't want everything to appear in the index
+%    \begin{macrocode}
+\DoNotIndex{\',\.,\@M,\@@input,\@Alph,\@alph,\@addtoreset,\@arabic}
+\DoNotIndex{\@badmath,\@centercr,\@cite}
+\DoNotIndex{\@dotsep,\@empty,\@float,\@gobble,\@gobbletwo,\@ignoretrue}
+\DoNotIndex{\@input,\@ixpt,\@m,\@minus,\@mkboth}
+\DoNotIndex{\@ne,\@nil,\@nomath,\@plus,\roman,\@set@topoint}
+\DoNotIndex{\@tempboxa,\@tempcnta,\@tempdima,\@tempdimb}
+\DoNotIndex{\@tempswafalse,\@tempswatrue,\@viipt,\@viiipt,\@vipt}
+\DoNotIndex{\@vpt,\@warning,\@xiipt,\@xipt,\@xivpt,\@xpt,\@xviipt}
+\DoNotIndex{\@xxpt,\@xxvpt,\\,\ ,\addpenalty,\addtolength,\addvspace}
+\DoNotIndex{\advance,\ast,\begin,\begingroup,\bfseries,\bgroup,\box}
+\DoNotIndex{\bullet}
+\DoNotIndex{\cdot,\cite,\CodelineIndex,\cr,\day,\DeclareOption}
+\DoNotIndex{\def,\DisableCrossrefs,\divide,\DocInput,\documentclass}
+\DoNotIndex{\DoNotIndex,\egroup,\ifdim,\else,\fi,\em,\endtrivlist}
+\DoNotIndex{\EnableCrossrefs,\end,\end@dblfloat,\end@float,\endgroup}
+\DoNotIndex{\endlist,\everycr,\everypar,\ExecuteOptions,\expandafter}
+\DoNotIndex{\fbox}
+\DoNotIndex{\filedate,\filename,\fileversion,\fontsize,\framebox,\gdef}
+\DoNotIndex{\global,\halign,\hangindent,\hbox,\hfil,\hfill,\hrule}
+\DoNotIndex{\hsize,\hskip,\hspace,\hss,\if@tempswa,\ifcase,\or,\fi,\fi}
+\DoNotIndex{\ifhmode,\ifvmode,\ifnum,\iftrue,\ifx,\fi,\fi,\fi,\fi,\fi}
+\DoNotIndex{\input}
+\DoNotIndex{\jobname,\kern,\leavevmode,\let,\leftmark}
+\DoNotIndex{\list,\llap,\long,\m@ne,\m@th,\mark,\markboth,\markright}
+\DoNotIndex{\month,\newcommand,\newcounter,\newenvironment}
+\DoNotIndex{\NeedsTeXFormat,\newdimen}
+\DoNotIndex{\newlength,\newpage,\nobreak,\noindent,\null,\number}
+\DoNotIndex{\numberline,\OldMakeindex,\OnlyDescription,\p@}
+\DoNotIndex{\pagestyle,\par,\paragraph,\paragraphmark,\parfillskip}
+\DoNotIndex{\penalty,\PrintChanges,\PrintIndex,\ProcessOptions}
+\DoNotIndex{\protect,\ProvidesClass,\raggedbottom,\raggedright}
+\DoNotIndex{\refstepcounter,\relax,\renewcommand}
+\DoNotIndex{\rightmargin,\rightmark,\rightskip,\rlap,\rmfamily}
+\DoNotIndex{\secdef,\selectfont,\setbox,\setcounter,\setlength}
+\DoNotIndex{\settowidth,\sfcode,\skip,\sloppy,\slshape,\space}
+\DoNotIndex{\symbol,\the,\trivlist,\typeout,\tw@,\undefined,\uppercase}
+\DoNotIndex{\usecounter,\usefont,\usepackage,\vfil,\vfill,\viiipt}
+\DoNotIndex{\viipt,\vipt,\vskip,\vspace}
+\DoNotIndex{\wd,\xiipt,\year,\z@}
+%    \end{macrocode}
+%    We do want an index, using line numbers
+%    \begin{macrocode}
+\EnableCrossrefs
+\CodelineIndex
+%    \end{macrocode}
+%    We use so many \file{docstrip} modules that we set the
+%    \texttt{StandardModuleDepth} counter to 1.
+%    \begin{macrocode}
+\setcounter{StandardModuleDepth}{1}
+%    \end{macrocode}
+%    The following command retrieves the date and version information
+%    from the file.
+%    \begin{macrocode}
+\GetFileInfo{classes.drv}
+%    \end{macrocode}
+%    Some commonly used abbreviations
+% \changes{v1.2w}{1994/12/01}{Use \cs{newcommand*}}
+%    \begin{macrocode}
+\newcommand*{\Lopt}[1]{\textsf {#1}}
+\newcommand*{\file}[1]{\texttt {#1}}
+\newcommand*{\Lcount}[1]{\textsl {\small#1}}
+\newcommand*{\pstyle}[1]{\textsl {#1}}
+%    \end{macrocode}
+%    We also want the full details.
+%    \begin{macrocode}
+\begin{document}
+\DocInput{classes-zh-cn.dtx}
+\PrintIndex
+% ^^A\PrintChanges
+\end{document}
+%</driver>
+%    \end{macrocode}
+%
+% \fi
+%
+% \changes{v1.0d}{1993/11/30}{remove \cs{@in}, made option makeindex
+%    a synonym for option makeidx}
+% \changes{v1.0d}{1993/11/30}{removed \cs{@minus}, \cs{@plus},
+%    \cs{@settopoint}, \cs{@setfontsize}; they are now in the
+%    kernel}
+% \changes{v1.0d}{1993/11/30}{Added use of \cs{NeedsTeXFormat}}
+% \changes{v1.0d}{1993/11/30}{Replaced \cs{bf} with \cs{bfseries};
+%    \cs{rm} with \cs{rmfamily}}
+% \changes{v1.0d}{1993/11/30}{Made equation and eqnarray environments
+%    in the fleqn option up to date with latex.dtx}
+% \changes{v1.0f}{1993/12/08}{Made all lines shorter than 72 characters}
+% \changes{v1.0g}{1993/12/08}{Made change in eqnarray for the fleqn
+%    option, as suggested by Rainer.}
+% \changes{v1.0h}{1993/12/18}{Made the definitions of the font- and
+%    size-changing commands use \cs{renew} rather than \cs{new}.
+%    Defined the float parameters with \cs{renewcommand} rather than
+%    \cs{newcommand}.  Corrected some typos in the fleqn option.
+%    Replaced two occurrences of -\cs{@secpenalty} by
+%    \cs{@secpenalty}.  ASAJ.}
+% \changes{v1.0j}{1993/12/20}{Added \cs{ProvidesFile} to size files}
+% \changes{v1.0j}{1993/12/10}{Use \cs{cmd} in change entries}
+% \changes{v1.0k}{1994/01/09}{Removed some typos/bugs}
+% \changes{v1.0l}{1994/01/11}{add the extension to the names of the
+%     files}
+% \changes{v1.0l}{1994/01/10}{Changed version numbering; moved leqno
+%    and fleqn options to an external file.}
+% \changes{v1.0n}{1994/01/19}{Removed code for makeidx option and made
+%    it a separate package; removed use of \cs{setlength} from list
+%    parameters.}
+% \changes{v1.0o}{1994/01/31}{Small documentation changes}
+% \changes{v1.0q}{1994/02/16}{Small documentation changes}
+% \changes{v1.1a}{1994/03/12}{Removed \cs{typeout} messages}
+% \changes{v1.1f}{1994/04/15}{Inserted forgotten line break}
+% \changes{v1.2a}{1994/03/17}{Added openright option. (LL)}
+% \changes{v1.2b}{1994/03/17}{Added the \ldots{}matter commands. (LL)}
+% \changes{v1.2c}{1994/03/17}{Fixed page numbering in titlepage
+%    env. (LL)}
+% \changes{v1.2d}{1994/04/11}{Checked the file for long lines and
+%    wrapped them when necessary; made a slight implementation
+%    modification to the openright and openany options.}
+% \changes{v1.2i}{1994/04/28}{Use LaTeX instead of LaTeX2e in messages}
+% \changes{v1.2j}{1994/05/01}{Removed the use of \cs{fileversion}
+%    c.s.}
+% \changes{v1.2l}{1994/05/11}{changed some \cs{changes} entries}
+% \changes{v1.2m}{1994/05/12}{Forgot a few entries}
+% \changes{v1.2o}{1994/05/24}{Changed file information}
+% \changes{v1.2p}{1994/05/27}{Moved identification and driver to the
+%    front of the file}
+% \changes{v1.2t}{1994/06/22}{Rephrased a few sentences to prevent
+%    overfull hboxes}
+% \changes{v1.2v}{1994/12/01}{Made the oneside option work for the
+%    book class}
+% \changes{v1.2w}{1994/12/01}{Use \cs{newcommand*} for commands with
+%    arguments}
+% \changes{v1.2z}{1995/05/16}{Always use \cs{cs} in \cs{changes}
+%    entries}
+% \changes{v1.3a}{1995/05/17}{Replaced all \cs{hbox to} by \cs{hb@xt@}}
+% \changes{v1.3d}{1995/06/05}{Replaced all \cs{uppercase} by
+%    \cs{MakeUppercase}}
+% \changes{v1.3l}{1995/10/20}{Disabled in compatibility mode all
+%    options that are new in \LaTeXe.}
+% \changes{v1.3v}{1997/06/16}{Documentation fixes.}
+% \changes{v1.4j}{2019/08/27}{Various commands made robust}
+% \changes{v1.4m}{2020/04/10}{(JLB) prettyprinting the code}
+%
+%
+% \title{{\Huge \textbf{\LaTeXe}}\ {\Huge \Heiti 的标准文档类}\ \thanks{该文件的版本号为 \fileversion，最新修订日期为 \filedate。}}
+%
+% \author{%
+% Copyright (C) 1992 by Leslie Lamport \and
+% Copyright (C) 1994-2021 by Frank Mittelbach, \and Johannes Braams\ 和\
+%                            \LaTeX\,项目团队\\[6pt]赣医一附院神经科\ \ \ 黄旭华\ \ \ \ \ \ \ \ 翻译
+% }
+% \date{\filedate}
+% \MaintainedByLaTeXTeam{latex}
+% \maketitle
+% \tableofcontents
+%
+%\newpage
+% \MaybeStop{}    ^^A
+%
+% \section{{\textbf{\sc docstrip}}\ {\heiti 模块}}
+%
+% 实现(implementation)中使用了以下模块(modules)来指导 {\sc docstrip} 生成外部文件(external files)：
+% \begin{center}
+% \begin{tabular}{rl}
+    \hlinew{1.2pt}
+%   {\heiti 模块}& {\heiti 生成的外部文件}\\ \hlinew{0.7pt}
+%   article & 生成 article 文档类\\
+%   report  & 生成 report 文档类\\
+%   size10  & 生成 10pt 的类选项\\
+%   size11  & 生成 11pt 的类选项\\
+%   size12  & 生成 12pt 的类选项\\
+%   book    & 生成 book 文档类\\
+%   bk10    & 生成 10pt 的 book 类选项\\
+%   bk11    & 生成 11pt 的 book 类选项\\
+%   bk12    & 生成 12pt 的 book 类选项\\
+%   driver  & 生成文档驱动程序(documentation driver)文件 \\\hlinew{1.2pt}
+% \end{tabular}
+% \end{center}
+%
+%\newpage
+%
+% \section{\heiti 初始代码}
+%
+%    在本节中，我们定义了一些稍后使用的命令。
+%
+% \begin{macro}{\@ptsize}
+%    这个控制序列(control sequence)用于存储我们正在排版的点大小(pointsize)的第二个数字(second digit)。因此，通常它的值是 0、1 或 2 中的一个。
+%    \begin{macrocode}
+%<*article|report|book>
+\newcommand\@ptsize{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\if@restonecol}
+%    当文档必须打印成两栏(columns)时，我们有时不得不临时切换到一栏。这个开关用于记住切换回来。
+%    \begin{macrocode}
+\newif\if@restonecol
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\if@titlepage}
+%    用于指示是否必须制作标题页(titlepage)的开关。对于 article 文档类，默认设置是不创建单独的标题页(separate titlepage)。
+%    \begin{macrocode}
+\newif\if@titlepage
+%<article>\@titlepagefalse
+%<!article>\@titlepagetrue
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\if@openright}
+%    用于指示章(chapters)是否必须从右页(right-hand page)开始的开关。report 类的默认值为 no； book 类的默认值为 yes。
+%    \begin{macrocode}
+%<!article>\newif\if@openright
+%    \end{macrocode}
+% \end{macro}
+%
+% \changes{v1.3k}{1995/08/27}{Macro \cs{if@openbib} removed}
+%
+% \begin{macro}{\if@mainmatter}
+% \changes{v1.2v}{1994/12/01}{Moved the allocation of
+%    \cs{if@mainmatter} here}
+%
+%    |\if@mainmatter| 开关，仅在 book 文档类中可用，表示我们是否正在处理 book 中的主要材料(main material)。
+%    \begin{macrocode}
+%<book>\newif\if@mainmatter \@mainmattertrue
+%    \end{macrocode}
+%  \end{macro}
+%
+%\newpage
+%
+% \section{\heiti 选项的声明}
+%
+%
+% \subsection[设定纸张尺寸]{\heiti 设定纸张尺寸}
+%
+%    变量 |\paperwidth|(纸宽度) 和 |\paperheight|(纸高度) 应反映剪裁(trimming)后的实际纸张尺寸(physical paper size)。
+%    对于台式打印机(desk printer)输出，这通常是真正的纸张尺寸，因为没有后期处理(post-processing)。
+%    真正的书籍制作(book production)类(glasses)可能会添加其他纸张尺寸，并额外制作裁剪标记(crop marks for trimming)。
+%    在兼容模式(compatibility mode)中，这些(和一些后续)选项是禁用的，因为它们在 \LaTeX 2.09\ 中不存在。
+% \changes{v1.0g}{1993/12/09}{Removed typo, A4 is not 279 mm high}
+%    \begin{macrocode}
+\if@compatibility\else
+  \DeclareOption{a4paper}
+     {\setlength\paperheight {297mm}%
+      \setlength\paperwidth  {210mm}}
+  \DeclareOption{a5paper}
+     {\setlength\paperheight {210mm}%
+      \setlength\paperwidth  {148mm}}
+  \DeclareOption{b5paper}
+     {\setlength\paperheight {250mm}%
+      \setlength\paperwidth  {176mm}}
+  \DeclareOption{letterpaper}
+     {\setlength\paperheight {11in}%
+      \setlength\paperwidth  {8.5in}}
+  \DeclareOption{legalpaper}
+     {\setlength\paperheight {14in}%
+      \setlength\paperwidth  {8.5in}}
+  \DeclareOption{executivepaper}
+     {\setlength\paperheight {10.5in}%
+      \setlength\paperwidth  {7.25in}}
+%    \end{macrocode}
+%
+%    假设给出了肖像纸(portrait paper)的尺寸，选项 \Lopt{landscape}\ 切换 |\paperheight| 和 |\paperwidth| 的值。
+%    \begin{macrocode}
+  \DeclareOption{landscape}
+     {\setlength\@tempdima   {\paperheight}%
+      \setlength\paperheight {\paperwidth}%
+      \setlength\paperwidth  {\@tempdima}}
+\fi
+%    \end{macrocode}
+%
+% \subsection[选择类型尺寸]{\heiti 选择类型尺寸}
+%
+%    通过定义 |\@ptsize| 来处理类型尺寸选项(type size options)，它包含所讨论尺寸的最后一位数字，
+%    并在 |\ifcase| 语句(statements)上进行分支(branching)。由于历史原因，这样做是为了与使
+%    用 |\@ptsize| 变量选择特殊操作(special actions)的其他包保持兼容(compatible)。
+%    这使得小于 10pt 的尺寸选项(size options)的声明变得困难，尽管可以使用 \texttt{9}\ 和 \texttt{8}，
+%    前提是类(class)不会同时定义 \Lopt{8pt}\ 和 \Lopt{18pt}\ 选项。
+%
+%    \begin{macrocode}
+\if@compatibility
+  \renewcommand\@ptsize{0}
+\else
+  \DeclareOption{10pt}{\renewcommand\@ptsize{0}}
+\fi
+\DeclareOption{11pt}{\renewcommand\@ptsize{1}}
+\DeclareOption{12pt}{\renewcommand\@ptsize{2}}
+%    \end{macrocode}
+%
+%
+%  \subsection[双面或单面打印]{\heiti 双面或单面打印}
+%
+%    对于双面打印(two-sided printing)，我们使用开关 |\if@twoside|。此外，我们还必须设置 |\if@mparswitch|，
+%    以便将任何页边距段落(margin paragraphs)放入外部页边距(outside margin)中。
+%    \begin{macrocode}
+\if@compatibility\else
+  \DeclareOption{oneside}{\@twosidefalse \@mparswitchfalse}
+\fi
+\DeclareOption{twoside}{\@twosidetrue  \@mparswitchtrue}
+%    \end{macrocode}
+%
+%
+%  \subsection[draft\ 选项]{\textbf{draft}\ {\heiti 选项}}
+%
+%    如果用户要求 \Lopt{draft}(草稿)，我们会显示任何溢框(overfull boxes)。我们可能会
+%    在这个选项中添加一些更有趣的东西。
+%    \begin{macrocode}
+\DeclareOption{draft}{\setlength\overfullrule{5pt}}
+\if@compatibility\else
+  \DeclareOption{final}{\setlength\overfullrule{0pt}}
+\fi
+%    \end{macrocode}
+%
+%  \subsection[titlepage\ 选项]{\textbf{titlepage}\ {\heiti 选项}}
+%    一篇 article(文章)通常没有单独的标题页(separate titlepage)，但是用户可以请求一个。
+%    \begin{macrocode}
+\DeclareOption{titlepage}{\@titlepagetrue}
+\if@compatibility\else
+  \DeclareOption{notitlepage}{\@titlepagefalse}
+\fi
+%    \end{macrocode}
+%
+%  \subsection[openright\ 选项]{\textbf{openright}\ {\heiti 选项}}
+%    此选项确定章(chapter)是否必须从请求的右侧页面(right-hand page)开始。
+%    \begin{macrocode}
+%<!article>\if@compatibility
+%<book>\@openrighttrue
+%<!article>\else
+%<!article>\DeclareOption{openright}{\@openrighttrue}
+%<!article>\DeclareOption{openany}{\@openrightfalse}
+%<!article>\fi
+%    \end{macrocode}
+%
+%  \subsection[双栏打印]{\heiti 双栏打印}
+%
+%    通过该开关再次实现了双栏和单栏打印。
+%    \begin{macrocode}
+\if@compatibility\else
+  \DeclareOption{onecolumn}{\@twocolumnfalse}
+\fi
+\DeclareOption{twocolumn}{\@twocolumntrue}
+%    \end{macrocode}
+%
+%  \subsection[公式编号在左侧]{\heiti 公式编号在左侧}
+%
+%    \Lopt{leqno}\ 选项可用于获取公式左侧的公式编号(equation numbers)。它加载在构建
+%    格式时从内核文件(kernel files)自动生成的代码。如果公式编号确实获得了特殊的格式(special formatting)，
+%    那么类将需要显式地(explicitly)提供代码，而不是使用内核文件(kernel file)。
+%    \begin{macrocode}
+\DeclareOption{leqno}{\input{leqno.clo}}
+%    \end{macrocode}
+%
+%  \subsection[左对齐显示]{\heiti 左对齐显示}
+%
+%    \Lopt{fleqn}\ 选项重新定义了所显示的数学环境(math environments)，使其显示为左对齐(flush left)，
+%    并从左边距(left margin)缩进 |\mathindent|。它加载在构建格式时从内核文件自动生成的代码。
+% \changes{v1.0h}{1993/12/18}{Corrected some typos.  ASAJ.}
+%    \begin{macrocode}
+\DeclareOption{fleqn}{\input{fleqn.clo}}
+%    \end{macrocode}
+%
+% \subsection[打开参考文献]{\heiti 打开参考文献}
+%
+%    \Lopt{openbib}\ 选项生成“open(打开)”参考文献样式(bibliography style)，其中每个块(block)从一个新行开始，
+%    块中的后续行缩进 |\bibindent|。
+% \changes{v1.3k}{1995/08/27}{openbib option reimplemented}
+%    \begin{macrocode}
+\DeclareOption{openbib}{%
+%    \end{macrocode}
+%    首先，在参考文献环境(bibliography environment)中添加一些钩子(hook)。
+%    \begin{macrocode}
+  \AtEndOfPackage{%
+    \renewcommand\@openbib@code{%
+      \advance\leftmargin\bibindent
+      \itemindent -\bibindent
+      \listparindent \itemindent
+      \parsep \z@
+      }%
+%    \end{macrocode}
+%    另外，|\newblock| 的定义被覆盖。
+%    \begin{macrocode}
+    \renewcommand\newblock{\par}}%
+}
+%    \end{macrocode}
+%
+%
+%\newpage
+%
+% \section{\heiti 执行选项}
+%
+%    在这里，我们执行(execute)默认选项来初始化(initialize)某些变量。注意，文档类“book”总是使用双面打印(two sided printing)。
+%    \begin{macrocode}
+%<*article>
+\ExecuteOptions{letterpaper,10pt,oneside,onecolumn,final}
+%</article>
+%<*report>
+\ExecuteOptions{letterpaper,10pt,oneside,onecolumn,final,openany}
+%</report>
+%<*book>
+\ExecuteOptions{letterpaper,10pt,twoside,onecolumn,final,openright}
+%</book>
+%    \end{macrocode}
+%
+%    |\ProcessOptions| 命令会为每个声明的 \Lopt{FOO}\ 选项执行代码，用户在他的 |\documentclass| 命令中
+%    为其键入了 \Lopt{FOO}\ 选项。对于他键入的每个未声明的 \Lopt{BAR}\ 选项，会被假定为全局选项(global option)。
+%    所有选项都将作为文档选项(document options)传递给文档导言中的任何 |\usepackage| 命令。
+%    \begin{macrocode}
+\ProcessOptions
+%    \end{macrocode}
+%    既然所有选项都已执行，我们就可以加载所选的类选项文件(class option file)，其中包含
+%    所有尺寸相关的代码(size dependent code)。
+%    \begin{macrocode}
+%<!book>\input{size1\@ptsize.clo}
+%<book>\input{bk1\@ptsize.clo}
+%</article|report|book>
+%    \end{macrocode}
+%
+% \newpage
+%
+%  \section{\heiti 加载宏包}
+%
+%  标准类文件(standard class files)不加载其他宏包(packages)。
+%
+%
+% \section{\heiti 文档布局}
+% \label{sec:classes:maincode}
+%
+%  在本节中，我们最终将讨论令人讨厌的排印细节(typographical details)。
+%
+% \subsection[字体]{\heiti 字体}
+%
+%    \LaTeX\ 提供了用户命令(user commands)来更改字体的尺寸(size)，它是相对于“主(main)”尺寸的。
+%    每个相对尺寸变化的(relative size changing)命令 |\size| 执行命令
+%    |\@setfontsize||\size|\meta{font-size}\meta{baselineskip}，其中的：
+%
+%    \begin{description}
+%    \item[\meta{font-size}] 从现在开始使用的字体的绝对尺寸(absolute size)。
+%
+%    \item[\meta{baselineskip}] 所选字体尺寸的 |\baselineskip| 的正常值。
+%    (实际值为 |\baselinestretch| * \meta{baselineskip})
+%    \end{description}
+%
+%    \LaTeX{}\ 内核中定义的许多命令缩短了(shorten)以下定义，并一直在使用。他们是：
+% \begin{center}
+% \begin{tabular}{ll@{\qquad}ll@{\qquad}ll}
+%  \verb=\@vpt= & 5 & \verb=\@vipt= & 6 & \verb=\@viipt= & 7 \\
+%  \verb=\@viiipt= & 8 & \verb=\@ixpt= & 9 & \verb=\@xpt= & 10 \\
+%  \verb=\@xipt= & 10.95 & \verb=\@xiipt= & 12 & \verb=\@xivpt= & 14.4\\
+%  ...
+%  \end{tabular}
+%  \end{center}
+%
+% \begin{macro}{\normalsize}
+% \begin{macro}{\@normalsize}
+% \changes{v1.0o}{1994/01/31}{\cs{@normalsize} now defined in the
+%    kernel}
+%
+%    主尺寸(main size)的用户级命令(user level command)为 |\normalsize|。在内部，
+%    当 \LaTeX{}\ 引用主尺寸时，它使用 |\@normalsize|。
+%    如果 |\normalsize| 从其默认定义(default definition)被重新定义(仅发出错误消息) ，
+%    那么 |\@normalsize| 将被定义为 |\normalsize|。否则 |\@normalsize| 只会选择一个10pt/12pt 的尺寸。
+%
+%    |\normalsize| 宏还为 |\abovedisplayskip|、|\abovedisplayshortskip| 和 |\belowdisplayshortskip| 设置新值。
+%
+% \changes{v1.0e}{1993/12/07}{\cs{normalsize} doesn't exist, so use
+%    \cs{newcommand}}
+% \changes{v1.0h}{1993/12/18}{\cs{normalsize} is now defined in the
+%    kernel, so use \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+%<*10pt|11pt|12pt>
+\renewcommand\normalsize{%
+%<*10pt>
+   \@setfontsize\normalsize\@xpt\@xiipt
+   \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+%</10pt>
+%<*11pt>
+   \@setfontsize\normalsize\@xipt{13.6}%
+   \abovedisplayskip 11\p@ \@plus3\p@ \@minus6\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6.5\p@ \@plus3.5\p@ \@minus3\p@
+%</11pt>
+%<*12pt>
+   \@setfontsize\normalsize\@xiipt{14.5}%
+   \abovedisplayskip 12\p@ \@plus3\p@ \@minus7\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6.5\p@ \@plus3.5\p@ \@minus3\p@
+%</12pt>
+%    \end{macrocode}
+%    |\belowdisplayskip| 始终等于 |\abovedisplayskip|。第一级列表( first level list)的
+%    参数总是由 |\@listI| 给出。
+%    \begin{macrocode}
+   \belowdisplayskip \abovedisplayskip
+   \let\@listi\@listI}
+%    \end{macrocode}
+%
+%    We initially choose the normalsize font.
+%    \begin{macrocode}
+\normalsize
+%    \end{macrocode}
+%    我们使用 |\MakeRobust| 而不是上面的 |\DeclareRobustCommand| 来避免重新定义的
+%    日志条目(log entry)。但如果我们在回滚情况(rollback situation)下运行(2015年之前)，我们不会触及它。
+% \changes{v1.4k}{2019/10/25}{Roll back handling (gh/201)}
+%    \begin{macrocode}
+\ifx\MakeRobust\@undefined \else
+    \MakeRobust\normalsize
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\small}
+%    这类似于 |\normalsize|。
+% \changes{v1.0h}{1993/12/18}{\cs{small} is now defined in the kernel,
+%    so use \cs{renewcommand}.  ASAJ.}
+% \changes{v1.2e}{1994/04/14}{\cs{small} is no longer defined in the
+%    kernel; use \cs{newcommand}}
+%    \begin{macrocode}
+\DeclareRobustCommand\small{%
+%<*10pt>
+   \@setfontsize\small\@ixpt{11}%
+   \abovedisplayskip 8.5\p@ \@plus3\p@ \@minus4\p@
+   \abovedisplayshortskip \z@ \@plus2\p@
+   \belowdisplayshortskip 4\p@ \@plus2\p@ \@minus2\p@
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 4\p@ \@plus2\p@ \@minus2\p@
+               \parsep 2\p@ \@plus\p@ \@minus\p@
+               \itemsep \parsep}%
+%</10pt>
+%<*11pt>
+   \@setfontsize\small\@xpt\@xiipt
+   \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 6\p@ \@plus2\p@ \@minus2\p@
+               \parsep 3\p@ \@plus2\p@ \@minus\p@
+               \itemsep \parsep}%
+%</11pt>
+%<*12pt>
+   \@setfontsize\small\@xipt{13.6}%
+   \abovedisplayskip 11\p@ \@plus3\p@ \@minus6\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6.5\p@ \@plus3.5\p@ \@minus3\p@
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 9\p@ \@plus3\p@ \@minus5\p@
+               \parsep 4.5\p@ \@plus2\p@ \@minus\p@
+               \itemsep \parsep}%
+%</12pt>
+   \belowdisplayskip \abovedisplayskip
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\footnotesize}
+%    这类似于 |\normalsize|。
+% \changes{v1.0h}{1993/12/18}{\cs{footnotesize} is now defined in the
+%    kernel, so use \cs{renewcommand}.  ASAJ.}
+% \changes{v1.2e}{1994/04/14}{use \cs{newcommand} again}
+%    \begin{macrocode}
+\DeclareRobustCommand\footnotesize{%
+%<*10pt>
+   \@setfontsize\footnotesize\@viiipt{9.5}%
+   \abovedisplayskip 6\p@ \@plus2\p@ \@minus4\p@
+   \abovedisplayshortskip \z@ \@plus\p@
+   \belowdisplayshortskip 3\p@ \@plus\p@ \@minus2\p@
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 3\p@ \@plus\p@ \@minus\p@
+               \parsep 2\p@ \@plus\p@ \@minus\p@
+               \itemsep \parsep}%
+%</10pt>
+%<*11pt>
+   \@setfontsize\footnotesize\@ixpt{11}%
+   \abovedisplayskip 8\p@ \@plus2\p@ \@minus4\p@
+   \abovedisplayshortskip \z@ \@plus\p@
+   \belowdisplayshortskip 4\p@ \@plus2\p@ \@minus2\p@
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 4\p@ \@plus2\p@ \@minus2\p@
+               \parsep 2\p@ \@plus\p@ \@minus\p@
+               \itemsep \parsep}%
+%</11pt>
+%<*12pt>
+   \@setfontsize\footnotesize\@xpt\@xiipt
+   \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 6\p@ \@plus2\p@ \@minus2\p@
+               \parsep 3\p@ \@plus2\p@ \@minus\p@
+               \itemsep \parsep}%
+%</12pt>
+   \belowdisplayskip \abovedisplayskip
+}
+%</10pt|11pt|12pt>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\scriptsize}
+% \begin{macro}{\tiny}
+% \begin{macro}{\large}
+% \begin{macro}{\Large}
+% \begin{macro}{\LARGE}
+% \begin{macro}{\huge}
+% \begin{macro}{\Huge}
+%    这些宏(macros)都比以前的宏简单得多，它们只选择一个新的字体尺寸(fontsize)，但只
+%    保留显示(displays)和列表(lists)的参数。
+% \changes{v1.0h}{1993/12/18}{These are now defined in the kernel,
+%    so use \cs{renewcommand}.  ASAJ.}
+% \changes{v1.2e}{1994/04/14}{use \cs{newcommand} again}
+%    \begin{macrocode}
+%<*10pt>
+\DeclareRobustCommand\scriptsize{\@setfontsize\scriptsize\@viipt\@viiipt}
+\DeclareRobustCommand\tiny{\@setfontsize\tiny\@vpt\@vipt}
+\DeclareRobustCommand\large{\@setfontsize\large\@xiipt{14}}
+\DeclareRobustCommand\Large{\@setfontsize\Large\@xivpt{18}}
+\DeclareRobustCommand\LARGE{\@setfontsize\LARGE\@xviipt{22}}
+\DeclareRobustCommand\huge{\@setfontsize\huge\@xxpt{25}}
+\DeclareRobustCommand\Huge{\@setfontsize\Huge\@xxvpt{30}}
+%</10pt>
+%<*11pt>
+\DeclareRobustCommand\scriptsize{\@setfontsize\scriptsize\@viiipt{9.5}}
+\DeclareRobustCommand\tiny{\@setfontsize\tiny\@vipt\@viipt}
+\DeclareRobustCommand\large{\@setfontsize\large\@xiipt{14}}
+\DeclareRobustCommand\Large{\@setfontsize\Large\@xivpt{18}}
+\DeclareRobustCommand\LARGE{\@setfontsize\LARGE\@xviipt{22}}
+\DeclareRobustCommand\huge{\@setfontsize\huge\@xxpt{25}}
+\DeclareRobustCommand\Huge{\@setfontsize\Huge\@xxvpt{30}}
+%</11pt>
+%<*12pt>
+\DeclareRobustCommand\scriptsize{\@setfontsize\scriptsize\@viiipt{9.5}}
+\DeclareRobustCommand\tiny{\@setfontsize\tiny\@vipt\@viipt}
+\DeclareRobustCommand\large{\@setfontsize\large\@xivpt{18}}
+\DeclareRobustCommand\Large{\@setfontsize\Large\@xviipt{22}}
+\DeclareRobustCommand\LARGE{\@setfontsize\LARGE\@xxpt{25}}
+\DeclareRobustCommand\huge{\@setfontsize\huge\@xxvpt{30}}
+\let\Huge=\huge
+%</12pt>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%
+% \subsection[分段]{\heiti 分段}
+%
+% \begin{macro}{\lineskip}
+% \begin{macro}{\normallineskip}
+%    当两行(lines)过于接近时，这些参数控制 \TeX\ 的行为。
+%    \begin{macrocode}
+%<*article|report|book>
+\setlength\lineskip{1\p@}
+\setlength\normallineskip{1\p@}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\baselinestretch}
+%    这用作 |\baselineskip| 的乘数(multiplier)。默认设置是{\kaiti 不}拉伸(stretch)基线(baselines)。
+%    请注意，如果此命令未解析为“空(empty)”，则会忽略 |\baselineskip| 规范中的任
+%    何 \texttt{plus}\ 和 \texttt{minus}\ 部分。
+%    \begin{macrocode}
+\renewcommand\baselinestretch{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\parskip}
+% \begin{macro}{\parindent}
+%    |\parskip| 在段落之间提供额外的垂直间距(vertical space)，|\parindent| 是段落
+%    缩进(paragraph indentation)的宽度。|\parindent| 的值取决于我们是否处于双栏模式(two-column mode)。
+% \changes{v1.0m}{1994/01/12}{\cs{parindent} should be different,
+%    depending on the pointsize}
+%    \begin{macrocode}
+\setlength\parskip{0\p@ \@plus \p@}
+%</article|report|book>
+%<*10pt|11pt|12pt>
+\if@twocolumn
+  \setlength\parindent{1em}
+\else
+%<10pt>  \setlength\parindent{15\p@}
+%<11pt>  \setlength\parindent{17\p@}
+%<12pt>  \setlength\parindent{1.5em}
+\fi
+%</10pt|11pt|12pt>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%  \begin{macro}{\smallskipamount}
+%  \begin{macro}{\medskipamount}
+%  \begin{macro}{\bigskipamount}
+%    这三个参数的值是在 \LaTeX\ 内核中设置的。根据指定的尺寸选项(size option)，它们可能会有所不同。
+%    但由于无论尺寸选项如何，它们始终具有相同的值，因此我们不会更改它们以保持
+%    与 \LaTeX~2.09\ 和旧版本的 \LaTeXe\ 兼容。
+% \changes{v1.3n}{1995/10/29}{Added setting the values of
+%    \cs{...skipamount}}
+%    \begin{macrocode}
+%<*10pt|11pt|12pt>
+\setlength\smallskipamount{3\p@ \@plus 1\p@ \@minus 1\p@}
+\setlength\medskipamount{6\p@ \@plus 2\p@ \@minus 2\p@}
+\setlength\bigskipamount{12\p@ \@plus 4\p@ \@minus 4\p@}
+%</10pt|11pt|12pt>
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%  \end{macro}
+%
+% \begin{macro}{\@lowpenalty}
+% \begin{macro}{\@medpenalty}
+% \begin{macro}{\@highpenalty}%
+%    命令 |\nopagebreak| 和 |\nolinebreak| 设置了惩罚(penalty)，以阻止这些中断(breaks)在其放置点发生。
+%    他们使用 |\@lowpenalty|、|\@medpenalty| 或 |\@highpenalty|，这取决于他们的参数。
+%    \begin{macrocode}
+%<*article|report|book>
+\@lowpenalty   51
+\@medpenalty  151
+\@highpenalty 301
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\clubpenalty}
+% \begin{macro}{\widowpenalty}
+%    这些惩罚(penalty)用于阻止段末短行(club lines)和寡行(widow lines)\footnote{[译者注]寡行(widow lines)：指的是
+%    在新页面顶部单独出现的段落的最后一行。(这一行来自于上一个页面的段落)}。因为我们使用它们的默认值，所以这里只显示它们，注释掉了。
+%    \begin{macrocode}
+% \clubpenalty  150
+% \widowpenalty 150
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\displaywidowpenalty}
+% \begin{macro}{\predisplaypenalty}
+% \begin{macro}{\postdisplaypenalty}
+%    在数学显示(math display)前阻止寡行(widow lines)(但不要太多)，禁止在显示前直接中断(breaking)。
+%    允许在显示后中断而不受惩罚(penalty)。再次使用默认值，因此我们只在此处显示它们。
+%    \begin{macrocode}
+% \displaywidowpenalty 50
+% \predisplaypenalty   10000
+% \postdisplaypenalty  0
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\interlinepenalty}
+%    允许在段落中间分页(breaking of a page)。
+%    \begin{macrocode}
+% \interlinepenalty 0
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\brokenpenalty}
+%    我们允许在用连字符连接的行(hyphenated line)之后分页。
+% \changes{v1.1a}{1994/03/12}{Show correct default which is 100}
+%    \begin{macrocode}
+% \brokenpenalty 100
+%</article|report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection[页面布局]{\heiti 页面布局}
+%
+%    所有页边距尺寸(margin dimensions)均从距页面顶部和左侧(lefthand)一英寸的点开始测量。
+%
+% \subsubsection[垂直间距]{\heiti 垂直间距}
+%
+% \begin{macro}{\headheight}
+% \begin{macro}{\headsep}
+% \begin{macro}{\topskip}
+%    |\headheight| 栏外标题(running head，即短标题)所在的盒子的高度。|\headsep| 是栏外标题的底部
+%    和文本顶部之间的距离。|\topskip| 是页面第一行的 |\baselineskip|；如果值为 0pt，
+%    那么 \LaTeX\ 的输出程序(output routine)将无法正常工作，因此不要这样做！
+%    \begin{macrocode}
+%<*10pt|11pt|12pt>
+\setlength\headheight{12\p@}
+%<!bk>\setlength\headsep   {25\p@}
+%<10pt&bk>\setlength\headsep   {.25in}
+%<11pt&bk>\setlength\headsep   {.275in}
+%<12pt&bk>\setlength\headsep   {.275in}
+%<10pt>\setlength\topskip   {10\p@}
+%<11pt>\setlength\topskip   {11\p@}
+%<12pt>\setlength\topskip   {12\p@}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\footskip}
+%    栏外脚注(running footer)所在盒子的基线(baseline)到最后一行文本基线之间的距离由 |\footskip| 控制。
+%    \begin{macrocode}
+%<!bk>\setlength\footskip{30\p@}
+%<10pt&bk>\setlength\footskip{.35in}
+%<11pt&bk>\setlength\footskip{.38in}
+%<12pt&bk>\setlength\footskip{30\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\maxdepth}
+% \changes{v1.2k}{1994/05/06}{Added setting of \cs{maxdepth} and
+%    \cs{@maxdepth}}
+% \changes{v1.3j}{1995/08/16}{Take setting of
+%    \cs{@maxdepth} out again}
+%    \TeX\ 原语寄存器(primitive register) |\maxdepth| 有一个类似于 |\topskip| 的函数。
+%    |\@maxdepth| 寄存器应该始终包含 |\maxdepth| 的副本。这是通过在 |\begin{document}| 处
+%    的内部设置它来实现的。在plain \TeX\ 和 \LaTeX~2.09\ 中，|\maxdepth| 都有一个固定的值\texttt{4pt}；
+%    在原生 \LaTeX2e\ 模式(native \LaTeX2e\ mode)中，我们让值取决于字体尺寸(typesize)。我们将其设置
+%    为|\maxdepth| $+$ |\topskip| $=$ typesize $\times 1.5$。碰巧，在这些类中，|\topskip| 等于 typesize，
+%    因此我们将 |\maxdepth| 设置为 |\topskip| 值的一半。
+%    \begin{macrocode}
+\if@compatibility \setlength\maxdepth{4\p@} \else
+  \setlength\maxdepth{.5\topskip} \fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection[文本的尺寸]{\heiti 文本的尺寸}
+%
+% \begin{macro}{\textwidth}
+%    当我们处于兼容模式(compatibility mode)时，我们必须确保打印区域的尺寸(dimensions of the printed area)
+%    与用户习惯看到的尺寸没有差异。
+%
+%    \begin{macrocode}
+\if@compatibility
+  \if@twocolumn
+    \setlength\textwidth{410\p@}
+  \else
+%<10pt&!bk>    \setlength\textwidth{345\p@}
+%<11pt&!bk>    \setlength\textwidth{360\p@}
+%<12pt&!bk>    \setlength\textwidth{390\p@}
+%<10pt&bk>    \setlength\textwidth{4.5in}
+%<11pt&bk>    \setlength\textwidth{5in}
+%<12pt&bk>    \setlength\textwidth{5in}
+  \fi
+%    \end{macrocode}
+%    当我们不是处于兼容模式时，我们可以设置一些不同的尺寸(dimensions)，例如考虑纸张尺寸(paper size)。
+%    \begin{macrocode}
+\else
+%    \end{macrocode}
+%    首先，我们计算所选纸张上允许的最大 |\textwidth|，并将其存储在 |\@tempdima| 中。然后，
+%    我们在 |\@tempdimb| 中存储大约 60--70 个字符的行长度(length of a line)。当使用
+%    计算机现代字体(Computer Modern fonts)时，给出的值或多或少是合适的。
+% \changes{v1.1a}{1994/03/12}{Have old values for width in native mode}
+%    \begin{macrocode}
+  \setlength\@tempdima{\paperwidth}
+  \addtolength\@tempdima{-2in}
+%<10pt>  \setlength\@tempdimb{345\p@}
+%<11pt>  \setlength\@tempdimb{360\p@}
+%<12pt>  \setlength\@tempdimb{390\p@}
+%    \end{macrocode}
+%
+%    现在我们可以设置 |\textwidth|，这取决于我们将设置一栏还是两栏。
+%
+%    在双栏模式(two-column mode)中，每一{\kaiti 栏}的宽度不应
+%    超过 |\@tempdimb|(例如，这可能发生在 \textsc{a3}\ 纸张上)。
+%    \begin{macrocode}
+  \if@twocolumn
+    \ifdim\@tempdima>2\@tempdimb\relax
+      \setlength\textwidth{2\@tempdimb}
+    \else
+      \setlength\textwidth{\@tempdima}
+    \fi
+%    \end{macrocode}
+%
+%    在单栏模式(one-column mode)中，文本的宽度不应超过最小纸张宽度(paperwidth)(页边空白为-2英寸)
+%    和由字符数(number of characters)定义的一行的最大长度。
+%    \begin{macrocode}
+  \else
+    \ifdim\@tempdima>\@tempdimb\relax
+      \setlength\textwidth{\@tempdimb}
+    \else
+      \setlength\textwidth{\@tempdima}
+    \fi
+  \fi
+\fi
+%    \end{macrocode}
+%
+%    这里我们稍微修改一下文本的宽度(width of the text)，使之成为一个完整的点数(number of points)。
+%    \begin{macrocode}
+\if@compatibility\else
+  \@settopoint\textwidth
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\textheight}
+%    现在我们已经计算了文本的宽度，我们必须考虑高度(height)。|\textheight| 是文本的高度，包括
+%    脚注(footnotes)和图形(figures)，不包括栏外标题(running head)和栏外脚注(running foot)。
+%
+%    首先确保兼容模式(compatibility mode)的尺寸(dimensions)与 \LaTeX2.09\ 的尺寸相同。
+%    行数的计算方法是旧的 |\textheight| 减去 |\topskip| 的下限(floor)，再除以 |\baselineskip| 得到
+%    的 |\normalsize|。旧的 |\textheight| 值是 528pt
+%
+%    \begin{macrocode}
+\if@compatibility
+%<10pt&!bk>  \setlength\textheight{43\baselineskip}
+%<10pt&bk>  \setlength\textheight{41\baselineskip}
+%<11pt>  \setlength\textheight{38\baselineskip}
+%<12pt>  \setlength\textheight{36\baselineskip}
+%    \end{macrocode}
+%
+%    同样，我们根据纸张尺寸(papersize)和使用的基线间距(baselineskip)来计算这个值，以便在页面
+%    上有完整的行数(whole number of lines)。
+%    \begin{macrocode}
+\else
+  \setlength\@tempdima{\paperheight}
+%    \end{macrocode}
+%
+%    我们在页面的顶部和底部留有至少 1 英寸的边距(margin)。
+%    \begin{macrocode}
+  \addtolength\@tempdima{-2in}
+%    \end{macrocode}
+%
+%    我们还必须为栏外标题(running headers)和栏外页脚(running footers)留出空间。
+%    \begin{macrocode}
+  \addtolength\@tempdima{-1.5in}
+%    \end{macrocode}
+%
+%    然后，我们将结果除以当前的 |\baselineskip|，并将其存储在计数寄存器(count register) |\@tempcnta| 中，
+%    该寄存器随后包含适合此页面的行数。
+%    \begin{macrocode}
+  \divide\@tempdima\baselineskip
+  \@tempcnta=\@tempdima
+%    \end{macrocode}
+%
+%    由此我们可以计算文本的高度(height)。
+%    \begin{macrocode}
+  \setlength\textheight{\@tempcnta\baselineskip}
+\fi
+%    \end{macrocode}
+%
+%    页面上的第一行的高度为 |\topskip|。
+%    \begin{macrocode}
+\addtolength\textheight{\topskip}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \subsubsection[边距]{\heiti 边距}
+%
+%    现在，这些参数的大多数值都是根据所使用的纸张尺寸(papersize)进行计算的。在计算中，需要考虑 |\marginparsep|，
+%    因此我们首先给它赋值。
+%
+% \begin{macro}{\marginparsep}
+% \begin{macro}{\marginparpush}
+%    主文本(main text)和边距注释(marginal notes)之间的水平间距(horizontal space)由 |\marginparsep| 决定，
+%    两个边距注释间的最小垂直间距(minimum vertical separation)由 |\marginparpush| 控制。
+%    \begin{macrocode}
+\if@twocolumn
+  \setlength\marginparsep {10\p@}
+\else
+%<10pt&!bk>  \setlength\marginparsep{11\p@}
+%<11pt&!bk>  \setlength\marginparsep{10\p@}
+%<12pt&!bk>  \setlength\marginparsep{10\p@}
+%<bk>  \setlength\marginparsep{7\p@}
+\fi
+%<10pt|11pt>\setlength\marginparpush{5\p@}
+%<12pt>\setlength\marginparpush{7\p@}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    现在我们可以给出其他边距参数(margin parameters)的值。对于原生(native) \LaTeXe，
+%    计算这些值。
+% \begin{macro}{\oddsidemargin}
+% \begin{macro}{\evensidemargin}
+% \begin{macro}{\marginparwidth}
+%    首先，我们给出兼容模式(compatibility mode)的值。
+%
+%    双面打印(two-sided printing)的值：
+%    \begin{macrocode}
+\if@compatibility
+%<*bk>
+%<10pt>   \setlength\oddsidemargin   {.5in}
+%<11pt>   \setlength\oddsidemargin   {.25in}
+%<12pt>   \setlength\oddsidemargin   {.25in}
+%<10pt>   \setlength\evensidemargin  {1.5in}
+%<11pt>   \setlength\evensidemargin  {1.25in}
+%<12pt>   \setlength\evensidemargin  {1.25in}
+%<10pt>   \setlength\marginparwidth {.75in}
+%<11pt>   \setlength\marginparwidth {1in}
+%<12pt>   \setlength\marginparwidth {1in}
+%</bk>
+%<*!bk>
+  \if@twoside
+%<10pt>     \setlength\oddsidemargin   {44\p@}
+%<11pt>     \setlength\oddsidemargin   {36\p@}
+%<12pt>     \setlength\oddsidemargin   {21\p@}
+%<10pt>     \setlength\evensidemargin  {82\p@}
+%<11pt>     \setlength\evensidemargin  {74\p@}
+%<12pt>     \setlength\evensidemargin  {59\p@}
+%<10pt>     \setlength\marginparwidth {107\p@}
+%<11pt>     \setlength\marginparwidth {100\p@}
+%<12pt>     \setlength\marginparwidth {85\p@}
+%    \end{macrocode}
+%    单面打印(one-sided printing)的值：
+%    \begin{macrocode}
+  \else
+%<10pt>     \setlength\oddsidemargin   {63\p@}
+%<11pt>     \setlength\oddsidemargin   {54\p@}
+%<12pt>     \setlength\oddsidemargin   {39.5\p@}
+%<10pt>     \setlength\evensidemargin  {63\p@}
+%<11pt>     \setlength\evensidemargin  {54\p@}
+%<12pt>     \setlength\evensidemargin  {39.5\p@}
+%<10pt>     \setlength\marginparwidth  {90\p@}
+%<11pt>     \setlength\marginparwidth  {83\p@}
+%<12pt>     \setlength\marginparwidth  {68\p@}
+  \fi
+%</!bk>
+%    \end{macrocode}
+%    两栏模式(two-column mode)的值：
+%    \begin{macrocode}
+  \if@twocolumn
+     \setlength\oddsidemargin  {30\p@}
+     \setlength\evensidemargin {30\p@}
+     \setlength\marginparwidth {48\p@}
+  \fi
+%    \end{macrocode}
+%
+%    当我们不处于兼容模式时，我们可以考虑所选纸张的尺寸。
+%
+%    |\oddsidemargin| 和 |\marginparwidth| 的值将根据 |\if@twoside| 的状态设置。
+%
+%    如果 |@twoside| 为 true(对 于book 总是如此)，我们将使内页边距(inner margin)小于外页边距(outer margin)。
+%    \begin{macrocode}
+\else
+  \if@twoside
+    \setlength\@tempdima        {\paperwidth}
+    \addtolength\@tempdima      {-\textwidth}
+    \setlength\oddsidemargin    {.4\@tempdima}
+    \addtolength\oddsidemargin  {-1in}
+%    \end{macrocode}
+%    文本的边距宽度(width of the margin)设置为宽度的余数(remainder)，但宽度为 0.4in 英寸的
+%    空白的“实际边距(real margin)”除外。也许应该内置一个检查(check)，以确保(文本)边距宽度不会太小！
+%
+% \changes{v1.1a}{1994/03/12}{New algorithm for \cs{oddsidemargin}}
+% \changes{v1.1a}{1994/03/12}{New algorithm for \cs{marginparwidth}}
+% \changes{v1.2z}{1995/04/14}{Also take \cs{marginparsep} into account
+%    here}
+%    \begin{macrocode}
+    \setlength\marginparwidth   {.6\@tempdima}
+    \addtolength\marginparwidth {-\marginparsep}
+    \addtolength\marginparwidth {-0.4in}
+%    \end{macrocode}
+%    对于单面打印(one-sided printing)，我们通过计算 |\textwidth| 和 |\paperwidth| 之间的
+%    差值将文本居中放置在页面上。该差值的一半用于边距(margin)(因此 |\oddsidemargin| 小于 1 英寸)。
+%    \begin{macrocode}
+  \else
+    \setlength\@tempdima        {\paperwidth}
+    \addtolength\@tempdima      {-\textwidth}
+    \setlength\oddsidemargin    {.5\@tempdima}
+    \addtolength\oddsidemargin  {-1in}
+    \setlength\marginparwidth   {.5\@tempdima}
+    \addtolength\marginparwidth {-\marginparsep}
+    \addtolength\marginparwidth {-0.4in}
+    \addtolength\marginparwidth {-.4in}
+  \fi
+%    \end{macrocode}
+%    使用上述算法，|\marginparwidth| 可以变得相当大，这是我们不希望看到的。
+%    \begin{macrocode}
+  \ifdim \marginparwidth >2in
+     \setlength\marginparwidth{2in}
+  \fi
+%    \end{macrocode}
+%    完成这些计算之后，我们将它们设置为  pt 值。
+%    \begin{macrocode}
+  \@settopoint\oddsidemargin
+  \@settopoint\marginparwidth
+%    \end{macrocode}
+%
+%    现在可以根据上面设置的值计算 |\evensidemargin|。
+% \changes{v1.0l}{1994/01/11}{Computing of \cs{evensidemargin}
+%    should only occur in compatibility mode}
+%    \begin{macrocode}
+  \setlength\evensidemargin  {\paperwidth}
+  \addtolength\evensidemargin{-2in}
+  \addtolength\evensidemargin{-\textwidth}
+  \addtolength\evensidemargin{-\oddsidemargin}
+%    \end{macrocode}
+%    将 |\evensidemargin| 设置为整点值(full point value)可能会产生一个小的误差(small error)。
+%    然而，该误差在当今技术的双面打印机(doublesided printer)能够精确打印的误差范围(error range)内。
+%    \begin{macrocode}
+  \@settopoint\evensidemargin
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\topmargin}
+%    |\topmargin|(上边距)是“可打印区域(printable area)”顶部(低于纸张顶部 1 英寸)与
+%    栏外标题(running head)所在的盒子顶部之间的距离。
+%
+%    现在可以根据上面设置的值计算它。
+%    \begin{macrocode}
+\if@compatibility
+%<!bk>  \setlength\topmargin{27pt}
+%<10pt&bk>  \setlength\topmargin{.75in}
+%<11pt&bk>  \setlength\topmargin{.73in}
+%<12pt&bk>  \setlength\topmargin{.73in}
+\else
+  \setlength\topmargin{\paperheight}
+  \addtolength\topmargin{-2in}
+  \addtolength\topmargin{-\headheight}
+  \addtolength\topmargin{-\headsep}
+  \addtolength\topmargin{-\textheight}
+  \addtolength\topmargin{-\footskip}     % 这可能是错误的！
+%    \end{macrocode}
+%    通过改变下一行中的因子(factor)，整个页面可以垂直移动(shifted vertically)。
+% \changes{v1.2u}{1994/07/13}{Moved rounding of \cs{topmargin} to
+%    native mode}
+%    \begin{macrocode}
+  \addtolength\topmargin{-.5\topmargin}
+  \@settopoint\topmargin
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsubsection[脚注]{\heiti 脚注}
+%
+% \begin{macro}{\footnotesep}
+%    |\footnotesep| 是每个脚注开头的支柱(strut)的高度。它等于此类中 |\footnotesize| 的支柱的高度，
+%    因此脚注之间没有额外的空间(extra space)。
+%    \begin{macrocode}
+%<10pt>\setlength\footnotesep{6.65\p@}
+%<11pt>\setlength\footnotesep{7.7\p@}
+%<12pt>\setlength\footnotesep{8.4\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\footins}
+%    |\skip\footins| 是主文本(main text)最后一行和第一个脚注顶部之间的空间(space)。
+%    \begin{macrocode}
+%<10pt>\setlength{\skip\footins}{9\p@ \@plus 4\p@ \@minus 2\p@}
+%<11pt>\setlength{\skip\footins}{10\p@ \@plus 4\p@ \@minus 2\p@}
+%<12pt>\setlength{\skip\footins}{10.8\p@ \@plus 4\p@ \@minus 2\p@}
+%</10pt|11pt|12pt>
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection[浮动放置参数]{\heiti 浮动放置参数}
+%
+% 在 \LaTeXe{}\ 内核中，所有的浮动参数(float parameters)都被赋予默认值。因此，需要
+% 使用 |\renewcommand| 设置非计数器(not counters)的参数。
+%
+% \paragraph{放置浮动对象的限制}
+%
+% \begin{macro}{\c@topnumber}
+%    \Lcount{topnumber}\ 计数器(counter)保存可出现在文本页面(text page)顶部的最大浮动数(maximum number of floats)。
+%    \begin{macrocode}
+%<*article|report|book>
+\setcounter{topnumber}{2}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\topfraction}
+%    这表示文本页面(text page)顶部的浮动可以占据的最大部分。
+% \changes{v1.0h}{1993/12/18}{Replaced \cs{newcommand} with
+%    \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+\renewcommand\topfraction{.7}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\c@bottomnumber}
+%    \Lcount{bottomnumber}\ 计数器(counter)保存可出现在文本页底部的最大浮动数(maximum number of floats)。
+%    \begin{macrocode}
+\setcounter{bottomnumber}{1}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\bottomfraction}
+%    这表示文本页面(text page)底部的浮动可以占据的最大部分。
+% \changes{v1.0h}{1993/12/18}{Replaced \cs{newcommand} with
+%    \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+\renewcommand\bottomfraction{.3}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\c@totalnumber}
+%    这表示可以出现在任何文本页面上的最大浮动数。
+%    \begin{macrocode}
+\setcounter{totalnumber}{3}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\textfraction}
+%    这表示文本页面必须被文本占据的最小部分。
+% \changes{v1.0h}{1993/12/18}{Replaced \cs{newcommand} with
+%    \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+\renewcommand\textfraction{.2}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\floatpagefraction}
+%    这表示在生成“浮动页面(float page)”之前必须被浮动对象(floating objects)占据的页面的
+%    最小部分(minimum part of a page)。
+% \changes{v1.0h}{1993/12/18}{Replaced \cs{newcommand} with
+%    \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+\renewcommand\floatpagefraction{.5}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\c@dbltopnumber}
+%    \Lcount{dbltopnumber}\ 计数器(counter)保存可以出现在两栏文本页面(two-column text page)
+%    顶部的最大两栏浮点数(maximum number of two-column floats)。
+%    \begin{macrocode}
+\setcounter{dbltopnumber}{2}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dbltopfraction}
+%    这表示两栏文本页面(two-column text page)的最大部分可以被顶部的两栏浮动(two-column floats)所占据。
+% \changes{v1.0h}{1993/12/18}{Replaced \cs{newcommand} with
+%    \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+\renewcommand\dbltopfraction{.7}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\dblfloatpagefraction}
+%    这表示在生成“浮动页面(float page)”之前，页面的最小部分(minimum part of a page)必须由
+%    两栏宽浮动对象(two-column wide floating objects)占据。
+% \changes{v1.0h}{1993/12/18}{Replaced \cs{newcommand} with
+%    \cs{renewcommand}.  ASAJ.}
+%    \begin{macrocode}
+\renewcommand\dblfloatpagefraction{.5}
+%</article|report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{文本页面上的浮动}
+%
+% \begin{macro}{\floatsep}
+% \begin{macro}{\textfloatsep}
+% \begin{macro}{\intextsep}
+%    当浮动对象(floating object)放置在带有文本的页面上时，这些参数控制浮动对象和页面上其他
+%    对象之间的分隔(separation)。这些参数用于单栏模式(one-column mode)和双栏模式(two-column mode)
+%    中的单栏浮点(single-column floats)。
+%
+%    |\floatsep| 是移动到文本页面顶部或底部的相邻浮动(adjacent floats)之间的间距(space)。
+%
+%    |\textfloatsep| 是主文本(main text)和页面顶部或底部浮动之间的间距(space)。
+%
+%    |\intextsep| 是文本内浮动(|\intextsep|)和文本之间的间距。
+%    \begin{macrocode}
+%<*10pt>
+\setlength\floatsep    {12\p@ \@plus 2\p@ \@minus 2\p@}
+\setlength\textfloatsep{20\p@ \@plus 2\p@ \@minus 4\p@}
+\setlength\intextsep   {12\p@ \@plus 2\p@ \@minus 2\p@}
+%</10pt>
+%<*11pt>
+\setlength\floatsep    {12\p@ \@plus 2\p@ \@minus 2\p@}
+\setlength\textfloatsep{20\p@ \@plus 2\p@ \@minus 4\p@}
+\setlength\intextsep   {12\p@ \@plus 2\p@ \@minus 2\p@}
+%</11pt>
+%<*12pt>
+\setlength\floatsep    {12\p@ \@plus 2\p@ \@minus 4\p@}
+\setlength\textfloatsep{20\p@ \@plus 2\p@ \@minus 4\p@}
+\setlength\intextsep   {14\p@ \@plus 4\p@ \@minus 4\p@}
+%</12pt>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\dblfloatsep}
+% \begin{macro}{\dbltextfloatsep}
+%    当处于双栏模式(two-column mode)时，当跨越整个 |\textwidth| (文本宽度)的浮动对
+%    象(floating objects)放置在文本页面上时，浮动和文本之间的分隔由 |\dblfloatsep| 和 |\dbltextfloatsep| 控制。
+%
+%    |\dblfloatsep| 是移动到文本页面(text page)顶部或底部的相邻浮动(adjacent floats)之间间距(space)。
+%
+%    |\dbltextfloatsep| 是主文本(main text)和页面顶部或底部浮动之间的间距(space)。
+%
+%    \begin{macrocode}
+%<*10pt>
+\setlength\dblfloatsep    {12\p@ \@plus 2\p@ \@minus 2\p@}
+\setlength\dbltextfloatsep{20\p@ \@plus 2\p@ \@minus 4\p@}
+%</10pt>
+%<*11pt>
+\setlength\dblfloatsep    {12\p@ \@plus 2\p@ \@minus 2\p@}
+\setlength\dbltextfloatsep{20\p@ \@plus 2\p@ \@minus 4\p@}
+%</11pt>
+%<*12pt>
+\setlength\dblfloatsep    {14\p@ \@plus 2\p@ \@minus 4\p@}
+\setlength\dbltextfloatsep{20\p@ \@plus 2\p@ \@minus 4\p@}
+%</12pt>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \paragraph{浮动在自己的页面或栏上}
+%
+% \begin{macro}{\@fptop}
+% \begin{macro}{\@fpsep}
+% \begin{macro}{\@fpbot}
+%    当浮动对象(floating objects)放置在单独的页面上时，这些页面的布局由这些参数控制。在页面
+%    顶部插入了 |\@fptop| 的可伸缩空白(stretchable whitespace)，在页面底部插入了 |\@fpbot| 的可伸缩空白。
+%    在相邻的浮动(adjacent floats)之间插入 |\@fpsep|。
+%
+%    这些参数用于在单栏模式(one-column mode)中放置浮动对象，或在两栏模式(two-column mode)中
+%    在单栏浮动(single-column floats)中放置浮动对象。
+%
+%    请注意，|\@fptop| 和 |\@fpbot| 两个参数中至少有一个应该包含 |plus ...fil|，以便填充
+%    剩余的空白(remaining empty space)。
+%    \begin{macrocode}
+%<*10pt>
+\setlength\@fptop{0\p@ \@plus 1fil}
+\setlength\@fpsep{8\p@ \@plus 2fil}
+\setlength\@fpbot{0\p@ \@plus 1fil}
+%</10pt>
+%<*11pt>
+\setlength\@fptop{0\p@ \@plus 1fil}
+\setlength\@fpsep{8\p@ \@plus 2fil}
+\setlength\@fpbot{0\p@ \@plus 1fil}
+%</11pt>
+%<*12pt>
+\setlength\@fptop{0\p@ \@plus 1fil}
+\setlength\@fpsep{10\p@ \@plus 2fil}
+\setlength\@fpbot{0\p@ \@plus 1fil}
+%</12pt>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@dblfptop}
+% \begin{macro}{\@dblfpsep}
+% \begin{macro}{\@dblfpbot}
+%    双栏模式(two-column mode)中的双栏浮动(double-column floats)使用类似的参数处理。
+%    \begin{macrocode}
+%<*10pt>
+\setlength\@dblfptop{0\p@ \@plus 1fil}
+\setlength\@dblfpsep{8\p@ \@plus 2fil}
+\setlength\@dblfpbot{0\p@ \@plus 1fil}
+%</10pt>
+%<*11pt>
+\setlength\@dblfptop{0\p@ \@plus 1fil}
+\setlength\@dblfpsep{8\p@ \@plus 2fil}
+\setlength\@dblfpbot{0\p@ \@plus 1fil}
+%</11pt>
+%<*12pt>
+\setlength\@dblfptop{0\p@ \@plus 1fil}
+\setlength\@dblfpsep{10\p@ \@plus 2fil}
+\setlength\@dblfpbot{0\p@ \@plus 1fil}
+%</12pt>
+%<*article|report|book>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection[页面样式]{\heiti 页面样式}
+%
+%    页面样式(page style) \pstyle{foo}\ 是通过定义 |\ps@foo| 命令来定义的。此命令应仅进行
+%    局部定义(local definitions)。定义中不应该夹杂空格(stray spaces)，因为它们可能导致
+%    输出中出现神秘的额外空格(mysterious extra spaces)(这是应该始终避免的)。
+%
+% \begin{macro}{\@evenhead}
+% \begin{macro}{\@oddhead}
+% \begin{macro}{\@evenfoot}
+% \begin{macro}{\@oddfoot}
+%    |\ps@...| 命令定义 |\@oddhead|、|\@oddfoot|、|\@evenhead|等宏，|\@evenfoot| 用于定义
+%    栏外标题(running heads)和流水脚注(running feet)---例如，|\@oddhead| 是生成奇数页(odd-numbered pages)
+%    标题盒子(heading box)内容的宏。它在一个宽度为 |\textwidth| 的 |\hbox| 中被调用。
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[标记约定]{\heiti 标记约定}
+%
+%    要使标题(headings)由分节命令(sectioning commands)确定，页面样式(page style)定义了
+%    命令 |\chaptermark|、|\sectionmark|、\ldots，其中 |\chaptermark{|\meta{TEXT}|}|
+%    被 |\chapter| 调用以设置标记(mark)，依此类推
+%
+%    在下列宏的帮助下定义了 |\...mark| 命令和 |\...head| 宏。(所有 |\...mark| 命令都应该初始化为 no-ops。)
+%
+%    \LaTeX{}\ 通过使用以下命令生成“left(左)”和“right(右)”两种标记(mark)，扩展了 \TeX\ 的
+%    标记功能(|\mark| facility)：
+%    \begin{flushleft}
+%     |\markboth{|\meta{LEFT}|}{|\meta{RIGHT}|}|：添加两个标记。
+%
+%     |\markright{|\meta{RIGHT}|}|：添加“right(右)”标记。
+%
+%     |\leftmark|：在 |\@oddhead|、|\@oddfoot|、|\@evenhead| 或 |\@evenfoot| 宏中使用时，
+%                  它获得当前的“left(左)”标记。|\leftmark| 的工作方式类似于 \TeX\ 的 |\botmark| 命令。
+%
+%     |\rightmark|: 在 |\@oddhead|、|\@oddfoot|、|\@evenhead| 或 |\@evenfoot| 宏中使用时，
+%                   它获得当前的“right(右)”标记。|\rightmark| 的工作方式类似于 \TeX\ 的 |\firstmark|命令。
+%    \end{flushleft}
+%
+%    标记命令(marking commands)对于“编号在”左标记内(“numbered within”left marks)的右标记(right marks)
+%    工作得相当好---例如，左标记由 |\chapter| 命令更改，右标记由 |\section| 命令更改。但是，如果
+%    两个 |\markboth| 同时出现在同一个页面上时，它确实会产生一些异常的结果。
+%
+%
+%    像 |\tableofcontents| 这样的命令应该使用 |\@mkboth| 命令在某些页面样式(page styles)中设置标记(set the marks)，
+%    页面样式命令(pagestyle command)(|\ps@...|) |\let|(让) |\@mkboth| 变成 |\markboth| 用于设置标题(heading)，或者
+%    |\let|(让) |\@mkboth| 变成 |\@gobbletwo| 设置为不做任何事情。
+%
+%    [译者注]感觉前一段可能翻译错误！前一段的原文是：
+%    Commands like |\tableofcontents| that should set the marks in some
+%    page styles use a |\@mkboth| command, which is |\let| by the
+%    pagestyle command (|\ps@...|)  to |\markboth| for setting the
+%    heading or to |\@gobbletwo| to do nothing.
+%
+%
+%
+% \subsubsection[定义页面样式]{\heiti 定义页面样式}
+% \label{sec:classes:pagestyle}
+%
+%    页面样式(pagestyles)的 \pstyle{empty}(空)和 \pstyle{plain}(普通)是在 \LaTeX{}\ 格式中定义的。
+%
+% \begin{macro}{\ps@headings}
+%    双面打印(two sided printing)与单面打印(one sided printing)的页面样式(page style) \pstyle{headings}\ 的定义必须不同。
+%
+%    \begin{macrocode}
+\if@twoside
+  \def\ps@headings{%
+%    \end{macrocode}
+%    在这种页面样式中，流水脚注(running feet)是空的(empty)，栏外标题(running head，即短标题)
+%    包含页码(page number)和其中一个标记(marks)。
+%    \begin{macrocode}
+      \let\@oddfoot\@empty\let\@evenfoot\@empty
+      \def\@evenhead{\thepage\hfil\slshape\leftmark}%
+      \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
+%    \end{macrocode}
+%
+%    使用此页面样式时，栏外标题(running head，即短标题)的内容由章标题(chapter titles)
+%    和节标题(section titles)决定。因此，我们 |\let|(让) |\@mkboth| 变成 |\markboth|。
+%    \begin{macrocode}
+      \let\@mkboth\markboth
+%    \end{macrocode}
+%
+%    对于 article 文档类，我们定义 |\sectionmark| 来清除右标记(right mark)，并将节
+%    的编号(当节被编号时)及其标题放在左标记(left mark)中。右标记由 |\subsectionmark| 设置，
+%    以包含小节标题(subsection titles)。
+%
+%    请注意，|\sectionmark| 命令的参数使用 |##1|，该参数将在执行 |\ps@headings| 时定义。
+%
+% \changes{v1.2z}{1995/04/03}{Removed extra dot after \cs{thesection}
+%    (PR 1519)}
+% \changes{v1.3c}{1995/05/25}{Replace \cs{hskip}
+%    \texttt{1em}\cs{relax} with \cs{quad}}
+%    \begin{macrocode}
+%<*article>
+    \def\sectionmark##1{%
+      \markboth {\MakeUppercase{%
+        \ifnum \c@secnumdepth >\z@
+          \thesection\quad
+        \fi
+        ##1}}{}}%
+    \def\subsectionmark##1{%
+      \markright {%
+        \ifnum \c@secnumdepth >\@ne
+          \thesubsection\quad
+        \fi
+        ##1}}}
+%</article>
+%    \end{macrocode}
+%
+%    在 report 和 book 文档类中，我们使用 |\chaptermark| 和 |\sectionmark| 宏来填充
+%    栏外标题(running head，即短标题)。
+%
+%    请注意，|\chaptermark| 命令的参数使用 |##1|，该参数将在执行 |\ps@headings| 时定义。
+%
+%    \begin{macrocode}
+%<*report|book>
+    \def\chaptermark##1{%
+      \markboth {\MakeUppercase{%
+        \ifnum \c@secnumdepth >\m@ne
+%<book>          \if@mainmatter
+            \@chapapp\ \thechapter. \ %
+%<book>          \fi
+        \fi
+        ##1}}{}}%
+    \def\sectionmark##1{%
+      \markright {\MakeUppercase{%
+        \ifnum \c@secnumdepth >\z@
+          \thesection. \ %
+        \fi
+        ##1}}}}
+%</report|book>
+%    \end{macrocode}
+%
+%    对于单面打印(one sided printing)，|\ps@headings| 的定义可以简单得多，因为我们
+%    对偶数页和奇数页的处理是一样的。因此，我们不需要定义 |\@even...|。
+%    \begin{macrocode}
+\else
+  \def\ps@headings{%
+    \let\@oddfoot\@empty
+    \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
+    \let\@mkboth\markboth
+%    \end{macrocode}
+%    我们现在使用 |\markright|，而不是像双面打印那样使用 |\markboth|。
+%    \begin{macrocode}
+%<*article>
+    \def\sectionmark##1{%
+      \markright {\MakeUppercase{%
+        \ifnum \c@secnumdepth >\m@ne
+          \thesection\quad
+        \fi
+        ##1}}}}
+%</article>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*report|book>
+    \def\chaptermark##1{%
+      \markright {\MakeUppercase{%
+        \ifnum \c@secnumdepth >\m@ne
+%<book>          \if@mainmatter
+            \@chapapp\ \thechapter. \ %
+%<book>          \fi
+        \fi
+        ##1}}}}
+%</report|book>
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ps@myheadings}
+%    页面样式(page style) \pstyle{myheadings}\ 的定义相当简单，因为用户可以使用
+%    |\markboth| 和 |\markright| 命令自行确定栏外标题(running head，即短标题)。
+%
+%    \begin{macrocode}
+\def\ps@myheadings{%
+    \let\@oddfoot\@empty\let\@evenfoot\@empty
+    \def\@evenhead{\thepage\hfil\slshape\leftmark}%
+    \def\@oddhead{{\slshape\rightmark}\hfil\thepage}%
+%    \end{macrocode}
+%
+%    我们必须确保禁用章节标题所使用的标记命令(marking commands)。我们这样做，|\let|(让)
+%    它们进入一个吞噬其参数的宏。
+%    \begin{macrocode}
+    \let\@mkboth\@gobbletwo
+%<!article>    \let\chaptermark\@gobble
+    \let\sectionmark\@gobble
+%<article>    \let\subsectionmark\@gobble
+    }
+%    \end{macrocode}
+% \end{macro}
+%
+%\newpage
+%
+% \section{\heiti 文档标记}
+%
+% \subsection[标题]{\heiti 标题}
+%
+% \begin{macro}{\title}
+% \begin{macro}{\author}
+% \begin{macro}{\date}
+%    这三个宏(macros)由 \LaTeX{}\ 格式提供，用于提供有关文档的标题(title)、作者(authors)
+%    和日期(date)的信息。信息存储在内部控制序列(internal control sequences)中。|\maketitle| 命令
+%    的任务是使用提供的信息。这里显示了这些宏的定义以供参考。
+%    \begin{macrocode}
+% \DeclareRobustCommand*{\title}[1]{\gdef\@title{#1}}
+% \DeclareRobustCommand*{\author}[1]{\gdef\@author{#1}}
+% \DeclareRobustCommand*{\date}[1]{\gdef\@date{#1}}
+%    \end{macrocode}
+%    默认情况下， |\date| 宏获取今天的日期。
+%    \begin{macrocode}
+% \date{\today}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\maketitle}
+%    |\maketitle| 的定义取决于是否创建单独的标题页(title page)。这是 report 和
+%     book 文档类的默认值，但是对于 article 类，它是可选的。
+%
+%    制作标题页时，我们在局部重新定义 |\footnotesize| 和 |footnoterule|，以更改
+%    |\thanks| 命令生成的脚注的外观；这些变化影响到所有脚注。
+% \changes{v1.3o}{1995/11/02}{(CAR) Make \cs{footnote} always work in
+%      title, etc}
+%    \begin{macrocode}
+\if@titlepage
+  \newcommand\maketitle{\begin{titlepage}%
+  \let\footnotesize\small
+  \let\footnoterule\relax
+  \let \footnote \thanks
+%    \end{macrocode}
+%    我们将整个标题垂直居中；通过添加一个 |\vskip|，可以稍微调整中心位置。
+%    (在兼容模式下，标题页环境将页码设置为 0，以保持 \LaTeX\ 2.09 样式文件的行为。)
+% \changes{v1.0g}{1993/12/09}{Removed the setting of the page number,
+%    when not in compatibility mode}
+% \changes{v1.2c}{1994/03/17}{Removed setting of page number, now done
+%    in titlepage environment}
+%    \begin{macrocode}
+  \null\vfil
+  \vskip 60\p@
+%    \end{macrocode}
+%    然后我们用 |\LARGE| 字体设置标题(title)；留出一点空间(space)，用 |\large| 字体
+%    设置作者(author)。我们在表格环境(tabular environment)中执行此操作，以便将它们
+%    放在单栏(single column)中。在 date(日期)之前，我们又留了一点空白(whitespace)。
+%    \begin{macrocode}
+  \begin{center}%
+    {\LARGE \@title \par}%
+    \vskip 3em%
+    {\large
+     \lineskip .75em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+      \vskip 1.5em%
+    {\large \@date \par}%       % Set date in \large size.
+  \end{center}\par
+%    \end{macrocode}
+%    然后，我们调用 |\@thanks| 打印进入脚注中的信息并完成页面。
+%    \begin{macrocode}
+  \@thanks
+  \vfil\null
+  \end{titlepage}%
+%    \end{macrocode}
+%    我们重置 \Lcount{footnote}\ 计数器(counter)，禁用 |\thanks| 和 |\maketitle|，
+%    并通过清空内部信息宏(internal information macros)来节省一些存储空间(storage space)。
+% \changes{v1.3j}{1995/08/16}{use \cs{let} to save space}
+% \changes{v1.3n}{1995/10/29}{Empty \cs{@date} as well}
+%    \begin{macrocode}
+  \setcounter{footnote}{0}%
+  \global\let\thanks\relax
+  \global\let\maketitle\relax
+  \global\let\@thanks\@empty
+  \global\let\@author\@empty
+  \global\let\@date\@empty
+  \global\let\@title\@empty
+%    \end{macrocode}
+%    设置标题后，声明命令 |\title| 等可能会消失(vanish)。|\and| 的定义只有在 |\author| 的参数中才有意义，
+%    所以也可以这样做。
+% \changes{v1.3k}{1995/08/27}{Disable \cs{title} and similar decls}
+%    \begin{macrocode}
+  \global\let\title\relax
+  \global\let\author\relax
+  \global\let\date\relax
+  \global\let\and\relax
+  }
+%    \end{macrocode}
+%    当标题不在自己的页面上时，标题的布局略有不同。我们用符号(symbols)来标记脚注(footnotes)，
+%    我们必须处理两栏文档(two-column documents)。
+%
+%    因此，我们首先启动一个新组(new group)，以保持局部更改(changes local)。然后我们
+%    重新定义 |\thefootnote| 以使用 |\fnsymbol|；并更改 |\@makefnmark| 使脚注标记(footnotemarks)的
+%    宽度为零(以使作者姓名居中看起来更好)。
+% \changes{v1.2s}{1994/06/02}{Reset \cs{@makefntext}}
+% \changes{v1.3a}{1995/05/17}{Use \cs{@makefnmark} in definition of
+%    \cs{@makefntext}}
+% \changes{v1.3g}{1995/06/26}{Fix definition of \cs{@makefnmark} and
+%    \cs{@makefntext} to a) work and b) without using math}
+%    \begin{macrocode}
+\else
+  \newcommand\maketitle{\par
+    \begingroup
+      \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
+      \def\@makefnmark{\rlap{\@textsuperscript{\normalfont\@thefnmark}}}%
+      \long\def\@makefntext##1{\parindent 1em\noindent
+              \hb@xt@1.8em{%
+                \hss\@textsuperscript{\normalfont\@thefnmark}}##1}%
+%    \end{macrocode}
+%    如果这是一个两栏文档(two-column document)，我们将以两栏模式(two-column mode)开始一个新页面，
+%    标题设置为文本的全宽。标题信息的实际打印由 |\@maketitle| 完成。
+% \changes{v1.2k}{1994/05/06}{Added check on number of columns in use
+%    locally}
+%    \begin{macrocode}
+      \if@twocolumn
+        \ifnum \col@number=\@ne
+          \@maketitle
+        \else
+          \twocolumn[\@maketitle]%
+        \fi
+      \else
+%    \end{macrocode}
+%    当这不是一个两栏文档时，我们只需开始一个新页面，防止浮动对象(floating objects)出现
+%    在此页面顶部并打印标题信息(title information)。
+%    \begin{macrocode}
+      \newpage
+        \global\@topnum\z@   % Prevents figures from going at top of page.
+        \@maketitle
+      \fi
+%    \end{macrocode}
+%    此页面有一个 \pstyle{plain}\ 的布局。我们称 |\@thanks| 生成脚注。
+%    \begin{macrocode}
+      \thispagestyle{plain}\@thanks
+%    \end{macrocode}
+%    现在，我们可以关闭组(group)，重置 \Lcount{footnote}\ 计数器，禁用 |\thanks|、|\maketitle| 和
+%    |\@maketitle|，并通过清空内部信息宏(internal information macros)来节省一些存储空间(storage space)。
+% \changes{v1.3j}{1995/08/16}{use \cs{let} to save space}
+% \changes{v1.3k}{1995/08/27}{Disable \cs{title} and similar decls}
+% \changes{v1.3n}{1995/10/29}{Empty \cs{@date} as well}
+%    \begin{macrocode}
+    \endgroup
+    \setcounter{footnote}{0}%
+    \global\let\thanks\relax
+    \global\let\maketitle\relax
+    \global\let\@maketitle\relax
+    \global\let\@thanks\@empty
+    \global\let\@author\@empty
+    \global\let\@date\@empty
+    \global\let\@title\@empty
+    \global\let\title\relax
+    \global\let\author\relax
+    \global\let\date\relax
+    \global\let\and\relax
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@maketitle}
+%    当我们没有单独的标题页时，这个宏负责格式化标题信息。
+%
+%    我们总是开始一个新的页面，留下一些空白(white space)并将信息居中。标题以 |\LARGE| 字体设置，
+%    作者姓名(author names)和日期(date)以 |\large| 字体设置。
+% \changes{v1.3o}{1995/11/02}{(CAR) Make \cs{footnote} always work in
+%      title, etc}
+%    \begin{macrocode}
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 2em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1.5em}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[章和节]{\heiti 章和节}
+%
+% \subsubsection[构建块]{\heiti 构建块} 类文件(class file)这一部分中的定义使用了两个
+%    内部宏(internal macros) |\@startsection| 和 |\secdef|。
+%    为了理解这里发生了什么，我们描述了它们的语法。
+%
+%    |\@startsection| 宏有 6 个必需参数(required arguments)，可以选择后跟一个$*$、
+%    可选参数(optional argument)和必需参数：
+%
+%    |\@startsection|\meta{name}\meta{level}\meta{indent}^^A
+%                    \meta{beforeskip}\meta{afterskip}\meta{style}
+%            optional *\\
+%    \null\hphantom{\bslash @startsection}^^A
+%            |[|\meta{altheading}|]|\meta{heading}
+%
+%    这是一个用于启动节(section)的通用命令(generic command)，参数具有以下含义：
+%
+%    \begin{description}
+%    \item[\meta{name}] 用户级命令的名称，例如“section”。
+%    \item[\meta{level}] 表示节深度的数字--例如，chapter=1、section = 2等。当且仅
+%    当 \meta{level} $<=$ \Lcount{secnumdepth}\ 计数器的值时，将打印节编号(section number)。
+%    \item[\meta{indent}] 标题从左边距的缩进。
+%    \item[\meta{beforeskip}] 此参数的绝对值(absolute value)允许在标题(heading)上方放置垂直
+%    空间(skip)。如果为负值(negative)，则紧跟标题后面的文本段落缩进(indent)将被抑制。
+%    \item[\meta{afterskip}] 如果为正值(positive)，则允许在标题(heading)下方放置垂直空间(skip)。
+%    否则允许在参选标题(run-in heading)的右侧放置垂直空间(skip)。
+%    \item[\meta{style}] 设置标题样式(style of the heading)的命令
+%    \item[$*$] 当此项缺失时，将对标题进行编号，并递增相应的计数器(counter)。
+%    \item[\meta{altheading}] 提供一个可在目录(table of contents)和栏外标题(running heads)中
+%    使用的替代标题(alternative heading)。使用 $*$ 形式时，不应出现这种情况。
+%    \item[\meta{heading}] 新节(new section)的标题(heading)。
+%    \end{description}
+%  分段命令(sectioning command)通常定义为 |\@startsection| 及其前六个参数。
+%
+%    当不使用 |\@startsection| 来定义分节命令(sectioning command)时，可以使用宏 |\secdef|。
+%    它有两个参数：
+%
+%    |\secdef|\meta{unstarcmds}\meta{starcmds}
+%
+%    \begin{description}
+%    \item[\meta{unstarcmds}] 用于分节命令(sectioning command)的正常形式(normal form)。
+%    \item[\meta{starcmds}] 用于分节命令(sectioning command)的 $*$ 形式。
+%    \end{description}
+%
+%    您可以按如下方式使用 |\secdef|：
+% \begin{verbatim}
+%       \def\chapter { ... \secdef \CMDA \CMDB }
+%       \def\CMDA    [#1]#2{ ... }  % Command to define
+%                                   % \chapter[...]{...}
+%       \def\CMDB    #1{ ... }      % Command to define
+%                                   % \chapter*{...}
+% \end{verbatim}
+%
+% \subsubsection[标记命令]{\heiti 标记命令}
+%
+% \begin{macro}{\chaptermark}
+% \begin{macro}{\sectionmark}
+% \begin{macro}{\subsectionmark}
+% \begin{macro}{\subsubsectionmark}
+% \begin{macro}{\paragraphmark}
+% \begin{macro}{\subparagraphmark}
+%    |\...mark| 命令的默认初始化(default initializations)。这些命令用于定义页面样
+%    式(page styles)(见第~\ref{sec:classes:pagestyle}~节)，其中大多数已经由 \LaTeX{}\ 格式定义，
+%    因此仅在此处显示。
+%
+%    \begin{macrocode}
+%<!article>\newcommand*\chaptermark[1]{}
+% \newcommand*\sectionmark[1]{}
+% \newcommand*\subsectionmark[1]{}
+% \newcommand*\subsubsectionmark[1]{}
+% \newcommand*\paragraphmark[1]{}
+% \newcommand*\subparagraphmark[1]{}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[定义计数器]{\heiti 定义计数器}
+%
+% \begin{macro}{\c@secnumdepth}
+%    计数器 \Lcount{secnumdepth}\ 的值给出了用于生成节号(section numbers)的最高级别
+%    的分节命令(sectioning command)的深度(depth)。
+%    \begin{macrocode}
+%<article>\setcounter{secnumdepth}{3}
+%<!article>\setcounter{secnumdepth}{2}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\c@part}
+% \begin{macro}{\c@chapter}
+% \begin{macro}{\c@section}
+% \begin{macro}{\c@subsection}
+% \begin{macro}{\c@subsubsection}
+% \begin{macro}{\c@paragraph}
+% \begin{macro}{\c@subparagraph}
+%    这些计数器(counters)用于节编号(section numbers)。宏 |\newcounter{|\meta{newctr}|}[|\meta{oldctr}|]|
+%    定义 \meta{newctr}\ 为计数器(counter)，当计数器 \meta{oldctr}\ 被步进时(stepped)，\meta{newctr}\ 重置
+%    为零(reset to zero)。\meta{oldctr}必须已定义。
+%
+%    \begin{macrocode}
+\newcounter {part}
+%<article>\newcounter {section}
+%<*report|book>
+\newcounter {chapter}
+\newcounter {section}[chapter]
+%</report|book>
+\newcounter {subsection}[section]
+\newcounter {subsubsection}[subsection]
+\newcounter {paragraph}[subsubsection]
+\newcounter {subparagraph}[paragraph]
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\thepart}
+% \begin{macro}{\thechapter}
+% \begin{macro}{\thesection}
+% \begin{macro}{\thesubsection}
+% \begin{macro}{\thesubsubsection}
+% \begin{macro}{\theparagraph}
+% \begin{macro}{\thesubparagraph}
+%    对于任何计数器 \Lcount{CTR}，|\theCTR| 是定义计数器 \Lcount{CTR}\ 的打印版本
+%    (printed version)的宏。它是根据以下宏来定义的:
+%
+%    |\arabic{|\Lcount{COUNTER}|}| 将 \Lcount{COUNTER}\ 的值打印为阿拉伯数字(arabic numeral)。
+%
+%    |\roman{|\Lcount{COUNTER}|}| 将 \Lcount{COUNTER}\ 的值打印为小写罗马数字(lowercase roman numeral)。
+%
+%    |\Roman{|\Lcount{COUNTER}|}| 将 \Lcount{COUNTER}\ 的值打印为大写罗马数字(uppercase roman numeral)。
+%
+%    |\alph{|\Lcount{COUNTER}|}| 将 \Lcount{COUNTER}\ 的值打印为小写字母(lowercase letter)：$1 =$~a、$2 =$~ b等。
+%
+%    |\Alph{|\Lcount{COUNTER}|}| 将 \Lcount{COUNTER}\ 的值打印为大写字母(uppercase letter)：$1 =$~A、$2 =$~B等。
+%
+%    实际上，为了节省空间，我们使用了内部计数器表示法(internal counter representations)和操作这些表示法的命令。
+%    \begin{macrocode}
+\renewcommand \thepart {\@Roman\c@part}
+%<article>\renewcommand \thesection {\@arabic\c@section}
+%<*report|book>
+\renewcommand \thechapter {\@arabic\c@chapter}
+\renewcommand \thesection {\thechapter.\@arabic\c@section}
+%</report|book>
+\renewcommand\thesubsection   {\thesection.\@arabic\c@subsection}
+\renewcommand\thesubsubsection{\thesubsection.\@arabic\c@subsubsection}
+\renewcommand\theparagraph    {\thesubsubsection.\@arabic\c@paragraph}
+\renewcommand\thesubparagraph {\theparagraph.\@arabic\c@subparagraph}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@chapapp}
+%    |\@chapapp| 最初定义为“|\chaptername|”。|\appendix| 命令将其重新定义为“|\appendixname|”。
+%
+%    \begin{macrocode}
+%<report|book>\newcommand\@chapapp{\chaptername}
+%    \end{macrocode}
+% \end{macro}
+%
+%  \subsubsection[前言、正文和附属资料]{\heiti 前言、正文和附属资料}
+
+%    一本书(book)包含这三个(逻辑)节(sections)\footnote{[译者注]这三个逻辑节(logical sections)就是：
+%    前言(front Matter)、正文(main Matter)、附属资料(back Matter)。前言包括诸如标题页、
+%    摘要、目录、序言、注释清单、数字清单和表格清单，其中一些前题页如标题页传统上是
+%    不编号的；附属资料可能包括词汇表、注释、参考书目和索引等。}。如果我们正在处理
+%    正文(main Matter)，则开关 |\@mainmatter| 为 true。 当此开关为 false 时，
+%    |\chapter| 命令不打印章编号(chapter numbers)。
+%
+%    在这里，我们定义了启动这些节(sections)的命令。
+%  \begin{macro}{\frontmatter}
+%    此命令启动罗马页码编号(Roman page numbering)并关闭章编号(chapter numbering)。
+%    由于这会从 1 开始重新启动页面编号，因此还应确保使用的是右页(recto page)。
+% \changes{v1.3r}{1996/05/26}{Make this command react to the option
+%    \texttt{openany}}
+% \changes{v1.3y}{1998/05/05}{Two years on: Make this command not
+%    react to the option \texttt{openany} as this makes the
+%    verso/recto numbering wrong: see pr/2754 for discussion}
+%    \begin{macrocode}
+%<*book>
+\newcommand\frontmatter{%
+%   \if@openright
+    \cleardoublepage
+%   \else
+%     \clearpage
+%   \fi
+  \@mainmatterfalse
+  \pagenumbering{roman}}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\mainmatter}
+%    此命令清除页面，开始阿拉伯数字页码编号(arabic page numbering)，并打开章编号(chapter numbering)。
+%    由于这会从 1 开始重新启动页面编号，因此还应确保使用的是右页(recto page)。
+% \changes{v1.3r}{1996/05/26}{Make this command react to the option
+%    \texttt{openany}}
+% \changes{v1.3y}{1998/05/05}{Two years on: Make this command not
+%    react to the option \texttt{openany} as this makes the
+%    verso/recto numbering wrong: see pr/2754 for discussion}
+%    \begin{macrocode}
+\newcommand\mainmatter{%
+%   \if@openright
+    \cleardoublepage
+%   \else
+%     \clearpage
+%   \fi
+  \@mainmattertrue
+  \pagenumbering{arabic}}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\backmatter}
+%    这将清除页面，关闭章编号(chapter numbering)并保持页面编号不变。
+%    \begin{macrocode}
+\newcommand\backmatter{%
+  \if@openright
+    \cleardoublepage
+  \else
+    \clearpage
+  \fi
+  \@mainmatterfalse}
+%</book>
+%    \end{macrocode}
+%  \end{macro}
+%
+% \subsubsection[部分]{\heiti 部分}
+%
+% \begin{macro}{\part}
+%    启动文档新部分(new part)的命令。
+%
+%    在 article 类中，|\part| 的定义相当简单；我们开始一个新段落(new paragraph)，
+%    添加一点空白(white space)，取消第一段的缩进，并使用 |\secdef|。与其他分节命令
+%    (sectioning commands)({\LaTeXe}\ 内核中的 cf.\ |\@startsection|)一样，
+%    我们需要检查 |@noskipsec| 开关并强制水平模式(horizontal mode)(如果设置了)。
+% \changes{v1.4a}{1999/01/07}{Check \texttt{@noskipsec} switch and
+%      possibly force horizontal mode; see PR/2889.}
+%    \begin{macrocode}
+%<*article>
+\newcommand\part{%
+   \if@noskipsec \leavevmode \fi
+   \par
+   \addvspace{4ex}%
+   \@afterindentfalse
+   \secdef\@part\@spart}
+%</article>
+%    \end{macrocode}
+%
+%    对于 report 和 book 类，我们的做法有些不同。
+%
+%    我们启动一个新的(右边的)页面并使用 \pstyle{plain}\ 页面样式(pagestyle)。
+% \changes{v1.3r}{1996/05/26}{Make this command react to the option
+%    \texttt{openany}}
+%    \begin{macrocode}
+%<*report|book>
+\newcommand\part{%
+  \if@openright
+    \cleardoublepage
+  \else
+    \clearpage
+  \fi
+  \thispagestyle{plain}%
+%    \end{macrocode}
+%    当我们制作两栏文档(two-column document)时，这将是一个单栏页面(one column page)。
+%    我们使用 |@tempswa| 来记住切换回两栏。
+%    \begin{macrocode}
+  \if@twocolumn
+    \onecolumn
+    \@tempswatrue
+  \else
+    \@tempswafalse
+  \fi
+%    \end{macrocode}
+%    We need an empty box to prevent the fil glue from disappearing.
+%    我们需要一个空盒子来防止空白粘连(fil glue)消失。
+% \changes{v1.3j}{1995/08/16}{Replace \cs{hbox} by \cs{null}}
+%    \begin{macrocode}
+  \null\vfil
+%    \end{macrocode}
+%    在这里，我们使用 |\secdef| 来指示使用哪些命令来创建实际的标题(actual heading)。
+%    \begin{macrocode}
+  \secdef\@part\@spart}
+%</report|book>
+%    \end{macrocode}
+%
+% \begin{macro}{\@part}
+%    此宏执行部分的标题(title of the part)的实际格式(actual formatting)。同样，
+%    article 文档类的宏定义与 report 和 book 文档类的宏定义不同。
+
+%    当 article 文档类的 \Lcount{secnumdepth}\ 大于 $-1$ 时，我们有一个已编号的部分(numbered part)，
+%    否则它就是未编号的(unnumbered)。
+%    \begin{macrocode}
+%<*article>
+\def\@part[#1]#2{%
+    \ifnum \c@secnumdepth >\m@ne
+      \refstepcounter{part}%
+      \addcontentsline{toc}{part}{\thepart\hspace{1em}#1}%
+    \else
+      \addcontentsline{toc}{part}{#1}%
+    \fi
+%    \end{macrocode}
+%    我们打印 article 类中左对齐的标题(title flush left)。此外，我们还防止断行和重新设置字体。
+% \changes{v1.3c}{1995/05/25}{replace \cs{reset@font} with
+%    \cs{normalfont}}
+%    \begin{macrocode}
+    {\parindent \z@ \raggedright
+     \interlinepenalty \@M
+     \normalfont
+%    \end{macrocode}
+%    当这是一个已编号的部分(numbered part)时，我们必须打印编号(number)number和标题(title)。
+%    此处的 |\nobreak| 应防止分页。
+% \changes{v1.4e}{2001/05/24}{Replaced tilde with \cs{nobreakspace}
+%                             (pr/3310)}
+%    \begin{macrocode}
+     \ifnum \c@secnumdepth >\m@ne
+       \Large\bfseries \partname\nobreakspace\thepart
+       \par\nobreak
+     \fi
+     \huge \bfseries #2%
+%    \end{macrocode}
+%    现在我们清空标记寄存器(mark registers)，留下一些空白(white space)，并让 |\@afterheading| 负责抑制缩进。
+%    \begin{macrocode}
+     \markboth{}{}\par}%
+    \nobreak
+    \vskip 3ex
+    \@afterheading}
+%</article>
+%    \end{macrocode}
+%
+%    对于 report 和 book 文档类，当 \Lcount{secnumdepth}\ 大于 $-2$，我们有一个
+%    已编号的部分(numbered part)，否则就没有编号(unnumbered)。
+%    \begin{macrocode}
+%<*report|book>
+\def\@part[#1]#2{%
+    \ifnum \c@secnumdepth >-2\relax
+      \refstepcounter{part}%
+      \addcontentsline{toc}{part}{\thepart\hspace{1em}#1}%
+    \else
+      \addcontentsline{toc}{part}{#1}%
+    \fi
+%    \end{macrocode}
+%    我们清空标记寄存器(mark registers)，并将标题放在 report 和 book 文档类的页面中央。
+%    此外，我们还防止断行和重新设置字体。
+% \changes{v1.3c}{1995/05/25}{replace \cs{reset@font} with
+%    \cs{normalfont}}
+% \changes{v1.3j}{1995/08/16}{add missing percent}
+%    \begin{macrocode}
+    \markboth{}{}%
+    {\centering
+     \interlinepenalty \@M
+     \normalfont
+%    \end{macrocode}
+%    当这是一个已编号的部分(numbered part)时，我们必须打印编号(number)。
+% \changes{v1.4e}{2001/05/24}{Replaced tilde with \cs{nobreakspace}
+%                             (pr/3310)}
+%    \begin{macrocode}
+     \ifnum \c@secnumdepth >-2\relax
+       \huge\bfseries \partname\nobreakspace\thepart
+       \par
+%    \end{macrocode}
+%    在打印标题之前，我们留出一些空间(space)，并将收尾工作(finishing)留给 |\@endpart|。
+%    \begin{macrocode}
+       \vskip 20\p@
+     \fi
+     \Huge \bfseries #2\par}%
+    \@endpart}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@spart}
+%    当使用用户命令的星形形式(star form)时，此宏执行部分标题(title of the part)的
+%    实际格式(actual formatting)。在这种情况下，我们{\kaiti 从不}打印编号(number)。
+%    否则格式相同。
+%
+%    该宏在 article 文档类中的定义与在 report 和 book 文档类中的定义的差异与
+%    它们在 |\@part| 中定义的差异相同。
+% \changes{v1.3c}{1995/05/25}{replace \cs{reset@font} with
+%    \cs{normalfont}}
+%    \begin{macrocode}
+%<*article>
+\def\@spart#1{%
+    {\parindent \z@ \raggedright
+     \interlinepenalty \@M
+     \normalfont
+     \huge \bfseries #1\par}%
+     \nobreak
+     \vskip 3ex
+     \@afterheading}
+%</article>
+%<*report|book>
+\def\@spart#1{%
+    {\centering
+     \interlinepenalty \@M
+     \normalfont
+     \Huge \bfseries #1\par}%
+    \@endpart}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@endpart}
+% \changes{v1.3j}{1995/08/16}{move docstrip guard to avoid defining
+%    \cs{@endpart} in article}
+%    此宏完成了 |\@part| 和 |\@spart| 的部分页(part page)。
+%
+%    首先我们填充当前页面(current page)。
+%    \begin{macrocode}
+%<*report|book>
+\def\@endpart{\vfil\newpage
+%    \end{macrocode}
+%    然后，当我们处于双面模式(twosided mode)并且章(chapters)应该位于右侧时，我们会
+%    生成一个完全空白的页面(completely blank page)。
+% \changes{v1.4b}{2000/05/19}{Only add empty page after part if
+%    twoside and openright (pr/3155)}
+%    \begin{macrocode}
+              \if@twoside
+               \if@openright
+                \null
+                \thispagestyle{empty}%
+                \newpage
+               \fi
+              \fi
+%    \end{macrocode}
+%    当这是一个两栏文档(two-column document)时，我们必须切换回两栏模式(two-column mode)。
+%    \begin{macrocode}
+              \if@tempswa
+                \twocolumn
+              \fi}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[章]{\heiti 章}
+%
+% \begin{macro}{\chapter}
+%    章(chapter)应该总是从新页面开始，因此我们首先调用 |\clearpage| 并将此页面的页
+%    面样式(pagestyle)设置为 \pstyle{plain}。
+%    \begin{macrocode}
+%<*report|book>
+\newcommand\chapter{\if@openright\cleardoublepage\else\clearpage\fi
+                    \thispagestyle{plain}%
+%    \end{macrocode}
+%    然后我们防止浮动(floats)出现在页面顶部，因为在章标题上方有浮动对象(floating object)看起来很奇怪。
+%    \begin{macrocode}
+                    \global\@topnum\z@
+%    \end{macrocode}
+%    然后，我们通过将 |\@afterindent| 开关设置为 |false| 来抑制第一段的缩进。
+%    我们使用 |\secdef| 指定用于实际设置章标题(chapter title)的宏。
+%    \begin{macrocode}
+                    \@afterindentfalse
+                    \secdef\@chapter\@schapter}
+%    \end{macrocode}
+%
+% \begin{macro}{\@chapter}
+%    当我们有一个已编号的章(numbered chapter)时，就会调用这个宏。当 \Lcount{secnumdepth}\ 大
+%    于 $-1$ 时，并且在 boo k类中， |\@mainmatter| 为 true，我们显示章编号(chapter number)。
+%    我们还通过向终端(terminal)写入消息来通知用户即将排版新章。
+%    \begin{macrocode}
+\def\@chapter[#1]#2{\ifnum \c@secnumdepth >\m@ne
+%<book>                       \if@mainmatter
+                         \refstepcounter{chapter}%
+                         \typeout{\@chapapp\space\thechapter.}%
+                         \addcontentsline{toc}{chapter}%
+                                   {\protect\numberline{\thechapter}#1}%
+%<*book>
+                       \else
+                         \addcontentsline{toc}{chapter}{#1}%
+                       \fi
+%</book>
+                    \else
+                      \addcontentsline{toc}{chapter}{#1}%
+                    \fi
+%    \end{macrocode}
+%    在将条目(entry)写入目录(table of contents)后，我们将本章(可选)标题存储
+%    为 |\chaptermark|，并在图(figures)和表(tables)列表中添加一些空白。
+%    \begin{macrocode}
+                    \chaptermark{#1}%
+                    \addtocontents{lof}{\protect\addvspace{10\p@}}%
+                    \addtocontents{lot}{\protect\addvspace{10\p@}}%
+%    \end{macrocode}
+%    然后我们调用 |\@makechapterhead| 来格式化实际的章标题(actual chapter title)。
+%    当我们处于两栏模式(two-column mode)时，为了让章标题使用整个 |\textwidth| 宽度，
+%    我们必须以一种特殊的方式进行此操作。在单栏模式(one-column mode)中，我们调
+%    用 |\@afterheading| 来抑制缩进
+%    \begin{macrocode}
+                    \if@twocolumn
+                      \@topnewpage[\@makechapterhead{#2}]%
+                    \else
+                      \@makechapterhead{#2}%
+                      \@afterheading
+                    \fi}
+%    \end{macrocode}
+%
+% \begin{macro}{\@makechapterhead}
+%    上面的宏使用 |\@makechapterhead|\meta{text}\ 来格式化章标题(heading of the chapter)。
+%
+%    我们首先留一些空白(white space)。我们打开了一个组(group)，其中段落缩进为 0pt，
+%    文本设置为右侧不对齐(ragged)。我们还重置了字体。
+% \changes{v1.3c}{1995/05/25}{replace \cs{reset@font} with
+%    \cs{normalfont}}
+%    \begin{macrocode}
+\def\@makechapterhead#1{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+%    \end{macrocode}
+%    然后我们检查是否必须打印章编号。如果是这样，我们在章编号(chapternumber)和标题之间留一些空白(whitespace)。
+% \changes{v1.2v}{1994/11/30}{Added a \cs{nobreak} to prevent a
+%    pagebreak between the chapternumber and the chaptertitle}
+% \changes{v1.3j}{1995/08/16}{replace braces by \cs{space}}
+%    \begin{macrocode}
+    \ifnum \c@secnumdepth >\m@ne
+%<book>      \if@mainmatter
+        \huge\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 20\p@
+%<book>      \fi
+    \fi
+%    \end{macrocode}
+%    现在我们将标题设置为大号粗体(large bold)字体。我们防止分页符(pagebreak)出现在
+%    标题的中间或后面。最后，在文本开始之前，我们留下一些空白。
+% \changes{v1.2v}{1994/11/30}{Added \cs{interlinepenalty}\cs{@M} to
+%    prevent a pagebreak in the middle of a title}
+%    \begin{macrocode}
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@schapter}
+%    当我们有一个未编号的章(unnumbered chapter)时，就会调用此宏。它比 |\@chapter| 简单得多，
+%    因为它只需要排版章标题(chapter title)。
+%    \begin{macrocode}
+\def\@schapter#1{\if@twocolumn
+                   \@topnewpage[\@makeschapterhead{#1}]%
+                 \else
+                   \@makeschapterhead{#1}%
+                   \@afterheading
+                 \fi}
+%    \end{macrocode}
+%
+% \begin{macro}{\@makeschapterhead}
+%    上面的宏使用 |\@makeschapterhead|\meta{text}\ 格式化章标题。它与 |\@makechapterhead| 类似，
+%    只是它不必打印章编号(chapter number)。
+%
+% \changes{v1.2v}{1994/11/30}{Added \cs{interlinepenalty}\cs{@M} to
+%    prevent a pagebreak in the middle of a title}
+% \changes{v1.3c}{1995/05/25}{replace \cs{reset@font} with
+%    \cs{normalfont}}
+%    \begin{macrocode}
+\def\@makeschapterhead#1{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedright
+    \normalfont
+    \interlinepenalty\@M
+    \Huge \bfseries  #1\par\nobreak
+    \vskip 40\p@
+  }}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+%
+% \subsubsection[下级标题]{\heiti 下级标题}
+%
+%    这些命令都使用 |\@startsection|。
+% \begin{macro}{\section}
+%    这给出了一个普通的标题(normal heading)，标题上下都有空白(space)，标题设置
+%    为 |\Large\bfseries|，第一段没有缩进。
+% \changes{v1.3c}{1995/05/25}{replace \cs{reset@font} with
+%    \cs{normalfont}}
+%    \begin{macrocode}
+\newcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
+                                   {2.3ex \@plus.2ex}%
+                                   {\normalfont\Large\bfseries}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\subsection}
+%    这给出了一个普通的标题(normal heading)，标题上下都有空白(space)，标题设置
+%    为 |\large\bfseries|，第一段没有缩进。
+%    \begin{macrocode}
+\newcommand\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\large\bfseries}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\subsubsection}
+%    这将给出一个普通的标题(normal heading)，标题上方和下方都有空白(space)，标题设置
+%    为 |\normalsize\bfseries|，第一段没有缩进。
+%    \begin{macrocode}
+\newcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\paragraph}
+%    这将在标题上方和右侧提供一个带有空白的栏外标题(run-in heading)，
+%    标题设置为 |\normalsize\bfseries|。
+%    \begin{macrocode}
+\newcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+                                    {3.25ex \@plus1ex \@minus.2ex}%
+                                    {-1em}%
+                                    {\normalfont\normalsize\bfseries}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\subparagraph}
+%    这将在标题上方和右侧显示缩进的带有空白的栏外标题(run-in heading)，标题设置
+%    为 |\normalsize\bfseries|。
+%    \begin{macrocode}
+\newcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
+                                       {3.25ex \@plus1ex \@minus .2ex}%
+                                       {-1em}%
+                                      {\normalfont\normalsize\bfseries}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[列表]{\heiti 列表}
+%
+% \subsubsection[普通的列表参数]{\heiti 普通的列表参数}
+%
+% 以下命令用于设置列表环境(list environment)参数的默认值。有关参数含义的解释，请参阅 \LaTeX{}\ 手册。
+% 列表环境的默认设置如下。首先，将 |\rightmargin|、|\listparindent| 和 |\itemindent| 设置为0pt。
+% 然后，对于第 K 级列表(Kth level list)，调用命令 |\@listK|，其中“K”表示“i”、“ii”、...、“vi”。
+% (即，第三级列表调用 |\@listiii|。)按照惯例，|\@listK| 应将 |\leftmargin| 设置为 |\leftmarginK|。
+%
+% \begin{macro}{\leftmargin}
+% \begin{macro}{\leftmargini}
+% \begin{macro}{\leftmarginii}
+% \begin{macro}{\leftmarginiii}
+% \begin{macro}{\leftmarginiv}
+% \begin{macro}{\leftmarginv}
+% \begin{macro}{\leftmarginvi}
+% \changes{v1.0m}{1994/01/12}{Use em instead of pt to remain
+%    compatible with old styles}
+% \changes{v1.3q}{1995/12/20}{Temporary(?) fix: revert to setting
+%    \cs{leftmargin} at outer level}
+%
+% 当我们处于两栏模式(two-column mode)时，有些页边距设置得稍微小一些。
+%    \begin{macrocode}
+\if@twocolumn
+  \setlength\leftmargini  {2em}
+\else
+  \setlength\leftmargini  {2.5em}
+\fi
+%    \end{macrocode}
+%    在这些文件中的所有参数设置合理化之前，我们需要在此外部级别(outer level)设置 |\leftmargin| 的值。
+%    \begin{macrocode}
+\leftmargin  \leftmargini
+%    \end{macrocode}
+%    计算以下三个值，使其大于 |\labelsep| 和默认标签(default labels)宽度之和
+%    默认标签即“(m)”、“vii.”和“M.”。
+%    \begin{macrocode}
+\setlength\leftmarginii  {2.2em}
+\setlength\leftmarginiii {1.87em}
+\setlength\leftmarginiv  {1.7em}
+\if@twocolumn
+  \setlength\leftmarginv  {.5em}
+  \setlength\leftmarginvi {.5em}
+\else
+  \setlength\leftmarginv  {1em}
+  \setlength\leftmarginvi {1em}
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\labelsep}
+% \begin{macro}{\labelwidth}
+% \changes{v1.0m}{1994/01/12}{Use em instead of pt to remain
+%    compatible with old styles}
+%    |\labelsep| 是标签(label)和项目文本(text of an item)之间的距离；|\labelwidth| 是标签的宽度。
+%    \begin{macrocode}
+\setlength  \labelsep  {.5em}
+\setlength  \labelwidth{\leftmargini}
+\addtolength\labelwidth{-\labelsep}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\partopsep}
+%    当用户在环境前留下空行(blank line)时，除了 |\parskip| 和 |\topsep| 之外，还会
+%    插入一个额外的垂直空间 |\partopsep|。
+% \changes{v1.0m}{1994/01/12}{\cs{partopsep} should be different,
+%    depending on the pointsize}
+%    \begin{macrocode}
+%</article|report|book>
+%<10pt>\setlength\partopsep{2\p@ \@plus 1\p@ \@minus 1\p@}
+%<11pt>\setlength\partopsep{3\p@ \@plus 1\p@ \@minus 1\p@}
+%<12pt>\setlength\partopsep{3\p@ \@plus 2\p@ \@minus 2\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@beginparpenalty}
+% \begin{macro}{\@endparpenalty}
+%    这些惩罚(penalties)在列表(list)或段落(paragraph)环境前后插入。
+%    它们被设置为奖金值(bonus value)，以鼓励在这些点上分页。
+% \begin{macro}{\@itempenalty}
+%    在列表项(list items)之间插入此惩罚(penalty)。
+%    \begin{macrocode}
+%<*article|report|book>
+\@beginparpenalty -\@lowpenalty
+\@endparpenalty   -\@lowpenalty
+\@itempenalty     -\@lowpenalty
+%</article|report|book>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@listi}
+% \begin{macro}{\@listI}
+% |\@listi| 为显示在顶层(top-level)的列表定义了 |\leftmargin|、|\parsep|、|\topsep|、|\itemsep| 等的值。
+% 它的定义由字体尺寸命令(font-size commands)修改，例如，在 |\small| 中，列表参数的值“更小(smaller)”。
+%
+% 由于这个原因，\@listI\ 被定义为保存 \@listi\ 的一个副本，以便 |\normalsize| 可以将所有参数切换回来。
+%
+%    \begin{macrocode}
+%<*10pt|11pt|12pt>
+\def\@listi{\leftmargin\leftmargini
+%<*10pt>
+            \parsep 4\p@ \@plus2\p@ \@minus\p@
+            \topsep 8\p@ \@plus2\p@ \@minus4\p@
+            \itemsep4\p@ \@plus2\p@ \@minus\p@}
+%</10pt>
+%<*11pt>
+            \parsep 4.5\p@ \@plus2\p@ \@minus\p@
+            \topsep 9\p@   \@plus3\p@ \@minus5\p@
+            \itemsep4.5\p@ \@plus2\p@ \@minus\p@}
+%</11pt>
+%<*12pt>
+            \parsep 5\p@  \@plus2.5\p@ \@minus\p@
+            \topsep 10\p@ \@plus4\p@   \@minus6\p@
+            \itemsep5\p@  \@plus2.5\p@ \@minus\p@}
+%</12pt>
+\let\@listI\@listi
+%    \end{macrocode}
+%    我们对参数进行了初始化(initialise)，尽管严格来说这是不必要的。
+%    \begin{macrocode}
+\@listi
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@listii}
+% \begin{macro}{\@listiii}
+% \begin{macro}{\@listiv}
+% \begin{macro}{\@listv}
+% \begin{macro}{\@listvi}
+%    下面是用于更高层级列表的相同宏。请注意，它们没有保存的版本(saved versions)，
+%    也不会被字体尺寸命令(font-size commands)修改。换句话说，此类假定嵌套列表(nested lists)
+%    仅以 |\normalsize| 显示，即主文档尺寸(document size)。
+%    \begin{macrocode}
+\def\@listii {\leftmargin\leftmarginii
+              \labelwidth\leftmarginii
+              \advance\labelwidth-\labelsep
+%<*10pt>
+              \topsep    4\p@ \@plus2\p@ \@minus\p@
+              \parsep    2\p@ \@plus\p@  \@minus\p@
+%</10pt>
+%<*11pt>
+              \topsep    4.5\p@ \@plus2\p@ \@minus\p@
+              \parsep    2\p@   \@plus\p@  \@minus\p@
+%</11pt>
+%<*12pt>
+              \topsep    5\p@   \@plus2.5\p@ \@minus\p@
+              \parsep    2.5\p@ \@plus\p@    \@minus\p@
+%</12pt>
+              \itemsep   \parsep}
+\def\@listiii{\leftmargin\leftmarginiii
+              \labelwidth\leftmarginiii
+              \advance\labelwidth-\labelsep
+%<10pt>              \topsep    2\p@ \@plus\p@\@minus\p@
+%<11pt>              \topsep    2\p@ \@plus\p@\@minus\p@
+%<12pt>              \topsep    2.5\p@\@plus\p@\@minus\p@
+              \parsep    \z@
+              \partopsep \p@ \@plus\z@ \@minus\p@
+              \itemsep   \topsep}
+\def\@listiv {\leftmargin\leftmarginiv
+              \labelwidth\leftmarginiv
+              \advance\labelwidth-\labelsep}
+\def\@listv  {\leftmargin\leftmarginv
+              \labelwidth\leftmarginv
+              \advance\labelwidth-\labelsep}
+\def\@listvi {\leftmargin\leftmarginvi
+              \labelwidth\leftmarginvi
+              \advance\labelwidth-\labelsep}
+%</10pt|11pt|12pt>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[排序列表]{\heiti 排序列表}
+%
+%    排序列表环境(enumerate environment)使用四个计数器(counters)：\Lcount{enumi}、
+%    \Lcount{enumii}、\Lcount{enumiii} 和 \Lcount{enumiv}，其中 \Lcount{enumN}\ 控制
+%    第 N 级排序(enumeration)的编号(numbering)。
+%
+% \begin{macro}{\theenumi}
+% \begin{macro}{\theenumii}
+% \begin{macro}{\theenumiii}
+% \begin{macro}{\theenumiv}
+%    计数器已定义为 \LaTeX{}\ 格式，但此处更改了它们的表示形式(representation)。
+%
+%    \begin{macrocode}
+%<*article|report|book>
+\renewcommand\theenumi{\@arabic\c@enumi}
+\renewcommand\theenumii{\@alph\c@enumii}
+\renewcommand\theenumiii{\@roman\c@enumiii}
+\renewcommand\theenumiv{\@Alph\c@enumiv}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\labelenumi}
+% \begin{macro}{\labelenumii}
+% \begin{macro}{\labelenumiii}
+% \begin{macro}{\labelenumiv}
+%    每个项目(item)的标签(label)由 |\labelenumi| \ldots\ |\labelenumiv| 命令生成。
+%    \begin{macrocode}
+\newcommand\labelenumi{\theenumi.}
+\newcommand\labelenumii{(\theenumii)}
+\newcommand\labelenumiii{\theenumiii.}
+\newcommand\labelenumiv{\theenumiv.}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\p@enumii}
+% \begin{macro}{\p@enumiii}
+% \begin{macro}{\p@enumiv}
+%    在引用排序列表的第 N 层级的项目时，|\p@enumN||\theenumN| 的展开(expansion)定义
+%     |\ref| 命令的输出。
+%    \begin{macrocode}
+\renewcommand\p@enumii{\theenumi}
+\renewcommand\p@enumiii{\theenumi(\theenumii)}
+\renewcommand\p@enumiv{\p@enumiii\theenumiii}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[常规列表]{\heiti 常规列表}
+%
+% \begin{macro}{\labelitemi}
+% \begin{macro}{\labelitemii}
+% \changes{v1.2k}{1994/05/06}{Inserted \cs{normalfont}}
+% \changes{v1.3s}{1996/08/24}{Replaced -{}- with \cs{textendash}}
+% \changes{v1.3u}{1996/10/31}{Changed to \cs{textbullet},
+%                 \cs{textasteriskcentered} and \cs{textperiodcentered}}
+% \begin{macro}{\labelitemiii}
+% \begin{macro}{\labelitemiv}
+%    项目(itemization)由四个命令控制：|\labelitemi|、|\labelitemii|、|\labelitemiii| 和 |\labelitemiv|，
+%    它们定义了各种项目级别的标签：使用的符号有黑点(bullet)、粗体短划线(bold en-dash)、
+%    居中星号(centered asterisk)和居中的点(centred dot)。
+%
+% \changes{v1.4n}{2021/06/11}{Drop incorrect space in \cs{labelitemiv} (gh/496)}
+%    \begin{macrocode}
+\newcommand\labelitemi  {\labelitemfont \textbullet}
+\newcommand\labelitemii {\labelitemfont \bfseries \textendash}
+\newcommand\labelitemiii{\labelitemfont \textasteriskcentered}
+\newcommand\labelitemiv {\labelitemfont \textperiodcentered}
+%    \end{macrocode}
+%
+% \begin{macro}{\labelitemfont}
+%    \cs{labelitemfont}\ 的默认定义(default definition)是将字体重置为 \cs{normalfont}，
+%    以便不管周围的条件如何，始终生成相同的符号(same symbol)。
+%
+% \changes{v1.4l}{2019/12/20}{Normalize label fonts}
+%    可能的替代方案(alternatives)是，例如：
+%\begin{verbatim}
+%  \renewcommand\labelitemfont
+%     {\normalfont\fontfamily{lmss}\selectfont}
+%  \renewcommand\labelitemfont
+%     {\rmfamily\normalshape}
+%\end{verbatim}
+%    第一种方法将使用 Latin Modern Sans 的符号，第二种方法将只允许更改字体序列(font series)，
+%    以便在粗体上下文中的 \texttt{itemize}\ 产成生更粗体的符号(bolder symbols)。
+%    \begin{macrocode}
+\newcommand\labelitemfont{\normalfont}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[解说列表]{\heiti 解说列表}
+%
+% \begin{environment}{description}
+%    这里定义了解说列表环境(description environment) -- 而 itemize 和 enumerate 环境
+%    是以 \LaTeX{}\ 格式定义的。
+%
+%    \begin{macrocode}
+\newenvironment{description}
+               {\list{}{\labelwidth\z@ \itemindent-\leftmargin
+                        \let\makelabel\descriptionlabel}}
+               {\endlist}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{macro}{\descriptionlabel}
+%    要更改标签(label)的格式，必须重新定义 |\descriptionlabel|。
+%
+% \changes{v1.2k}{1994/05/06}{Inserted \cs{normalfont}}
+% \changes{v1.2y}{1995/01/31}{made command short}
+%    \begin{macrocode}
+\newcommand*\descriptionlabel[1]{\hspace\labelsep
+                                \normalfont\bfseries #1}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[定义新环境]{\heiti 定义新环境}
+%
+% \subsubsection[摘要]{\heiti 摘要}
+%
+% \begin{environment}{abstract}
+%    当我们制作单独的标题页(separate titlepage)时，我们也会将摘要(abstract)放在它
+%    自己的页面上。摘要在页面上垂直居中放置。
+%
+%    请注意，此环境不是为 books 定义的。
+% \changes{v1.3e}{1995/06/19}{Added setting of \cs{@endparpenalty}
+%         to avoid page break after abstract heading.}
+%    \begin{macrocode}
+% \changes{v1.3m}{1995/10/23}{Added setting of \cs{beginparpenalty} to
+%    discourage page break before abstract heading.}
+%<*article|report>
+\if@titlepage
+  \newenvironment{abstract}{%
+      \titlepage
+      \null\vfil
+      \@beginparpenalty\@lowpenalty
+      \begin{center}%
+        \bfseries \abstractname
+        \@endparpenalty\@M
+      \end{center}}%
+     {\par\vfil\null\endtitlepage}
+%    \end{macrocode}
+%    当我们没有创建单独的标题页--article 文档类的默认标题页，我们必须检查是否处于
+%    两栏模式(two-column mode)。在这种情况下，摘要将作为一个|\section*|，否则将使
+%    用引用环境(quotation environment)对摘要进行排版。
+%    \begin{macrocode}
+\else
+  \newenvironment{abstract}{%
+      \if@twocolumn
+        \section*{\abstractname}%
+      \else
+        \small
+        \begin{center}%
+          {\bfseries \abstractname\vspace{-.5em}\vspace{\z@}}%
+        \end{center}%
+        \quotation
+      \fi}
+      {\if@twocolumn\else\endquotation\fi}
+\fi
+%</article|report>
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsubsection[诗歌]{\heiti 诗歌}
+%
+% \begin{environment}{verse}
+%   诗歌环境(verse environment)是通过巧妙地使用列表环境(list environment)的参数来定义的。
+%   用户键入 |\\| 结束一行。这是通过 |\let| |\\| 等于 |\@centercr| 来实现的。
+%
+% \changes{v1.3j}{1995/08/16}{stop \cs{item} scanning for [ with
+%    \cs{relax}}
+%    \begin{macrocode}
+\newenvironment{verse}
+               {\let\\\@centercr
+                \list{}{\itemsep      \z@
+                        \itemindent   -1.5em%
+                        \listparindent\itemindent
+                        \rightmargin  \leftmargin
+                        \advance\leftmargin 1.5em}%
+                \item\relax}
+               {\endlist}
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsubsection[引用(quotation)]{\heiti 引用(quotation)}
+%
+% \begin{environment}{quotation}
+%   引用环境环境(quotation environment)也可以通过巧妙地使用列表环境(list environment)的
+%   参数来定义。环境中的线条设置小于 |\textwidth|。此环境中段落的第一行是缩进的。
+%
+% \changes{v1.3j}{1995/08/16}{stop \cs{item} scanning for [ with
+%    \cs{relax}}
+%    \begin{macrocode}
+\newenvironment{quotation}
+               {\list{}{\listparindent 1.5em%
+                        \itemindent    \listparindent
+                        \rightmargin   \leftmargin
+                        \parsep        \z@ \@plus\p@}%
+                \item\relax}
+               {\endlist}
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsubsection[引用(quote)]{引用(quote)}
+%
+% \begin{environment}{quote}
+%   引用(quote)环境与引用(quotation)环境类似，只是段落没有缩进。
+%
+% \changes{v1.3j}{1995/08/16}{stop \cs{item} scanning for [ with
+%    \cs{relax}}
+%    \begin{macrocode}
+\newenvironment{quote}
+               {\list{}{\rightmargin\leftmargin}%
+                \item\relax}
+               {\endlist}
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsubsection[定理]{\heiti 定理}
+%
+%    这个文档类(document class)没有定义自己的定理环境(theorem environments)，可以
+%    使用 \LaTeX{}\ 格式提供的默认值。
+%
+% \subsubsection[标题页]{\heiti 标题页}
+%
+% \begin{environment}{titlepage}
+%  在普通环境(normal environments)中，titlepage 环境只会开始和结束页面，并禁止页码(page numbers)。
+%  当 \LaTeX\ 处于两栏模式(two-column mode)时，环境会暂时切换到单栏模式(one-column mode)。在 report 类中，
+%  它还将页码重置为 1，然后在两栏模式中，在末尾将其重置为 1。对于 book 类，环境通过
+%  发出 \cs{cleardouplepage}\ 命令来确保标题页位于右侧页(recto page)上。在兼容模式(compatibility mode)中，
+%  它将页码设置为零。这是不正确的，因为它的结果是使用右侧页面(right-hand page)的页面参数(page parameters)，但它是以前的方式。
+%
+% \changes{v1.0g}{1993/12/09}{Moved the setting of
+%    \cs{@restonecolfalse}}
+% \changes{v1.2c}{1994/03/17}{page :!= 0 only in compatibility mode
+%    (LL)}
+% \changes{v1.2d}{1994/04/11}{Moved \cs{cleardoublepage} inside
+%    definition of titlepage environment}
+% \changes{v1.3i}{1995/08/08}{New implementation with support for
+%      twoside and openright option}
+%
+%    首先，我们给出了兼容模式(compatibility mode)的定义。
+%    \begin{macrocode}
+\if@compatibility
+  \newenvironment{titlepage}
+    {%
+%<book>      \cleardoublepage
+      \if@twocolumn
+        \@restonecoltrue\onecolumn
+      \else
+        \@restonecolfalse\newpage
+      \fi
+      \thispagestyle{empty}%
+      \setcounter{page}\z@
+    }%
+    {\if@restonecol\twocolumn \else \newpage \fi
+    }
+%    \end{macrocode}
+%
+%    这是原始的(native) \LaTeXe{}。
+%    \begin{macrocode}
+\else
+  \newenvironment{titlepage}
+    {%
+%<book>      \cleardoublepage
+      \if@twocolumn
+        \@restonecoltrue\onecolumn
+      \else
+        \@restonecolfalse\newpage
+      \fi
+      \thispagestyle{empty}%
+      \setcounter{page}\@ne
+    }%
+    {\if@restonecol\twocolumn \else \newpage \fi
+%    \end{macrocode}
+%    如果我们不是在双面模式(two-side mode)中，标题页(title page)后的第一页也应该是第 1 页。
+%    \begin{macrocode}
+     \if@twoside\else
+        \setcounter{page}\@ne
+     \fi
+    }
+\fi
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsubsection[附录]{\heiti 附录}
+%
+% \begin{macro}{\appendix}
+%
+%    |\appendix| 命令并不是真正的环境，它是一个宏，它对事情的处理方式做了一些改变。
+%
+%    在 article 文档类中，|\appendix| 命令必须执行以下操作：
+%    \begin{itemize}
+%    \item 将节(section)和子节(subsection)计数器重置为零，
+%    \item 重新定义 |\thesection| 以产生按字母顺序排列的附录编号(alphabetic appendix numbers)。
+%    这种重新定义是全局进行的，以确保即使在诸如 \texttt{multicols}\ 之类的环境中发出 |\appendix|，
+%    它也能够继续存在。
+%    \end{itemize}
+%
+% \changes{1.3z}{1998/09/19}{Redefine \cs{thesection} globally (pr/2862)}
+%    \begin{macrocode}
+%<*article>
+\newcommand\appendix{\par
+  \setcounter{section}{0}%
+  \setcounter{subsection}{0}%
+  \gdef\thesection{\@Alph\c@section}}
+%</article>
+%    \end{macrocode}
+%
+%    在 report 和 book 文档类中， |\appendix| 命令必须执行以下操作：
+%    \begin{itemize}
+%    \item 将章(chapter)和节(section)计数器重置为零
+%    \item 将 |\@chapapp| 设置为|\appendixname|(用于消息)
+%    \item 重新定义章计数器(chapter counter)以生成附录编号(appendix numbers)
+%    \item 如果附录名称(appendix titles)和附录标题(appendix headings)看起来与章名
+%    称(chapter titles)和章标题(chapter headings)不同，可能需要重新定义 |\chapter| 命令。
+%    这种重新定义是全局进行的，以确保即使在诸如 \texttt{multicols}\ 之类的环境中发
+%    出 |\appendix|，它也能继续存在。
+%    \end{itemize}
+%
+% \changes{1.3z}{1998/09/19}{Redefine \cs{thechapter} and
+%                            \cs{@chapapp} globally (pr/2862)}
+%    \begin{macrocode}
+%<*report|book>
+\newcommand\appendix{\par
+  \setcounter{chapter}{0}%
+  \setcounter{section}{0}%
+  \gdef\@chapapp{\appendixname}%
+  \gdef\thechapter{\@Alph\c@chapter}}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[为现有环境设置参数]{\heiti 为现有环境设置参数}
+%
+% \subsubsection[数组(array)和表格(tabular)]{\heiti 数组(array)和表格(tabular)}
+%
+% \begin{macro}{\arraycolsep}
+%    数组环境(array environment)中的列(columns)由 2 个 |\arraycolsep| 分隔。
+%    \begin{macrocode}
+\setlength\arraycolsep{5\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\tabcolsep}
+%    表格环境(tabular environment)中的列(columns)由 2 个 |\tabcolsep| 分隔。
+%    \begin{macrocode}
+\setlength\tabcolsep{6\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\arrayrulewidth}
+%    数组(array)和表格(tabular)环境中线段(rule)的宽度由 |\arrayrulewidth| 给出。
+%    \begin{macrocode}
+\setlength\arrayrulewidth{.4\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\doublerulesep}
+%    数组(array)和表格(tabular)环境中相邻线段(rule)之间的间距由 |\doublerulesep| 给出。
+%    \begin{macrocode}
+\setlength\doublerulesep{2\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{表格(tabbing)}
+%
+% \begin{macro}{\tabbingsep}
+%    这将控制 |\'| 命令放入的空间(space)。(有关说明，请参阅 \LaTeX{}\ 手册。)
+%    \begin{macrocode}
+\setlength\tabbingsep{\labelsep}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection[小页]{\heiti 小页}
+%
+% \begin{macro}{\@minipagerestore}
+%    当 |\@minipagerestore| 宏进入到一个小页环境(minipage environmen)时，它被调用
+%    来设置在小页环境中需要以不同方式处理的事情。在当前的类中，它什么也不做。
+% \end{macro}
+%
+% \begin{macro}{\@mpfootins}
+%    小页(minipages)有自己的脚注(footnotes)；|\skip||\@mpfootins| 在迷你页面中对
+%    脚注的作用与对普通脚注(ordinary footnotes)的相同。
+%
+%    \begin{macrocode}
+\skip\@mpfootins = \skip\footins
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection[有框的盒子]{\heiti 有框的盒子}
+%
+% \begin{macro}{\fboxsep}
+%    |\fbox| 和 |\framebox| 在框和其中的文本之间留下空白(space)。
+% \begin{macro}{\fboxrule}
+%    由 |\fbox| 和 |\framebox| 创建的盒子(box)中线段(rules)的宽度。
+%    \begin{macrocode}
+\setlength\fboxsep{3\p@}
+\setlength\fboxrule{.4\p@}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[排序单行公式和排序公式组]{排序单行公式(equation)和排序公式组(eqnarray)}
+%
+% \begin{macro}{\theequation}
+%    在章内时，排序单行公式(equation)计数器将在新章开始时重置，排序单行公式(equation)编号将以章编号为前缀。
+% \changes{v1.3u}{1996/10/31}{Added test for non-zero chapter number}
+%
+%    此代码必须遵循 |\chapter| 的定义，或者更确切地说，遵循章计数器(chapter counter)的定义。
+%    \begin{macrocode}
+%<article>\renewcommand \theequation {\@arabic\c@equation}
+%<*report|book>
+\@addtoreset {equation}{chapter}
+\renewcommand\theequation
+  {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@equation}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\jot}
+%    |\jot| 是排序公式组(eqnarray)环境行之间添加的额外空间(extra space)。使用默认值。
+%    \begin{macrocode}
+% \setlength\jot{3pt}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@eqnnum}
+%    |\@eqnnum| 宏定义排序单行公式(equation)编号在公式中的显示方式。再次使用默认值。
+%
+%    \begin{macrocode}
+% \def\@eqnnum{(\theequation)}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[浮动对象]{\heiti 浮动对象}
+%
+%    \LaTeX{}\ 格式仅定义了一些可用于定义浮动对象(floating objects)的工具。这是在
+%    文档类(document class)中完成的。它需要为 \texttt{TYPE}\ 类型(例如\texttt{TYPE}=figure)的
+%    每个浮动对象定义以下宏。
+%
+%    \begin{description}
+%    \item[\texttt{\bslash fps@TYPE}]
+%        \texttt{TYPE}\ 类型的浮动的默认位置说明符(default placement specifier)。
+%
+%    \item[\texttt{\bslash ftype@TYPE}]
+%        \texttt{TYPE}\ 类型的浮动的类型编号(type number)。每个 \texttt{TYPE}\ 都关
+%        联了一个唯一的正 \texttt{TYPE}\ 编号，它是 2 的幂。例如，图形(figures)可能有
+%        类型编号 1，表格(tables)可能有类型编号 2，程序(programs)可能有类型编号 4，等等。
+%
+%    \item[\texttt{\bslash ext@TYPE}]
+%        指示存储浮动类型 \texttt{TYPE}\ 内容列表(contents list)的文件的扩展名。例如|\ext@figure|=`lof'。
+%
+%    \item[\texttt{\bslash fnum@TYPE}]
+%        为标题(caption)生成图形编号(figure number)的宏。例如 |\fnum@TYPE| == `Figure |\thefigure|'。
+%
+%    \item[\texttt{\bslash @makecaption}{\meta{num}}{\meta{text}}]
+%        用于制作标题(caption)的宏，\meta{num}\ 为标题文本 |\fnum@...| and \meta{text}\ 生成的值。
+%        它可以假定它位于适当宽度的 |\parbox| 中。这将用于{\kaiti 所有}浮动对象。
+%
+%    \end{description}
+%
+%    实现浮动对象(如图形)的实际环境是使用 |\@float| 和 |\end@float| 宏定义的，
+%    而这些宏又是在 \LaTeX{}\ 格式中定义好的。
+%
+%    实现单栏浮动对象(single-column floating object)的环境以 \texttt{TYPE}\ 类型
+%    的 |\@float{|\texttt{TYPE}|}[|\meta{placement}|]| 开始，\texttt{TYPE}\ 类型带
+%    有 \meta{placement}\ 作为位置说明符(placement specifier)。\meta{PLACEMENT}\ 的
+%    默认值由 |\fps@TYPE| 定义。
+%
+%    环境结束于 |\end@float|，例如，|\figure| == |\@float|{figure}, |\endfigure| == |\end@float|。
+%
+% \subsubsection[图形]{\heiti 图形}
+%
+%    下面是图形环境(figure environment)的实现。
+%
+% \begin{macro}{\c@figure}
+%    首先，我们必须分配一个计数器(counter)来对图形(figures)进行编号。
+%
+%    在 report 和 book 文档类中，章(chapters)内的图形按章编号。
+% \changes{v1.3u}{1996/10/31}{Added test for non-zero chapter number}
+%    \begin{macrocode}
+%<*article>
+\newcounter{figure}
+\renewcommand \thefigure {\@arabic\c@figure}
+%</article>
+%<*report|book>
+\newcounter{figure}[chapter]
+\renewcommand \thefigure
+     {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@figure}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\fps@figure}
+% \begin{macro}{\ftype@figure}
+% \begin{macro}{\ext@figure}
+% \begin{macro}{\num@figure}
+%    以下是“figure(图)”类型的浮动对象的参数。
+% \changes{v1.4e}{2001/05/24}{Replaced tilde with \cs{nobreakspace}
+%                             (pr/3310)}
+%    \begin{macrocode}
+\def\fps@figure{tbp}
+\def\ftype@figure{1}
+\def\ext@figure{lof}
+\def\fnum@figure{\figurename\nobreakspace\thefigure}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{environment}{figure}
+% \begin{environment}{figure*}
+%    以及实际环境(actual environment)的定义。带 |*| 的表单(form)用于双栏图形(double-column figures)。
+%    \begin{macrocode}
+\newenvironment{figure}
+               {\@float{figure}}
+               {\end@float}
+\newenvironment{figure*}
+               {\@dblfloat{figure}}
+               {\end@dblfloat}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \subsubsection[表格]{\heiti 表格}
+%
+%    下面是表环境(table environment)的实现。它与图形环境(figure environment)非常相似。
+%
+% \begin{macro}{\c@table}
+%    首先，我们必须分配一个计数器来对表进行编号。
+%
+%    在 report 和 book 文档类中，章内的表格按章编号。
+% \changes{v1.3u}{1996/10/31}{Added test for non-zero chapter number}
+%    \begin{macrocode}
+%<*article>
+\newcounter{table}
+\renewcommand\thetable{\@arabic\c@table}
+%</article>
+%<*report|book>
+\newcounter{table}[chapter]
+\renewcommand \thetable
+     {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@table}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\fps@table}
+% \begin{macro}{\ftype@table}
+% \begin{macro}{\ext@table}
+% \begin{macro}{\num@table}
+%    以下是“table(表格)”类型的浮动对象的参数。
+% \changes{v1.4e}{2001/05/24}{Replaced tilde with \cs{nobreakspace}
+%                             (pr/3310)}
+%    \begin{macrocode}
+\def\fps@table{tbp}
+\def\ftype@table{2}
+\def\ext@table{lot}
+\def\fnum@table{\tablename\nobreakspace\thetable}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{environment}{table}
+% \begin{environment}{table*}
+%    以及实际环境的定义。带 |*| 的表格用于双栏表格(double-column tables)。
+%    \begin{macrocode}
+\newenvironment{table}
+               {\@float{table}}
+               {\end@float}
+\newenvironment{table*}
+               {\@dblfloat{table}}
+               {\end@dblfloat}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \subsubsection[标题]{\heiti 标题}
+%
+% \begin{macro}{\@makecaption}
+%    |\caption| 命令调用 |\@makecaption| 来格式化浮动对象的标题(caption)。它有两个参数，
+%    第一个 \meta{number}，为浮动对象的编号(number)，第二个 \meta{text}，为标题的文本(text of the caption)。
+%    通常 \meta{number}\ 包含一个字符串(string)，如“图 3.2”。宏可以假定它是在一个宽度
+%    为 |\normalsize| 的 |\parbox| 中调用的。
+%
+% \begin{macro}{\abovecaptionskip}
+% \begin{macro}{\belowcaptionskip}
+%    这些长度包含标题上方和下方要保留的空白(space)。
+%    \begin{macrocode}
+\newlength\abovecaptionskip
+\newlength\belowcaptionskip
+\setlength\abovecaptionskip{10\p@}
+\setlength\belowcaptionskip{0\p@}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+%    此宏的定义是 |\long|，能在标题(caption)中允许多个段落(paragraph)。
+%    \begin{macrocode}
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+%    \end{macrocode}
+%    我们想看看标题(caption)是否适合页面上的一行，因此我们首先在一个临时盒子(temporary box)中排版。
+% \changes{v1.2q}{1994/05/29}{Use \cs{sbox}\cs{@tempboxa} instead of
+%    \cs{setbox}\cs{@tempboxa}\cs{hbox} to make this colour safe}
+%    \begin{macrocode}
+  \sbox\@tempboxa{#1: #2}%
+%    \end{macrocode}
+%    我们可以测量它的宽度。它比当前的 |\hsize| 大，我们将标题排版为普通段落(ordinary paragraph)。
+%    \begin{macrocode}
+  \ifdim \wd\@tempboxa >\hsize
+    #1: #2\par
+%    \end{macrocode}
+%    如果标题合适，我们将其居中。因为这在垂直模式(vertical mode)中直接使用了一个 |\hbox|，
+%    所以它不会执行 |\everypar| 令牌(tokens)；这里唯一需要做的就是重置“小页标志(minipage flag)”，
+%    所以我们显式地这么做。
+% \changes{v1.2x}{1994/12/09}{Due to a change in the way floats are
+%    handled we need to set the \cs{if@minipage} switch to false}
+%    \begin{macrocode}
+  \else
+    \global \@minipagefalse
+    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[字体更改]{\heiti 字体更改}
+%
+%    这里我们提供了\LaTeX\ 2.09 及更早版本中常见的声明性字体更改命令(declarative font changing commands)。
+%    这些命令在文本模式(text mode){\kaiti 和}数学模式(math mode)中工作。它们是为了兼容性而提供的，
+%    但使用时应以 |\text...| 和 |\math...| 命令开始。这些命令使用 |\DeclareTextFontCommand| 定义，
+%    该命令有三个参数：要定义的用户命令(user command)、在文本模式中要执行 \LaTeX\ 命令、
+%    在数学模式中要执行 \LaTeX\ 命令。
+%
+% \changes{v1.0g}{1993/12/12}{Distinguished between compatibility and
+%    `normal' mode for the font changing commands.}
+% \changes{v1.0h}{1993/12/18}{These are now defined in the kernel, so
+%    use \cs{@renewfontswitch}.  Compatibility mode defines
+%    \cs{@renewfontswitch} to do nothing, so we don't need to check
+%    for compatibility mode any more.}
+% \changes{v1.0j}{1993/12/20}{Added \cs{normalfont} back in the
+%    definitions of \cs{rm} etc. as this should be the default
+%    behaviour}
+% \changes{v1.2e}{1994/04/14}{\cs{@renewfontswitch} has become
+%    \cs{DeclareOldFontCommand}}
+%
+%  \begin{macro}{\rm}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+%  \begin{macro}{\tt}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+%  \begin{macro}{\sf}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+%
+%    修改族(family)的命令。在兼容模式下，我们首先选择“default”字体，以获得 \LaTeX2.09\ 行为(behaviour)。
+%    \begin{macrocode}
+\DeclareOldFontCommand{\rm}{\normalfont\rmfamily}{\mathrm}
+\DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
+\DeclareOldFontCommand{\tt}{\normalfont\ttfamily}{\mathtt}
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%  \end{macro}
+%
+%  \begin{macro}{\bf}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+%    更改为粗体序列(bold series)的命令。应该使用 |\mdseries| 显式切换回中等序列(medium series)。
+%    \begin{macrocode}
+\DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
+%    \end{macrocode}
+%  \end{macro}
+%
+%  \begin{macro}{\sl}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+% \changes{v1.2g}{1994/04/24}{Added warning if used in math mode}
+%  \begin{macro}{\it}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+%  \begin{macro}{\sc}
+% \changes{v1.0f}{1993/12/08}{Macro added}
+% \changes{v1.2g}{1994/04/24}{Added warning if used in math mode}
+%
+%    以及更改字体形状(shape)的命令。默认情况下，倾斜(slanted)和小型大写(small caps)形状
+%    不可用作数学字母(math alphabets)，因此这些更改在数学模式(math mode)中不起作用。
+%    但是，我们确实警告用户，这样的选择不会产生任何影响。应该使用 |\upshape| 明确地
+%    更改回直立形状(upright shape)。
+%    \begin{macrocode}
+\DeclareOldFontCommand{\it}{\normalfont\itshape}{\mathit}
+\DeclareOldFontCommand{\sl}{\normalfont\slshape}{\@nomath\sl}
+\DeclareOldFontCommand{\sc}{\normalfont\scshape}{\@nomath\sc}
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%  \end{macro}
+%
+% \begin{macro}{\cal}
+% \changes{v1.0g}{1993/12/12}{Macro added}
+% \begin{macro}{\mit}
+% \changes{v1.0g}{1993/12/12}{Macro added}
+%
+%    命令 |\cal| 和 |\mit| 只能在数学模式中使用，在数学模式之外，它们没有任何作用。
+%    目前，新字体选择方案(New Font Selection Scheme，NFSS)定义了这些命令来生成警告消息。
+%    因此，我们必须“手工(by hand)”定义它们。
+% \changes{v1.2w}{1994/12/01}{Now define \cs{cal} and \cs{mit} using
+%    \cs{DeclareRobustCommand*}}
+% \changes{v1.3j}{1995/08/16}{Remove surplus braces}
+%    \begin{macrocode}
+\DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
+\DeclareRobustCommand*\mit{\@fontswitch\relax\mathnormal}
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%
+%\newpage
+%
+% \section{\heiti 交叉引用}
+% \subsection[目录，等]{\heiti 目录，等}
+%
+%     |\section| 命令将 |\contentsline{section}{|\meta{title}|}{|\meta{page}|}| 命令
+%     写入 \file{.toc}\ 文件中，在\file{.toc}\ 文件中，\meta{title}\ 包含条目(entry)的内容，
+%     而 \meta{page}\ 是页码(page number)。如果正在对节进行编号，则 \meta{title}\  格式
+%     为 |\numberline{|\meta{num}|}{|\meta{heading}|}|，这里的 \meta{num}\ 是
+%     由 |\thesection| 生成的编号(number)。其他分节命令(sectioning commands)的工作方式类似。
+%
+%     “figure(图形)”环境中的 |\caption| 命令写入
+%
+%     |\contentsline{figure}{\numberline{|\meta{num}|}{|^^A
+%                    \meta{caption}|}}{|\meta{page}|}|
+%
+%     在 .\file{lof}\ 文件中，其中的 \meta{num}\ 是 |\thefigure| 生成的编号(number)，
+%     而 \meta{caption}\ 是图形标题(figure caption)。它在“table(表格)”环境中的工作方式类似。
+%
+%    命令 |\contentsline{|\meta{name}|}| 展开为 |\l@|\meta{name}。因此，要指定目录(table of contents)，
+%    我们必须定义 |\l@chapter|、|\l@section|、|\l@subsection|、... ；要指定图表目录(list of figures)，
+%    我们必须定义 |\l@figure|；等等。其中大多数可以用 |\@dottedtocline| 命令来定义，其工作原理如下：
+%
+%    |\@dottedtocline{|\meta{level}|}{|\meta{indent}|}{|^^A
+%                      \meta{numwidth}|}{|^^A
+%                      \meta{title}|}{|\meta{page}|}|
+%
+%    \begin{description}
+%    \item[\meta{level}] 只有当 \meta{level} $\leq$ \Lcount{tocdepth}\ 计数器的值时才
+%    生成条目。注意，|\chapter| 是 0 级，|\section| 是 1 级，等等。
+%    \item[\meta{indent}] 从内容行开始处的左外边距(outer left margin)的缩进。
+%    \item[\meta{numwidth}] 节编号(section number)所在盒子的宽度，如果 \meta{title}\ 包括一个 |\numberline| 命令。
+%    \end{description}
+%
+% \begin{macro}{\@pnumwidth}
+% \begin{macro}{\@tocrmarg}
+% \begin{macro}{\@dotsep}
+%    此命令使用以下三个参数，这三个参数是用 |\newcommand| 命令设置的(因此可以使用 em 使它们依赖于字体)。
+%    \begin{description}
+%    \item[\texttt{\bslash @pnumwidth}] 放置页码的盒子的宽度。
+% \changes{v1.2v}{1994/10/29}{Changed documentation from $!>$ or $!=$ to
+%    $\ge$}
+%    \item[\texttt{\bslash @tocrmarg}] 多行条目(multiple line entries)的右边距(right margin)。一个条目需要 |\@tocrmarg| $\ge$ |\@pnumwidth|。
+%    \item[\texttt{\bslash @dotsep}] 点(dots)与点之间的距离，单位是 μ。应该定义为像 2 或 1.7 这样的数字
+%    \end{description}
+%
+%    \begin{macrocode}
+\newcommand\@pnumwidth{1.55em}
+\newcommand\@tocrmarg{2.55em}
+\newcommand\@dotsep{4.5}
+%<article>\setcounter{tocdepth}{3}
+%<!article>\setcounter{tocdepth}{2}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[目录]{\heiti 目录}
+%
+% \begin{macro}{\tableofcontents}
+%    此宏用于请求 \LaTeX{}\ 生成目录。在 report 和 book 文档类中，目录、图形等始终
+%    以单栏模式(single-column mode)设置。
+%
+% \changes{v1.0g}{1993/12/09}{Moved the setting of
+%    \cs{@restonecolfalse}}
+% \changes{v1.4h}{2007/10/19}{Explain why \cs{@mkboth} is inside the heading
+%                         arg for \cs{tableofcontents} (pr/3285 and pr/3984)}
+%    \begin{macrocode}
+\newcommand\tableofcontents{%
+%<*report|book>
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+%    \end{macrocode}
+%    使用 |\chapter*| 命令设置标题(title)，确保栏外标题(running head)--如果需要--包含正确的信息。
+%    \begin{macrocode}
+    \chapter*{\contentsname
+%</report|book>
+%<article>    \section*{\contentsname
+%    \end{macrocode}
+%    |\@mkboth| 的代码放在标题(heading)内，以避免标题后的垂直间距(vertical spacing)
+%    受到任何影响(在某些情况下)。对于其他命令，例如下面的 |\listoffigures|，
+%    它与 \LaTeX{}2.09\ 版本相比有所改变，因为如果在双栏模式(two-column mode)中使用，
+%    它将产生严重的错误(请参见 pr/3285)。然而，在这些类中，|\tableofcontents| 总是
+%    以单栏模式(one-column mode)排版，因此出于兼容性的原因，保留了一些不一致的设置
+%    (inconsistent setting)。
+%    \begin{macrocode}
+        \@mkboth{%
+           \MakeUppercase\contentsname}{\MakeUppercase\contentsname}}%
+%    \end{macrocode}
+%    实际的目录是通过调用 |\@starttoc{toc}| 生成的。之后，如有必要，我们将恢复双栏
+%    模式(two-column mode)。
+%    \begin{macrocode}
+    \@starttoc{toc}%
+%<!article>    \if@restonecol\twocolumn\fi
+    }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@part}
+%    如上所述，每个分节命令(sectioning command)都需要一个附加宏(additional macro)
+%    来格式化其在目录中的条目(entry)。部分条目(entry for parts)的宏是以特殊方式定义的。
+%
+%    首先，我们确保如果应该出现分页符(pagebreak)，它会出现在此条目{\kaiti 之前}。此外，
+%    还添加了一些空白(whitespace)，并且一个组(group)开始保持局部的更改(keep changes local)。
+% \changes{v1.0h}{1993/12/18}{Replaced -\cs{@secpenalty} by
+%    \cs{@secpenalty}.  ASAJ.}
+% \changes{v1.2i}{1994/04/28}{Don't print a toc line when the tocdepth
+%    counter is less then -1}
+% \changes{v1.3b}{1995/05/23}{Added missing braces around argument
+%           to \cs{addpenalty}.}
+% \changes{v1.3x}{1997/10/10}{Removed setting of \cs{@tempdima} as
+%    this macro does not use \cs{numberline} to set the toc line.}
+% \changes{v1.4a}{1998/10/12}{we should use \cs{@tocrmarg}; see PR/2881.}
+%    \begin{macrocode}
+\newcommand*\l@part[2]{%
+  \ifnum \c@tocdepth >-2\relax
+%<article>    \addpenalty\@secpenalty
+%<!article>    \addpenalty{-\@highpenalty}%
+    \addvspace{2.25em \@plus\p@}%
+%    \end{macrocode}
+%    宏 |\numberline| 要求保存部分编号(part number)的盒子的宽度存储在 \LaTeX\ 的暂
+%    存寄存器(scratch register) |\@tempdima| 中。因此，即使我们没有在内部使
+%    用 |\numberline|，我们也会在那里初始化它，因为使用的值非常大，所以
+%    像 |\numberline{VIII}| 这样的值仍然可以工作
+% \changes{v1.4d}{2001/04/21}{Initialize \cs{@tempdima} to some
+%    sensible value (pr/3327)}
+%    \begin{macrocode}
+    \setlength\@tempdima{3em}%
+    \begingroup
+%    \end{macrocode}
+%    我们将 |\parindent| 设置为 0pt，并使用 |\rightskip| 为页码(page numbers)留出
+%    足够的空间(room)。\footnote{我们应该将 \cs{rightskip}\ 设置为 \cs{@tocrmarg}\ 而不是 \cs{@pnumwidth}
+%    ({\LaTeX}\ 的任何版本都没有这样做)，否则 \cs{rightskip}\ 会太小。不幸的是，这在\ {\LaTeXe} 中无法改变，
+%    因为我们不想创建不同版本的\ {\LaTeXe}，除非这是绝对必要的，否则会产生不同的排版输出(typeset output)；
+%    相反，我们为了\ \LaTeX3\ 而暂停它。}
+%    为防止溢框信息(overfull box messages)，|\parfillskip| 设置为负值。
+%    \begin{macrocode}
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+%    \end{macrocode}
+%    现在我们可以用大粗体字体(large bold font)设置条目。我们确保离开垂直模式(vertical mode)，
+%    设置部分标题(part title)并添加页码(page number)，设置右侧对齐(flush right)。
+%    \begin{macrocode}
+      {\leavevmode
+       \large \bfseries #1\hfil
+       \hb@xt@\@pnumwidth{\hss #2%
+%    \end{macrocode}
+%
+% \changes{v1.4i}{2018/09/03}{Prevent protrusion
+%     (\url{https://tex.stackexchange.com/q/172785/10109})}
+%    \begin{macrocode}
+                          \kern-\p@\kern\p@}}\par
+%    \end{macrocode}
+%    在这个条目之后立即防止分页符(pagebreak)，但是使用 |\everypar| 重置 |\if@nobreak| 开关。
+%    最后，我们关闭组(close the group)。
+% \changes{v1.3j}{1995/08/16}{Add missing percent}
+%    \begin{macrocode}
+       \nobreak
+%<article>       \if@compatibility
+         \global\@nobreaktrue
+         \everypar{\global\@nobreakfalse\everypar{}}%
+%<article>      \fi
+    \endgroup
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@chapter}
+%    此宏设置章目录中的条目的格式。它与 |\l@part| 非常相似。
+%
+%    首先，我们确保如果出现分页符(pagebreak)，它会出现在该条目{\kaiti 之前}。此外，
+%    还添加了一点空白(whitespace)，一个组(group)开始保持局部的更改(keep changes local)。
+% \changes{v1.2i}{1994/04/28}{Don't print a toc line when the tocdepth
+%    counter is less than 0}
+% \changes{v1.3b}{1995/05/23}{Added missing braces around argument
+%           to \cs{addpenalty}.}
+% \changes{v1.4a}{1998/10/12}{we should use \cs{@tocrmarg}; see PR/2881.}
+%    \begin{macrocode}
+%<*report|book>
+\newcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+%    \end{macrocode}
+%
+%    宏 |\numberline| 要求保存部分编号(part number)的盒子的宽度存储在 \LaTeX\ 的暂
+%    存寄存器(scratch register) |\@tempdima| 中。因此，即使我们没有在内部使用 |\numberline|，
+%    我们也会在那里对其进行初始化(位置和值似乎有问题，但在不产生兼容性问题的情况下无法更改)。
+%    我们开始一个组(group)，并更改一些段落参数(paragraph parameters)
+%    (另请参阅 \cs{l@part}\ 关于\ \cs{rightskip})。
+%    \begin{macrocode}
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+%    \end{macrocode}
+%    然后我们离开垂直模式(vertical mode)并切换到粗体字体(bold font)。
+%    \begin{macrocode}
+      \leavevmode \bfseries
+%    \end{macrocode}
+%    因为这里不使用 |\numberline|，所以在设置条目之前，我们需要“手工”进行一些微调。
+%    我们不鼓励但不禁止在章条目(chapter entry)后立即使用分页符(pagebreak)。
+%    \begin{macrocode}
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil
+      \nobreak\hb@xt@\@pnumwidth{\hss #2%
+%    \end{macrocode}
+%
+% \changes{v1.4i}{2018/09/03}{Prevent protrusion
+%     (\url{https://tex.stackexchange.com/q/172785/10109})}
+%    \begin{macrocode}
+                                 \kern-\p@\kern\p@}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@section}
+%    在 article 文档类中，节(sections)目录中的条目看起来很像 report 和 book 文档类
+%    的章条目(chapter entries)。
+%
+%    首先，我们确保如果出现分页符(pagebreak)，它会出现在该条目{\kaiti 之前}。此外，
+%    还添加了一点空白(whitespace)，一个组(group)开始保持局部的更改(keep changes local)。
+% \changes{v1.0h}{1993/12/18}{Replaced -\cs{@secpenalty} by
+%    \cs{@secpenalty}.  ASAJ.}
+% \changes{v1.2i}{1994/04/28}{Don't print a toc line when the tocdepth
+%    counter is less than 1.}
+% \changes{v1.4a}{1998/10/12}{we should use \cs{@tocrmarg}; see PR/2881.}
+%    \begin{macrocode}
+%<*article>
+\newcommand*\l@section[2]{%
+  \ifnum \c@tocdepth >\z@
+    \addpenalty\@secpenalty
+    \addvspace{1.0em \@plus\p@}%
+%    \end{macrocode}
+%
+%    宏 |\numberline| 要求保存部分编号(part number)的盒子的宽度存储在 \LaTeX\ 的
+%    暂存寄存器(scratch register) |\@tempdima| 中。因此，我们把它放在那里。我们
+%    开始一个组(group)，并更改一些段落参数(另请参阅 \cs{l@part}\ 关于\ \cs{rightskip})。
+%    \begin{macrocode}
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+%    \end{macrocode}
+%    然后我们离开垂直模式(vertical mode)并切换到粗体字体(bold font)。
+%    \begin{macrocode}
+      \leavevmode \bfseries
+%    \end{macrocode}
+%    因为这里不使用 |\numberline|，所以在设置条目之前，我们需要“手工”进行一些微调。
+%    我们不鼓励但不禁止在章条目(chapter entry)后立即使用分页符(pagebreak)。
+%    \begin{macrocode}
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil
+      \nobreak\hb@xt@\@pnumwidth{\hss #2%
+%    \end{macrocode}
+%
+% \changes{v1.4i}{2018/09/03}{Prevent protrusion
+%     (\url{https://tex.stackexchange.com/q/172785/10109})}
+%    \begin{macrocode}
+                                 \kern-\p@\kern\p@}\par
+    \endgroup
+  \fi}
+%</article>
+%    \end{macrocode}
+%    在 report 和 book 文档类中 |\l@section| 的定义要简单得多。
+%    \begin{macrocode}
+%<*report|book>
+\newcommand*\l@section{\@dottedtocline{1}{1.5em}{2.3em}}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@subsection}
+% \begin{macro}{\l@subsubsection}
+% \begin{macro}{\l@paragraph}
+% \begin{macro}{\l@subparagraph}
+%    所有较低层级的条目都是使用宏 |\@dottedtocline| 来定义的(请参见上文)。
+%    \begin{macrocode}
+%<*article>
+\newcommand*\l@subsection{\@dottedtocline{2}{1.5em}{2.3em}}
+\newcommand*\l@subsubsection{\@dottedtocline{3}{3.8em}{3.2em}}
+\newcommand*\l@paragraph{\@dottedtocline{4}{7.0em}{4.1em}}
+\newcommand*\l@subparagraph{\@dottedtocline{5}{10em}{5em}}
+%</article>
+%<*report|book>
+\newcommand*\l@subsection{\@dottedtocline{2}{3.8em}{3.2em}}
+\newcommand*\l@subsubsection{\@dottedtocline{3}{7.0em}{4.1em}}
+\newcommand*\l@paragraph{\@dottedtocline{4}{10em}{5em}}
+\newcommand*\l@subparagraph{\@dottedtocline{5}{12em}{6em}}
+%</report|book>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection[图形列表]{\heiti 图形列表}
+%
+% \begin{macro}{\listoffigures}
+%    此宏用于请求 \LaTeX{}\ 生成图形列表(list of figures)。它与 |\tableofcontents| 非常相似。
+%
+% \changes{v1.0g}{1993/12/09}{Moved the setting of
+%    \cs{@restonecolfalse}}
+% \changes{v1.4c}{2001/01/06}{Moved \cs{@mkboth} out of heading
+%                             arg (pr/3285)}
+%    \begin{macrocode}
+\newcommand\listoffigures{%
+%<*report|book>
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \chapter*{\listfigurename}%
+%</report|book>
+%<article>    \section*{\listfigurename}%
+      \@mkboth{\MakeUppercase\listfigurename}%
+              {\MakeUppercase\listfigurename}%
+    \@starttoc{lof}%
+%<report|book>    \if@restonecol\twocolumn\fi
+    }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@figure}
+%    此宏在图形列表(list of figures)中生成一个条目(entry)。
+%    \begin{macrocode}
+\newcommand*\l@figure{\@dottedtocline{1}{1.5em}{2.3em}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection[表格列表]{\heiti 表格列表}
+%
+% \begin{macro}{\listoftables}
+%    此宏用于请求 \LaTeX{}\ 生成表格列表(list of tables)。它与 |\tableofcontents| 非常相似。
+%
+% \changes{v1.0g}{1993/12/09}{Moved the setting of
+%    \cs{@restonecolfalse}}
+% \changes{v1.4c}{2001/01/06}{Moved \cs{@mkboth} out of heading
+%                             arg (pr/3285)}
+%    \begin{macrocode}
+\newcommand\listoftables{%
+%<*report|book>
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \chapter*{\listtablename}%
+%</report|book>
+%<article>    \section*{\listtablename}%
+      \@mkboth{%
+          \MakeUppercase\listtablename}%
+         {\MakeUppercase\listtablename}%
+    \@starttoc{lot}%
+%<report|book>    \if@restonecol\twocolumn\fi
+    }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@table}
+%    此宏在表格列表(list of tables)中生成一个条目(entry)。
+%    \begin{macrocode}
+\let\l@table\l@figure
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[参考文献]{\heiti 参考文献}
+%
+% \begin{macro}{\bibindent}
+%    “开放(open)”参考文献格式(bibliography format)使用 |\bibindent| 缩进。
+%    \begin{macrocode}
+\newdimen\bibindent
+\setlength\bibindent{1.5em}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{thebibliography}
+%    “theobjectory”环境执行以下命令：
+%
+%    |\renewcommand{\newblock}{\hskip.11em \@plus.33em \@minus.07em}|\\
+%      --- 定义“封闭(closed)”格式，其中条目的块(blocks)(主要信息单元)一起运行。
+%
+%    |\sloppy|  --- 使用它是因为在参考文献中很难做断行(line breaks)处理,
+%
+%    |\sfcode`\.=1000\relax| --- 使“.”(句号)不产生句末空格。
+%
+%    此环境的实现(implementation)基于通用列表环境(generic list environment)。它在
+%    内部使用 \Lcount{enumiv}\ 计数器生成列表的标签
+%
+%    当发现一个空的“thebibliography”环境时，会发出警告。
+%
+% \changes{v1.0i}{1993/12/19}{Corrected definition of thebibliography
+%    for article}
+% \changes{v1.2z}{1995/05/09}{added a missing percent character}
+% \changes{v1.3b}{1995/05/23}{Added missing braces in definition
+%    of thebibliography environment.}
+% \changes{v1.3j}{1995/08/16}{remove surplus spaces}
+% \changes{v1.3k}{1995/08/27}{Code for openbib changed}
+% \changes{v1.3t}{1996/10/05}{Added setting value of \cs{@clubpenalty}}
+%    \begin{macrocode}
+\newenvironment{thebibliography}[1]
+%<*article>
+     {\section*{\refname}%
+%    \end{macrocode}
+%    由于至少在 report 和 book (双栏选项)中有 |\chapter| 的定义，否则会将其吞没，
+%    所以 |\@mkboth| 被移出了标题参数(heading argument)。
+% \changes{v1.4c}{2001/01/06}{Moved \cs{@mkboth} out of heading
+%                             arg (pr/3285)}
+%    \begin{macrocode}
+      \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}%
+%</article>
+%<*!article>
+     {\chapter*{\bibname}%
+      \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}%
+%</!article>
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{#1}}%
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \sloppy
+%    \end{macrocode}
+%    这是为整个环境设置 |\clubpenalty| 的正常(非无限)值，因此我们还必须重置其
+%    已存储的值(stored value)。(为什么在下面第二个 4000 之后有 |%|？)
+%    \begin{macrocode}
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      \endlist}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{macro}{\newblock}
+%    |\newblock| 的默认定义是生成一个小空间(small space)。
+% \changes{v1.3k}{1995/08/27}{Default changed.}
+%    \begin{macrocode}
+\newcommand\newblock{\hskip .11em\@plus.33em\@minus.07em}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@openbib@code}
+%    |\@openbib@code| 的默认定义就是什么都不做。它将由 \Lopt{openbib}\ 选项更改。
+% \changes{v1.3k}{1995/08/27}{Macro added}
+%    \begin{macrocode}
+\let\@openbib@code\@empty
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@biblabel}
+%    |\bibitem[...]| 命令的标签由该宏生成。使用 \LaTeX{}\ 格式的默认值。
+%    \begin{macrocode}
+% \renewcommand*{\@biblabel}[1]{[#1]\hfill}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@cite}
+%    |\cite| 命令的输出由该宏生成。使用 \LaTeX{}\ 格式的默认值。
+%    \begin{macrocode}
+% \renewcommand*{\@cite}[1]{[#1]}
+%    \end{macrocode}
+% \end{macro}
+%
+%  \subsection[索引]{\heiti 索引}
+%
+% \begin{environment}{theindex}
+%    “theindex”环境可用于索引(index)。它创建的索引包含两栏，每个条目都是一个单独的段落。
+%    在用户级别，命令|\item|、|\subitem| 和 |\subsubitem| 用于生成不同层级的索引条目(index entries)。
+%    当遇到字母表(alphabet)中的新字母时，可以添加一定数量的 |\indexspace| 空白(white space)。
+%
+%
+% \changes{v1.0g}{1993/12/09}{Moved the setting of
+%    \cs{@restonecoltrue}}
+%    \begin{macrocode}
+\newenvironment{theindex}
+               {\if@twocolumn
+                  \@restonecolfalse
+                \else
+                  \@restonecoltrue
+                \fi
+%<article>                \twocolumn[\section*{\indexname}]%
+%<!article>                \twocolumn[\@makeschapterhead{\indexname}]%
+                \@mkboth{\MakeUppercase\indexname}%
+                        {\MakeUppercase\indexname}%
+                \thispagestyle{plain}\parindent\z@
+%    \end{macrocode}
+%    必须在 |\twocolumn| 操作之后对 |\columnseprule| 和 |\columnsep| 进行参数更改(parameter changes)。
+%    否则，它们可能会影响索引前的最后一页。
+% \changes{ v1.4f}{2004/02/16}{Moved setting of \cs{columnsep} and
+%    \cs{columnseprule} later to avoid affecting the wrong page (pr/3616)}
+%    \begin{macrocode}
+                \parskip\z@ \@plus .3\p@\relax
+                \columnseprule \z@
+                \columnsep 35\p@
+                \let\item\@idxitem}
+%    \end{macrocode}
+%    当文档在索引后继续，并且它是一个单栏文档(one-column document)时，我们必须
+%    切换回索引之后的一栏。
+%    \begin{macrocode}
+               {\if@restonecol\onecolumn\else\clearpage\fi}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{macro}{\@idxitem}
+% \begin{macro}{\subitem}
+% \begin{macro}{\subsubitem}
+%    这些宏用于格式化索引中的条目。
+% \changes{v1.3f}{1995/06/23}{Corrected error in definition of
+%                         \cs{@idxitem}.}
+% \changes{v1.3j}{1995/08/16}{use \cs{@idxitem} to save space}
+%    \begin{macrocode}
+\newcommand\@idxitem{\par\hangindent 40\p@}
+\newcommand\subitem{\@idxitem \hspace*{20\p@}}
+\newcommand\subsubitem{\@idxitem \hspace*{30\p@}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\indexspace}
+%    在索引中的“字母块(letter blocks)”之间插入的空白(white space)。
+%    \begin{macrocode}
+\newcommand\indexspace{\par \vskip 10\p@ \@plus5\p@ \@minus3\p@\relax}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[脚注]{\heiti 脚注}
+%
+% \begin{macro}{\footnoterule}
+%    通常，脚注(footnotes)与正文(main body of the text)之间用一条小线段(rule)分开。
+%    这条线段是由 |\footnoterule| 宏画出来的。我们必须确保该线段不占用垂直空
+%    间(vertical space)(请参阅 \file{plain.tex})，因此我们通过添加适量的垂直间距
+%    (vertical skip)来补偿 0.4pt 线段的自然高度(natural height)。
+%
+%    为了防止线段(rule)与脚注(footnote)冲突，我们首先添加了一点负的垂直间距(negative vertical skip)，
+%    然后我们放置线段，并确保我们在开始此操作的同一点结束。
+% \changes{v1.3a}{1995/05/17}{use \cs{@width}}
+%    \begin{macrocode}
+\renewcommand\footnoterule{%
+  \kern-3\p@
+  \hrule\@width.4\columnwidth
+  \kern2.6\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\c@footnote}
+%    脚注在报告(report)和书籍(book)文档类的章中编号。
+%    \begin{macrocode}
+%<!article>\@addtoreset{footnote}{chapter}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@makefntext}
+%    \LaTeX{}\ 的脚注机制(footnote mechanism)调用宏 |\@makefntext| 来生成实际的脚注。
+%    宏获取脚注的文本作为其参数，并应使用 |\@thefnmark| 作为脚注的标记(mark)。
+%    当 |\@makefntext| 宏有效地位于宽度为 |\columnwidth| (即使用 |\hsize| = |\columnwidth|)的 |\parbox| 内时，将调用该宏。
+%
+%   下面的 \TeX\ 代码给出了一个可以实现的示例。
+% \begin{verbatim}
+%          \newcommand\@makefntext[1]{%
+%             \@setpar{\@@par
+%                      \@tempdima = \hsize
+%                      \advance\@tempdima-10pt
+%                      \parshape \@ne 10pt \@tempdima}%
+%             \par
+%             \parindent 1em\noindent
+%             \hbox to \z@{\hss\@makefnmark}#1}
+% \end{verbatim}
+%    这个定义的效果是脚注的所有行缩进 10pt，而新段落的第一行缩进 1em。要更改这些尺寸，
+%    只需将“10pt”(在两个位置)或“1em”替换为所需的值(desired value)。这个记号(mark)刚好与脚注对齐。
+%
+%    在这些文档类中，我们使用了一个更简单的宏，其中脚注文本(footnote text)设置为普通文本段落(ordinary text paragraph)，
+%    除了段落的第一行和脚注的第一行外，没有缩进。因此，宏必须做的所有事情都是为后续段落设置 |\parindent| 为适当的值，
+%    并在标记前放置适当的缩进(indentation)。
+%
+% \changes{v1.1a}{1994/03/13}{Use \cs{@makefnmark} to generate
+%    footnote marker}
+%    \begin{macrocode}
+\newcommand\@makefntext[1]{%
+    \parindent 1em%
+    \noindent
+    \hb@xt@1.8em{\hss\@makefnmark}#1}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@makefnmark}
+%    打印在文本中指向脚注的脚注标记(footnote markers)应由 |\@makefnmark| 宏生成。我们使用它的默认定义。
+%    \begin{macrocode}
+%\renewcommand\@makefnmark{\hbox{\@textsuperscript
+%                                  {\normalfont\@thefnmark}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\newpage
+%
+% \section{\heiti 初始化}
+%
+% \subsection[单词]{\heiti 单词}
+%
+% 此文档类用于以英语编写的文档。为了准备另一种语言的版本，各种各样的英语单词(English words)必须被替换。
+% 所有需要替换的英语单词在下面的命令名中定义。这些命令可以在用于非英语的 LATEX 定制的类或包中重新定义。
+% \changes{v1.3h}{1995/07/20}{Split up to save on save stack /1742}
+%
+% \begin{macro}{\contentsname}
+% \begin{macro}{\listfigurename}
+% \begin{macro}{\listtablename}
+%    \begin{macrocode}
+\newcommand\contentsname{Contents}
+\newcommand\listfigurename{List of Figures}
+\newcommand\listtablename{List of Tables}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\refname}
+% \begin{macro}{\bibname}
+% \begin{macro}{\indexname}
+%    \begin{macrocode}
+%<article>\newcommand\refname{References}
+%<report|book>\newcommand\bibname{Bibliography}
+\newcommand\indexname{Index}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\figurename}
+% \begin{macro}{\tablename}
+%    \begin{macrocode}
+\newcommand\figurename{Figure}
+\newcommand\tablename{Table}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\partname}
+% \begin{macro}{\chaptername}
+% \begin{macro}{\appendixname}
+% \begin{macro}{\abstractname}
+%    \begin{macrocode}
+\newcommand\partname{Part}
+%<report|book>\newcommand\chaptername{Chapter}
+\newcommand\appendixname{Appendix}
+%<!book>\newcommand\abstractname{Abstract}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection[日期]{\heiti 日期}
+%
+% \begin{macro}{\today}
+%    该宏使用 \TeX\ 原语 |\month|、|\day| 和 |\year| 来提供 \LaTeX\ 运行的日期。
+%
+%    在 |\begin{document}|中此定义将得到优化，从而不会存储所有“错误(wrong)”月份的名称。
+%    这种优化不会在这里完成，因为这将“冻结(freeze)” 在任何特殊用途的格式(special purpose format)中
+%    的 |\today|，这种特殊用途的格式是通过将类文件(class file)加载到格式文件(format file)中而生成的格式。
+% \changes{v1.3j}{1995/08/16}{use \cs{edef} to save a lot of space}
+% \changes{v1.3w}{1997/10/06}{use \cs{def} again, latex/2620}
+%    \begin{macrocode}
+\def\today{\ifcase\month\or
+  January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\day, \number\year}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[两栏模式]{\heiti 两栏模式}
+%
+% \begin{macro}{\columnsep}
+%    这给出了两栏模式(two-column mode)中两栏之间的距离。
+%    \begin{macrocode}
+\setlength\columnsep{10\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\columnseprule}
+%    这给出了两栏模式(two-column mode)中两栏之间的线段(rule)的宽度。我们没有
+%    可见的线段(visible rule)。
+%    \begin{macrocode}
+\setlength\columnseprule{0\p@}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection[页面样式]{\heiti 页面样式}
+%    除非用户另有指定，否则文档类 article 和 report 中都有 \pstyle{plain}\ 页面。
+%    在“book”文档类中，我们默认使用 \pstyle{headings}\ 页面样式。并使用阿拉伯数字
+%    页码(arabic page numbers)。
+%    \begin{macrocode}
+%<!book>\pagestyle{plain}
+%<book>\pagestyle{headings}
+\pagenumbering{arabic}
+%    \end{macrocode}
+%
+% \subsection[单面或双面打印]{\heiti 单面或双面打印}
+%
+%
+% \changes{v1.2v}{1994/11/10}{removed typo}
+%    当未指定 \Lopt{twoside}\ 选项时，我们不会试图使每个页面与其他页面一样长。
+%    \begin{macrocode}
+\if@twoside
+\else
+  \raggedbottom
+\fi
+%    \end{macrocode}
+%    当指定了 \Lopt{twocolumn}\ 选项时，我们调用 |\twocolumn| 来激活此模式。
+%    我们试图使每一栏一样长，只需调用 |sloppy| 即可。
+%    \begin{macrocode}
+\if@twocolumn
+  \twocolumn
+  \sloppy
+  \flushbottom
+%    \end{macrocode}
+%    通常我们调用 |\onecolumn| 来启动单栏排版。
+%    \begin{macrocode}
+\else
+  \onecolumn
+\fi
+%</article|report|book>
+%    \end{macrocode}
+%
+% \changes{v1.3i}{1995/08/09}{Moved code for generic class options
+% leqno and fleqn to kernel file}
+%
+% \Finale
+%
+\endinput
