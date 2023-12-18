@@ -31,33 +31,91 @@
 
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 
+\PassOptionsToPackage{quiet}{fontspec}
 \documentclass{ltxguide}[1995/11/28]
 
 \usepackage[T1]{fontenc}
 \usepackage{tabularray}
 \usepackage{caption}
 
+% ================== 中文版特殊设置 ==============================
+\usepackage{multicol}
 %%%%%%%%%%%%% 以下设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{xeCJK}  %%
-\setCJKfamilyfont{heiti}{SimHei} %%黑体hei，在幻灯片中黑体(SimHei)最漂亮
-\newcommand{\heiti}{\CJKfamily{heiti}} %% 自定义\heiti命令，显示黑体
-\setCJKfamilyfont{songti}{SimSun}
-\newcommand{\songti}{\CJKfamily{heiti}}%%置主中文字体为宋体
-\setCJKmainfont{SimSun} %%设置主中文字体为宋体
-\setCJKfamilyfont{kaiti}{KaiTi} %%设置中文字体楷体，用于强调
-\newcommand{\kaiti}{\CJKfamily{kaiti}} %%
+\usepackage{xeCJK}
+\usepackage{zhnumber,zhspacing}
+%%%%%%%%%%%%%%% 思源字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setCJKmainfont {SourceHanSerifSC}
+[
+  Extension   = .otf,
+  UprightFont = *-regular,
+  BoldFont    = *-Bold,
+  ItalicFont  = FandolKai-Regular
+]
+\setCJKsansfont {SourceHanSansSC}
+[
+  Extension   = .otf,
+  UprightFont = *-regular,
+  BoldFont    = *-Bold
+]
+\setCJKmonofont {FandolKai}
+[
+  Extension   = .otf,
+  UprightFont = *-regular
+]
+\newCJKfontfamily[song]\songti{SourceHanSerifSC-regular.otf} %%自定义宋体 \sognti ，作为文章中文主字体
+\newCJKfontfamily[hei]\heiti{SourceHanSansSC-regular.otf}[BoldFont=SourceHanSansSC-Bold] %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+\newCJKfontfamily[kai]\kaiti{FandolKai-regular.otf} %%设置中文字体楷体 \kaiti ，用于强调
+%%%%%%%%%%%%%%%%%%%% Windows系统自带字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newCJKfontfamily[song]\songti{SimSun} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+% \newCJKfontfamily[hei]\heiti{SimHei} %%自定义宋体 \sognti ，作为文章中文主字体
+% \newCJKfontfamily[kai]\kaiti{KaiTi} %%设置中文字体楷体 \kaiti ，用于强调
+% \setCJKmainfont{SimSun}[BoldFont = SimHei] %%设置主中文字体为宋体
+% \setCJKsansfont{SimHei} %%设置中文无衬线字体为黑体
+% \setCJKmonofont{KaiTi} %%设置中文等宽字体为楷体（主要影响\ttfamily和\texttt{}）
+%%%%%%%%%%%%%%% Fandol字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newCJKfontfamily[song]\songti{FandolSong-Regular.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+% \newCJKfontfamily[hei]\heiti{FandolHei-Regular.otf} %%自定义宋体 \sognti ，作为文章中文主字体
+% \newCJKfontfamily[kai]\kaiti{FandolKai-Regular.otf} %%设置中文字体楷体 \kaiti ，用于强调
+% \setCJKmainfont{FandolSong-Regular.otf}[BoldFont = FandolSong-Bold.otf] %%设置主中文字体为宋体
+% \setCJKsansfont{FandolHei-Regular.otf}[BoldFont = FandolHei-Bold.otf] %%设置中文无衬线字体为黑体
+% \setCJKmonofont{FandolKai-Regular.otf} %%设置中文等宽字体为楷体（主要影响\ttfamily和\texttt{}）
 %%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%% 以下设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{indentfirst} %%% 首行缩进
 \setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
-\linespread{1.4} %%% 设置行间距
+\linespread{1.242} %%% 设置行间距
+\renewcommand{\contentsname}{\centerline{目\quad 录}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\renewcommand{\refname}{参考文献}
+\renewcommand{\tablename}{表}
+\NewDocumentCommand{\booktitle}{ m }{《\bgroup\color{blue}\sffamily#1\egroup》}
+\catcode`《 = \active
+\def《#1》{\booktitle{#1}}
 %%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{xcolor}
-\usepackage[colorlinks=true,linkcolor=red]{hyperref}
+\usepackage{hyperref}
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\AtBeginEnvironment{decl}{\color{spot}}
+\patchcmd{\NEWfeature}{New feature}{\kaiti\color{spot}新的特色}{}{}
+\patchcmd{\NEWdescription}{New description}{\kaiti\color{spot}新的说明}{}{}
+\AtBeginEnvironment{verbatim}{\color{verb}}
+\AtBeginEnvironment{quote}{\tt\color{verb}}
+\AtBeginEnvironment{quotation}{\tt\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false,
+  pdfview=FitH}
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%% 以下在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
@@ -83,36 +141,34 @@
 
 \setcounter{secnumdepth}{0}
 
-\title{{\Huge \textbf{\LaTeXe}}\ {\Huge \heiti 的配置选项}}
+\title{\huge\bfseries\color{spot}\LaTeXe 的配置选项}
 
 \author{\copyright~Copyright 1998, 2001, 2003\ \  \LaTeX\ 项目团队\\[3pt]
-   保留所有权\\[8pt]赣医一附院神经科\ \ \ 黄旭华\ \ \ \ \ \ \ \ 翻译}
+   版权所有\\[8pt]赣医一附院神经科\ \ \ 黄旭华\ \ \ \ \ \ \ \ 翻译}
 
 \date{2003年2月14日}
 
 \begin{document}
 
-\renewcommand{\contentsname}{\heiti 目\ 录}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
-\renewcommand{\refname}{\heiti 参考文献}
-\renewcommand{\tablename}{表}
-\renewcommand{\abstractname}{\heiti 摘\ 要}
 
 \maketitle
 
+\pdfbookmark[1]{目录}{Contents}
+\addtocontents{toc}{\protect\begin{multicols}{2}}
+    \AtEndDocument{\addtocontents{toc}{\protect\end{multicols}}}
 \tableofcontents
-
 \newpage
 
-\section{{\heiti 配置} \textbf{\LaTeX}}
+\section{{\sffamily 配置} \textbf{\LaTeX}}
 
-新的标准 \LaTeX{}\ 的主要目标之一是通过可靠文档处理系统(reliable document processing system)为所有用户提供自由，该文档处理系统可以连接到高度可移植文档格式(portable document format)，因此其配置(configuration)受到严格限制。\texttt{modguide.tex}\ 文件中的\ {\color{blue}\textit{Modifying \LaTeX{}}}\ ({\color{blue}《修改 \LaTeX{}》})一文对此进行了更详细的解释。这样做的一个重要后果是，依赖于任何扩展包(extension package)的任何文档都必须在文档文件中声明此包；这有助于确保文档可在不同的位置(site)工作，该位置 \LaTeX{}\ 系统的配置可能不同。
+新的标准 \LaTeX{}\ 的主要目标之一是通过可靠文档处理系统(reliable document processing system)为所有用户提供自由，该文档处理系统可以连接到高度可移植文档格式(portable document format)，因此其配置(configuration)受到严格限制。\texttt{modguide.tex}\ 文件中的\ 《Modifying \LaTeX{}》\ 【《修改 \LaTeX{}》】一文对此进行了更详细的解释。这样做的一个重要后果是，依赖于任何扩展包(extension package)的任何文档都必须在文档文件中声明此包；这有助于确保文档可在不同的位置(site)工作，该位置 \LaTeX{}\ 系统的配置可能不同。
 
 按照惯例(convention)，局部配置选项(local configuration options)放在扩展名为 |.cfg| 的“配置文件(configuration files)”中。该文件描述了这个 \LaTeX\ 发行版中配置的可能性(possibilities)；它还解释了如何配置字体定义文件(font definition files)以利用可用的字体。
 
 最后一节将简要介绍在需要进一步自定义格式化程序时如何进行操作。
 
 
-\section{\heiti 系统配置}
+\section{\sffamily 系统配置}
 
 \filesection{texsys.cfg}
 
@@ -123,7 +179,7 @@
 如果您已经从使用不同操作系统的计算机上复制了 \LaTeX{}\ 安装(installation)，那么您很可能有一个版本的 |texsys.cfg|，这将使得在您的系统上安装 \LaTeX{}\ 变得困难。如果发生这种情况，那么使用一个空的 |texsys.cfg| 文件重新启动该过程；这将产生一个安装，该安装至少应该允许您对文档进行排版。但是，有可能 \LaTeX{}\ 仍然只能找到当前目录(current directory)中的那些文件，在这种情况下，您必须正确设置 |\input@path| 宏以适合您的系统。
 
 
-\section{{\heiti 配置} \textbf{\LaTeX}\ {\heiti 格式}}
+\section{{\sffamily 配置} \textbf{\LaTeX}\ {\sffamily 格式}}
 
 有四个配置文件(configuration files)可以将个人首选项(personal preferences)合并到 \LaTeX{}\ 格式文件 |latex.fmt| 中。这些文件可以配置的首选项范围受到严格限制，因为这有助于确保文档的可移植性(document portability)。
 
@@ -198,11 +254,11 @@
 [我们打算在未来的 \LaTeX{}\ 版本中提供一组用于配置连字符的标准命令。]
 
 
-\section{\heiti 配置字体定义文件}
+\section{\sffamily 配置字体定义文件}
 
 如果您的位置(site)上有可用的特殊字体(或某些字体不可用)，那么您可能需要生成自定义版本(customised versions)的字体定义文件(font definition files)；这些文件的扩展名为 \texttt{.fd}并由 \LaTeX{}\ 读取，以获取有关您系统中已安装的字体文件以及何时加载它们的信息。
 
-虽然我们不鼓励这种自定义(customisation)，但您可以在 \texttt{fntguide.tex}\ 文件中的文档化的源文件(documented source file)\texttt{cmfonts.fdd}\ 和\ {\color{blue}{\textit{\LaTeXe{} font selection}}}【{\color{blue}{《\LaTeXe{}\ 的字体选择》}}】中找到有关这些文件的内容(content)及其语法(syntax)的信息。[我们希望在未来的某个时候能够提供关于这个主题(subject)的更多信息和示例]
+虽然我们不鼓励这种自定义(customisation)，但您可以在 \texttt{fntguide.tex}\ 文件中的文档化的源文件(documented source file)\texttt{cmfonts.fdd}\ 和\ 《\LaTeXe{} font selection》【《\LaTeXe{}\ 的字体选择》】中找到有关这些文件的内容(content)及其语法(syntax)的信息。[我们希望在未来的某个时候能够提供关于这个主题(subject)的更多信息和示例]
 
 请注意，使用自定义字体定义文件会产生以下后果：
 \begin{itemize}
@@ -218,7 +274,7 @@
 如果您安装了带有局部配置字体设置(locally configured font set-up)的 \LaTeX{}\ 版本，则此系统可能会生成不再“格式兼容(formatting compatible)”的文档；例如，使用不同的默认字体很可能会产生不同的换行符(line breaks)和分页符(page breaks)。如果您确实在多用户系统(multi-user system)上安装了一个配置方式不是“格式兼容”的系统，那么您应该仔细考虑用户需要创建可移植文档(portable douments)的需求。而满足用户这样需求的一个好方法是提供 \LaTeX{}\ 的标准形式(standard form)，而不需要任何“格式不兼容(formatting incompatible)”的定制(customisations)。
 
 
-\section{\heiti 配置兼容模式}
+\section{\sffamily 配置兼容模式}
 
 处理以 |\documentstyle| 开头的文档时，\LaTeXe{}\ 尝试尽可能模拟旧的 \LaTeX~2.09\ 系统。
 
@@ -239,7 +295,7 @@
 如果您的位置(site)当时输入了任何修改，那么 \LaTeXe{}\ “兼容性模式(compatibility mode)”将无法完全模拟{\kaiti 您位置上安装的} \LaTeX~2.09。在这种情况下，您应该将所有这些“局部修改(local modifications)”放到一个名为 |latex209.cfg| 的文件中，并将该文件放在位置(site)的默认输入路径(default input path)中。这些“局部修改”虽然没有存储在格式中，但是将在处理任何旧式文档(old-style document)之前加载。这将确保您可以继续处理使用本地定制的任何旧文档。
 
 
-\section{\heiti 标准包和类的配置文件}
+\section{\sffamily 标准包和类的配置文件}
 
 发行版(distribution)中的大多数包没有任何关联的配置文件(configuration files)。此处列出了例外情况。
 
@@ -285,21 +341,21 @@
 
 \textsf{ltxguide}\ 类由 \LaTeX\ 发行版中的“guide”文档(如此文档)使用。配置文件 |ltxguide.cfg| 可以与此类一起使用，其方式与前一节中描述的 \textsf{ltxdoc}\ 类的定制(customisation)非常相似。
 
-\section{\heiti 其他受支持包的配置}
+\section{\sffamily 其他受支持包的配置}
 
 “graphics(图形)”捆绑包(bundle of packages)需要两个配置文件(configuration files)，主要用于指定用来处理 \LaTeX{}\ 生成的 |.dvi| 文件的驱动程序(driver)。关于这些文件的更多文档随 graphics 捆绑包提供，但为了完整起见，我们在此提及它们。
 
 \filesection{graphics.cfg}
-通常，该文件只通过调用 |\ExecuteOptions| 指定默认选项，例如 |\ExecuteOptions{dvips}| 或 |\ExecuteOptions{textures}|。
+通常，该文件只通过调用 |\ExecuteOptions| 指定默认选项，例如\hfil\break |\ExecuteOptions{dvips}| 或 |\ExecuteOptions{textures}|。
 
 此文件由 \textsf{graphics}\ 包读取，因此会影响捆绑包中基于 \textsf{graphics}\ 的所有宏包：\textsf{graphicx}、\textsf{epsfig}、\textsf{lscape}。
 
 \filesection{color.cfg}
 通常，此文件与 |graphics.cfg| 相同。它指定 \textsf{color}\ 的默认驱动程序选项(default driver option)。
 
-\section{\heiti 非标准版本}
+\section{\sffamily 非标准版本}
 
-如果你觉得有必要制作一个不同于标准版本(standard version)的 \LaTeX{}\ 版本，而使用上述配置方法是不可能的，那么您应该首先阅读 |modguide.tex| 文件中的\ {\color{blue}{\textit{Modifying \LaTeX{}}}}【{\color{blue}{《修改\ \LaTeX{}》}}】，这可能会让您意识到您没有这样的需求
+如果你觉得有必要制作一个不同于标准版本(standard version)的 \LaTeX{}\ 版本，而使用上述配置方法是不可能的，那么您应该首先阅读 |modguide.tex| 文件中的\ 《Modifying \LaTeX{}》\ 【《修改 \LaTeX{}》】，这可能会让您意识到您没有这样的需求
 
 因此，我们确信您将永远不需要创建非标准版本，并且，即使您确实创建了一个非标准版本，我们也希望您不会发布这样的版本。然而，您可以这样做，只要您特别注意以下几点：
 \begin{itemize}
