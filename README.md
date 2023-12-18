@@ -2,15 +2,15 @@
 本项目目前主要收录一些本人在学习 LaTeX 过程中，阅读到的一些LaTeX基础性的文档。随手翻译出来，方便中文 TeXer 对照原文阅读。
 
 ***2023年12月13日更新***
-经过与赣医一附院神经科的黄旭华本人确认，本项目今后会收录部分由黄旭华翻译的优秀作品。后期可能会做部分增量更新。
+经过与赣医一附院神经科的**黄旭华**本人确认，本项目今后会收录部分由黄旭华翻译的优秀作品。后期可能会做部分增量更新。
 
 为方便阅读，部分中文版的翻译文档在部分内容颜色上做了一定的区分，宏命令和标题以及其它带链接的部分（比如目录和引用等）用蓝色，抄录（verbatim）环境和类似的环境用的是绿色，宏包代码用的是褐色。
 
 ## 目前已有的文档包含有：
-* **cfgguide.pdf** 的中文文档 **cfgguide-zh-cn.pdf** ，cfgguide 是一份系统性地介绍 LaTeX 内部的各种配置文件，对于普通的 LaTeX 用户来说，基本上不会遇到需要修改这些文件的情况。但是对于一部分 hacker 或者一部分需要阅读 LaTeX 源代码的朋友，这还是一个算是工具手册一样的文档吧。该手册的中文文档由黄旭华翻译，在措辞方面，本人未做什么改动，仅调整了一些格式、字体以及颜色方面的设置，以便使之与本项目其它文档的风格保持一致。编译方法、字体设置等方面的问题，详情可查看相应的[说明文档][11]。
+* **cfgguide.pdf** 的中文文档 **cfgguide-zh-cn.pdf** ，cfgguide 是一份系统性地介绍 LaTeX 内部的各种配置文件，对于普通的 LaTeX 用户来说，基本上不会遇到需要修改这些文件的情况。但是对于一部分 hacker 或者一部分需要阅读 LaTeX 源代码的朋友，这还是一个算是工具手册一样的文档吧。该手册的中文文档由**黄旭华**翻译，在措辞方面，本人未做什么改动，仅调整了一些格式、字体以及颜色方面的设置，以便使之与本项目其它文档的风格保持一致。编译方法、字体设置等方面的问题，详情可查看相应的[说明文档][11]。
 * **classes.pdf** 的中文文档 **classes-zh-cn.pdf** ，classes 主要从文档类源代码出发，通过介绍类文档的源代码的方式来解释文档类的使用方法。本文主要面向有兴趣研究底层代码实现的朋友，并不适合初学者。本文档的中文版本由**黄旭华**翻译，这里仅做部分格式调整（目录改为双栏，以使版面分布更均匀，增加了索引），并进行了一定的颜色区分，与本项目其它的文档风格保持一致。编译方法、字体设置等方面的问题，详情可查看相应的[说明文档][12]。
 * **clsguide.pdf**(current-version) 的中文文档 **clsguide-zh-cn.pdf**（当前版本） , clsguide 即《LATEX for class and package writers》，中文版译名《面向宏包与类文件编写者的 LATEX》。clsguide 作为 LaTeX 各种发行版中必带的一个基础文档之一，已经有接近 30 年的历史了。从 TeXLive 2023 版开始，LaTeX 项目团队把主要以介绍 LaTeX2ε 的宏包与类文件开发语法的旧版 clsguide 转为 clsguide(historic version) ，而把加入了新的 LaTeX3 开发成果的更加方便快捷的开发语法介绍的新版文档作为 clsguide(current version) 。该中文翻译文档即以新的当前版本作为原文翻译的，详情可查看相应的[说明文档][8]。
-* **clsguide-historic.pdf** 的中文文档 **clsguide-historic-zh-cn.pdf** , clsguide 即《LATEX2ε for class and package writers》，中文版译名《用于类和包作者的 LATEX2ε》。在 LaTeX 世界可谓历史悠久相当经典，可谓算作学习编写类与包的作者入门必读系列之一了。本文由赣医一附院神经科的黄旭华翻译，该文自2006年以来，一直到2022年都未有任何改变，但是在今年最新的 TeXlive 仓库中，clsguide 加入了非常多的更新，并且把该文分作两个版本做分别更新，分别为 historic-version 和 current-version 。在 historic-version 中，未再做任何修订。该文档详情请查看相应的[说明文档][7]。
+* **clsguide-historic.pdf** 的中文文档 **clsguide-historic-zh-cn.pdf** , clsguide 即《LATEX2ε for class and package writers》，中文版译名《用于类和包作者的 LATEX2ε》。在 LaTeX 世界可谓历史悠久相当经典，可谓算作学习编写类与包的作者入门必读系列之一了。本文由赣医一附院神经科的**黄旭华**翻译，该文自2006年以来，一直到2022年都未有任何改变，但是在今年最新的 TeXlive 仓库中，clsguide 加入了非常多的更新，并且把该文分作两个版本做分别更新，分别为 historic-version 和 current-version 。在 historic-version 中，未再做任何修订。该文档详情请查看相应的[说明文档][7]。
 * **doc.pdf** 的中文文档 **doc-zh-cn.pdf** 以及 **doc-code.pdf** （增加了代码实现部分说明）的中文文档 **doc-code-zh-cn.pdf** ，doc & shortvrb 宏包是一个用于为 TeX 代码提供代码文档的包。从那时起，它被广泛用于记录 LaTeX 核心和现在大多数可用的包。该文档详情请查看相应的[说明文档][5]。
 * **docstrip.pdf** 的中文文档 **docstrip-zh-cn.pdf** ，该文档从另一个[项目][4]转移过来的，原项目已归档，后续的更新（如果有的话）放在本项目下继续维护。该文档主要描述了 DocStrip 程序的实现，DocStrip 程序是 TeX 实现文学编程的一个重要的工具。
 * **dtxtut.pdf** 的中文文档 **dtxtut-zh-cn.pdf** ，原文《How To Package Your LaTeX Packages》是一篇综合介绍 doc 宏包与 DocStrip 程序的教程。与 doc.pdf 和 docstrip.pdf 不同的是，那两份是说明手册的性质，而这份 dtxtut.pdf 则是一篇手把手教你如何利用 doc 宏包与 DocStrip 程序为工具，在 LaTeX 中实现初步的文学编程，打包你的代码。详情请参阅相应的[说明文档][6]。
