@@ -45,22 +45,19 @@
 \documentclass[full]{l3doc}
 % ^^A ======================== 中文版特定设置 ========================
 \usepackage[fontset=source]{ctex}
-\ctexset{
-  contentsname = {\centerline{目\quad 录}}
-}
+\renewcommand{\contentsname}{\hfil 目\quad 录\hfil}
 \usepackage{xcolor}
 \definecolor{spot}{HTML}{003399}
 \definecolor{code}{HTML}{a25e26}
 \definecolor{verb}{HTML}{007f00}
-\let\OriginMF\MacroFont
-\def\MacroFont{\color{spot}\OriginMF}
-\pretocmd{\macrocode}{\color{code}\def\MacroFont{\color{code}\OriginMF}}{}{}
-\AtBeginEnvironment{macrocode}{\def\MacroFont{\color{code}\OriginMF}}
-\AtEndEnvironment{macrocode}{\def\MacroFont{\color{spot}\OriginMF}}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\makeatother
 \AtBeginEnvironment{quote}{\color{verb}}
 \AtBeginEnvironment{flushleft}{\color{verb}}
-\AtBeginEnvironment{verbatim}{\color{verb}\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
-\AtEndEnvironment{verbatim}{\let\MacroFont\MF}
+\AtBeginEnvironment{verbatim}{\color{verb}}
 \ExplSyntaxOn
 \pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
 \ExplSyntaxOff
@@ -71,8 +68,7 @@
   citecolor=spot,
   bookmarksopen=false,
   bookmarksnumbered=false,
-  plainpages=false,
-  pdfview=FitH}
+  plainpages=false}
 \IndexPrologue
   {
     \section*{索引}
@@ -118,9 +114,8 @@
 % \maketitle
 %
 % \addtocontents{toc}{\protect\begin{multicols}{2}}
-%
+%     \AtEndDocument{\addtocontents{toc}{\protect\end{multicols}}}
 % \tableofcontents
-%
 % \newpage
 %
 % \begin{documentation}
@@ -1361,6 +1356,4 @@
 % \end{implementation}
 %
 % \PrintIndex
-%
-% \addtocontents{toc}{\protect\end{multicols}}
 %
