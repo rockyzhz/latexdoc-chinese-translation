@@ -98,20 +98,20 @@
 
 
 %%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{enumitem}
 \usepackage{xcolor}
 \definecolor{spot}{HTML}{003399}
 \definecolor{code}{HTML}{a25e26}
 \definecolor{verb}{HTML}{007f00}
 \usepackage{etoolbox}
-\let\OriginMF\MacroFont
-\def\MacroFont{\color{spot}\OriginMF}
-\pretocmd{\macrocode}{\color{code}\def\MacroFont{\color{code}\OriginMF}}{}{}
-\AtBeginEnvironment{macrocode}{\def\MacroFont{\color{code}\OriginMF}}
-\AtEndEnvironment{macrocode}{\def\MacroFont{\color{spot}\OriginMF}}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\makeatother
 \AtBeginEnvironment{quote}{\color{verb}}
-\AtBeginEnvironment{flushleft}{\color{verb}}
-\AtBeginEnvironment{verbatim}{\color{verb}\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
-\AtEndEnvironment{verbatim}{\let\MacroFont\MF}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}}
 \usepackage{hyperref}
 \hypersetup{%
   colorlinks=true,
@@ -120,8 +120,16 @@
   citecolor=spot,
   bookmarksopen=false,
   bookmarksnumbered=false,
-  plainpages=false,
-  pdfview=FitH}
+  plainpages=false}
+\IndexPrologue
+  {
+    \section*{索引}
+    \markboth{索引}{索引}
+    \addcontentsline{toc}{section}{\heiti 索引}
+    斜体数字指向相应条目描述的页面，
+    下划线数字指向定义的代码行，
+    其它的都指向使用条目的页面。
+  }
 %%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -149,10 +157,10 @@
 %%%%%%% 以上制作索引 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\renewcommand{\contentsname}{\heiti 目\ 录}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
-\renewcommand{\refname}{\heiti 参考文献}
+\renewcommand{\contentsname}{\hfil 目\quad 录\hfil}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\renewcommand{\refname}{ 参考文献}
 \renewcommand{\tablename}{表}
-\renewcommand{\abstractname}{\heiti 摘\ 要}
+\renewcommand{\abstractname}{ 摘\ 要}
 
 
 %
@@ -301,7 +309,7 @@
 % \changes{v1.4m}{2020/04/10}{(JLB) prettyprinting the code}
 %
 %
-% \title{{\Huge \textbf{\LaTeXe}}\ {\Huge \Heiti 的标准文档类}\ \thanks{该文件的版本号为 \fileversion，最新修订日期为 \filedate。}}
+% \title{\color{spot}\huge\bfseries\LaTeXe\ 的标准文档类\ \thanks{该文件的版本号为 \fileversion，最新修订日期为 \filedate。}}
 %
 % \author{%
 % Copyright (C) 1992 by Leslie Lamport \and
@@ -311,9 +319,10 @@
 % \date{\filedate}
 % \MaintainedByLaTeXTeam{latex}
 % \maketitle
+% \addtocontents{toc}{\protect\begin{multicols}{2}}
+%     \AtEndDocument{\addtocontents{toc}{\protect\end{multicols}}}
 % \tableofcontents
-%
-%\newpage
+% \newpage
 % \MaybeStop{}    ^^A
 %
 % \section{{\textbf{\sc docstrip}}\ {\heiti 模块}}
@@ -459,7 +468,7 @@
 %    \end{macrocode}
 %
 %
-%  \subsection[draft\ 选项]{\textbf{draft}\ {\heiti 选项}}
+%  \subsection[\Lopt{draft}\ 选项]{\textbf{\Lopt{draft}}\ {\heiti 选项}}
 %
 %    如果用户要求 \Lopt{draft}(草稿)，我们会显示任何溢框(overfull boxes)。我们可能会
 %    在这个选项中添加一些更有趣的东西。
@@ -470,7 +479,7 @@
 \fi
 %    \end{macrocode}
 %
-%  \subsection[titlepage\ 选项]{\textbf{titlepage}\ {\heiti 选项}}
+%  \subsection[\Lopt{titlepage}\ 选项]{\textbf{\Lopt{titlepage}}\ {\heiti 选项}}
 %    一篇 article(文章)通常没有单独的标题页(separate titlepage)，但是用户可以请求一个。
 %    \begin{macrocode}
 \DeclareOption{titlepage}{\@titlepagetrue}
@@ -479,7 +488,7 @@
 \fi
 %    \end{macrocode}
 %
-%  \subsection[openright\ 选项]{\textbf{openright}\ {\heiti 选项}}
+%  \subsection[\Lopt{openright}\ 选项]{\textbf{\Lopt{openright}}\ {\heiti 选项}}
 %    此选项确定章(chapter)是否必须从请求的右侧页面(right-hand page)开始。
 %    \begin{macrocode}
 %<!article>\if@compatibility
@@ -596,11 +605,11 @@
 %    \item[\meta{font-size}] 从现在开始使用的字体的绝对尺寸(absolute size)。
 %
 %    \item[\meta{baselineskip}] 所选字体尺寸的 |\baselineskip| 的正常值。
-%    (实际值为 |\baselinestretch| * \meta{baselineskip})
+%    (实际值为\hfil\break |\baselinestretch| * \meta{baselineskip})
 %    \end{description}
 %
 %    \LaTeX{}\ 内核中定义的许多命令缩短了(shorten)以下定义，并一直在使用。他们是：
-% \begin{center}
+% \begin{center}\color{verb}
 % \begin{tabular}{ll@{\qquad}ll@{\qquad}ll}
 %  \verb=\@vpt= & 5 & \verb=\@vipt= & 6 & \verb=\@viipt= & 7 \\
 %  \verb=\@viiipt= & 8 & \verb=\@ixpt= & 9 & \verb=\@xpt= & 10 \\
@@ -1287,7 +1296,7 @@
 % \subsubsection[脚注]{\heiti 脚注}
 %
 % \begin{macro}{\footnotesep}
-%    |\footnotesep| 是每个脚注开头的支柱(strut)的高度。它等于此类中 |\footnotesize| 的支柱的高度，
+%    |\footnotesep| 是每个脚注开头的支柱(strut)的高度。它等于此类中\hfil\break |\footnotesize| 的支柱的高度，
 %    因此脚注之间没有额外的空间(extra space)。
 %    \begin{macrocode}
 %<10pt>\setlength\footnotesep{6.65\p@}
@@ -1473,7 +1482,7 @@
 %    这些参数用于在单栏模式(one-column mode)中放置浮动对象，或在两栏模式(two-column mode)中
 %    在单栏浮动(single-column floats)中放置浮动对象。
 %
-%    请注意，|\@fptop| 和 |\@fpbot| 两个参数中至少有一个应该包含 |plus ...fil|，以便填充
+%    请注意，|\@fptop| 和 |\@fpbot| 两个参数中至少有一个应该包含\hfil\break |plus ...fil|，以便填充
 %    剩余的空白(remaining empty space)。
 %    \begin{macrocode}
 %<*10pt>
@@ -1550,17 +1559,14 @@
 %
 %    \LaTeX{}\ 通过使用以下命令生成“left(左)”和“right(右)”两种标记(mark)，扩展了 \TeX\ 的
 %    标记功能(|\mark| facility)：
-%    \begin{flushleft}
-%     |\markboth{|\meta{LEFT}|}{|\meta{RIGHT}|}|：添加两个标记。
-%
-%     |\markright{|\meta{RIGHT}|}|：添加“right(右)”标记。
-%
-%     |\leftmark|：在 |\@oddhead|、|\@oddfoot|、|\@evenhead| 或 |\@evenfoot| 宏中使用时，
+%    \begin{description}[leftmargin=65pt,itemsep=0pt,parsep=0pt]\tt\color{verb}
+%     \item[\texttt{\bslash markboth\{\meta{LEFT}\}\{\meta{RIGHT}\}}]：添加两个标记。
+%     \item[\texttt{\bslash markright\{\meta{RIGHT}\}}]：添加“right(右)”标记。
+%     \item[\texttt{\bslash leftmark}]：在 |\@oddhead|、|\@oddfoot|、|\@evenhead| 或 |\@evenfoot| 宏中使用时，
 %                  它获得当前的“left(左)”标记。|\leftmark| 的工作方式类似于 \TeX\ 的 |\botmark| 命令。
-%
-%     |\rightmark|: 在 |\@oddhead|、|\@oddfoot|、|\@evenhead| 或 |\@evenfoot| 宏中使用时，
+%     \item[\texttt{\bslash rightmark}]：在 |\@oddhead|、|\@oddfoot|、|\@evenhead| 或 |\@evenfoot| 宏中使用时，
 %                   它获得当前的“right(右)”标记。|\rightmark| 的工作方式类似于 \TeX\ 的 |\firstmark|命令。
-%    \end{flushleft}
+%    \end{description}
 %
 %    标记命令(marking commands)对于“编号在”左标记内(“numbered within”left marks)的右标记(right marks)
 %    工作得相当好---例如，左标记由 |\chapter| 命令更改，右标记由 |\section| 命令更改。但是，如果
@@ -1918,8 +1924,7 @@
 %    可选参数(optional argument)和必需参数：
 %
 %    |\@startsection|\meta{name}\meta{level}\meta{indent}^^A
-%                    \meta{beforeskip}\meta{afterskip}\meta{style}
-%            optional *\\
+%                    \meta{beforeskip}\meta{afterskip}\meta{style}* 可选
 %    \null\hphantom{\bslash @startsection}^^A
 %            |[|\meta{altheading}|]|\meta{heading}
 %
@@ -2006,7 +2011,7 @@
 % \begin{macro}{\c@subsubsection}
 % \begin{macro}{\c@paragraph}
 % \begin{macro}{\c@subparagraph}
-%    这些计数器(counters)用于节编号(section numbers)。宏 |\newcounter{|\meta{newctr}|}[|\meta{oldctr}|]|
+%    这些计数器(counters)用于节编号(section numbers)。宏 |\newcounter|\ |{|\meta{newctr}|}[|\meta{oldctr}|]|
 %    定义 \meta{newctr}\ 为计数器(counter)，当计数器 \meta{oldctr}\ 被步进时(stepped)，\meta{newctr}\ 重置
 %    为零(reset to zero)。\meta{oldctr}必须已定义。
 %
@@ -2794,7 +2799,7 @@
 %                 \cs{textasteriskcentered} and \cs{textperiodcentered}}
 % \begin{macro}{\labelitemiii}
 % \begin{macro}{\labelitemiv}
-%    项目(itemization)由四个命令控制：|\labelitemi|、|\labelitemii|、|\labelitemiii| 和 |\labelitemiv|，
+%    项目(itemization)由四个命令控制：|\labelitemi|、|\labelitemii|、\hfil\break|\labelitemiii| 和 |\labelitemiv|，
 %    它们定义了各种项目级别的标签：使用的符号有黑点(bullet)、粗体短划线(bold en-dash)、
 %    居中星号(centered asterisk)和居中的点(centred dot)。
 %
@@ -3097,7 +3102,7 @@
 % \end{macro}
 %
 % \begin{macro}{\doublerulesep}
-%    数组(array)和表格(tabular)环境中相邻线段(rule)之间的间距由 |\doublerulesep| 给出。
+%    数组(array)和表格(tabular)环境中相邻线段(rule)之间的间距由\hfil\break |\doublerulesep| 给出。
 %    \begin{macrocode}
 \setlength\doublerulesep{2\p@}
 %    \end{macrocode}
@@ -3461,7 +3466,7 @@
 %     |\section| 命令将 |\contentsline{section}{|\meta{title}|}{|\meta{page}|}| 命令
 %     写入 \file{.toc}\ 文件中，在\file{.toc}\ 文件中，\meta{title}\ 包含条目(entry)的内容，
 %     而 \meta{page}\ 是页码(page number)。如果正在对节进行编号，则 \meta{title}\  格式
-%     为 |\numberline{|\meta{num}|}{|\meta{heading}|}|，这里的 \meta{num}\ 是
+%     为 |\numberline{|\meta{num}|}|\ |{|\meta{heading}|}|，这里的 \meta{num}\ 是
 %     由 |\thesection| 生成的编号(number)。其他分节命令(sectioning commands)的工作方式类似。
 %
 %     “figure(图形)”环境中的 |\caption| 命令写入
