@@ -1,0 +1,4791 @@
+% \iffalse meta-comment
+%
+%% File: l3doc.dtx
+%
+% Copyright (C) 1990-2023 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3kernel bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+\input docstrip %
+\askforoverwritefalse
+\preamble
+
+Copyright (C) 1990-2023 The LaTeX Project
+
+It may be distributed and/or modified under the conditions of
+the LaTeX Project Public License (LPPL), either version 1.3c of
+this license or (at your option) any later version.  The latest
+version of this license is in the file:
+
+   https://www.latex-project.org/lppl.txt
+
+This file is part of the "l3kernel bundle" (The Work in LPPL)
+and all files in that bundle must be distributed together.
+
+\endpreamble
+% stop docstrip adding \endinput
+\postamble
+\endpostamble
+\generate{\file{l3doc.cls}{\from{l3doc-zh-cn.dtx}{class,cfg}}}
+%\generate{\file{l3doc.ist}{\from{l3doc-zh-cn.dtx}{docist}}}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</driver>
+%
+%<*driver|class>
+\RequirePackage{calc}
+%</driver|class>
+%
+%<*driver>
+\PassOptionsToPackage{quiet}{fontspec}
+\documentclass{l3doc}
+\usepackage{framed}
+
+% ^^A ================ 中文版特别设置 ============================
+\usepackage[fontset=source]{ctex}
+% ^^A =================== 设置颜色 ===============================
+\usepackage{xcolor}
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\patchcmd{\l@section}
+  {\hfil}
+  {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+  {}{}
+\makeatother
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
+\AtBeginEnvironment{verbatim}{\def\MacroFont{\color{verb}\OriginalMF}}
+\ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
+\patchcmd{\__codedoc_typeset_aux:n}{\color[gray]{0.5}}{\color{spot}}{}{}
+\ExplSyntaxOff
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false}
+% ^^A ================ 中文版设置结束 ============================
+
+\begin{document}
+  \DocInput{l3doc-zh-cn.dtx}
+\end{document}
+%</driver>
+%
+% This isn't included in the typeset documentation because it's a bit
+% ugly:
+%<*class>
+\ProvidesExplClass{l3doc}{2023-12-11}{}
+  {L3 Experimental documentation class}
+%</class>
+% \fi
+%
+% \title{The \cls{l3doc} class -- experimental\thanks{%
+%    根据广泛需求，我们现在发布了这个实验性类的文档。
+%    但请注意，它绝不是最终版本，并且很有可能会经历修改，甚至是
+%    \emph{不兼容的修改}！因此，如果类发生变化，可能需要进行更新才能继续使用。}}
+%
+% \author{\Team}
+% \date{Released 2023-12-11}
+% \maketitle
+% \tableofcontents
+%
+% \begin{documentation}
+%
+%
+% \section{Introduction}
+%
+% Code and documentation for this class have been written prior to the
+% change of \pkg{doc} from version 2 to version 3, which already shows
+% how far behind this class currently is. So take the following
+% warning seriously please:
+%
+%  \begin{quote}
+% \textbf{It is much less stable than the main \pkg{expl3} packages.\\
+%   Use at own risk!}
+%  \end{quote}
+%
+% This is an ad-hoc class for documenting the \pkg{expl3} bundle, a
+% collection of modules or packages that make up \LaTeX3's programming
+% environment.  Eventually it will replace the \cls{ltxdoc} class for
+% \LaTeX3, but not before the good ideas in \pkg{hypdoc}, \cls{xdoc2},
+% \pkg{docmfp}, and \cls{gmdoc} are incorporated.
+%
+% It is written as a \enquote{self-contained} docstrip file: executing
+% |latex l3doc.dtx| generates the \file{l3doc.cls} file and typesets
+% this documentation; execute |tex l3doc.dtx| to only generate
+% \file{l3doc.cls}.
+%
+% \section{Features of other packages}
+%
+% This class builds on the \pkg{ltxdoc} class and the \pkg{doc} package,
+% but in the time since they were originally written some improvements
+% and replacements have appeared that we would like to use as
+% inspiration.
+%
+% These packages or classes are \pkg{hypdoc}, \pkg{docmfp}, \pkg{gmdoc},
+% and \pkg{xdoc}.  I have summarised them below in order to work out
+% what sort of features we should aim at a minimum for \pkg{l3doc}.
+%
+% \subsection{The \pkg{hypdoc} package}
+%
+% This package provides hyperlink support for the \pkg{doc} package.  I
+% have included it in this list to remind me that cross-referencing
+% between documentation and implementation of methods is not very
+% good. (\emph{E.g.}, it would be nice to be able to automatically
+% hyperlink the documentation for a function from its implementation and
+% vice-versa.)
+%
+% \subsection{The \pkg{docmfp} package}
+%
+% \begin{itemize}
+%   \item Provides \cs{DescribeRoutine} and the \env{routine}
+%     environment (\emph{etc.}) for MetaFont and MetaPost code.
+%   \item Provides \cs{DescribeVariable} and the \env{variable}
+%     environment (\emph{etc.})  for more general code.
+%   \item Provides \cs{Describe} and the \env{Code} environment
+%     (\emph{etc.})  as a generalisation of the above two
+%     instantiations.
+%   \item Small tweaks to the DocStrip system to aid non-\LaTeX{} use.
+% \end{itemize}
+%
+% \subsection{The \pkg{xdoc2} package}
+%
+% \begin{itemize}
+%   \item Two-sided printing.
+%   \item \cs{NewMacroEnvironment}, \cs{NewDescribeEnvironment}; similar
+%     idea to \pkg{docmfp} but more comprehensive.
+%   \item Tons of small improvements.
+% \end{itemize}
+%
+% \subsection{The \pkg{gmdoc} package}
+%
+% Radical re-implementation of \pkg{doc} as a package or class.
+% \begin{itemize}
+%   \item Requires no |\begin{macrocode}| blocks!
+%   \item Automatically inserts |\begin{macro}| blocks!
+%   \item And a whole bunch of other little things.
+% \end{itemize}
+%
+% \section{Problems \& Todo}
+%
+% Problems at the moment:
+% (1)~not flexible in the types of things that can be documented;
+% (2)~no obvious link between the |\begin{function}| environment for
+%     documenting things to the |\begin{macro}| function that's used
+%     analogously in the implementation.
+%
+% The \env{macro} should probably be renamed to \env{function} when it
+% is used within an implementation section.  But they should have the
+% same syntax before that happens!
+%
+% Furthermore, we need another \enquote{layer} of documentation commands
+% to account for \enquote{user-macro} as opposed to
+% \enquote{code-functions}; the \pkg{expl3} functions should be
+% documented differently, probably, to the \pkg{ltcmd} user macros (at
+% least in terms of indexing).
+%
+% In no particular order, a list of things to do:
+% \begin{itemize}
+%   \item Rename \env{function}/\env{macro} environments to better
+%     describe their use.
+%   \item Generalise \env{function}/\env{macro} for documenting
+%     \enquote{other things}, such as environment names, package
+%     options, even keyval options.
+%   \item New function like \tn{part} but for files (remove awkward
+%     \enquote{File} as \tn{partname}).
+%   \item Something better to replace \cs{StopEventually}; I'm thinking
+%     two environments \env{documentation} and \env{implementation} that
+%     can conditionally typeset/ignore their material.  (This has been
+%     implemented but needs further consideration.)
+%   \item Hyperlink documentation and implementation of macros (see the
+%     \textsc{dtx} file of \pkg{svn-multi} v2 as an example).  This is
+%     partially done, now, but should be improved.
+% \end{itemize}
+%
+% \section{Documentation}
+%
+% \subsection{Configuration}
+%
+% Before class options are processed, \pkg{l3doc} loads a configuration
+% file \file{l3doc.cfg} if it exists, allowing you to customise the
+% behaviour of the class without having to change the documentation
+% source files.
+%
+% For example, to produce documentation on letter-sized paper instead of
+% the default A4 size, create \file{l3doc.cfg} and include the line
+% \begin{verbatim}
+% \PassOptionsToClass{letterpaper}{l3doc}
+% \end{verbatim}
+%
+% By default, \pkg{l3doc} selects the |T1| font encoding and loads the
+% Latin Modern fonts.  To prevent this, use the class option
+% |cm-default|.
+%
+% \subsection{Class options}
+%
+% The class recognises a number of options, some of which are generally
+% useful and some of which are aimed squarely at use by the kernel team only.
+%
+% \DescribeOption{full}
+% \DescribeOption{onlydoc}
+% When the \texttt{full} option is set (the standard setting), both the
+% documentation and implementation parts of the source are typeset. If on the
+% other hand the \texttt{onlydoc} option is set, only the documentation part
+% is typeset.
+%
+% \DescribeOption{lm-default}
+% Selects whether the standard font set up is Latin Modern in the \texttt{T1}
+% encoding (the standard setting) or leaves the font setup unchanged.
+%
+% \DescribeOption{kernel}
+% Determines whether \pkg{l3doc} treats |\__kernel_| commands and
+% |\(c|g|l)__kernel_| variables as allowable in code. In general,
+% \emph{no} internal material from outside the current module is allowed.
+% However, for bootstrapping the \pkg{expl3} kernel, a small number of
+% cross-module functions are needed. To suppress the error message that
+% would otherwise arise, the class option \texttt{kernel} may be given.
+%
+% \DescribeOption{check}
+% When the \texttt{check} option is given, the class will record all commands
+% defined and documented in a \texttt{\meta{name}.cmds} file. This will show
+% which are both documented and defined, which are only documented and which
+% are only defined. (Here, \enquote{defined} means listed using a
+% \texttt{macro} or \texttt{variable} environment in the implementation part of
+% the source file).
+%
+% \DescribeOption{checktest}
+% When \texttt{checktest} is given as an option, the class will check that each
+% function entry in the implementation part of the source is marked using
+% \cs{UnitTest}.
+%
+% \DescribeOption{show-notes}
+% \DescribeOption{hide-notes}
+% These complementary options determine if the information given using the
+% \cs{NB} and \cs{NOTE} commands is printed.
+%
+% \DescribeOption{cs-break}
+% \DescribeOption{cs-break-nohyphen}
+% The commands \cs{cmd} and \cs{cs} allow hyphenation of control sequences
+% after (most) underscores. By default, a hyphen is used to mark the
+% hyphenation, but this can be changed with the \texttt{cs-break-nohyphen}
+% class option. To disable hyphenation of control sequences entirely, use
+% \texttt{cs-break = false}.
+%
+% \subsection{Partitioning documentation and implementation}
+%
+% \pkg{doc} uses the \cs{OnlyDocumentation}/\cs{AlsoImplementation}
+% macros to guide the use of \cs{StopEventually}|{}|, which is intended
+% to be placed to partition the documentation and implementation within
+% a single \file{.dtx} file.
+%
+% This isn't very flexible, since it assumes that we \emph{always} want
+% to print the documentation.  For the \pkg{expl3} sources, I wanted to
+%  be able to input \file{.dtx} files in two modes: only displaying
+% the documentation, and only displaying the implementation.  For
+% example:
+% \begin{verbatim}
+% \DisableImplementation
+% \DocInput{l3basics,l3prg,...}
+% \EnableImplementation
+% \DisableDocumentation
+% \DocInputAgain
+% \end{verbatim}
+%
+% The idea being that the entire \pkg{expl3} bundle can be documented,
+% with the implementation included at the back.  Now, this isn't
+% perfect, but it's a start.
+%
+% Use |\begin{documentation}...\end{documentation}| around the
+% documentation, and |\begin{implementation}...\end{implementation}|
+% around the implementation.  The
+% \cs{EnableDocumentation}/\cs{EnableImplementation} causes them to
+% be typeset when the \file{.dtx} file is \cs{DocInput}; use
+% \cs{DisableDocumentation}/\cs{DisableImplementation} to omit the
+% contents of those environments.
+%
+% Note that \cs{DocInput} now takes comma-separated arguments, and
+% \cs{DocInputAgain} can be used to re-input all \file{.dtx} files
+% previously input in this way.
+%
+% \subsection{General text markup}
+%
+% Many of the commands in this section come from \pkg{ltxdoc} with some
+% improvements.
+%
+% \begin{function}{\cmd, \cs}
+%   \begin{syntax}
+%     \cmd{\cmd} \oarg{options} \meta{control sequence}\\
+%     \cs{cs} \oarg{options} \marg{csname}
+%   \end{syntax}
+%   These commands are provided to typeset control sequences.
+%   |\cmd\foo| produces \enquote{\cmd\foo} and |\cs{foo}| produces the
+%   same.  In general, \cs{cs} is more robust since
+%   it doesn't rely on catcodes being \enquote{correct} and is therefore
+%   recommended.
+%
+%   These commands are aware of the |@@| \pkg{l3docstrip} syntax and
+%   replace such instances correctly in the typeset documentation.
+%   This only happens after a |%<@@=|\meta{module}|>| declaration.
+%
+%   Additionally, commands can be used in the argument of \cs{cs}.  For
+%   instance, |\cs{\meta{name}:\meta{signature}}| produces
+%   \cs[no-index]{\meta{name}:\meta{signature}}.
+%
+%   The \meta{options} are a key--value list which can contain the
+%   following keys:
+%   \begin{itemize}
+%     \item |index=|\meta{name}: the \meta{csname} is indexed as if
+%       one had written \cs{cs}\Arg{name}.
+%     \item |no-index|: the \meta{csname} is not indexed.
+%     \item |module=|\meta{module}: the \meta{csname} is indexed in
+%       the list of commands from the \meta{module}; the \meta{module}
+%       can in particular be |TeX| for \enquote{\TeX{} and \LaTeXe{}}
+%       commands, or empty for commands which should be placed in the
+%       main index.  By default, the \meta{module} is deduced
+%       automatically from the command name.
+%     \item |replace| is a boolean key (\texttt{true} by default) which
+%       indicates whether to replace |@@| as \pkg{l3docstrip} does.
+%   \end{itemize}
+%   These commands allow hyphenation of control sequences after (most) underscores.
+%   By default, a hyphen is used to mark the hyphenation, but this can be changed with
+%   the \texttt{cs-break-nohyphen} class option.
+%   To disable hyphenation of control sequences entirely, use
+%   \texttt{cs-break = false}.
+% \end{function}
+%
+%
+% \begin{function}{\tn}
+%   \begin{syntax}
+%     \cs{tn} \oarg{options} \marg{csname}
+%   \end{syntax}
+%   Analoguous to \cs{cs} but intended for \enquote{traditional} \TeX{}
+%   or \LaTeXe{} commands; they are indexed accordingly.  This is in
+%   fact equivalent to \cs{cs} |[module=TeX, replace=false,|
+%   \meta{options}|]| \Arg{csname}.
+% \end{function}
+%
+% \begin{function}{\meta}
+%   \begin{syntax}
+%     \cs{meta} \Arg{name}
+%   \end{syntax}
+%   \cs{meta} typesets the \meta{name} italicised in \meta{angle
+%     brackets}.  Within a \env{function} environment or similar, angle
+%   brackets |<...>| are set up to be a shorthand for |\meta{...}|.
+%
+%   This function has additional functionality over its \pkg{ltxdoc}
+%   versions; underscores can be used to subscript material as in math
+%   mode.  For example, |\meta{arg_{xy}}| produces
+%   \enquote{\meta{arg_{xy}}}.
+% \end{function}
+%
+% \begin{function}{\Arg, \marg, \oarg, \parg}
+%   \begin{syntax}
+%     |\Arg| \Arg{name}
+%   \end{syntax}
+%   Typesets the \meta{name} as for \cs{meta} and wraps it in braces.
+%
+%   The \cs{marg}/\cs{oarg}/\cs{parg} versions follow from \pkg{ltxdoc}
+%   in being used for \enquote{mandatory} or \enquote{optional} or
+%   \enquote{picture} brackets as per \LaTeXe{} syntax.
+% \end{function}
+%
+% \begin{function}{\file, \env, \pkg, \cls}
+%   \begin{syntax}
+%     \cs{pkg} \Arg{name}
+%   \end{syntax}
+%   These all take one argument and are intended to be used as semantic
+%   commands for representing files, environments, package names, and
+%   class names, respectively.
+% \end{function}
+%
+% \begin{function}{\NB, \NOTE}
+%   \begin{syntax}
+%     \cs{NB} \marg{tag} \marg{comments}
+%     \verb|\begin{NOTE}| \marg{tag}
+%     \qquad\meta{comments}
+%     \verb|\end{NOTE}|
+%   \end{syntax}
+%   Make notes in the source that are not typeset by default. When the \verb|show-notes|
+%   class option is active, the comments are typeset in a detokenized and verbatim mode, respectively.
+% \end{function}
+%
+% \subsection{Describing functions in the documentation}
+%
+% \DescribeEnv{function}
+% \DescribeEnv{variable}
+% Two heavily-used environments are defined to describe \pkg{expl3} functions
+% and variables.  If describing a variable, use the latter environment; it
+% behaves identically to the \env{function} environment.
+% \DescribeEnv{syntax}
+% Both of the above environments are typically combined with the \env{syntax}
+% environment, to describe their syntax.
+% \begin{framed}
+%   \vspace{-\baselineskip}
+% \begin{verbatim}
+% \begin{function}{\package_function_one:N, \package_function_two:n}
+%   \begin{syntax}
+%     \cs{package_function_one:N} \meta{cs}
+%     \cs{package_function_two:n} \marg{Argument}
+%   \end{syntax}
+% Descriptive text here ...
+% \end{function}
+% \end{verbatim}
+%   \hrulefill
+%   \par
+%   \hspace*{0.25\textwidth}
+%   \begin{minipage}{0.5\textwidth}
+%     \begin{function}{\package_function_one:N, \package_function_two:n}
+%       \begin{syntax}
+%         \cs[no-index]{package_function_one:N} \meta{cs}
+%         \cs[no-index]{package_function_two:n} \marg{Argument}
+%       \end{syntax}
+%       \emph{Descriptive text here …}
+%     \end{function}
+%   \end{minipage}
+% \end{framed}
+%
+% Function environments take an optional argument to indicate whether
+% the function(s) it describes are expandable (use |EXP|) or
+% restricted-expandable (use |rEXP|) or defined in conditional forms
+% (use |TF|, |pTF|, or |noTF|).  Note that |pTF| implies |EXP| since
+% predicates must always be expandable, and that |noTF| means that the
+% function without |TF| should be documented in addition to |TF|.  For
+% the conditional forms |TF| and |pTF|, the argument of the
+% \env{function} environment is \emph{not} in fact a command that
+% exists: in the example below, \cs[no-index]{tl_if_empty:N} does not
+% exist, but its conditional forms \cs{tl_if_empty:NT},
+% \cs{tl_if_empty:NF}, \cs{tl_if_empty:NTF} and predicate form
+% \cs{tl_if_empty_p:N} exist:
+% \begin{framed}
+%   \vspace{-\baselineskip}
+% \begin{verbatim}
+% \begin{function}[pTF]{\tl_if_empty:N, \tl_if_empty:c}
+%   \begin{syntax}
+%     \cs{tl_if_empty_p:N} \meta{tl~var}
+%     \cs{tl_if_empty:NTF} \meta{tl~var} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if the \meta{token list variable} is entirely empty
+%   (\emph{i.e.}~contains no tokens at all).
+% \end{function}
+% \end{verbatim}
+%   \hrulefill
+%   \par
+%   \hspace*{0.25\textwidth}
+%   \begin{minipage}{0.5\textwidth}
+%     \begin{function}[pTF]{\tl_if_empty:N, \tl_if_empty:c}
+%       \begin{syntax}
+%         \cs{tl_if_empty_p:N} \meta{tl~var}
+%         \cs{tl_if_empty:NTF} \meta{tl~var} \Arg{true code} \Arg{false code}
+%       \end{syntax}
+%       Tests if the \meta{token list variable} is entirely empty
+%       (\emph{i.e.}~contains no tokens at all).
+%     \end{function}
+%   \end{minipage}
+% \end{framed}
+%
+% \DescribeEnv{texnote}
+% This environment is used to call out sections within \env{function}
+% and similar environments that are only of interest to seasoned
+% \TeX{} developers.
+%
+% \subsection{Describing functions in the implementation}
+%
+% \DescribeEnv{macro}
+% The well-used environment from \LaTeXe{} for marking up the
+% implementation of macros/functions remains the \env{macro}
+% environment.  Some changes in \pkg{l3doc}: it now accepts
+% comma-separated lists of functions, to avoid a very large number of
+% consecutive |\end{macro}| statements.
+% Spaces and new lines are ignored (the option |[verb]| prevents this).
+% \begin{verbatim}
+% % \begin{macro}{\foo:N, \foo:c}
+% %   \begin{macrocode}
+% ... code for \foo:N and \foo:c ...
+% %   \end{macrocode}
+% % \end{macro}
+% \end{verbatim}
+% If you are documenting an auxiliary macro, it's generally not
+% necessary to highlight it as much and you also don't need to check it
+% for, say, having a test function and having a documentation chunk
+% earlier in a \env{function} environment.  \pkg{l3doc} will pick up these
+% cases from the presence of |__| in the name, or you may force marking
+% as internal by using |\begin{macro}[int]| to mark it as such. The margin
+% call-out is then printed in grey for such cases.
+%
+% For documenting \pkg{expl3}-type conditionals, you may also pass this
+% environment a |TF| option (and omit it from the function name) to
+% denote that the function is provided with |T|, |F|, and |TF| suffixes.
+% A similar |pTF| option prints both |TF| and |_p| predicate forms.
+% An option |noTF| prints both the |TF| forms and a form with neither
+% |T| nor |F|, to document functions such as \cs[no-index]{prop_get:NN}
+% which also have conditional forms (\cs[no-index]{prop_get:NNTF}).
+%
+% In a very small number of cases, there is no user documentation for
+% a \enquote{public} function. In these rare cases, the option
+% |no-user-doc| may be added to suppress the undefined reference that
+% would otherwise then arises.
+%
+% \DescribeMacro{\TestFiles}
+% \cs{TestFiles}\marg{list of files} is used to indicate which test
+% files are used for the current code; they are printed in the
+% documentation.
+%
+% \DescribeMacro{\UnitTested}
+% Within a \env{macro} environment, it is a good idea to mark whether a
+% unit test has been created for the commands it defines.  This is
+% indicated by writing \cs{UnitTested} anywhere within |\begin{macro}|
+%   \dots |\end{macro}|.
+%
+% If the class option |checktest| is enabled, then it is an \emph{error}
+% to have a \env{macro} environment without a call to
+% \file{Testfiles}.  This is intended for large packages such as
+% \pkg{expl3} that should have absolutely comprehensive tests suites and
+% whose authors may not always be as sharp at adding new tests with new
+% code as they should be.
+%
+% \DescribeMacro{\TestMissing}
+% If a function is missing a test, this may be flagged by writing (as
+% many times as needed) \cs{TestMissing} \marg{explanation of test
+%   required}.  These missing tests are summarised in the listing
+% printed at the end of the compilation run.
+%
+% \DescribeEnv{variable}
+% When documenting variable definitions, use the \env{variable}
+% environment instead.  Here it behaves identically to the
+% \env{macro} environment, except that if the class option |checktest|
+% is enabled, variables are not required to have a test file.
+%
+% \DescribeEnv{arguments}
+% Within a \env{macro} environment, you may use the \env{arguments}
+% environment to describe the arguments taken by the function(s).  It
+% behaves like a modified enumerate environment.
+% \begin{verbatim}
+% % \begin{macro}{\foo:nn, \foo:VV}
+% % \begin{arguments}
+% %   \item Name of froozle to be frazzled
+% %   \item Name of muble to be jubled
+% % \end{arguments}
+% %   \begin{macrocode}
+% ... code for \foo:nn and \foo:VV ...
+% %   \end{macrocode}
+% % \end{macro}
+% \end{verbatim}
+%
+%
+% \subsection{Keeping things consistent}
+%
+% Whenever a function is either documented or defined with
+% \env{function} and \env{macro} respectively, its name is stored in a
+% sequence for later processing.
+%
+% At the end of the document (\emph{i.e.}, after the \file{.dtx} file
+% has finished processing), the list of names is analysed to check
+% whether all defined functions have been documented and vice versa. The
+% results are printed in the console output.
+%
+% If you need to do more serious work with these lists of names, take a
+% look at the implementation for the data structures and methods used to
+% store and access them directly.
+%
+% \subsection{Documenting templates}
+%
+% The following macros are provided for documenting templates; might end
+% up being something completely different but who knows.
+% \begin{quote}\parskip=0pt\obeylines
+%   |\begin{TemplateInterfaceDescription}| \Arg{template type name}
+%   |  \TemplateArgument{none}{---}|
+%   \textsc{or one or more of these:}
+%   |  \TemplateArgument| \Arg{arg no} \Arg{meaning}
+%   \textsc{and}
+%   |\TemplateSemantics|
+%   |  | \meta{text describing the template type semantics}
+%   |\end{TemplateInterfaceDescription}|
+% \end{quote}
+%
+% \begin{quote}\parskip=0pt\obeylines
+%   |\begin{TemplateDescription}| \Arg{template type name} \Arg{name}
+%   \textsc{one or more of these:}
+%   |  \TemplateKey| \marg{key name} \marg{type of key}
+%   |    |\marg{textual description of meaning}
+%   |    |\marg{default value if any}
+%   \textsc{and}
+%   |\TemplateSemantics|
+%   |  | \meta{text describing special additional semantics of the template}
+%   |\end{TemplateDescription}|
+% \end{quote}
+%
+% \begin{quote}\parskip=0pt\obeylines
+%   |\begin{InstanceDescription}| \oarg{text to specify key column width (optional)}
+%   \hfill\marg{template type name}\marg{instance name}\marg{template name}
+%   \textsc{one or more of these:}
+%   |  \InstanceKey| \marg{key name} \marg{value}
+%   \textsc{and}
+%   |\InstanceSemantics|
+%   |  | \meta{text describing the result of this instance}
+%   |\end{InstanceDescription}|
+% \end{quote}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3doc} implementation}
+%
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=codedoc>
+%    \end{macrocode}
+%
+% \subsection{Variables}
+%
+% \begin{variable}{\g_docinput_clist}
+%   The list of files which have been input through \cs{DocInput}.
+%    \begin{macrocode}
+\clist_new:N \g_docinput_clist
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_doc_functions_seq, \g_doc_macros_seq}
+%   All functions documented through \env{function}, and all macros
+%   introduced through \env{macro}.  They can be compared to see what
+%   documentation or code is missing.
+%    \begin{macrocode}
+\seq_new:N \g_doc_functions_seq
+\seq_new:N \g_doc_macros_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_detect_internals_bool, \l_@@_detect_internals_tl}
+%   If \texttt{true}, \pkg{l3doc} will check for use of internal
+%   commands \cs[no-index]{__\meta{pkg}_\ldots{}} from other packages in
+%   the argument of the \texttt{macro} environment, and in the code typeset in
+%   \texttt{macrocode} environments, but not in~\cs{cs}.  Also a token list
+%   to store temporary data for this purpose.
+%    \begin{macrocode}
+\bool_new:N \l_@@_detect_internals_bool
+\bool_set_true:N \l_@@_detect_internals_bool
+\tl_new:N \l_@@_detect_internals_tl
+\tl_new:N \l_@@_detect_internals_cs_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_output_coffin}
+%   The \env{function} environment is typeset by combining coffins
+%   containing various pieces (function names, description, \emph{etc.})
+%   into this coffin.
+%    \begin{macrocode}
+\coffin_new:N \l_@@_output_coffin
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {\l_@@_functions_coffin, \l_@@_descr_coffin, \l_@@_syntax_coffin}
+%   These coffins contain respectively the list of function names
+%   (argument of the \env{function} environment), the text between
+%   |\begin{function}| and |\end{function}|, and the syntax given in the
+%   \env{syntax} environment.
+%    \begin{macrocode}
+\coffin_new:N \l_@@_functions_coffin
+\coffin_new:N \l_@@_descr_coffin
+\coffin_new:N \l_@@_syntax_coffin
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_syntax_box}
+%   The contents of the \env{syntax} environment are typeset in this box
+%   before being transferred to \cs{l_@@_syntax_coffin}.
+%    \begin{macrocode}
+\box_new:N \g_@@_syntax_box
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_in_function_bool}
+%   True when inside a \texttt{function} or \texttt{variable}
+%   environment.  Used by the \texttt{syntax} environment to determine
+%   its behaviour.
+%    \begin{macrocode}
+\bool_new:N \l_@@_in_function_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_long_name_bool, \l_@@_trial_width_dim}
+%   The boolean \cs{l_@@_long_name_bool} is \texttt{true} if the width
+%   \cs{l_@@_trial_width_dim} of the coffin \cs{l_@@_functions_coffin}
+%   (containing the current function names) is bigger than the space
+%   available in the margin.
+%    \begin{macrocode}
+\bool_new:N \l_@@_long_name_bool
+\dim_new:N \l_@@_trial_width_dim
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_nested_macro_int}
+%   The nesting of \env{macro} environments (this is now~$0$ outside a
+%   \env{macro} environment).
+%    \begin{macrocode}
+\int_new:N \l_@@_nested_macro_int
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \l_@@_macro_tested_bool,
+%     \g_@@_missing_tests_prop,
+%     \g_@@_not_tested_seq,
+%     \g_@@_testfiles_seq,
+%   }
+%   A boolean describing whether the current macro has tests, and some
+%   global structures which contain information about test files and
+%   which tests are missing.
+%    \begin{macrocode}
+\bool_new:N \l_@@_macro_tested_bool
+\prop_new:N \g_@@_missing_tests_prop
+\seq_new:N \g_@@_not_tested_seq
+\seq_new:N \g_@@_testfiles_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \l_@@_macro_deprecated_bool ,
+%     \l_@@_macro_internal_bool,
+%     \l_@@_macro_nodoc_bool ,
+%     \l_@@_macro_TF_bool,
+%     \l_@@_macro_pTF_bool,
+%     \l_@@_macro_noTF_bool,
+%     \l_@@_macro_EXP_bool,
+%     \l_@@_macro_rEXP_bool,
+%     \l_@@_macro_var_bool,
+%     \l_@@_override_module_tl,
+%     \l_@@_macro_documented_tl,
+%   }
+%   Contain information about some options of function/macro
+%   environments.  We initialize \cs{l_@@_override_module_tl} to avoid
+%   overriding module names by an empty name (meaning no module).
+%    \begin{macrocode}
+\bool_new:N \l_@@_macro_deprecated_bool
+\bool_new:N \l_@@_macro_internal_bool
+\bool_new:N \l_@@_macro_nodoc_bool
+\bool_new:N \l_@@_macro_TF_bool
+\bool_new:N \l_@@_macro_pTF_bool
+\bool_new:N \l_@@_macro_noTF_bool
+\bool_new:N \l_@@_macro_EXP_bool
+\bool_new:N \l_@@_macro_rEXP_bool
+\bool_new:N \l_@@_macro_var_bool
+\tl_new:N \l_@@_override_module_tl
+\tl_set:Nn \l_@@_override_module_tl { \q_no_value }
+\tl_new:N \l_@@_macro_documented_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \g_@@_lmodern_bool,
+%     \g_@@_checkfunc_bool,
+%     \g_@@_checktest_bool,
+%     \g_@@_cs_break_bool,
+%     \g_@@_show_notes_bool,
+%     \g_@@_kernel_bool
+%   }
+%   Information about package options.
+%    \begin{macrocode}
+\bool_new:N \g_@@_lmodern_bool
+\bool_new:N \g_@@_checkfunc_bool
+\bool_new:N \g_@@_checktest_bool
+\bool_new:N \g_@@_kernel_bool
+\bool_new:N \g_@@_cs_break_bool
+\bool_new:N \g_@@_show_notes_bool
+\bool_gset_true:N \g_@@_cs_break_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_tmpa_tl, \l_@@_tmpb_tl, \l_@@_tmpa_int, \l_@@_tmpa_seq}
+%   Some temporary variables.
+%    \begin{macrocode}
+\tl_new:N \l_@@_tmpa_tl
+\tl_new:N \l_@@_tmpb_tl
+\int_new:N \l_@@_tmpa_int
+\int_new:N \l_@@_tmpa_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_names_block_tl}
+%   List of local sequence variables (produced through
+%   \cs{@@_lseq_name:n}), one for each set of variants in a
+%   \env{function} or \env{macro} environment.  More precisely these
+%   sequences are named after the base forms, such as \cs{clist_count:n}
+%   or \cs{clist_count:N} (which are not variants).  Each of these
+%   sequences have the base name (without any signature) as their first
+%   item, followed by the list of variant's signatures, or
+%   \cs{scan_stop:} to denote the absence of signature (no colon).
+%    \begin{macrocode}
+\tl_new:N \l_@@_names_block_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_variants_seq}
+%   Stores rather temporarily the list of variants (signatures only) of
+%   a function/macro that is being documented.  It is global because we
+%   need it to keep its value throughout cells of an alignment.
+%    \begin{macrocode}
+\seq_new:N \g_@@_variants_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_names_verb_bool}
+%   Set to |true| if the main argument of a macro/function environment
+%   should be used as is, without removing any comma or space.
+%    \begin{macrocode}
+\bool_new:N \l_@@_names_verb_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_names_seq}
+%   List of functions/environments/\ldots{} appearing as arguments of a
+%   given \env{function} or \env{macro} environment.  These are the
+%   names after conversion of |_@@| and |@@| to |__|\meta{module name}
+%   and other sanitizing.
+%    \begin{macrocode}
+\seq_new:N \l_@@_names_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_nested_names_seq}
+%   Collects all macros in nested \env{macro} environments, to use them
+%   in the \enquote{End definition} text.
+%    \begin{macrocode}
+\seq_new:N \g_@@_nested_names_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \l_@@_index_macro_tl, \l_@@_index_key_tl,
+%     \l_@@_index_module_tl, \l_@@_index_internal_bool,
+%     \l_@@_macro_do_not_index_tl
+%   }
+%   When analyzing a control sequence found within a \env{macrocode}
+%   environment, \cs{l_@@_index_macro_tl} holds the control sequence
+%   (partially a string), \cs{l_@@_index_key_tl} holds the future
+%   sort key in the index, and \cs{l_@@_index_module_tl} is the
+%   subindex in which the control sequence should be listed.
+%   \cs{l_@@_index_internal_bool} indicates when the control sequence is
+%   internal and should be indexed in a slightly different subindex.
+%   Finally, \cs{l_@@_macro_do_not_index_tl} indicates control sequences
+%   which should not be indexed in a specifiv \env{macro} envronment.
+%    \begin{macrocode}
+\tl_new:N \l_@@_index_macro_tl
+\tl_new:N \l_@@_index_key_tl
+\tl_new:N \l_@@_index_module_tl
+\tl_new:N \l_@@_macro_do_not_index_tl
+\bool_new:N \l_@@_index_internal_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_module_name_tl}
+%   The module name, set when reading a line |<@@=|\meta{module}|>|.
+%    \begin{macrocode}
+\tl_new:N \g_@@_module_name_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\c_@@_iow_rule_tl, \c_@@_iow_midrule_tl}
+%   $40$~equal signs.
+%    \begin{macrocode}
+\tl_const:Nn \c_@@_iow_rule_tl
+  { ======================================== }
+\tl_const:Nn \c_@@_iow_mid_rule_tl
+  { -------------------------------------- }
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {\l_@@_macro_box, \l_@@_macro_index_box, \l_@@_macro_int}
+%   A vertical box in which the names given to the macro environment are
+%   typeset, a horizontal box in which we store the targets created by
+%   indexing commands, and the number of macros so far (including those
+%   from surrounding \env{macro} environments).
+%    \begin{macrocode}
+\box_new:N \l_@@_macro_box
+\box_new:N \l_@@_macro_index_box
+\int_new:N \l_@@_macro_int
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \l_@@_cmd_tl,
+%     \l_@@_cmd_index_tl,
+%     \l_@@_cmd_module_tl,
+%     \l_@@_cmd_noindex_bool,
+%     \l_@@_cmd_replace_bool,
+%   }
+%   Variables used to control the behaviour of \cs{cmd}, \cs{cs} and
+%   \cs{tn}.
+%    \begin{macrocode}
+\tl_new:N \l_@@_cmd_tl
+\tl_new:N \l_@@_cmd_index_tl
+\tl_new:N \l_@@_cmd_module_tl
+\bool_new:N \l_@@_cmd_noindex_bool
+\bool_new:N \l_@@_cmd_replace_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_in_implementation_bool}
+%   This boolean is \texttt{true} within the \env{implementation}
+%   environment, and \texttt{false} anywhere else.
+%    \begin{macrocode}
+\bool_new:N \l_@@_in_implementation_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}
+%   {
+%     \g_@@_typeset_documentation_bool,
+%     \g_@@_typeset_implementation_bool
+%   }
+%   These booleans control whether the documentation/implementation
+%   should be typeset.  By default both should be.
+%    \begin{macrocode}
+\bool_new:N \g_@@_typeset_documentation_bool
+\bool_new:N \g_@@_typeset_implementation_bool
+\bool_set_true:N \g_@@_typeset_documentation_bool
+\bool_set_true:N \g_@@_typeset_implementation_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\g_@@_base_name_tl, \l_@@_variants_prop}
+%   The name of the macro which is being documented (without its
+%   signature), and a property list mapping base forms of variants to
+%   all variants which have the same base form.
+%    \begin{macrocode}
+\tl_new:N \g_@@_base_name_tl
+\prop_new:N \l_@@_variants_prop
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_function_label_clist, \l_@@_no_label_bool}
+%   Option of a \env{function} environment which replaces the label that
+%   would normally be inserted by labels for the given list of control
+%   sequences.  This is only useful to avoid duplicate labels when a
+%   function's documentation appears multiple times.
+%    \begin{macrocode}
+\clist_new:N \l_@@_function_label_clist
+\bool_new:N \l_@@_no_label_bool
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_date_added_tl, \l_@@_date_updated_tl}
+%   Values of some options of the \env{function} environment.
+%    \begin{macrocode}
+\tl_new:N \l_@@_date_added_tl
+\tl_new:N \l_@@_date_updated_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_macro_argument_tl}
+%   Save the argument of a \env{macro} or \env{function} environment for
+%   use in error messages.
+%    \begin{macrocode}
+\tl_new:N \l_@@_macro_argument_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% ^^A Bruno: what does the next line do?
+%    \begin{macrocode}
+% \int_new:N \c@CodelineNo
+%    \end{macrocode}
+%
+% \subsection{Variants and helpers}
+%
+% \begin{macro}{\@@_tmpa:w, \@@_tmpb:w}
+%   Auxiliary macros for temporary use.
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_tmpa:w ?
+\cs_new_eq:NN \@@_tmpb:w ?
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \seq_set_split:NoV,
+%     \tl_to_str:f
+%   }
+%   A few missing variants.
+%    \begin{macrocode}
+\cs_generate_variant:Nn \seq_set_split:Nnn { NoV }
+\cs_generate_variant:Nn \tl_to_str:n { f }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[TF]{\@@_if_almost_str:n}
+%   Used to test if the argument of |\cmd| or other macros to be indexed
+%   is almost a string or not: for instance this is \texttt{false} if |#1|
+%   contains |\meta{...}|.  The surprising |f|-expansion is there to
+%   cope with the case of |#1| starting with \cs{c_backslash_str}
+%   which should be expanded and considered to be \enquote{normal}.
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn \@@_if_almost_str:n #1 { TF , T , F }
+  {
+    \int_compare:nNnTF
+      { \tl_count:n {#1} }
+      < { \tl_count:e { \tl_to_str:f {#1} } }
+      { \prg_return_false: }
+      { \prg_return_true: }
+  }
+\prg_generate_conditional_variant:Nnn \@@_if_almost_str:n { V } { T }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_trim_right:Nn, \@@_trim_right:No}
+%   Removes all material after |#2| in the token list variable~|#1|.
+%   Perhaps combine with \cs{@@_key_trim_module:n}?
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_trim_right:Nn #1#2
+  {
+    \cs_set:Npn \@@_tmp:w ##1 #2 ##2 \q_stop { \exp_not:n {##1} }
+    \__kernel_tl_set:Ne #1 { \exp_after:wN \@@_tmp:w #1 #2 \q_stop }
+  }
+\cs_generate_variant:Nn \@@_trim_right:Nn { No }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[TF]{\@@_str_if_begin:nn, \@@_str_if_begin:oo}
+%   True if the first string starts with the second.
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn \@@_str_if_begin:nn #1#2 { TF , T , F }
+  {
+    \tl_if_in:ooTF
+      { \exp_after:wN \scan_stop: \tl_to_str:n {#1} }
+      { \exp_after:wN \scan_stop: \tl_to_str:n {#2} }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+\prg_generate_conditional_variant:Nnn \@@_str_if_begin:nn
+  { oo } { TF , T , F }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_replace_at_at:N}
+% \begin{macro}{\@@_replace_at_at_aux:Nn}
+%   The goal is to replace |@@| by the current module name.  We take
+%   advantage of this function to also detect internal macros.  If there is
+%   no \meta{module~name}, do nothing.  Otherwise, sanitize the catcodes
+%   of |@| and~|_|, temporarily change |@@@@| to |aa| with different catcodes and later to |@@|, and replace |__@@| and |_@@| and |@@| by
+%   |__|\meta{module~name}.  The result contains |_| with category
+%   code letter because this is what the |macrocode| environment
+%   expects.  Other use cases can apply \cs{tl_to_str:n} if needed.
+%   Note that we include spaces between the
+%   |@| in the code below, since it is also processed through the same
+%   replacement rules.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_replace_at_at:N #1
+  {
+    \tl_if_empty:NF \g_@@_module_name_tl
+      {
+        \exp_args:NNo \@@_replace_at_at_aux:Nn
+          #1 \g_@@_module_name_tl
+      }
+  }
+\cs_new_protected:Npe \@@_replace_at_at_aux:Nn #1#2
+  {
+    \tl_replace_all:Nnn #1 { \token_to_str:N @ } { @ }
+    \tl_replace_all:Nnn #1 { \token_to_str:N _ } { _ }
+    \tl_replace_all:Nnn #1 { @ @ @ @ } { \token_to_str:N a a }
+    \tl_replace_all:Nnn #1 { _ _ @ @ } { _ _ #2 }
+    \tl_replace_all:Nnn #1 {   _ @ @ } { _ _ #2 }
+    \tl_replace_all:Nnn #1 {     @ @ } { _ _ #2 }
+    \tl_replace_all:Nnn #1 { \token_to_str:N a a } { @ @ }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_detect_internals:N,
+%     \@@_detect_internals_aux:N,
+%     \@@_if_detect_internals_ok:NF
+%   }
+%   After splitting at each |__| and removing the leading item from the
+%   sequence (since it does not follow |__|), remove everything after
+%   any space or end-of-line to get a good approximation of the control
+%   sequence (for the warning message).  Then check if that starts with
+%   something allowed: |@@| module name and |:| or |_|, or if the
+%   relevant boolean is set |kernel_| (it seems safe to assume we will
+%   not define a |\__kernel:...| command).  For the message itself
+%   remove anything after any |_| or |:| (with either catcode) to get a
+%   guess of the module name.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_detect_internals:N #1
+  {
+    \bool_if:NT \l_@@_detect_internals_bool
+      { \@@_detect_internals_aux:N #1 }
+  }
+\group_begin:
+  \char_set_catcode_active:N \^^M
+  \cs_new_protected:Npn \@@_detect_internals_aux:N #1
+    {
+      \tl_set_eq:NN \l_@@_detect_internals_tl #1
+      \tl_replace_all:NVn \l_@@_detect_internals_tl \c_underscore_str { _ }
+      \seq_set_split:NnV \l_@@_tmpa_seq { _ _ } \l_@@_detect_internals_tl
+      \seq_pop_left:NN \l_@@_tmpa_seq \l_@@_detect_internals_tl
+      \seq_map_variable:NNn \l_@@_tmpa_seq \l_@@_detect_internals_tl
+        {
+          \@@_trim_right:No \l_@@_detect_internals_tl
+            \c_catcode_active_space_tl
+          \@@_trim_right:Nn \l_@@_detect_internals_tl ^^M
+          \@@_if_detect_internals_ok:NF \l_@@_detect_internals_tl
+            {
+              \tl_set_eq:NN \l_@@_detect_internals_cs_tl \l_@@_detect_internals_tl
+              \@@_trim_right:Nn \l_@@_detect_internals_tl _
+              \@@_trim_right:Nn \l_@@_detect_internals_tl :
+              \@@_trim_right:No \l_@@_detect_internals_tl { \token_to_str:N : }
+              \msg_warning:nneee { l3doc } { foreign-internal }
+                { \tl_to_str:N \l_@@_detect_internals_cs_tl }
+                { \tl_to_str:N \l_@@_detect_internals_tl }
+                { \tl_to_str:N \g_@@_module_name_tl }
+            }
+        }
+    }
+\group_end:
+\prg_new_protected_conditional:Npnn \@@_if_detect_internals_ok:N #1 { F }
+  {
+    \@@_str_if_begin:ooTF {#1} { \g_@@_module_name_tl _ }
+      { \prg_return_true: }
+      {
+        \@@_str_if_begin:ooTF {#1} { \g_@@_module_name_tl : }
+          { \prg_return_true: }
+          {
+            \bool_if:NTF \g_@@_kernel_bool
+              {
+                \@@_str_if_begin:ooTF {#1} { kernel _ }
+                  { \prg_return_true: }
+                  { \prg_return_false: }
+              }
+              { \prg_return_false: }
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[rEXP]{\@@_signature_base_form:n}
+% \begin{macro}
+%   {\@@_signature_base_form_aux:n, \@@_signature_base_form_aux:w}
+%   Expands to the \enquote{base form} of the signature.  For instance,
+%   given |noxcfvV| it would obtain |nnnNnnn|, or given |ow| it would
+%   obtain |nw|.  The loop stops at the first token that is not
+%   recognized; the rest is enclosed in \cs{exp_not:n}.
+%    \begin{macrocode}
+\cs_new:Npn \@@_signature_base_form:n #1
+  { \@@_signature_base_form_aux:n #1 \q_stop }
+\cs_new:Npn \@@_signature_base_form_aux:n #1
+  {
+    \str_case:nnTF {#1}
+      {
+        { N } { N }
+        { c } { N }
+        { n } { n }
+        { o } { n }
+        { f } { n }
+        { e } { n }
+        { x } { n }
+        { V } { n }
+        { v } { n }
+      }
+      { \@@_signature_base_form_aux:n }
+      { \@@_signature_base_form_aux:w #1 }
+  }
+\cs_new:Npn \@@_signature_base_form_aux:w #1 \q_stop
+  { \exp_not:n {#1} }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_predicate_from_base:n}
+%   Get predicate from a function's base name.  The code is not broken
+%   by functions with no signature.  The |n|-type version can be used
+%   for keys and other non-control sequences.  The output after
+%   |e|-expansion is a string.
+%    \begin{macrocode}
+\cs_new:Npn \@@_predicate_from_base:n #1
+  {
+    \@@_get_function_name:n {#1}
+    \tl_to_str:n { _p: }
+    \@@_get_function_signature:n {#1}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_split_function_do:nn, \@@_split_function_do:on}
+% \begin{macro}{\@@_get_function_name:n, \@@_get_function_signature:n}
+% \begin{macro}{\@@_split_function_auxi:w, \@@_split_function_auxii:w}
+%   Similar to internal functions defined in \pkg{l3basics}, but here we
+%   operate on strings directly rather than control sequences.
+%    \begin{macrocode}
+\cs_new:Npn \@@_get_function_name:n #1
+  { \@@_split_function_do:nn {#1} { \use_i:nnn } }
+\cs_new:Npn \@@_get_function_signature:n #1
+  { \@@_split_function_do:nn {#1} { \use_ii:nnn } }
+\cs_set_protected:Npn \@@_tmpa:w #1
+  {
+    \cs_new:Npn \@@_split_function_do:nn ##1
+      {
+        \exp_after:wN \@@_split_function_auxi:w
+        \tl_to_str:n {##1} \q_mark \c_true_bool
+        #1 \q_mark \c_false_bool
+        \q_stop
+      }
+    \cs_new:Npn \@@_split_function_auxi:w
+      ##1 #1 ##2 \q_mark ##3##4 \q_stop ##5
+      { \@@_split_function_auxii:w {##5} ##1 \q_mark \q_stop {##2} ##3 }
+    \cs_new:Npn \@@_split_function_auxii:w
+      ##1##2 \q_mark ##3 \q_stop
+      { ##1 {##2} }
+  }
+\exp_args:No \@@_tmpa:w { \token_to_str:N : }
+\cs_generate_variant:Nn \@@_split_function_do:nn { o }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}[rEXP]{\@@_key_get_base:nN}
+%   Get the base form of a function and store it.  As part of getting
+%   the base form, change trailing |T| or |F| to |TF|, skipping that
+%   change if the function contains no colon to avoid changing for
+%   instance some names ending in \texttt{PDF} or similar.  The various
+%   letters |z| serve as end-delimiters different from any outcome of
+%   \cs{tl_to_str:n}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_key_get_base:nN #1#2
+  {
+    \@@_if_almost_str:nTF {#1}
+      {
+        \@@_key_get_base_TF:nN {#1} \l_@@_tmpa_tl
+        \__kernel_tl_set:Ne #2
+          { \@@_split_function_do:on \l_@@_tmpa_tl { \@@_base_form_aux:nnN } }
+      }
+      { \tl_set:Nn #2 {#1} }
+  }
+\cs_new:Npe \@@_key_get_base_TF:nN #1#2
+  {
+    \__kernel_tl_set:Ne #2 { \exp_not:N \tl_to_str:n {#1} }
+    \tl_if_in:NoF #2 { \tl_to_str:n {:} }
+      { \exp_not:N \prg_break: }
+    \tl_if_in:onT { #2 z } { \tl_to_str:n {TF} z }
+      { \exp_not:N \prg_break: }
+    \tl_if_in:onT { #2 z } { \tl_to_str:n {T} z }
+      {
+        \tl_put_right:Nn #2 { \tl_to_str:n {F} }
+        \exp_not:N \prg_break:
+      }
+    \tl_if_in:onT { #2 z } { \tl_to_str:n {F} z }
+      {
+        \tl_put_right:Nn #2 { z }
+        \tl_replace_once:Nnn #2 { \tl_to_str:n {F} z } { \tl_to_str:n {TF} }
+        \exp_not:N \prg_break:
+      }
+    \exp_not:N \prg_break_point:
+  }
+\cs_new:Npn \@@_base_form_aux:nnN #1#2#3
+  {
+    \exp_not:n {#1}
+    \bool_if:NT #3
+      {
+        \token_to_str:N :
+        \bool_lazy_or:nnTF
+            { \str_if_eq_p:nn { #1 ~ } { \exp_args } }
+            { \str_if_eq_p:nn { #1 ~ } { \exp_last_unbraced } }
+          { \exp_not:n {#2} }
+          { \@@_signature_base_form:n {#2} }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_base_form_signature_do:nnn}
+%   Do |#2{#1}| if there is no signature, or if |#1| contains two colons
+%   in a row (this covers the weird function |\::N| and so on).
+%   Otherwise apply |#3| with the following two arguments: the base form
+%   of |#1|, and the original signature with an extra pair of braces.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_base_form_signature_do:nnn #1#2#3
+  {
+    \@@_split_function_do:nn {#1}
+      { \@@_base_form_aux:nnnnnN {#1} {#2} {#3} }
+  }
+\cs_new_protected:Npn \@@_base_form_aux:nnnnnN #1#2#3#4#5#6
+  {
+    \bool_if:NTF #6
+      {
+        \tl_if_head_eq_charcode:nNTF {#4} :
+          { #2 {#1} }
+          {
+            \use:e
+              {
+                \exp_not:n {#3}
+                { \@@_base_form_aux:nnN {#4} {#5} #6 }
+              }
+                {#4} {#5}
+          }
+      }
+      { #2 {#1} }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[pTF]{\@@_date_compare:nNn}
+% \begin{macro}{\@@_date_compare_aux:nnnNnnn, \@@_date_compare_aux:w}
+%   Expects |#1| and |#3| to be dates in the format YYYY-MM-DD (but
+%   accepts YYYY or YYYY-MM too).  Compares them using |#2| (one of |<|,
+%   |=|, |>|), filling in zeros for missing data.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \@@_date_compare:nNn #1#2#3 { TF , T , F , p }
+  { \@@_date_compare_aux:w #1--- \q_mark #2 #3--- \q_stop }
+\cs_new:Npn \@@_date_compare_aux:w
+    #1 - #2 - #3 - #4 \q_mark #5 #6 - #7 - #8 - #9 \q_stop
+  {
+    \@@_date_compare_aux:nnnNnnn
+      { \tl_if_empty:nTF {#1} { 0 } {#1} }
+      { \tl_if_empty:nTF {#2} { 0 } {#2} }
+      { \tl_if_empty:nTF {#3} { 0 } {#3} }
+      #5
+      { \tl_if_empty:nTF {#6} { 0 } {#6} }
+      { \tl_if_empty:nTF {#7} { 0 } {#7} }
+      { \tl_if_empty:nTF {#8} { 0 } {#8} }
+  }
+\cs_new:Npn \@@_date_compare_aux:nnnNnnn #1#2#3#4#5#6#7
+  {
+    \int_compare:nNnTF {#1} = {#5}
+      {
+        \int_compare:nNnTF {#2} = {#6}
+          {
+            \int_compare:nNnTF {#3} #4 {#7}
+              { \prg_return_true: } { \prg_return_false: }
+          }
+          {
+            \int_compare:nNnTF {#2} #4 {#6}
+              { \prg_return_true: } { \prg_return_false: }
+          }
+      }
+      {
+        \int_compare:nNnTF {#1} #4 {#5}
+          { \prg_return_true: } { \prg_return_false: }
+      }
+    \use_none:n
+    \q_stop
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_gprop_name:n, \@@_lseq_name:n}
+%   We need to keep track of some information about control sequences
+%   (and other strings) that are being (or have been) documented.  Some
+%   is stored into global props and some into local seqs, whose name
+%   does not follow conventions: it is \cs[no-index]{g_@@} or
+%   \cs[no-index]{l_@@} followed by a space and by the string, which can
+%   be arbitrary.  We cannot reasonably use a single big |prop| for
+%   speed reasons.
+%    \begin{macrocode}
+\cs_new:Npn \@@_gprop_name:n #1 { g_@@ ~ \tl_to_str:n {#1} }
+\cs_new:Npn \@@_lseq_name:n #1 { l_@@ ~ \tl_to_str:n {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Messages}
+%
+%    \begin{macrocode}
+\msg_new:nnnn { l3doc } { no-signature-TF }
+  { Function/macro~'#1'~cannot~be~turned~into~a~conditional. }
+  {
+    A~function~or~macro~environment~with~option~pTF,~TF~or~noTF~
+    received~the~argument~'#1'.~This~function's~name~has~no~
+    ':'~hence~it~is~not~clear~where~to~add~'_p'~or~'TF'.~
+    Please~follow~expl3~naming~conventions.
+  }
+\msg_new:nnn { l3doc } { date-format }
+  { The~date~'#1'~should~be~given~in~YYYY-MM-DD~format. }
+\msg_new:nnn { l3doc } { future-date }
+  { The~added/updated~date~'#2'~of~'#1'~is~in~the~future. }
+\msg_new:nnn { l3doc } { syntax-nested-function }
+  {
+    The~'syntax'~environment~should~be~used~in~the~
+    innermost~'function'~environment.
+  }
+\msg_new:nnn { l3doc } { multiple-syntax }
+  {
+    The~'syntax'~environment~should~only~be~used~once~in~
+    a~'function'~environment.
+  }
+\msg_new:nnn { l3doc } { deprecated-option }
+  { The~option~'#1'~has~been~deprecated~for~'#2'. }
+\msg_new:nnn { l3doc } { foreign-internal }
+  {
+    A~control~sequence~of~the~form~'...__#1'~was~used.~
+    It~should~only~be~used~in~the~module~'#2'
+    \tl_if_empty:nF {#3} { ,~not~in~'#3' } .
+  }
+%    \end{macrocode}
+%
+% \subsection{Options and configuration}
+%
+%    \begin{macrocode}
+\DeclareKeys [ l3doc / options ]
+  {
+    a5paper .code:n = \@latexerr { Option~not~supported } { } ,
+    full .code:n =
+      {
+        \bool_gset_true:N \g_@@_typeset_documentation_bool
+        \bool_gset_true:N \g_@@_typeset_implementation_bool
+      } ,
+   onlydoc .code:n = 
+    {
+      \bool_gset_true:N \g_@@_typeset_documentation_bool
+      \bool_gset_false:N \g_@@_typeset_implementation_bool
+    } ,
+    check .bool_gset:N = \g_@@_checkfunc_bool ,
+    checktest .bool_gset:N = \g_@@_checktest_bool ,
+    kernel .bool_gset:N = \g_@@_kernel_bool ,
+    stdmodule .bool_gset_inverse:N = \g_@@_kernel_bool ,
+    lm-default .bool_gset:N = \g_@@_lmodern_bool ,
+    cs-break .bool_gset_inverse:N = \g_@@_cs_break_bool ,
+    cs-break-nohyphen .code:n = \PassOptionsToPackage{nohyphen}{underscore} ,
+    show-notes .bool_gset:N = \g_@@_show_notes_bool,
+    hide-notes .bool_gset_inverse:N = \g_@@_show_notes_bool
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\DeclareUnknownKeyHandler [ l3doc / options ]
+  { \PassOptionsToClass { \CurrentOption } { article } }
+\SetKeys [ l3doc / options ]
+  { full , kernel , check = false , checktest = false , lm-default }
+\PassOptionsToClass { a4paper } { article }
+%    \end{macrocode}
+%
+% Input a local configuration file, if it exists, with a message to the
+% console that this has happened. Since we distribute a \file{.cfg} file
+% with the class, this should usually always be true. Therefore, check
+% for \cs{ExplMakeTitle} (defined in \enquote{our} \file{.cfg} file) and
+% only output the informational message if it's not found.
+%
+%    \begin{macrocode}
+\msg_new:nnn { l3doc } { input-cfg }
+  { Local~config~file~l3doc.cfg~loaded. }
+\file_if_exist:nT { l3doc.cfg }
+  {
+    \file_input:n { l3doc.cfg }
+    \cs_if_exist:cF { ExplMakeTitle }
+      { \msg_info:nn { l3doc } { input-cfg } }
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProcessKeyOptions [ l3doc / options ]
+%    \end{macrocode}
+%
+%
+% \subsection{Class and package loading}
+%
+%    \begin{macrocode}
+\LoadClass{article}
+\RequirePackage{doc}
+\RequirePackage
+  {
+    array,
+    alphalph,
+    amsmath,
+    amssymb,
+    booktabs,
+    color,
+    colortbl,
+    hologo,
+    enumitem,
+    pifont,
+    textcomp,
+    trace,
+    csquotes,
+    fancyvrb,
+    underscore,
+    verbatim
+  }
+\raggedbottom
+%    \end{macrocode}
+%
+% Depending on the option, load the package \pkg{lmodern} to set the
+% font.  Then replace the italic typewriter font with the oblique shape
+% instead; the former makes my skin crawl. (Will, Aug 2011)
+%    \begin{macrocode}
+\bool_if:NT \g_@@_lmodern_bool
+  {
+    \RequirePackage[T1]{fontenc}
+    \RequirePackage{lmodern}
+    \group_begin:
+      \ttfamily
+      \DeclareFontShape{T1}{lmtt}{m}{it}{<->ec-lmtto10}{}
+    \group_end:
+  }
+%    \end{macrocode}
+%
+% Must be last, as usual.
+%    \begin{macrocode}
+\RequirePackage{hypdoc}
+%    \end{macrocode}
+%
+% \subsection{Configuration and tweaks}
+%
+% \begin{macro}{\MakePrivateLetters}
+%   A few more letters are \enquote{private} in a \LaTeX3 programming
+%   environment.
+%    \begin{macrocode}
+\cs_gset:Npn \MakePrivateLetters
+  {
+    \char_set_catcode_letter:N \@
+    \char_set_catcode_letter:N \_
+    \char_set_catcode_letter:N \:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{CodelineNo}
+%   Some configurations which have to do with line numbering.
+%    \begin{macrocode}
+\setcounter{StandardModuleDepth}{1}
+\@addtoreset{CodelineNo}{part}
+\tl_replace_once:Nnn \theCodelineNo
+  { \HDorg@theCodelineNo }
+  { \textcolor[gray]{0.5} { \sffamily\tiny\arabic{CodelineNo} } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\verbatim, \endverbatim}
+%   In \file{.dtx} documents, the \env{verbatim} environment adds extra
+%   space because it only removes the first \enquote{\%} sign, and not
+%   the indentation (typically a space).  Fix it with \pkg{fancyvrb}:
+%    \begin{macrocode}
+\fvset{gobble=2}
+\cs_gset_eq:NN \verbatim \Verbatim
+\cs_gset_eq:NN \endverbatim \endVerbatim
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ifnot@excluded}
+%   This function tests whether a macro name stored in
+%   \tn{macro@namepart} was excluded from indexing by \tn{DoNotIndex}.
+%   Rather than trying to fix catcodes that come into here, turn
+%   everything to string catcodes.  This is slightly inefficient as we
+%   could have ensured that \tn{index@excludelist} has string catcodes
+%   in the first place.
+%    \begin{macrocode}
+\cs_set_protected:Npn \ifnot@excluded
+  {
+    \exp_args:Nee \expanded@notin
+      { \c_backslash_str \tl_to_str:N \macro@namepart , }
+      { \exp_args:NV \tl_to_str:n \index@excludelist }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pdfstringnewline}
+% \begin{macro}{\@@_pdfstring_newline:w}
+%   We avoid some hyperref warnings by making |\\| (almost) trivial in
+%   bookmarks: more precisely it might be used with a star and an
+%   optional argument, which we thus remove using an \pkg{ltcmd}
+%   expandable command.  Since there cannot be trailing optional
+%   arguments, pick up an extra mandatory one and put it back.
+%    \begin{macrocode}
+\cs_new:Npn \pdfstringnewline { : ~ }
+\DeclareExpandableDocumentCommand
+  { \@@_pdfstring_newline:w } { s o m } { \pdfstringnewline #3 }
+\pdfstringdefDisableCommands
+  { \cs_set_eq:NN \\ \@@_pdfstring_newline:w }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Design}
+%
+% Increase the text width slightly so that width the standard fonts
+% 72~columns of code may appear in a \env{macrocode} environment.
+% Increase the marginpar width slightly, for long command names.  And
+% increase the left margin by a similar amount.
+%    \begin{macrocode}
+\setlength   \textwidth      { 385pt }
+\addtolength \marginparwidth {  30pt }
+\addtolength \oddsidemargin  {  20pt }
+\addtolength \evensidemargin {  20pt }
+%    \end{macrocode}
+% (These were introduced when \cls{article} was the documentclass, but
+% I've left them here for now to remind me to do something about them
+% later.)
+%
+% \begin{macro}{\list}
+% \begin{macro}{\@@_oldlist:nn}
+%   Customise lists.
+%    \begin{macrocode}
+\cs_new_eq:NN \@@_oldlist:nn \list
+\cs_gset:Npn \list #1 #2
+  { \@@_oldlist:nn {#1} { #2 \dim_zero:N \listparindent } }
+\setlength \parindent  { 2em }
+\setlength \itemindent { 0pt }
+\setlength \parskip    { 0pt plus 3pt minus 0pt }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\partname}
+%   Use \enquote{File} as a name in Part titles.
+%    \begin{macrocode}
+\tl_gset:Nn \partname {File}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\l@section, \l@subsection}
+%   Customise the table of contents (as we have so many sections).
+%   Different design and/or structure is called for).
+%    \begin{macrocode}
+\@addtoreset{section}{part}
+\cs_gset:Npn \l@section #1#2
+  {
+    \ifnum \c@tocdepth >\z@
+      \addpenalty\@secpenalty
+      \addvspace{1.0em \@plus\p@}
+      \setlength\@tempdima{2.5em}  % was 1.5em
+      \begingroup
+        \parindent \z@ \rightskip \@pnumwidth
+        \parfillskip -\@pnumwidth
+        \leavevmode \bfseries
+        \advance\leftskip\@tempdima
+        \hskip -\leftskip
+        #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \endgroup
+    \fi
+  }
+\cs_gset:Npn \l@subsection
+  { \@dottedtocline{2}{2.5em}{2.3em} }  % #2 = 1.5em
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Text markup}
+%
+% Make "|" and |"| be \enquote{short verb} characters, but not in the
+% document preamble, where an active character may interfere with
+% packages that are loaded.  Remove these short-hands at the end of the
+% document before reading the \file{.aux} file, as they may appear in
+% labels (for instance, \pkg{l3fp} documents an operation "||").
+%    \begin{macrocode}
+\AtBeginDocument
+  {
+    \MakeShortVerb \"
+    \MakeShortVerb \|
+  }
+\AtEndDocument
+  {
+    \DeleteShortVerb \"
+    \DeleteShortVerb \|
+  }
+%    \end{macrocode}
+%
+% \begin{macro}{\eTeX, \IniTeX, \Lua, \LuaTeX, \pdfTeX, \XeTeX,
+%   \pTeX, \upTeX, \epTeX, \eupTeX}
+%   Some commands for logos.
+%    \begin{macrocode}
+\providecommand*\eTeX{\hologo{eTeX}}
+\providecommand*\IniTeX{\hologo{iniTeX}}
+\providecommand*\Lua{Lua}
+\providecommand*\LuaTeX{\hologo{LuaTeX}}
+\providecommand*\pdfTeX{\hologo{pdfTeX}}
+\providecommand*\XeTeX{\hologo{XeTeX}}
+\providecommand*\pTeX{p\kern-.2em\hologo{TeX}}
+\providecommand*\upTeX{up\kern-.2em\hologo{TeX}}
+\providecommand*\epTeX{$\varepsilon$-\pTeX}
+\providecommand*\eupTeX{$\varepsilon$-\upTeX}
+\providecommand*\ConTeXt{\hologo{ConTeXt}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\cmd, \cs, \tn}
+%   They rely on a common auxiliary \cs{@@_cmd:nn} which receives as
+%   arguments the options and some tokens whose string representation
+%   starts with a backslash (to support cases such as |\cs{pkg_\ldots}|,
+%   we do not turn the whole argument into a string).
+%    \begin{macrocode}
+\DeclareDocumentCommand \cmd { O{} m }
+  { \@@_cmd:no {#1} { \token_to_str:N #2 } }
+\DeclareDocumentCommand \cs  { O{} m }
+  { \@@_cmd:no {#1} { \c_backslash_str #2 } }
+\DeclareDocumentCommand \tn  { O{} m }
+  {
+    \@@_cmd:no
+      { module = TeX , replace = false , #1 }
+      { \c_backslash_str #2 }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\meta}
+%   A document-level command.
+%    \begin{macrocode}
+\DeclareDocumentCommand \meta { m }
+  { \@@_meta:n {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_pdfstring_cmd:w,
+%     \@@_pdfstring_cs:w,
+%     \@@_pdfstring_meta:w
+%   }
+%   To work within a bookmark, these commands must be expandable.
+%    \begin{macrocode}
+\DeclareExpandableDocumentCommand
+  { \@@_pdfstring_cmd:w } { o m } { \token_to_str:N #2 }
+\DeclareExpandableDocumentCommand
+  { \@@_pdfstring_cs:w }  { o m } { \textbackslash \tl_to_str:n {#2} }
+\cs_new:Npn \@@_pdfstring_meta:w #1
+  { < \tl_to_str:n {#1} > }
+\pdfstringdefDisableCommands
+  {
+    \cs_set_eq:NN \cmd  \@@_pdfstring_cmd:w
+    \cs_set_eq:NN \cs   \@@_pdfstring_cs:w
+    \cs_set_eq:NN \tn   \@@_pdfstring_cs:w
+    \cs_set_eq:NN \meta \@@_pdfstring_meta:w
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Arg, \marg, \oarg, \parg}
+%   |\marg{text}| prints \marg{text}, \enquote{mandatory argument}.\\
+%   |\oarg{text}| prints \oarg{text}, \enquote{optional argument}.\\
+%   |\parg{te,xt}| prints \parg{te,xt}, \enquote{picture mode argument}.
+%   Finally, \cs{Arg} is the same as \cs{marg}.
+%    \begin{macrocode}
+\newcommand\Arg[1]
+  { \texttt{\char`\{} \meta{#1} \texttt{\char`\}} }
+\providecommand\marg[1]{ \Arg{#1} }
+\providecommand\oarg[1]{ \texttt[ \meta{#1} \texttt] }
+\providecommand\parg[1]{ \texttt( \meta{#1} \texttt) }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\file, \env, \pkg, \cls}
+%   This list may change\dots this is just my preference for markup.
+%    \begin{macrocode}
+\DeclareRobustCommand \file {\nolinkurl}
+\DeclareRobustCommand \env {\texttt}
+\DeclareRobustCommand \pkg {\textsf}
+\DeclareRobustCommand \cls {\textsf}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\EnableDocumentation, \EnableImplementation}
+% \begin{macro}{\DisableDocumentation, \DisableImplementation}
+%   Control whether to typeset the documentation/implementation or not.
+%   These simply set two switches.
+%    \begin{macrocode}
+\NewDocumentCommand \EnableDocumentation { }
+  { \bool_gset_true:N \g_@@_typeset_documentation_bool }
+\NewDocumentCommand \EnableImplementation { }
+  { \bool_gset_true:N \g_@@_typeset_implementation_bool }
+\NewDocumentCommand \DisableDocumentation { }
+  { \bool_gset_false:N \g_@@_typeset_documentation_bool }
+\NewDocumentCommand \DisableImplementation { }
+  { \bool_gset_false:N \g_@@_typeset_implementation_bool }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{environment}{documentation}
+% \begin{environment}{implementation}
+%   If the documentation/implementation should be typeset, then simply
+%   set the boolean \cs{l_@@_in_implementation_bool} which indicates
+%   whether we are within the implementation section.  Otherwise use
+%   \cs{comment} (and a paired \cs{endcomment}).
+%    \begin{macrocode}
+\NewDocumentEnvironment { documentation } { }
+  {
+    \bool_if:NTF \g_@@_typeset_documentation_bool
+      { \bool_set_false:N \l_@@_in_implementation_bool }
+      { \comment }
+  }
+  { \bool_if:NF \g_@@_typeset_documentation_bool { \endcomment } }
+\NewDocumentEnvironment { implementation } { }
+  {
+    \bool_if:NTF \g_@@_typeset_implementation_bool
+      { \bool_set_true:N \l_@@_in_implementation_bool }
+      { \comment }
+  }
+  { \bool_if:NF \g_@@_typeset_implementation_bool { \endcomment } }
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{variable}
+%   The \env{variable} environment behaves as a \env{function} or
+%   \env{macro} environment depending on the part of the document.
+%    \begin{macrocode}
+\DeclareDocumentEnvironment { variable } { O{} +v }
+  {
+    \bool_if:NTF \l_@@_in_implementation_bool
+      { \@@_macro:nnw { var , #1 } {#2} }
+      { \@@_function:nnw {#1} {#2} }
+  }
+  {
+    \bool_if:NTF \l_@@_in_implementation_bool
+      { \@@_macro_end: }
+      { \@@_function_end: }
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{function}
+% \begin{environment}{macro}
+%   Environment for documenting function(s), and environment for
+%   documenting the implementation of a macro.
+%    \begin{macrocode}
+\DeclareDocumentEnvironment { function } { O{} +v }
+  { \@@_function:nnw {#1} {#2} }
+  { \@@_function_end: }
+\DeclareDocumentEnvironment { macro } { O{} +v }
+  { \@@_macro:nnw {#1} {#2} }
+  { \@@_macro_end: }
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{syntax}
+%   Syntax block placed next to the list of functions to illustrate
+%   their use.  TODO: test that the \env{syntax} environment is only
+%   used inside the \env{function} environment, and that it only appears
+%   once.
+%    \begin{macrocode}
+\NewDocumentEnvironment { syntax } { }
+  { \@@_syntax:w }
+  {
+    \@@_syntax_end:
+    \ignorespacesafterend
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{texnote}
+%   Used to describe information destined to \TeX{} experts only.
+%    \begin{macrocode}
+\NewDocumentEnvironment { texnote } { }
+  {
+    \endgraf
+    \vspace{3mm}
+    \small\textbf{\TeX~hackers~note:}
+  }
+  {
+    \vspace{3mm}
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{arguments}
+%   This environment is designed to be used within a \env{macro}
+%   environment to describe the arguments of the macro/function.
+%    \begin{macrocode}
+\NewDocumentEnvironment { arguments } { }
+  {
+    \enumerate [
+      nolistsep ,
+      label = \texttt{\#\arabic*} ~ : ,
+      labelsep = * ,
+    ]
+  }
+  {
+    \endenumerate
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{macro}{\CodedocExplain, \CodedocExplainEXP, \CodedocExplainREXP, \CodedocExplainTF}
+%   Explanation of stars and |TF| notations, for use in third-party
+%   packages.
+%    \begin{macrocode}
+\NewDocumentCommand { \CodedocExplain } { }
+  { \CodedocExplainEXP \ \CodedocExplainREXP \ \CodedocExplainTF }
+\NewDocumentCommand { \CodedocExplainEXP } { }
+  {
+    \raisebox{\baselineskip}[0pt][0pt]{\hypertarget{expstar}{}}%
+    \write \@auxout { \def \string \Codedoc@expstar { } }
+    \@@_typeset_exp:\ indicates~fully~expandable~functions,~which~
+    can~be~used~within~an~\texttt{e}-type~argument~(inside~an~\tn{expanded}),~
+    \texttt{x}-type~argument~(in~plain~\TeX{}~terms,~inside~an~\tn{edef}),~
+    as~well~as~within~an~\texttt{f}-type~argument.
+  }
+\NewDocumentCommand { \CodedocExplainREXP } { }
+  {
+    \raisebox{\baselineskip}[0pt][0pt]{\hypertarget{rexpstar}{}}%
+    \write \@auxout { \def \string \Codedoc@rexpstar { } }
+    \@@_typeset_rexp:\ indicates~
+    restricted~expandable~functions,~which~can~be~used~within~an~
+    \texttt{x}-type~argument~or~an~\texttt{e}-type~argument,~
+    but~cannot~be~fully~expanded~within~an~\texttt{f}-type~argument.
+  }
+\NewDocumentCommand { \CodedocExplainTF } { }
+  {
+    \raisebox{\baselineskip}[0pt][0pt]{\hypertarget{explTF}{}}%
+    \write \@auxout { \def \string \Codedoc@explTF { } }
+    \@@_typeset_TF:\ indicates~conditional~(\texttt{if})~functions~
+    whose~variants~with~\texttt{T},~\texttt{F}~and~\texttt{TF}~
+    argument~specifiers~expect~different~
+    \enquote{true}/\enquote{false}~branches.
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Implementing text markup}
+%
+% Keys for \cs{cmd}, \cs{cs} and \cs{tn}.
+%    \begin{macrocode}
+\keys_define:nn { l3doc/cmd }
+  {
+    index     .tl_set:N     = \l_@@_cmd_index_tl        ,
+    module    .tl_set:N     = \l_@@_cmd_module_tl       ,
+    no-index  .bool_set:N   = \l_@@_cmd_noindex_bool    ,
+    replace   .bool_set:N   = \l_@@_cmd_replace_bool    ,
+  }
+%    \end{macrocode}
+%
+% \begin{macro}[do-not-index={\\,\_,\1,\c,\2}]{\@@_cmd:nn, \@@_cmd:no}
+%   Apply the key--value \meta{options}~|#1| after setting some
+%   default values.  Then (unless |replace=false|) replace |@@| in~|#2|,
+%   which is a bit tricky: the |_| must be given the catcode expected by
+%   \cs{@@_replace_at_at:N}, but should be reverted to their original
+%   catcode (normally active, needed for line-breaking) without
+%   rescanning the whole argument.  Then typeset the command in
+%   \tn{verbatim@font}, after turning it to harmless characters if
+%   needed (and keeping the underscore breakable); in any case, spaces
+%   must be turned into \tn{@xobeysp} and we must use \tn{@} to avoid
+%   longer spaces after a control sequence that ends for instance with a
+%   colon (empty signature).  Finally, produce an index entry.
+%   Indexing is suppressed when \cs{l_@@_cmd_noindex_bool} is true.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_cmd:nn #1#2
+  {
+    \bool_set_false:N \l_@@_cmd_noindex_bool
+    \bool_set_true:N \l_@@_cmd_replace_bool
+    \tl_set:Nn \l_@@_cmd_index_tl { \q_no_value }
+    \tl_set:Nn \l_@@_cmd_module_tl { \q_no_value }
+    \keys_set:nn { l3doc/cmd } {#1}
+    \tl_set:Nn \l_@@_cmd_tl {#2}
+    \bool_if:NT \l_@@_cmd_replace_bool
+      {
+        \tl_set_rescan:Nnn \l_@@_tmpb_tl { } { _ }
+        \tl_replace_all:NVn \l_@@_cmd_tl \l_@@_tmpb_tl { _ }
+        \@@_replace_at_at:N \l_@@_cmd_tl
+        \tl_replace_all:NnV \l_@@_cmd_tl { _ } \l_@@_tmpb_tl
+      }
+%    \end{macrocode}
+% Typesetting.
+% Note the replacement for the underscore is to permit linebreaks.
+% The \texttt{underscore} package adds the linebreak,
+% and the regex results in applying the breakable underscore only to the \emph{last}
+% of a run of underscores, and not if the underscore follows a backslash.
+%    \begin{macrocode}
+    \mode_if_math:T { \mbox }
+      {
+        \bool_if:NT \l_@@_allow_indexing_bool { \@@_target: }
+        \verbatim@font
+        \@@_if_almost_str:VT \l_@@_cmd_tl
+          {
+            \__kernel_tl_set:Ne \l_@@_cmd_tl { \tl_to_str:N \l_@@_cmd_tl }
+            \bool_if:NT \g_@@_cs_break_bool
+              {
+                \regex_replace_all:nnN
+                  { ([^\\\_]\_*) \_ ([^\_]) }
+                  { \1 \c{BreakableUnderscore} \2 }
+                  \l_@@_cmd_tl
+              }
+          }
+        \tl_replace_all:Nnn \l_@@_cmd_tl { ~ } { \@xobeysp }
+        \l_@@_cmd_tl
+        \@
+      }
+%    \end{macrocode}
+% Indexing.
+%    \begin{macrocode}
+    \bool_if:NT \l_@@_allow_indexing_bool
+     {
+      \bool_if:NF \l_@@_cmd_noindex_bool
+       {
+        \quark_if_no_value:NF \l_@@_cmd_index_tl
+          {
+            \__kernel_tl_set:Ne \l_@@_cmd_tl
+              { \c_backslash_str \exp_not:o { \l_@@_cmd_index_tl } }
+          }
+        \exp_args:No \@@_key_get:n { \l_@@_cmd_tl }
+        \quark_if_no_value:NF \l_@@_cmd_module_tl
+          {
+            \__kernel_tl_set:Ne \l_@@_index_module_tl
+              { \tl_to_str:N \l_@@_cmd_module_tl }
+          }
+        \@@_special_index_module:ooonN
+          { \l_@@_index_key_tl }
+          { \l_@@_index_macro_tl }
+          { \l_@@_index_module_tl }
+          { usage }
+          \l_@@_index_internal_bool
+       }
+     }
+  }
+\cs_generate_variant:Nn \@@_cmd:nn { no }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_meta:n,
+%     \@@_ensuremath_sb:n,
+%     \@@_meta_original:n
+%   }
+%   Store |#1| in \cs{l_@@_tmpa_tl} and replaces every underscore,
+%   regardless of its category (\enquote{math toggle},
+%   \enquote{alignment}, \enquote{superscript}, \enquote{subscript},
+%   \enquote{letter}, \enquote{other}, or \enquote{active}) by
+%   \cs{@@_ensuremath_sb:n} (which creates math subscripts), then runs
+%   the code used for \tn{meta} in \pkg{doc.sty}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_meta:n #1
+  {
+    \tl_set:Nn \l_@@_tmpa_tl {#1}
+    \tl_map_inline:nn
+      { { 3 } { 4 } { 7 } { 8 } { 11 } { 12 } { 13 } }
+      {
+        \tl_set_rescan:Nnn \l_@@_tmpb_tl
+          { \char_set_catcode:nn { `_ } {##1} } { _ }
+        \tl_replace_all:NVn \l_@@_tmpa_tl \l_@@_tmpb_tl
+          { \@@_ensuremath_sb:n }
+      }
+    \exp_args:NV \@@_meta_original:n \l_@@_tmpa_tl
+  }
+\cs_new_protected:Npn \@@_ensuremath_sb:n #1
+  { \ensuremath { \sb {#1} } }
+\cs_new_protected:Npn \@@_meta_original:n #1
+  {
+    \ensuremath \langle
+    \mode_if_math:T { \nfss@text }
+    {
+      \meta@font@select
+      \edef \meta@hyphen@restore
+        { \hyphenchar \the \font \the \hyphenchar \font }
+      \hyphenchar \font \m@ne
+      \language \l@nohyphenation
+      #1 \/
+      \meta@hyphen@restore
+    }
+    \ensuremath \rangle
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Common between \env{macro} and \env{function}}
+%
+% \begin{macro}
+%   {
+%     \@@_typeset_exp:, \@@_typeset_rexp:,
+%     \@@_typeset_TF:, \@@_typeset_aux:n
+%   }
+%   Used by \cs{@@_macro_single:nNN} and in the \env{function} environment
+%   to typeset conditionals and auxiliary functions.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_typeset_exp:
+  {
+    \cs_if_exist:NTF \Codedoc@expstar
+      { \hyperlink { expstar } }
+      { \mbox }
+    {$\star$}
+  }
+\cs_new_protected:Npn \@@_typeset_rexp:
+  {
+    \cs_if_exist:NTF \Codedoc@rexpstar
+      { \hyperlink { rexpstar } }
+      { \mbox }
+    { \ding { 73 } } % hollow star
+  }
+\cs_new_protected:Npn \@@_typeset_TF:
+  {
+    \cs_if_exist:NTF \Codedoc@explTF
+      { \hyperlink { explTF } }
+      { \mbox }
+      {
+        \color{black}
+        \itshape TF
+        \makebox[0pt][r]
+          {
+            \cs_if_exist:NT \Codedoc@explTF { \color{red} }
+            \underline { \phantom{\itshape TF} \kern-0.1em }
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_typeset_aux:n #1
+  {
+    { \color[gray]{0.5} #1 }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {\@@_get_hyper_target:nN, \@@_get_hyper_target:oN, \@@_get_hyper_target:eN}
+%   Create a \pkg{hyperref} anchor from a macro name~|#1| and stores it
+%   in the token list variable~|#2|.  For instance, |\prg_replicate:nn|
+%   gives |doc/function//prg/replicate:nn|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_get_hyper_target:nN #1#2
+  {
+    \__kernel_tl_set:Ne #2 { \tl_to_str:n {#1} }
+    \tl_replace_all:NVn #2 \c_underscore_str { / }
+    \tl_remove_all:NV   #2 \c_backslash_str
+    \tl_put_left:Nn #2 { doc/function// }
+  }
+\cs_generate_variant:Nn \@@_get_hyper_target:nN { o , e }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_names_get_seq:nN}
+%   The argument~|#1| (argument of a |function| or |macro| environment)
+%   has catcodes $10$ (space), $12$ (other) and $13$ (active).  Sanitize
+%   catcodes.  If the |verb| option was used, output a one-item
+%   sequence.  Otherwise, remove any \enquote{\%} character at the
+%   beginning of a line.  Remove tabs and newlines.  Finally, convert
+%   |_@@| and |@@| to |__|\meta{module name} (if it is non-empty).  At
+%   this point, \cs{l_@@_tmpa_tl} contains a comma-delimited list of
+%   names, where |@| and~|_| have category code letter.  Turn it to a
+%   string, parse it as a comma-delimited list (in particular this
+%   removes spaces), and output a sequence of function/macro names.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_names_get_seq:nN #1#2
+  {
+    \__kernel_tl_set:Ne \l_@@_tmpa_tl { \tl_to_str:n {#1} }
+    \bool_if:NTF \l_@@_names_verb_bool
+      {
+        \seq_clear:N #2
+        \seq_put_right:NV #2 \l_@@_tmpa_tl
+      }
+      {
+        \tl_remove_all:Ne \l_@@_tmpa_tl
+          { \iow_char:N \^^M \c_percent_str }
+        \tl_remove_all:Ne \l_@@_tmpa_tl { \tl_to_str:n { ^ ^ A } }
+        \tl_remove_all:Ne \l_@@_tmpa_tl { \iow_char:N \^^I }
+        \tl_remove_all:Ne \l_@@_tmpa_tl { \iow_char:N \^^M }
+        \@@_detect_internals:N \l_@@_tmpa_tl
+        \@@_replace_at_at:N \l_@@_tmpa_tl
+        \exp_args:NNe \seq_set_from_clist:Nn #2
+          { \tl_to_str:N \l_@@_tmpa_tl }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_names_parse:, \@@_names_parse_one:n}
+%   The goal is to group variants together.  We populate
+%   \cs{l_@@_names_block_tl} with local sequence variable named with
+%   \cs{@@_lseq_name:n} after the base forms.  When encountering a new
+%   base form, set the corresponding local sequence to hold the
+%   \meta{base name} (stripped of the signature) and add the local
+%   sequence to the list \cs{l_@@_names_block_tl}.  In all cases append
+%   the signature to the local sequence, which thus takes the form
+%   \meta{base name}, \meta{signature_1}, \meta{signature_2} and so on.
+%   If the original function had no signature (no colon) then use
+%   \cs{scan_stop:} as the signature (there can be no variant).  We
+%   special case commands |#1| starting with |\::|, namely weird
+%   functions named |\::N| and the like.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_names_parse:
+  {
+    \tl_clear:N \l_@@_names_block_tl
+    \seq_map_function:NN
+      \l_@@_names_seq
+      \@@_names_parse_one:n
+  }
+\cs_new_protected:Npn \@@_names_parse_one:n #1
+  {
+    \@@_split_function_do:nn {#1}
+      { \@@_names_parse_one_aux:nnNn }
+    {#1}
+  }
+\cs_new_protected:Npn \@@_names_parse_one_aux:nnNn #1#2#3#4
+  {
+    \bool_if:NTF #3
+      {
+        \tl_if_head_eq_charcode:nNTF {#2} :
+          { \@@_names_parse_aux:nnn {#4} {#4} { \scan_stop: } }
+          {
+            \exp_args:Ne \@@_names_parse_aux:nnn
+              { \@@_base_form_aux:nnN {#1} {#2} #3 }
+              {#1} {#2}
+          }
+      }
+      {
+        \bool_if:NT \l_@@_macro_TF_bool
+          { \msg_error:nne { l3doc } { no-signature-TF } {#4} }
+        \@@_names_parse_aux:nnn {#4} {#4} { \scan_stop: }
+      }
+  }
+\cs_new_protected:Npn \@@_names_parse_aux:nnn #1
+  { \exp_args:Nc \@@_names_parse_aux:Nnn { \@@_lseq_name:n {#1} } }
+\cs_new_protected:Npn \@@_names_parse_aux:Nnn #1#2#3
+  {
+    \tl_if_in:NnF \l_@@_names_block_tl {#1}
+      {
+        \tl_put_right:Nn \l_@@_names_block_tl {#1}
+        \seq_clear_new:N #1
+        \seq_put_right:Nn #1 {#2}
+      }
+    \seq_put_right:Nn #1 {#3}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_names_typeset:}
+% \begin{macro}{\@@_names_typeset_auxi:n}
+%   This code is in particular used when typesetting function names in a
+%   \env{function} environment.  The mapping over \cs{l_@@_names_block_tl}
+%   cannot use \cs{tl_map_inline:Nn} because the code following |\\|
+%   would not be expandable, thus breaking \tn{bottomrule}.
+%
+%   Call \cs{@@_names_typeset_auxi:n} on each local sequence (which
+%   holds a set of variants).  The first step is to pop the base form
+%   and change spaces to category other so
+%   that they get displayed eventually.  Then store the variants in
+%   \cs{g_@@_variants_seq}, remove the first, which will be displayed
+%   more prominently, and reconstruct the actual name, passing it to
+%   \cs{@@_names_typeset_auxii:n}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_names_typeset:
+  {
+    \tl_map_function:NN \l_@@_names_block_tl
+      \@@_names_typeset_auxi:n
+  }
+\cs_new_protected:Npn \@@_names_typeset_auxi:n #1
+  {
+    \seq_pop:NN #1 \l_@@_tmpa_tl
+    \tl_gset_eq:NN \g_@@_base_name_tl \l_@@_tmpa_tl
+    \tl_greplace_all:NnV \g_@@_base_name_tl
+      { ~ } \c_catcode_other_space_tl
+    \seq_get:NN #1 \l_@@_tmpa_tl
+    \str_if_eq:VnTF \l_@@_tmpa_tl { \scan_stop: }
+      {
+        \seq_gclear:N \g_@@_variants_seq
+        \@@_names_typeset_auxii:e { \g_@@_base_name_tl }
+      }
+      {
+        \seq_gset_eq:NN \g_@@_variants_seq #1
+        \seq_gpop:NN \g_@@_variants_seq \l_@@_tmpb_tl
+        \@@_names_typeset_auxii:e
+          { \g_@@_base_name_tl : \l_@@_tmpb_tl }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}
+%   {\@@_names_typeset_auxii:n, \@@_names_typeset_auxii:e}
+%   In case the option |pTF| was given, typeset predicates before the
+%   |TF| functions.  In case the option |noTF| was given, typeset the
+%   non-|TF| function as well.  Pass the relevant boolean in both cases
+%   to control whether to append |TF|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_names_typeset_auxii:n #1
+  {
+    \bool_if:NT \l_@@_macro_pTF_bool
+      {
+        \@@_names_typeset_block:eN
+          { \@@_predicate_from_base:n {#1} }
+          \c_false_bool
+      }
+    \bool_if:NT \l_@@_macro_noTF_bool
+      { \@@_names_typeset_block:nN {#1} \c_false_bool }
+    \@@_names_typeset_block:nN {#1} \l_@@_macro_TF_bool
+  }
+\cs_generate_variant:Nn \@@_names_typeset_auxii:n { e }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_names_typeset_block:nN, \@@_names_typeset_block:eN}
+%   Names in \env{function} and \env{macro} environments are typeset
+%   differently.  To distinguish the two note that
+%   \cs{l_@@_nested_macro_int} is at least one when in an \env{macro}
+%   environment (we assume \env{function} is not nested inside it).  A
+%   block is a function with all its variants.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_names_typeset_block:nN
+  {
+    \int_compare:nNnTF \l_@@_nested_macro_int = 0
+      { \@@_typeset_function_block:nN }
+      { \@@_macro_typeset_block:nN }
+  }
+\cs_generate_variant:Nn \@@_names_typeset_block:nN { e }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[pTF]{\@@_if_macro_internal:n}
+% \begin{macro}[EXP]{\@@_if_macro_internal_aux:w}
+%   Determines whether the given macro should be considered internal or
+%   public.  If an option such as |int| was given then the answer is
+%   \cs{l_@@_macro_internal_bool}, otherwise check for whether the macro
+%   name contains~|__|.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \@@_if_macro_internal:n #1 { p , T , F , TF }
+  {
+    \bool_if:NTF \l_@@_macro_internal_bool
+      { \prg_return_true: }
+      {
+        \tl_if_empty:eTF
+          {
+            \exp_after:wN \@@_if_macro_internal_aux:w
+            \tl_to_str:n { #1 ~ __ }
+          }
+          { \prg_return_false: } { \prg_return_true: }
+      }
+  }
+\exp_last_unbraced:NNNNo
+  \cs_new:Npn \@@_if_macro_internal_aux:w #1 { \tl_to_str:n { __ } } { }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_names_block_base_map:N}
+%   The \cs{l_@@_names_block_tl} contains sequence variables
+%   corresponding to different base functions and their variants.  For
+%   each such sequence, put the first and second items in
+%   \cs{l_@@_tmpa_tl} and \cs{l_@@_tmpb_tl} and build the base
+%   function's name.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_names_block_base_map:N #1
+  {
+    \tl_map_inline:Nn \l_@@_names_block_tl
+      {
+        \group_begin:
+          \seq_set_eq:NN \l_@@_tmpa_seq ##1
+          \seq_pop:NN \l_@@_tmpa_seq \l_@@_tmpa_tl
+          \seq_get:NN \l_@@_tmpa_seq \l_@@_tmpb_tl
+          \exp_args:NNe
+        \group_end:
+        #1
+          {
+            \l_@@_tmpa_tl
+            \str_if_eq:VnF \l_@@_tmpb_tl { \scan_stop: }
+              { : \l_@@_tmpb_tl }
+            \bool_if:NT \l_@@_macro_TF_bool { TF }
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{The \env{function} environment}
+%
+%    \begin{macrocode}
+\keys_define:nn { l3doc/function }
+  {
+    TF .value_forbidden:n = true ,
+    TF .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_TF_bool
+      } ,
+    EXP .value_forbidden:n = true ,
+    EXP .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_EXP_bool
+        \bool_set_false:N \l_@@_macro_rEXP_bool
+      } ,
+    rEXP .value_forbidden:n = true ,
+    rEXP .code:n =
+      {
+        \bool_set_false:N \l_@@_macro_EXP_bool
+        \bool_set_true:N \l_@@_macro_rEXP_bool
+      } ,
+    pTF .value_forbidden:n = true ,
+    pTF .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_pTF_bool
+        \bool_set_true:N \l_@@_macro_TF_bool
+        \bool_set_true:N \l_@@_macro_EXP_bool
+        \bool_set_false:N \l_@@_macro_rEXP_bool
+      } ,
+    noTF .value_forbidden:n = true ,
+    noTF .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_noTF_bool
+        \bool_set_true:N \l_@@_macro_TF_bool
+      } ,
+    added .code:n = { \@@_date_set_past:Nn \l_@@_date_added_tl {#1} },
+    updated .code:n = { \@@_date_set_past:Nn \l_@@_date_updated_tl {#1} } ,
+    deprecated .bool_set:N = \l_@@_macro_deprecated_bool , 
+    no-user-doc .bool_set:N = \l_@@_macro_nodoc_bool ,
+    tested .code:n = { } ,
+    label .code:n =
+      {
+        \clist_set:Nn \l_@@_function_label_clist {#1}
+        \bool_set_true:N \l_@@_no_label_bool
+      } ,
+    verb .value_forbidden:n = true ,
+    verb .bool_set:N = \l_@@_names_verb_bool ,
+    module .tl_set:N = \l_@@_override_module_tl ,
+  }
+%    \end{macrocode}
+%
+% \begin{macro}[do-not-index={\A,\Z,\d,\1,\2,\3}]
+%     {\@@_date_set:Nn,\@@_date_set_past:Nn}
+%   Normalize the date into the format \texttt{YYYY-MM-DD}; more
+%   precisely month and day are allowed to be single digits.  The
+%   \cs{@@_date_set_past:Nn} function only allows dates in the past (or
+%   same day).
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_date_set:Nn #1#2
+  {
+    \tl_set:Nn #1 {#2}
+    \regex_replace_once:nnNF
+      { \A(\d\d\d\d)[-/](\d\d?)[-/](\d\d?)\Z } { \1-\2-\3 } #1
+      {
+        \msg_error:nnn { l3doc } { date-format } {#2}
+        \tl_set:Nn #1 { 1970-01-01 }
+      }
+  }
+\cs_new_protected:Npn \@@_date_set_past:Nn #1#2
+  {
+    \@@_date_set:Nn #1 {#2}
+    \exp_args:No \@@_date_compare:nNnT
+      {#1} > { \c_sys_year_int - \c_sys_month_int - \c_sys_day_int }
+      {
+        \msg_error:nnee { l3doc } { future-date }
+          { \tl_to_str:N \l_@@_macro_argument_tl }
+          {#1}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_function:nnw}
+%   \begin{arguments}
+%     \item Key--value list.
+%     \item Comma-separated list of functions; input has already been
+%       sanitised by catcode changes before reading the argument.
+%   \end{arguments}
+% \begin{macro}{\@@_function_end:}
+%   Make sure any paragraph is finished, and similar safe practices at
+%   the beginning of an environment which will typeset material.
+%   Initialize some variables.  Parse the key--value list.  Clean up the
+%   list of functions, then go through them to extract some data.  After
+%   this, typeset the function names in the coffin
+%   \cs{l_@@_functions_coffin} and measure it to know if it fits in the
+%   margin.  Finally, start a vertical coffin for the main part of the
+%   environment.  This coffin stops when the environment ends, then all
+%   the pieces are assembled into a single coffin, which is typeset.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function:nnw #1#2
+  {
+    \@@_function_typeset_start:
+    \@@_function_init:
+    \tl_set:Nn \l_@@_macro_argument_tl {#2}
+    \keys_set:nn { l3doc/function } {#1}
+    \@@_names_get_seq:nN {#2} \l_@@_names_seq
+    \@@_names_parse:
+    \@@_function_typeset:
+    \@@_function_reset:
+    \@@_function_descr_start:w
+  }
+\cs_new_protected:Npn \@@_function_end:
+  {
+    \@@_function_descr_stop:
+    \@@_function_assemble:
+    \@@_function_typeset_stop:
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}
+%   {\@@_function_typeset_start:, \@@_function_typeset_stop:}
+%   At the start of the \env{function} environment, before performing
+%   any assignment, close the last paragraph, and set up the typesetting
+%   scene.  Further code typesets a coffin, so we end the paragraph and
+%   allow a page break.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_typeset_start:
+  {
+    \par \bigskip \noindent
+  }
+\cs_new_protected:Npn \@@_function_typeset_stop:
+  {
+    \par
+    \dim_set:Nn \prevdepth { \box_dp:N \l_@@_descr_coffin }
+    \allowbreak
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_function_init:}
+%   Complain if \texttt{function} environments are nested.  Clear
+%   various variables.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_init:
+  {
+    \box_if_empty:NF \g_@@_syntax_box
+      { \msg_error:nn { l3doc } { syntax-nested-function } }
+    \coffin_clear:N \l_@@_descr_coffin
+    \box_gclear:N \g_@@_syntax_box
+    \coffin_clear:N \l_@@_syntax_coffin
+    \coffin_clear:N \l_@@_functions_coffin
+    \bool_set_false:N \l_@@_macro_TF_bool
+    \bool_set_false:N \l_@@_macro_pTF_bool
+    \bool_set_false:N \l_@@_macro_noTF_bool
+    \bool_set_false:N \l_@@_macro_EXP_bool
+    \bool_set_false:N \l_@@_macro_rEXP_bool
+    \bool_set_false:N \l_@@_no_label_bool
+    \bool_set_false:N \l_@@_names_verb_bool
+    \bool_set_true:N \l_@@_in_function_bool
+    \clist_clear:N \l_@@_function_label_clist
+    \tl_set:Nn \l_@@_override_module_tl { \q_no_value }
+    \char_set_active_eq:NN \< \@@_shorthand_meta:
+    \char_set_catcode_active:N \<
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_shorthand_meta:, \@@_shorthand_meta:w}
+%   Allow |<...>| to be used as markup for |\meta{...}|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_shorthand_meta:
+  { \mode_if_math:TF { < } { \@@_shorthand_meta:w } }
+\cs_new_protected_nopar:Npn \@@_shorthand_meta:w #1 > { \meta {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_function_reset:}
+%   Clear some variables.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_reset:
+  {
+    \tl_set:Nn \l_@@_override_module_tl { \q_no_value }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_function_typeset:}
+%   Typeset in the coffin \cs{l_@@_functions_coffin} the functions listed in
+%   \cs{l_@@_names_block_tl} and the relevant dates, then set
+%   \cs{l_@@_long_name_bool} to be \texttt{true} if this coffin is
+%   larger than the available width in the margin.  The function
+%   \cs{@@_typeset_functions:} is quite involved hence given later.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_typeset:
+  {
+    \dim_zero:N \l_@@_trial_width_dim
+    \hcoffin_set:Nn \l_@@_functions_coffin { \@@_typeset_functions: }
+    \dim_set:Nn \l_@@_trial_width_dim
+      { \box_wd:N \l_@@_functions_coffin }
+    \bool_set:Nn \l_@@_long_name_bool
+      { \dim_compare_p:nNn \l_@@_trial_width_dim > \marginparwidth }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {\@@_function_descr_start:w, \@@_function_descr_stop:}
+%   The last step in \cs{@@_function:nnw} (the beginning of a
+%   \env{function} environment) is to open a coffin which will capture
+%   the description of the function, namely the body of the
+%   \env{function} environment.  This is closed by \cs{@@_function_end:}
+%   (the end of a \env{function} environment).
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_descr_start:w
+  {
+    \vcoffin_set:Nnw \l_@@_descr_coffin { \textwidth }
+      \noindent \ignorespaces
+  }
+\cs_new_protected:Npn \@@_function_descr_stop:
+  { \vcoffin_set_end: }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_function_assemble:}
+%   The box \cs{g_@@_syntax_box} contains the contents of the syntax
+%   environment if it was used.  Now that we have all the pieces, join
+%   together the syntax coffin, the names coffin, and the description
+%   coffin.  The relative positions depend on whether the names coffin
+%   fits in the margin.  Then typeset the combination.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_assemble:
+  {
+    \hcoffin_set:Nn  \l_@@_syntax_coffin
+      { \box_use_drop:N \g_@@_syntax_box }
+    \bool_if:NTF \l_@@_long_name_bool
+      {
+        \coffin_join:NnnNnnnn
+          \l_@@_output_coffin {hc} {vc}
+          \l_@@_syntax_coffin {l} {T}
+          {0pt} {0pt}
+        \coffin_join:NnnNnnnn
+          \l_@@_output_coffin {l} {t}
+          \l_@@_functions_coffin  {r} {t}
+          {-\marginparsep} {0pt}
+        \coffin_join:NnnNnnnn
+          \l_@@_output_coffin {l} {b}
+          \l_@@_descr_coffin  {l} {t}
+          {0.75\marginparwidth + \marginparsep} {-\medskipamount}
+        \coffin_typeset:Nnnnn \l_@@_output_coffin
+          {\l_@@_descr_coffin-l} {\l_@@_descr_coffin-t}
+          {0pt} {0pt}
+      }
+      {
+        \coffin_join:NnnNnnnn
+          \l_@@_output_coffin {hc} {vc}
+          \l_@@_syntax_coffin {l} {t}
+          {0pt} {0pt}
+        \coffin_join:NnnNnnnn
+          \l_@@_output_coffin {l} {b}
+          \l_@@_descr_coffin  {l} {t}
+          {0pt} {-\medskipamount}
+        \coffin_join:NnnNnnnn
+          \l_@@_output_coffin {l} {t}
+          \l_@@_functions_coffin  {r} {t}
+          {-\marginparsep} {0pt}
+        \coffin_typeset:Nnnnn \l_@@_output_coffin
+          {\l_@@_syntax_coffin-l} {\l_@@_syntax_coffin-T}
+          {0pt} {0pt}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_typeset_functions:}
+%   This function builds the \cs{l_@@_functions_coffin} by typesetting the
+%   function names (with variants) and the relevant dates in a
+%   \env{tabular} environment.  The use of rules \tn{toprule},
+%   \tn{midrule} and \tn{bottomrule} requires whatever lies between the
+%   last |\\| and the rule to be expandable, making our lives a bit
+%   complicated.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_typeset_functions:
+  {
+    \small\ttfamily
+    \@@_target:
+    \Hy@MakeCurrentHref { HD. \int_use:N \c@HD@hypercount }
+    \begin{tabular} [t] { @{} l @{} >{\hspace{\tabcolsep}} r @{} }
+      \toprule
+      \@@_function_extra_labels:
+      \@@_names_typeset:
+      \@@_typeset_dates:
+      \bottomrule
+    \end{tabular}
+    \normalfont\normalsize
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% ^^A TODO: collect all index targets from a given function environment in a box and stick it at the top.
+% \begin{macro}
+%   {\@@_typeset_function_block:nN, \@@_typeset_function_block:eN}
+% \begin{macro}{\@@_function_index:n, \@@_function_index:e}
+%   |#1| is a csname, |#2| a boolean indicating whether to add |TF| or not.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_typeset_function_block:nN #1#2
+  {
+    \@@_function_index:e
+      { #1 \bool_if:NT #2 { \tl_to_str:n {TF} } }
+    \@@_function_label:eN {#1} #2
+    #1
+    \bool_if:NT #2 { \@@_typeset_TF: }
+    \@@_typeset_expandability:
+    \seq_if_empty:NF \g_@@_variants_seq
+      { \@@_typeset_variant_list:nN {#1} #2 }
+    \\
+  }
+\cs_generate_variant:Nn \@@_typeset_function_block:nN { e }
+\cs_new_protected:Npn \@@_function_index:n #1
+  {
+    \seq_gput_right:Nn \g_doc_functions_seq {#1}
+    \@@_special_index:nn {#1} { usage }
+  }
+\cs_generate_variant:Nn \@@_function_index:n { e }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_typeset_expandability:
+  {
+    &
+    \bool_if:NT \l_@@_macro_EXP_bool  { \@@_typeset_exp: }
+    \bool_if:NT \l_@@_macro_rEXP_bool { \@@_typeset_rexp: }
+  }
+%    \end{macrocode}
+%
+% |#1| is the function, |#2| whether to add |TF|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_typeset_variant_list:nN #1#2
+  {
+    \\
+    \@@_typeset_aux:n { \@@_get_function_name:n {#1} }
+    :
+    \int_compare:nTF { \seq_count:N \g_@@_variants_seq == 1 }
+      { \seq_use:Nn \g_@@_variants_seq { } }
+      {
+        \hbox_set:Nn \l_tmpa_box
+          { \seq_use:Nn \g__@@_variants_seq { \textrm| \nolinebreak[2] } }
+        \textrm(
+%    \end{macrocode}
+%
+%   Set long variant lists in a parbox, short lists set natural length.
+%    \begin{macrocode}
+        \dim_compare:nNnTF { \box_wd:N \l_tmpa_box } > { .4\columnwidth }
+          {
+            \parbox[t]{.4\columnwidth}
+              {
+                \raggedright
+                \hbox_unpack_drop:N \l_tmpa_box
+                \textrm)
+                \bool_if:NT #2 { \@@_typeset_TF: }
+              }
+          }
+          {
+            \hbox_unpack_drop:N \l_tmpa_box
+            \textrm)
+            \bool_if:NT #2 { \@@_typeset_TF: }
+          }
+      }
+    \@@_typeset_expandability:
+  }
+%    \end{macrocode}
+%
+% |#1| is the function name, |#2| whether to add |TF|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_function_extra_labels:
+  {
+    \bool_if:NT \l_@@_no_label_bool
+      {
+        \clist_map_inline:Nn \l_@@_function_label_clist
+          {
+            \@@_get_hyper_target:oN { \token_to_str:N ##1 }
+              \l_@@_tmpa_tl
+            \exp_args:No \label { \l_@@_tmpa_tl }
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_function_label:nN #1#2
+  {
+    \bool_if:NF \l_@@_no_label_bool
+      {
+        \@@_get_hyper_target:eN
+          {
+            \exp_not:n {#1}
+            \bool_if:NT #2 { \tl_to_str:n {TF} }
+          }
+          \l_@@_tmpa_tl
+        \exp_args:No \label { \l_@@_tmpa_tl }
+      }
+  }
+\cs_generate_variant:Nn \@@_function_label:nN { e }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\@@_typeset_dates:}
+%   To display metadata for when functions are added/modified.
+%   This function must be expandable since it produces rules for use in
+%   alignments.
+%    \begin{macrocode}
+\cs_new:Npn \@@_typeset_dates:
+  {
+    \bool_lazy_and:nnF
+      { \tl_if_empty_p:N \l_@@_date_added_tl }
+      { \tl_if_empty_p:N \l_@@_date_updated_tl }
+      { \midrule }
+    \tl_if_empty:NF \l_@@_date_added_tl
+      {
+        \multicolumn { 2 } { @{} r @{} }
+          { \scriptsize New: \, \l_@@_date_added_tl } \\
+      }
+
+    \tl_if_empty:NF \l_@@_date_updated_tl
+      {
+        \multicolumn { 2 } { @{} r @{} }
+          { \scriptsize Updated: \, \l_@@_date_updated_tl } \\
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_syntax:w, \@@_syntax_end:}
+%   Implement the \env{syntax} environment.
+%    \begin{macrocode}
+\dim_new:N \l_@@_syntax_dim
+\cs_new_protected:Npn \@@_syntax:w
+  {
+    \box_if_empty:NF \g_@@_syntax_box
+      { \msg_error:nn { l3doc } { multiple-syntax } }
+    \dim_set:Nn \l_@@_syntax_dim
+      {
+        \textwidth
+        \bool_if:NT \l_@@_long_name_bool
+          { + 0.75 \marginparwidth - \l_@@_trial_width_dim }
+      }
+    \hbox_gset:Nw \g_@@_syntax_box
+      \small \ttfamily
+      \arrayrulecolor{white}
+      \begin{tabular} { @{} l @{} }
+        \toprule
+        \begin{minipage}[t]{\l_@@_syntax_dim}
+          \raggedright
+          \obeyspaces
+          \obeylines
+  }
+\cs_new_protected:Npn \@@_syntax_end:
+  {
+        \end{minipage}
+      \end{tabular}
+      \arrayrulecolor{black}
+    \hbox_gset_end:
+    \bool_if:NF \l_@@_in_function_bool
+      {
+        \begin{quote}
+          \mode_leave_vertical:
+          \box_use_drop:N \g_@@_syntax_box
+        \end{quote}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{The \env{macro} environment}
+%
+% Keyval for the \env{macro} environment.
+% TODO: provide document command for documenting keys.
+%    \begin{macrocode}
+\keys_define:nn { l3doc/macro }
+  {
+    aux .value_forbidden:n = true ,
+    aux .code:n =
+      {
+        \msg_warning:nnnn { l3doc } { deprecated-option }
+          { aux } { function/macro }
+      } ,
+    deprecated .bool_set:N = \l_@@_macro_deprecated_bool , 
+    internal .value_forbidden:n = true ,
+    internal .code:n =
+      { \bool_set_true:N \l_@@_macro_internal_bool } ,
+    int .value_forbidden:n = true ,
+    int .code:n =
+      { \bool_set_true:N \l_@@_macro_internal_bool } ,
+    no-user-doc .bool_set:N = \l_@@_macro_nodoc_bool ,
+    var .value_forbidden:n = true ,
+    var .code:n =
+      { \bool_set_true:N \l_@@_macro_var_bool } ,
+    TF .value_forbidden:n = true ,
+    TF .code:n =
+      { \bool_set_true:N \l_@@_macro_TF_bool } ,
+    pTF .value_forbidden:n = true ,
+    pTF .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_TF_bool
+        \bool_set_true:N \l_@@_macro_pTF_bool
+        \bool_set_true:N \l_@@_macro_EXP_bool
+        \bool_set_false:N \l_@@_macro_rEXP_bool
+      } ,
+    noTF .value_forbidden:n = true ,
+    noTF .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_TF_bool
+        \bool_set_true:N \l_@@_macro_noTF_bool
+      } ,
+    EXP .value_forbidden:n = true ,
+    EXP .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_EXP_bool
+        \bool_set_false:N \l_@@_macro_rEXP_bool
+      } ,
+    rEXP .value_forbidden:n = true ,
+    rEXP .code:n =
+      {
+        \bool_set_false:N \l_@@_macro_EXP_bool
+        \bool_set_true:N \l_@@_macro_rEXP_bool
+      } ,
+    tested .code:n =
+      {
+        \bool_set_true:N \l_@@_macro_tested_bool
+      } ,
+    added .code:n = {} , % TODO
+    updated .code:n = {} , % TODO
+    verb .bool_set:N = \l_@@_names_verb_bool ,
+    module .tl_set:N = \l_@@_override_module_tl ,
+    documented-as .tl_set:N = \l_@@_macro_documented_tl ,
+    do-not-index .value_required:n = true ,
+    do-not-index .tl_set:N = \l_@@_macro_do_not_index_tl ,
+    % do-not-index .default:n = \q_no_value ,
+  }
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_macro:nnw}
+%   The arguments are a key--value list of \meta{options} and a
+%   comma-list of \meta{names}, read verbatim by \pkg{ltcmd}.  First
+%   initialize some variables before applying the \meta{options}, then
+%   parse the \meta{names} to get a sequence of macro names, then apply
+%   \cs{@@_macro_single:nNN} to each (this step is more subtle than
+%   \cs{seq_map_function:NN} because of |TF|/|pTF|/|noTF|).  Finally typeset
+%   the macro names in the margin.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro:nnw #1#2
+  {
+    \@@_macro_init:
+    \tl_set:Nn \l_@@_macro_argument_tl {#2}
+    \keys_set:nn { l3doc/macro } {#1}
+    \@@_names_get_seq:nN {#2} \l_@@_names_seq
+    \@@_names_parse:
+    \@@_macro_exclude_index:
+    \@@_macro_save_names:
+    \@@_names_typeset:
+    \@@_macro_dump:
+    \@@_macro_reset:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_init:}
+%   The booleans hold various key--value options,
+%   \cs{l_@@_nested_macro_int} counts the number of \env{macro}
+%   environments around the current point (is $0$ outside).
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_init:
+  {
+    \int_incr:N \l_@@_nested_macro_int
+    \bool_set_false:N \l_@@_macro_deprecated_bool
+    \bool_set_false:N \l_@@_macro_internal_bool
+    \bool_set_false:N \l_@@_macro_TF_bool
+    \bool_set_false:N \l_@@_macro_pTF_bool
+    \bool_set_false:N \l_@@_macro_noTF_bool
+    \bool_set_false:N \l_@@_macro_EXP_bool
+    \bool_set_false:N \l_@@_macro_rEXP_bool
+    \bool_set_false:N \l_@@_macro_var_bool
+    \bool_set_false:N \l_@@_macro_tested_bool
+    \bool_set_false:N \l_@@_names_verb_bool
+    \tl_set:Nn \l_@@_override_module_tl { \q_no_value }
+    \tl_clear:N \l_@@_macro_documented_tl
+    \cs_set_eq:NN \testfile \@@_print_testfile:n
+    \box_clear:N \l_@@_macro_index_box
+    \vbox_set:Nn \l_@@_macro_box
+      {
+        \hbox:n
+          {
+            \strut
+            \int_compare:nNnT \l_@@_macro_int = 0 { \@@_target: }
+          }
+        \vskip \int_eval:n { \l_@@_macro_int - 1 } \baselineskip
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_reset:}
+%   We ensure that \cs{cs} commands nested inside a macro whose module
+%   is imposed are not affected.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_reset:
+  {
+    \tl_set:Nn \l_@@_override_module_tl { \q_no_value }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_save_names:}
+%   The list of names defined in a set of \env{macro} environments is
+%   eventually used to display on which page they are documented.  If
+%   the |documented-as| key is given, use that, otherwise find names in
+%   \cs{l_@@_names_block_tl}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_save_names:
+  {
+    \tl_if_empty:NTF \l_@@_macro_documented_tl
+      { \@@_names_block_base_map:N \@@_macro_save_names_aux:n }
+      {
+        \seq_gput_right:Ne \g_@@_nested_names_seq
+          { \tl_to_str:N \l_@@_macro_documented_tl }
+      }
+  }
+\cs_new_protected:Npn \@@_macro_save_names_aux:n #1
+  { \seq_gput_right:Nn \g_@@_nested_names_seq {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_exclude_index:}
+%   Some control sequences in a \env{macrocode} environment shouldn't
+%   be indexed, for different reasons. This macro parses the argument
+%   of the |do-not-index| option and locally removes the given macros
+%   from the index.
+%
+%   The optional argument to \env{macro} is not scanned with verbatim
+%   catcodes, so we use \cs{tl_set_rescan:NnV} to rescan the commands
+%   with the same catcodes as \cs{DoNotIndex}. The scanned token list
+%   contains spaces after control sequences, which are not there when
+%   \cs{DoNotIndex} is used. Since \cs{seq_set_from_clist:Nn} removes
+%   spaces around the items, we can abuse that and \cs{seq_use:Nn} to
+%   normalise each item. After that \cs{DoNotIndex} can do its thing.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_exclude_index:
+  {
+    \tl_if_empty:NF \l_@@_macro_do_not_index_tl
+      {
+        \tl_set_rescan:NnV \l_@@_macro_do_not_index_tl
+          { \MakePrivateLetters \catcode`\\12 }
+          \l_@@_macro_do_not_index_tl
+        \exp_args:NNV \seq_set_from_clist:Nn
+          \l_@@_tmpa_seq \l_@@_macro_do_not_index_tl
+        \__kernel_tl_set:Ne \l_@@_macro_do_not_index_tl
+          { \seq_use:Nn \l_@@_tmpa_seq { , } }
+        \exp_args:NV \DoNotIndex \l_@@_macro_do_not_index_tl
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_dump:}
+%   This calls |\makelabel{}|
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_dump:
+  {
+    \topsep\MacroTopsep
+    \trivlist
+    \cs_set:Npn \makelabel ##1
+      {
+        \llap
+          {
+            \hbox_unpack_drop:N \l_@@_macro_index_box
+            \vtop to \baselineskip
+              {
+                \vbox_unpack_drop:N \l_@@_macro_box
+                \vss
+              }
+          }
+      }
+    \item [ ]
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_typeset_block:nN}
+%   Used to typeset a macro and its variants.  |#1| is the macro name,
+%   |#2| is a boolean controlling whether to add |TF|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_typeset_block:nN #1#2
+  {
+    \@@_macro_single:nNN {#1} \c_true_bool #2
+    \seq_if_empty:NF \g_@@_variants_seq
+      {
+        \@@_macro_typeset_variant_list:eN
+          { \@@_get_function_name:n {#1} } #2
+      }
+  }
+\cs_new_protected:Npn \@@_macro_typeset_variant_list:nN #1#2
+  {
+    \seq_map_inline:Nn \g_@@_variants_seq
+      { \@@_macro_single:nNN { #1 : ##1 } \c_false_bool #2 }
+  }
+\cs_generate_variant:Nn \@@_macro_typeset_variant_list:nN { e }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_single:nNN}
+%   The arguments are |#1| a macro name (without |TF|), |#2| a boolean
+%   determining whether or not to index, and |#3| whether or not to add |TF|.
+%   Let's start to mess around with \cls{doc}'s \env{macro} environment.
+%   See \file{doc.dtx} for a full explanation of the original
+%   environment.  It's rather \emph{enthusiastically} commented.
+%   \begin{arguments}
+%     \item Macro/function/whatever name; input has already been
+%       sanitised.
+%   \end{arguments}
+%   The assignments to \cs{saved@macroname} and \cs{saved@indexname}
+%   are used by \pkg{doc}'s \cs{changes} mechanism.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_single:nNN #1#2#3
+  {
+    \tl_set:Nn \saved@macroname {#1}
+    \@@_macro_typeset_one:nN {#1} #3
+    \bool_if:NT #3 { \DoNotIndex {#1} }
+    \exp_args:Ne \@@_macro_index:nN
+      { #1 \bool_if:NT #3 { \tl_to_str:n { TF } } }
+      #2
+  }
+\cs_new_protected:Npn \@@_macro_index:nN #1#2
+  {
+    \DoNotIndex {#1}
+    \bool_if:NT #2
+      {
+        \bool_lazy_any:nF
+          {
+            { \@@_if_macro_internal_p:n {#1} }
+            { \l_@@_macro_deprecated_bool }
+            { \l_@@_macro_nodoc_bool }
+          }
+          { \seq_gput_right:Nn \g_doc_macros_seq {#1} }
+        \hbox_set:Nw \l_@@_macro_index_box
+          \hbox_unpack_drop:N \l_@@_macro_index_box
+          \int_gincr:N \c@CodelineNo
+          \@@_special_index:nn {#1} { main }
+          \int_gdecr:N \c@CodelineNo
+        \exp_args:NNNo \hbox_set_end:
+          \tl_set:Nn \saved@indexname { \l_@@_index_key_tl }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_typeset_one:nN}
+%   For a long time, \cls{l3doc} collected the macro names as labels in
+%   the first items of nested \tn{trivlist}, but these were not closed
+%   properly with \tn{endtrivlist}.  Also, it interacted in surprising
+%   ways with \pkg{hyperref} targets.  Now, we collect typeset macro
+%   names by hand in the box \cs{l_@@_macro_box}.  The fixed-size space
+%   |\MacroFont\ | could be replaced by an customizable horizontal
+%   space; it is important for it to be the same for all macros.
+%   |#1| is the macro name, |#2| whether to add |TF|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_typeset_one:nN #1#2
+  {
+    \vbox_set:Nn \l_@@_macro_box
+      {
+        \vbox_unpack_drop:N \l_@@_macro_box
+        \hbox { \llap { \@@_print_macroname:nN {#1} #2
+            \MacroFont \
+        } }
+      }
+    \int_incr:N \l_@@_macro_int
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_print_macroname:nN}
+%   In the name, spaces are replaced by other spaces to ensure they get
+%   displayed in case there are any.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_print_macroname:nN #1#2
+  {
+    \strut
+    \@@_get_hyper_target:eN
+      {
+        \exp_not:n {#1}
+        \bool_if:NT #2 { \tl_to_str:n {TF} }
+      }
+      \l_@@_tmpa_tl
+    \cs_if_exist:cTF { r@ \l_@@_tmpa_tl }
+      { \exp_last_unbraced:NNo \hyperref [ \l_@@_tmpa_tl ] }
+      { \use:n }
+      {
+        \int_compare:nTF { \str_count:n {#1} <= 28 }
+          { \MacroFont } { \MacroLongFont }
+        \tl_set:Nn \l_@@_tmpa_tl {#1}
+        \tl_replace_all:NnV \l_@@_tmpa_tl
+          { ~ } \c_catcode_other_space_tl
+        \@@_macroname_prefix:o \l_@@_tmpa_tl
+        \@@_macroname_suffix:N #2
+      }
+  }
+\cs_new_protected:Npn \@@_macroname_prefix:n #1
+  {
+    \@@_if_macro_internal:nTF {#1}
+      { \@@_typeset_aux:n {#1} } {#1}
+  }
+\cs_generate_variant:Nn \@@_macroname_prefix:n { o }
+\cs_new_protected:Npn \@@_macroname_suffix:N #1
+  { \bool_if:NTF #1 { \@@_typeset_TF: } { } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\MacroLongFont}
+%    \begin{macrocode}
+\providecommand \MacroLongFont
+  {
+    \fontfamily{lmtt}\fontseries{lc}\small
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_print_testfile:n, \@@_print_testfile_aux:n}
+%   Used to show that a macro has a test, somewhere.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_print_testfile:n #1
+  {
+    \bool_set_true:N \l_@@_macro_tested_bool
+    \tl_if_eq:nnF {#1} {*}
+      {
+        \seq_if_in:NnF \g_@@_testfiles_seq {#1}
+          {
+            \seq_gput_right:Nn \g_@@_testfiles_seq {#1}
+            \par
+            \@@_print_testfile_aux:n {#1}
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_print_testfile_aux:n #1
+  {
+    \footnotesize
+    (
+    \textit
+      {
+        The~ test~ suite~ for~ this~ command,~
+        and~ others~ in~ this~ file,~ is~ \textsf{#1}
+      }.
+    )\par
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\TestFiles}
+%    \begin{macrocode}
+\DeclareDocumentCommand \TestFiles {m}
+  {
+    \par
+    \textit
+      {
+        The~ following~ test~ files~ are~
+        used~ for~ this~ code:~ \textsf{#1}.
+      }
+    \par \ignorespaces
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\UnitTested}
+%    \begin{macrocode}
+\DeclareDocumentCommand \UnitTested { } { \testfile* }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\TestMissing}
+%    \begin{macrocode}
+\DeclareDocumentCommand \TestMissing { m }
+  { \@@_test_missing:n {#1} }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_test_missing:n}
+%   Keys in \cs{g_@@_missing_tests_prop} are lists of macros given as
+%   arguments of one \env{macro} environment.  Values are pairs of a
+%   file name and a comment about the missing tests.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_test_missing:n #1
+  {
+    \@@_test_missing_aux:Nen
+      \g_@@_missing_tests_prop
+      { \seq_use:Nn \l_@@_names_seq { , } }
+      { { \g_file_curr_name_str \c_space_tl (#1) } }
+  }
+\cs_new_protected:Npn \@@_test_missing_aux:Nnn #1#2#3
+  {
+    \prop_get:NnNTF #1 {#2} \l_@@_tmpa_tl
+      { \tl_put_right:Nn \l_@@_tmpa_tl { , #3 } }
+      { \tl_set:Nn \l_@@_tmpa_tl {#3} }
+    \prop_put:Nno #1 {#2} \l_@@_tmpa_tl
+  }
+\cs_generate_variant:Nn \@@_test_missing_aux:Nnn { Ne }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_end:}
+%   It is too late for anyone to declare a test file for this macro, so
+%   we can check now whether the macro is tested.  If the \env{macro}
+%   environment which is being ended is the outermost one, then wrap
+%   each macro in \tn{texttt} (with the addition of |TF| if relevant)
+%   and typeset two informations: that this ends the definition of some
+%   macros, and that they are documented on some page.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_end:
+  {
+    \endtrivlist
+    \@@_macro_end_check_tested:
+    \int_compare:nNnT \l_@@_nested_macro_int = 1
+      { \@@_macro_end_style:n { \@@_print_end_definition: } }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_end_check_tested:}
+%   If the |checktest| option was issued and the macro is not an
+%   auxiliary nor a variable (and it does not have a test), then add it
+%   to the sequence of non-tested macros.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_end_check_tested:
+  {
+    \bool_lazy_all:nT
+     {
+       { \g_@@_checktest_bool }
+       { ! \l_@@_macro_var_bool }
+       { ! \l_@@_macro_tested_bool }
+     }
+     {
+       \seq_set_filter:NNn \l_@@_tmpa_seq \l_@@_names_seq
+         { ! \@@_if_macro_internal_p:n {##1} }
+       \seq_gput_right:Ne \g_@@_not_tested_seq
+         {
+           \seq_use:Nn \l_@@_tmpa_seq { , }
+           \bool_if:NTF \l_@@_macro_pTF_bool {~(pTF)}
+             { \bool_if:NT \l_@@_macro_TF_bool {~(TF)} }
+         }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_macro_end_style:n}
+%   Style for the extra information at the end of a top-level
+%   \env{macro} environment.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_end_style:n #1
+  {
+    \nobreak \noindent
+    { \footnotesize ( \emph{#1} ) \par }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_print_end_definition:,
+%     \@@_macro_end_wrap_item:n,
+%     \@@_print_documented:
+%   }
+%   Surround each item by \tn{texttt}, replacing |_|
+%   by \tn{_} as well.  Then list the
+%   macro names through \cs{seq_use:Nnnn}, unless there are too many.
+%   Finally, if the macro is neither auxiliary nor internal, add a link
+%   to where it is documented.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_macro_end_wrap_item:n #1
+  {
+    \tl_set:Nn \l_@@_tmpa_tl {#1}
+    \tl_replace_all:NVn \l_@@_tmpa_tl
+      \c_underscore_str { \_ }
+    \texttt { \l_@@_tmpa_tl }
+  }
+\cs_new_protected:Npn \@@_print_end_definition:
+  {
+    \seq_set_map:NNn \l_@@_tmpa_seq
+      \g_@@_nested_names_seq
+      { \@@_macro_end_wrap_item:n {##1} }
+    End~ of~ definition~ for~
+    \int_compare:nTF { \seq_count:N \l_@@_tmpa_seq <= 3 }
+      {
+        \seq_use:Nnnn \l_@@_tmpa_seq
+          { \,~and~ } { \,,~ } { \,,~and~ }
+      }
+      { \seq_item:Nn \l_@@_tmpa_seq {1}\,~and~others }
+    \@.
+    \@@_print_documented:
+  }
+\cs_new_protected:Npn \@@_print_documented:
+  {
+    \seq_gset_filter:NNn \g_@@_nested_names_seq
+      \g_@@_nested_names_seq
+      {
+        ! \bool_lazy_any_p:n
+          {
+            { \@@_if_macro_internal_p:n {##1} }
+            { \l_@@_macro_deprecated_bool }
+            { \l_@@_macro_nodoc_bool }
+          }
+      }
+    \seq_if_empty:NF \g_@@_nested_names_seq
+      {
+        \int_set:Nn \l_@@_tmpa_int
+          { \seq_count:N \g_@@_nested_names_seq }
+        \int_compare:nNnTF \l_@@_tmpa_int = 1 {~This~} {~These~}
+        \bool_if:NTF \l_@@_macro_var_bool {variable} {function}
+        \int_compare:nNnTF \l_@@_tmpa_int = 1 {~is~} {s~are~}
+        documented~on~page~
+        \@@_get_hyper_target:eN
+          { \seq_item:Nn \g_@@_nested_names_seq { 1 } }
+          \l_@@_tmpa_tl
+        \exp_args:Ne \pageref { \l_@@_tmpa_tl } .
+      }
+    \seq_gclear:N \g_@@_nested_names_seq
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Misc}
+%
+% \begin{macro}{\DescribeOption}
+%   For describing package options: retained for consistency, but updated for
+%   \pkg{doc}~v3.
+%    \begin{macrocode}
+\NewDocElement[idxtype = option, idxgroup = options]{Option}{optionenv}  
+%    \end{macrocode}
+% \end{macro}
+%
+% Here are some definitions for additional markup that helps to
+% structure your documentation.
+%
+% \begin{environment}{danger}
+% \begin{environment}{ddanger}
+%   \begin{syntax}
+%     |\begin{[d]danger}|\\
+%       dangerous code\\
+%     |\end{[d]danger}|
+%   \end{syntax}
+%   \begin{danger}
+%     Provides a danger bend, as known from the \TeX{}book.
+%   \end{danger}
+%   The actual character from the font |manfnt|:
+%    \begin{macrocode}
+\font \manual = manfnt \scan_stop:
+\cs_gset:Npn \dbend { {\manual\char127} }
+%    \end{macrocode}
+%
+% Defines the single danger bend. Use it whenever there is a feature in
+% your package that might be tricky to use.  FIXME: Has to be fixed when
+% in combination with a macro-definition.
+%    \begin{macrocode}
+\newenvironment {danger}
+  {
+    \begin{trivlist}\item[]\noindent
+    \begingroup\hangindent=2pc\hangafter=-2
+    \cs_set:Npn \par{\endgraf\endgroup}
+    \hbox to0pt{\hskip-\hangindent\dbend\hfill}\ignorespaces
+  }
+  {
+    \par\end{trivlist}
+  }
+%    \end{macrocode}
+%
+% \begin{ddanger}
+%   Use the double danger bend if there is something which could cause
+%   serious problems when used in a wrong way. Better the normal user
+%   does not know about such things.
+% \end{ddanger}
+%    \begin{macrocode}
+\newenvironment {ddanger}
+  {
+    \begin{trivlist}\item[]\noindent
+    \begingroup\hangindent=3.5pc\hangafter=-2
+    \cs_set:Npn \par{\endgraf\endgroup}
+    \hbox to0pt{\hskip-\hangindent\dbend\kern2pt\dbend\hfill}\ignorespaces
+  }{
+      \par\end{trivlist}
+  }
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \subsubsection{NB and NOTE}
+%
+% These macros are intended for additional notes added to the source that are not typeset.
+%
+% \begin{macro}{\NB}
+% \NB{wspr}{this is what I think about this!}
+% \begin{verbatim}
+%   \NB{wspr}{this is what I think about this!}
+% \end{verbatim}
+%    \begin{macrocode}
+\bool_if:NTF \g_@@_show_notes_bool
+  {
+    \NewDocumentCommand\NB{mm}
+      {
+        (\emph{Note}\footnote{\ttfamily [#1]:~\detokenize{#2}})
+      }
+  }
+  {
+    \NewDocumentCommand\NB{mm}{}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{NOTE}
+% \begin{NOTE}{wspr}
+%   this is what I #$%& think about this!
+% \end{NOTE}
+% \begin{verbatim}
+%   \begin{NOTE}{wspr}
+%     this is what I #$%& think about this!
+%   \end{NOTE}
+% \end{verbatim}
+%    \begin{macrocode}
+\bool_if:NTF \g_@@_show_notes_bool
+  {
+    \NewDocumentEnvironment{NOTE}{m}
+      {
+        \par\noindent (\emph{Note}~[\texttt{#1}]:\par
+        \verbatim
+      }
+      {
+        \endverbatim
+        \par\noindent \emph{Note~end})\par
+      }
+  }
+  {
+    \NewDocumentEnvironment{NOTE}{m}{\comment}{\endcomment}
+  }
+%    \end{macrocode}
+% \end{environment}
+%
+% \subsection{Footnote support}
+% The environments \env{function} and \env{variable} are boxes
+% and so looses footnotes. The following implements support.
+% It relies currently on an internal from hyperref to get the correct targets.
+% 
+%    \begin{macrocode}
+\providecommand\Hy@footnote@currentHref{}
+\prop_new:N\g_@@_fnmark_prop
+\cs_new_protected:Npn \@@_fn_store: 
+ { 
+   \prop_gput:Nee\g_@@_fnmark_prop 
+     {fn\int_use:N\c@footnote}{{\Hy@footnote@currentHref}{\int_use:N\c@footnote}}
+ }
+\cs_new_protected:Npn \@@_fn_restore:n  #1
+ {
+   \prop_get:NnN \g_@@_fnmark_prop {fn#1}\l_@@_tmpa_tl
+   \tl_gset:Ne\Hy@footnote@currentHref
+     {\exp_last_unbraced:NV\use_i:nn \l_@@_tmpa_tl }
+   \setcounter{footnote}{\exp_last_unbraced:NV\use_ii:nn \l_@@_tmpa_tl}
+ }  
+
+\cs_generate_variant:Nn \hook_gput_next_code:nn {ne}
+\cs_new_protected:Npn \@@_fn_footnote:nn #1 #2
+  {
+    \footnotemark
+    \@@_fn_store: 
+    \hook_gput_next_code:ne {env/#1/after}
+      {\exp_not:N\@@_fn_restore:n{\int_use:N\c@footnote}{\exp_not:n{\footnotetext{#2}}}}}
+
+\AddToHook{env/function/begin}{\def\footnote{\@@_fn_footnote:nn{function}}}
+\AddToHook{env/variable/begin}{\def\footnote{\@@_fn_footnote:nn{variable}}} 
+%    \end{macrocode}
+%
+% \subsection{Documenting templates}
+%
+%    \begin{macrocode}
+\newenvironment{TemplateInterfaceDescription}[1]
+  {
+    \subsection{The~object~type~`#1'}
+    \begingroup
+    \@beginparpenalty\@M
+    \description
+    \def\TemplateArgument##1##2{\item[Arg:~##1]##2\par}
+    \def\TemplateSemantics
+      {
+        \enddescription\endgroup
+        \subsubsection*{Semantics:}
+      }
+  }
+  {
+    \par\bigskip
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newenvironment{TemplateDescription}[2]
+  {
+    \subsection{The~template~`#2'~(object~type~#1)}
+    \subsubsection*{Attributes:}
+    \begingroup
+    \@beginparpenalty\@M
+    \description
+    \def\TemplateKey##1##2##3##4
+      {
+        \item[##1~(##2)]##3%
+        \ifx\TemplateKey##4\TemplateKey\else
+%         \hskip0ptplus3em\penalty-500\hskip 0pt plus 1filll Default:~##4%
+          \hfill\penalty500\hbox{}\hfill Default:~##4%
+          \nobreak\hskip-\parfillskip\hskip0pt\relax
+        \fi
+        \par
+      }
+    \def\TemplateSemantics
+      {
+        \enddescription\endgroup
+        \subsubsection*{Semantics~\&~Comments:}
+      }
+  }
+  { \par \bigskip }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\newenvironment{InstanceDescription}[4][xxxxxxxxxxxxxxx]
+  {
+    \subsubsection{The~instance~`#3'~(template~#2/#4)}
+    \subsubsection*{Attribute~values:}
+    \begingroup
+    \@beginparpenalty\@M
+    \def\InstanceKey##1##2{\>\textbf{##1}\>##2\\}
+    \def\InstanceSemantics{\endtabbing\endgroup
+      \vskip-30pt\vskip0pt
+      \subsubsection*{Layout~description~\&~Comments:}}
+    \tabbing
+    xxxx\=#1\=\kill
+  }
+  { \par \bigskip }
+%    \end{macrocode}
+%
+% \subsection{Inheriting doc}
+%
+% Code here is taken from \pkg{doc}, stripped of comments and translated
+% into \pkg{expl3} syntax. New features are added in various places.
+%
+% \begin{macro}
+%   {\StopEventually, \MaybeStop, \Finale, \AlsoImplementation, \OnlyDescription}
+% \begin{variable}{\g_@@_finale_tl}
+%   TODO: remove these four commands altogether, document that it is
+%   better to use the \env{documentation} and \env{implementation}
+%   environments.
+%    \begin{macrocode}
+\DeclareDocumentCommand \OnlyDescription { }
+  { \bool_gset_false:N \g_@@_typeset_implementation_bool }
+\DeclareDocumentCommand \AlsoImplementation { }
+  { \bool_gset_true:N \g_@@_typeset_implementation_bool }
+\DeclareDocumentCommand \StopEventually { m }
+  {
+    \bool_if:NTF \g_@@_typeset_implementation_bool
+      {
+        \@bsphack
+        \tl_gset:Nn \g_@@_finale_tl { #1 \check@checksum }
+        \init@checksum
+        \@esphack
+      }
+      { #1 \endinput }
+  }
+%    \end{macrocode}
+%    We also need to support doc V3 \cs{MaybeStop} if it is around
+%    (which may not be the case).
+%    \begin{macrocode}
+\cs_if_exist:NT \MaybeStop  
+   { \RenewCommandCopy \MaybeStop \StopEventually }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\DeclareDocumentCommand \Finale { }
+  { \tl_use:N \g_@@_finale_tl }
+\tl_new:N \g_@@_finale_tl
+%    \end{macrocode}
+% \end{variable}
+% \end{macro}
+%
+% \begin{macro}{\@@_input:n}
+%   Inputting a file, with some setup: the module name should be empty
+%   before the first |<@@=|\meta{module}|>| line in the file.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_input:n #1
+  {
+    \tl_gclear:N \g_@@_module_name_tl
+    \MakePercentIgnore
+    \input{#1}
+    \MakePercentComment
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DocInput}
+%   Modified from \pkg{doc} to accept comma-list input (who has commas
+%   in filenames?).
+%    \begin{macrocode}
+\DeclareDocumentCommand \DocInput { m }
+  {
+    \clist_map_inline:nn {#1}
+      {
+        \clist_put_right:Nn \g_docinput_clist {##1}
+        \@@_input:n {##1}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DocInputAgain}
+%   Uses \cs{g_docinput_clist} to re-input whatever's already been
+%   \tn{DocInput}-ed until now.  May be used multiple times.
+%    \begin{macrocode}
+\DeclareDocumentCommand \DocInputAgain { }
+  { \clist_map_function:NN \g_docinput_clist \@@_input:n }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DocInclude}
+%   More or less exactly the same as \tn{include}, but uses
+%   \tn{DocInput} on a \file{.dtx} file, not \tn{input} on a \file{.tex}
+%   file.
+%
+%    \begin{macrocode}
+\NewDocumentCommand \DocInclude { m }
+  {
+    \relax\clearpage
+    \docincludeaux
+    \IfFileExists{#1.fdd}
+      { \cs_set:Npn \currentfile{#1.fdd} }
+      { \cs_set:Npn \currentfile{#1.dtx} }
+    \int_compare:nNnTF \@auxout = \@partaux
+      { \@latexerr{\string\include\space cannot~be~nested}\@eha }
+      { \@docinclude {#1} }
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_gset:Npn \@docinclude #1
+  {
+    \clearpage
+    \immediate\write\@mainaux{\string\@input{#1.aux}}
+    \@tempswatrue
+    \if@partsw
+      \@tempswafalse
+      \cs_set:Npe \@tempb {#1}
+      \clist_map_inline:Nn \@partlist
+        {
+          \if_meaning:w \@tempa \@tempb
+            \@tempswatrue
+          \fi:
+        }
+    \fi
+    \if@tempswa
+      \cs_set_eq:NN \@auxout                 \@partaux
+      \immediate\openout\@partaux #1.aux
+      \immediate\write\@partaux{\relax}
+      \cs_set_eq:NN \@ltxdoc@PrintIndex      \PrintIndex
+      \cs_set_eq:NN \PrintIndex              \relax
+      \cs_set_eq:NN \@ltxdoc@PrintChanges    \PrintChanges
+      \cs_set_eq:NN \PrintChanges            \relax
+      \cs_set_eq:NN \@ltxdoc@theglossary     \theglossary
+      \cs_set_eq:NN \@ltxdoc@endtheglossary  \endtheglossary
+      \part{\currentfile}
+      {
+        \cs_set_eq:NN \ttfamily\relax
+        \cs_gset:Npe \filekey
+          { \filekey,~ \thepart = { \ttfamily \currentfile } }
+      }
+      \DocInput{\currentfile}
+      \cs_set_eq:NN \PrintIndex              \@ltxdoc@PrintIndex
+      \cs_set_eq:NN \PrintChanges            \@ltxdoc@PrintChanges
+      \cs_set_eq:NN \theglossary             \@ltxdoc@theglossary
+      \cs_set_eq:NN \endtheglossary          \@ltxdoc@endtheglossary
+      \clearpage
+      \@writeckpt{#1}
+      \immediate \closeout \@partaux
+    \else
+      \@nameuse{cp@#1}
+    \fi
+    \cs_set_eq:NN \@auxout \@mainaux
+  }
+%    \end{macrocode}
+%
+% Here, |MMMMI| (for page references) and |MMMMV| (for codeline
+% references) are interpreted by |makeindex| as an uppercase Roman
+% number pages, and should be large enough to avoid collisions with
+% other uses of uppercase Roman number pages.  Two subtle differences
+% between \cs{@wrindex} and \cs{codeline@wrindex} are that the first
+% must be a delayed write because the page number is not known yet, and
+% it must close a group and finish some space-hack.
+%
+% We also provide versions for our use that refer
+%    \begin{macrocode}
+\cs_gset_protected:Npn \@wrindex #1
+  {
+    \protected@write \@indexfile {}
+      { \string \indexentry {#1} { MMMMI - \thepage } }
+    \endgroup \@esphack
+  }
+\cs_gset_protected:Npn \codeline@wrindex #1
+  {
+    \immediate\write\@indexfile
+      {
+        \string\indexentry{#1}
+          { MMMMV - \filesep \int_use:N \c@CodelineNo }
+      }
+  }
+\tl_gclear:N \filesep
+\cs_new_protected:Npn \@@_index_page_hc:nn #1#2
+  {
+    \protected@write \@indexfile {}
+      {
+        \string \indexentry { #1 \encapchar hdpindex{#2} }
+          { MMMMI - \thepage }
+      }
+  }
+\cs_new_protected:Npn \@@_index_codeline_hc:nn #1#2
+  {
+    \immediate\write\@indexfile
+      {
+        \string \indexentry { #1 \encapchar hdclindex{\the\c@HD@hypercount}{#2} }
+          { MMMMV - \filesep \int_use:N \c@CodelineNo - MMMD - \the\c@HD@hypercount - M }
+      }
+  }
+%    \end{macrocode}
+% We already have a single |HD.xx| target per code line.  It would be
+% better to have a target |CL.\the\c@CodelineNo| per code line and
+% change |hdclindex{\the\c@HD@hypercount}| to a mechanism closer to
+% |hdpindex|, but we need to understand better the different types of
+% indexings, and there are subtleties with indexing |\{| and |\}|.
+% \end{macro}
+%
+% \begin{macro}{\docincludeaux}
+%    \begin{macrocode}
+\cs_gset:Npn \docincludeaux
+  {
+    \tl_set:Nn \thepart { \alphalph { part } }
+    \tl_set:Nn \filesep { \thepart - }
+    \cs_set_eq:NN \filekey \use_none:n
+    \tl_gput_right:Nn \index@prologue
+      {
+        \cs_gset:Npn \@oddfoot
+          {
+            \parbox { \textwidth }
+              {
+                \strut \footnotesize
+                \raggedright { \bfseries File~Key: } ~ \filekey
+              }
+          }
+        \cs_set_eq:NN \@evenfoot \@oddfoot
+      }
+    \cs_gset_eq:NN \docincludeaux \relax
+    \cs_gset:Npn \@oddfoot
+      {
+        \cs_if_exist:cTF { ver @ \currentfile }
+          { File~\thepart :~{\ttfamily\currentfile}~ }
+          {
+            \GetFileInfo{\currentfile}
+            File~\thepart :~{\ttfamily\filename}~
+            Date:~\ExplFileDate\ % space
+            Version~\ExplFileVersion
+          }
+        \hfill \thepage
+      }
+    \cs_set_eq:NN \@evenfoot \@oddfoot
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{The \env{macrocode} environment}
+%
+% \begin{macro}{\xmacro@code, \@@_xmacro_code:n, \@@_xmacro_code:w}
+%   Hook into the \texttt{macrocode} environment in a dirty way:
+%   \tn{xmacro@code} is responsible for grabbing (and tokenizing) the
+%   body of the environment.  Redefine it to pass what it grabs to
+%   \cs{@@_xmacro_code:n}.  This new macro replaces all |@@| by the
+%   appropriate module name.  One exceptional case is the
+%   |<@@=|\meta{module}|>| lines themselves, where |@@| should not be
+%   modified.  Actually, we search for such lines, to set the module
+%   name automatically.  We need to be careful: no |<@@=| should appear
+%   as such in the code below since \pkg{l3doc} is also typeset using
+%   this code.
+%   At each |<@@=| found, replace the \meta{module} in the code behind
+%   it, update the \meta{module}, and loop to check for further
+%   occurrences of |<@@=|.
+%    \begin{macrocode}
+\group_begin:
+  \char_set_catcode_other:N \^^A
+  \char_set_catcode_active:N \^^S
+  \char_set_catcode_active:N \^^B
+  \char_set_catcode_other:N \^^L
+  \char_set_catcode_other:N \^^R
+  \char_set_lccode:nn { `\^^A } { `\% }
+  \char_set_lccode:nn { `\^^S } { `\  }
+  \char_set_lccode:nn { `\^^B } { `\\ }
+  \char_set_lccode:nn { `\^^L } { `\{ }
+  \char_set_lccode:nn { `\^^R } { `\} }
+  \tex_lowercase:D
+    {
+      \group_end:
+      \cs_set_protected:Npn \xmacro@code
+          #1 ^^A ^^S^^S^^S^^S ^^Bend ^^Lmacrocode^^R
+        { \@@_xmacro_code:n {#1} \end{macrocode} }
+    }
+\group_begin:
+  \char_set_catcode_active:N \<
+  \char_set_catcode_active:N \>
+  \cs_new_protected:Npn \@@_xmacro_code:n #1
+    {
+      \tl_clear:N \l_@@_tmpa_tl
+      \tl_if_in:nnTF {#1} { < @ @ = }
+        { \@@_xmacro_code:w #1 < @ @ = \q_recursion_tail > \q_recursion_stop }
+        {
+          \tl_set:Nn \l_@@_tmpa_tl {#1}
+          \@@_detect_internals:N \l_@@_tmpa_tl
+          \@@_replace_at_at:N \l_@@_tmpa_tl
+          \tl_use:N \l_@@_tmpa_tl
+        }
+    }
+  \cs_new_protected:Npn \@@_xmacro_code:w #1 < @ @ = #2 >
+    {
+      % Add code before <@@@@=...>
+      \tl_set:Nn \l_@@_tmpb_tl {#1}
+      \@@_detect_internals:N \l_@@_tmpb_tl
+      \@@_replace_at_at:N \l_@@_tmpb_tl
+      \tl_put_right:NV \l_@@_tmpa_tl \l_@@_tmpb_tl
+      % Check for \q_recursion_tail
+      \quark_if_recursion_tail_stop_do:nn {#2}
+        { \tl_use:N \l_@@_tmpa_tl }
+      % Change module name and add <@@@@=#2> to typeset output
+      \tl_gset:Nn \g_@@_module_name_tl {#2}
+      \tl_put_right:Nn \l_@@_tmpa_tl { < \text { \verbatim@font @ @ = #2 } > }
+      % Loop
+      \@@_xmacro_code:w
+    }
+\group_end:
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{At end document}
+%
+% Print all defined and documented macros/functions.
+%
+%    \begin{macrocode}
+\iow_new:N \g_@@_func_iow
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\tl_new:N \l_@@_doc_def_tl
+\tl_new:N \l_@@_doc_undef_tl
+\tl_new:N \l_@@_undoc_def_tl
+\tl_const:Nn \c_@@_iow_separator_tl { ---- }
+\tl_const:Nn \c_@@_iow_midrule_tl  { -- }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_functions_defined:
+  {
+    \bool_lazy_and:nnT
+      { \g_@@_typeset_implementation_bool } { \g_@@_checkfunc_bool }
+      {
+        \iow_term:e { \c_@@_iow_separator_tl \iow_newline: }
+        \iow_open:Nn \g_@@_func_iow { \c_sys_jobname_str .cmds }
+
+        \tl_clear:N \l_@@_doc_def_tl
+        \tl_clear:N \l_@@_doc_undef_tl
+        \tl_clear:N \l_@@_undoc_def_tl
+        \seq_gremove_duplicates:N \g_doc_functions_seq
+        \seq_gremove_duplicates:N \g_doc_macros_seq
+        \seq_map_inline:Nn \g_doc_functions_seq
+          {
+            \seq_if_in:NnTF \g_doc_macros_seq {##1}
+              {
+                \tl_put_right:Ne \l_@@_doc_def_tl
+                  { \iow_newline: > ~ ##1 }
+              }
+              {
+                \tl_put_right:Ne \l_@@_doc_undef_tl
+                  { \iow_newline: ! ~ ##1 }
+              }
+          }
+        \seq_map_inline:Nn \g_doc_macros_seq
+          {
+            \seq_if_in:NnF \g_doc_functions_seq {##1}
+              {
+                \tl_put_right:Ne \l_@@_undoc_def_tl
+                  { \iow_newline: ? ~ ##1 }
+              }
+          }
+        \@@_functions_typeout:nN
+          {
+            Functions~both~documented~and~defined: \iow_newline:
+            (In~order~of~being~documented)
+          }
+          \l_@@_doc_def_tl
+        \@@_functions_typeout:nN
+          { Functions~documented~but~not~defined: }
+          \l_@@_doc_undef_tl
+        \@@_functions_typeout:nN
+          { Functions~defined~but~not~documented: }
+          \l_@@_undoc_def_tl
+
+        \iow_close:N \g_@@_func_iow
+        \iow_term:e { \c_@@_iow_separator_tl }
+      }
+  }
+\AtEndDocument { \@@_show_functions_defined: }
+%    \end{macrocode}
+%
+% TODO: use \cs{iow_term:e}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_functions_typeout:nN #1#2
+  {
+    \tl_if_empty:NF #2
+      {
+        \iow_now:Ne \g_@@_func_iow
+          {
+            \c_@@_iow_midrule_tl \iow_newline:
+            #1 \iow_newline:
+            \c_@@_iow_midrule_tl
+            #2
+          }
+        \tl_clear:N #2
+      }
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_show_not_tested:
+  {
+    \bool_if:NT \g_@@_checktest_bool
+      {
+        \tl_clear:N \l_@@_tmpa_tl
+        \prop_if_empty:NF \g_@@_missing_tests_prop
+          {
+            \cs_set:Npn \@@_tmpa:w ##1##2
+              {
+                \iow_newline:
+                \space\space\space\space \exp_not:n {##1}
+                \clist_map_function:nN {##2} \@@_tmpb:w
+              }
+            \cs_set:Npn \@@_tmpb:w ##1
+              {
+                \iow_newline:
+                \space\space\space\space\space\space * ~ ##1
+              }
+            \tl_put_right:Ne \l_@@_tmpa_tl
+              {
+                \iow_newline: \iow_newline:
+                The~ following~ macro(s)~ have~ incomplete~ tests:
+                \iow_newline:
+                \prop_map_function:NN
+                  \g_@@_missing_tests_prop \@@_tmpa:w
+              }
+          }
+        \seq_if_empty:NF \g_@@_not_tested_seq
+          {
+            \cs_set:Npn \@@_tmpa:w ##1
+              { \clist_map_function:nN {##1} \@@_tmpb:w }
+            \cs_set:Npn \@@_tmpb:w ##1
+              {
+                \iow_newline:
+                \space\space\space\space ##1
+              }
+            \tl_put_right:Ne \l_@@_tmpa_tl
+              {
+                \iow_newline:
+                \iow_newline:
+                The~ following~ macro(s)~ do~ not~ have~ any~ tests:
+                \iow_newline:
+                \seq_map_function:NN
+                  \g_@@_not_tested_seq \@@_tmpa:w
+              }
+          }
+        \tl_if_empty:NF \l_@@_tmpa_tl
+          {
+            \int_set:Nn \l_@@_tmpa_int { \tex_interactionmode:D }
+            \errorstopmode
+            \ClassError { l3doc } { \l_@@_tmpa_tl } { }
+            \int_set:Nn \tex_interactionmode:D { \l_@@_tmpa_int }
+          }
+      }
+  }
+\AtEndDocument { \@@_show_not_tested: }
+%    \end{macrocode}
+%
+% \subsection{Indexing}
+%
+% \subsubsection{Necessary patching}
+%
+% The following is useful to set up \pkg{hyperref} targets, for instance
+% for the purpose of indexing.  Contrarily to \pkg{hypdoc} we do not try
+% to save pdf destinations, as this leads to too many \pdfTeX{} warnings
+% on early runs.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_target:
+  {
+    \mode_leave_vertical:
+    \group_begin:
+      \HD@savedestfalse \HD@target
+    \group_end:
+  }
+%    \end{macrocode}
+% Force targets on every code line.
+%    \begin{macrocode}
+\cs_set_nopar:Npe \theCodelineNo
+  {
+    \group_begin:
+      \exp_not:N \HD@savedestfalse
+      \exp_not:o \theCodelineNo
+    \group_end:
+  }
+%    \end{macrocode}
+%
+% Inside the table of contents (and other similar lists introduced by
+% \cs{@starttoc}), we suppress indexing.  This is because \cs{cmd},
+% \cs{cs}, or \cs{tn} appearing in titles only gets typeset in the
+% second run, and getting their indexing right would require even more
+% runs than we already need.  Besides, it is not useful to index uses of
+% some command in the table of contents.
+%    \begin{macrocode}
+\bool_new:N \l_@@_allow_indexing_bool
+\bool_set_true:N \l_@@_allow_indexing_bool
+\use:e
+  {
+    \exp_not:n { \cs_set_nopar:Npn \@starttoc #1 }
+      {
+        \group_begin:
+          \bool_set_false:N \l_@@_allow_indexing_bool
+          \exp_not:o { \@starttoc {#1} }
+        \group_end:
+      }
+  }
+%    \end{macrocode}
+%
+% \subsubsection{Userspace commands}
+%
+% Fix index (for now):
+%    \begin{macrocode}
+\g@addto@macro \theindex { \MakePrivateLetters }
+\cs_gset:Npn \verbatimchar {&}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\setcounter { IndexColumns } { 2 }
+%    \end{macrocode}
+%
+% Set up the Index to use \tn{part}
+%    \begin{macrocode}
+\IndexPrologue
+  {
+    \part*{Index}
+    \markboth{Index}{Index}
+    \addcontentsline{toc}{part}{Index}
+    The~italic~numbers~denote~the~pages~where~the~
+    corresponding~entry~is~described,~
+    numbers~underlined~point~to~the~definition,~
+    all~others~indicate~the~places~where~it~is~used.
+  }
+%    \end{macrocode}
+%
+% \begin{macro}{\SpecialIndex}
+%   An attempt at affecting how commands which appear within the
+%   \env{macrocode} environment are treated in the index.
+%    \begin{macrocode}
+\cs_gset_protected:Npn \SpecialIndex #1
+  {
+    \@bsphack
+    \@@_special_index:nn {#1} { }
+    \@esphack
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\msg_new:nnn { l3doc } { print-index-howto }
+  {
+    Generate~the~index~by~executing\\
+    \iow_indent:n
+      { makeindex~-s~gind.ist~-o~\c_sys_jobname_str.ind~\c_sys_jobname_str.idx }
+  }
+\tl_gput_right:Nn \PrintIndex
+  { \AtEndDocument { \msg_info:nn { l3doc } { print-index-howto } } }
+%    \end{macrocode}
+%
+% \subsubsection{Internal index commands}
+%
+% \begin{macro}{\it@is@a}
+%   The index of one-character commands within the \env{macrocode}
+%   environment is produced using \tn{it@is@a} \meta{char}.  Alter that
+%   command.
+%    \begin{macrocode}
+\cs_gset_protected:Npn \it@is@a #1
+  {
+    \use:e
+      {
+        \@@_special_index_module:nnnnN
+          {#1}
+          { \bslash #1 }
+          { }
+          { }
+          \c_false_bool
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_special_index:nn}
+% ^^A TODO this override is somewhat a hack
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_special_index:nn #1#2
+  {
+    \@@_key_get:n {#1}
+    \quark_if_no_value:NF \l_@@_override_module_tl
+      { \tl_set_eq:NN \l_@@_index_module_tl \l_@@_override_module_tl }
+    \@@_special_index_module:ooonN
+      { \l_@@_index_key_tl }
+      { \l_@@_index_macro_tl }
+      { \l_@@_index_module_tl }
+      {#2}
+      \l_@@_index_internal_bool
+  }
+\cs_generate_variant:Nn \@@_special_index:nn { o }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_special_index_module:nnnnN,
+%     \@@_special_index_module:ooonN,
+%     \@@_special_index_aux:nnnnnn,
+%     \@@_special_index_set:Nn,
+%   }
+%   Remotely based on Heiko's replacement to play nicely with
+%   \pkg{hypdoc}.  We use \tn{verb} or a \tn{verbatim@font} construction
+%   depending on whether the number of tokens in |#2| is equal to its
+%   number of characters: if it is not then that suggests that there is
+%   a construct such as |\meta{...}|.
+%    \begin{macrocode}
+\tl_new:N \l_@@_index_escaped_macro_tl
+\tl_new:N \l_@@_index_escaped_key_tl
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_special_index_module:nnnnN #1#2#3#4#5
+%    \end{macrocode}
+% \begin{arguments}
+% \item key
+% \item macro
+% \item module
+% \item index `type' (\texttt{main}/\texttt{usage}/\emph{etc.})
+% \item boolean whether internal command
+% \end{arguments}
+%    \begin{macrocode}
+  {
+    \use:e
+      {
+        \exp_not:n { \@@_special_index_aux:nnnnnn {#1} {#2} }
+          \tl_if_empty:nTF {#3}
+            { { } { } { } }
+            {
+              \str_if_eq:nnTF {#3} { TeX }
+                {
+                  { TeX~and~LaTeX2e }
+                  { \string\TeX{}~and~\string\LaTeXe{} }
+                }
+                {
+                  {#3}
+                  { \string\pkg{#3} }
+                }
+              { \bool_if:NT #5 { ~internal } ~commands: }
+            }
+      }
+          {#4}
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_generate_variant:Nn \@@_special_index_module:nnnnN { ooo }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_special_index_aux:nnnnnn #1#2#3#4#5#6
+%    \end{macrocode}
+% \begin{arguments}
+% \item key
+% \item macro
+% \item index subheading string
+% \item index subheading text
+% \item index subheading suffix (appended to both arg 3 and 4)
+% \item index `type' (\texttt{main}/\texttt{usage}/\emph{etc.})
+% \end{arguments}
+%    \begin{macrocode}
+  {
+    \tl_set:Nn \l_@@_index_escaped_key_tl {#1}
+    \@@_quote_special_char:N \l_@@_index_escaped_key_tl
+    \@@_special_index_set:Nn \l_@@_index_escaped_macro_tl {#2}
+    \str_if_eq:onTF { \@currenvir } { macrocode }
+      { \@@_index_codeline_hc:nn }
+      {
+        \str_case:nnF {#6}
+          {
+            { main }  { \@@_index_codeline_hc:nn }
+            { usage } { \@@_index_page_hc:nn }
+          }
+          { \@@_target: \@@_index_page_hc:nn }
+      }
+      {
+        \tl_if_empty:nF { #3 #4 #5 }
+          { #3 #5 \actualchar #4 #5 \levelchar }
+        \l_@@_index_escaped_key_tl
+        \actualchar
+        {
+          \token_to_str:N \verbatim@font \c_space_tl
+          \l_@@_index_escaped_macro_tl
+        }
+      }
+      {#6}
+  }
+%    \end{macrocode}
+%
+% \begin{macro}{\hdpindex, \@@_old_hdpindex:nn, \hdclindex, \@@_old_hdclindex:nnn, \@@_hdindex:nn, \c_@@_active_minus_tl, \@@_hdindex_aux:nn, \@@_hdindex_aux:w}
+%   Note that |#3| here could contain |MMMMI-| or |MMMMV-| more than once
+%   if several successive code lines have been merged into a range
+%   somehow.  Note incidentally that the dash is active in some of our
+%   sources, like |interface3.tex| or |source2e.tex|.
+%    \begin{macrocode}
+\group_begin:
+\char_set_active_eq:NN - \scan_stop:
+\tl_const:Ne \c_@@_active_minus_tl { \char_generate:nn { `- } { 13 } }
+\group_end:
+\cs_new_eq:NN \@@_old_hdpindex:nn \hdpindex
+\cs_new_eq:NN \@@_old_hdclindex:nnn \hdclindex
+\cs_gset_protected:Npn \hdpindex #1
+  { \@@_hdindex:nn { \@@_old_hdpindex:nn {#1} } }
+\cs_gset_protected:Npn \hdclindex #1#2
+  { \@@_hdindex:nn { \@@_old_hdclindex:nnn {#1} {#2} } }
+\cs_new_protected:Npn \@@_hdindex:nn #1#2
+  {
+    \tl_set:Nn \l_@@_tmpa_tl {#2}
+    \tl_replace_all:Nen \l_@@_tmpa_tl
+      { \exp_not:V \c_@@_active_minus_tl \exp_not:V \c_@@_active_minus_tl }
+      { -- }
+    \seq_set_split:NnV \l_@@_tmpa_seq { -- } \l_@@_tmpa_tl
+    \seq_set_map:NNn \l_@@_tmpa_seq \l_@@_tmpa_seq
+      { \@@_hdindex_aux:nn {#1} {##1} }
+    \seq_use:Nn \l_@@_tmpa_seq { -- }
+  }
+\cs_new_protected:Npn \@@_hdindex_aux:nn #1#2
+  {
+    \tl_set:Nn \l_@@_tmpa_tl {#2}
+    \tl_replace_all:Nnn \l_@@_tmpa_tl { MMMM } { \use_none:nn }
+    \tl_if_in:NnT \l_@@_tmpa_tl { MMMD }
+      {
+        \tl_replace_all:Nen \l_@@_tmpa_tl
+          { \exp_not:V \c_@@_active_minus_tl MMMD } { - MMMD }
+        \tl_replace_all:Nnn \l_@@_tmpa_tl { - MMMD } { \@@_hdindex_aux:w }
+      }
+    \use:e { \exp_not:n {#1} { \exp_not:V \l_@@_tmpa_tl } }
+  }
+\cs_new_protected:Npn \@@_hdindex_aux:w #1 M { }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_special_index_set:Nn #1#2
+  {
+    \__kernel_tl_set:Ne #1 { \tl_to_str:n {#2} }
+    \@@_if_almost_str:nTF {#2}
+      {
+        \tl_replace_all:Nen #1 { \tl_to_str:n { __ } }
+          {
+            \verbatimchar
+            \token_to_str:N \_ \token_to_str:N \_
+            \token_to_str:N \verb * \verbatimchar
+          }
+        \exp_args:Ne \tl_map_inline:nn
+          { \tl_to_str:N \verbatimchar \token_to_str:N _ }
+          {
+            \tl_replace_all:Nnn #1 {##1}
+              {
+                \verbatimchar \c_backslash_str ##1
+                \token_to_str:N \verb * \verbatimchar
+              }
+          }
+        \__kernel_tl_set:Ne #1
+          {
+            \token_to_str:N \verb * \verbatimchar
+            #1 \verbatimchar
+          }
+      }
+      {
+        \tl_set:Nn #1 {#2}
+        \tl_replace_all:NVn #1
+          \c_backslash_str
+          { \token_to_str:N \bslash \c_space_tl }
+      }
+    \@@_quote_special_char:N #1
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_quote_special_char:N}
+% Quote some special characters.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_quote_special_char:N #1
+  {
+    \tl_map_inline:nn { \quotechar \actualchar \encapchar \levelchar \bslash }
+      {
+        \tl_replace_all:Nen #1
+          { \tl_to_str:N ##1 } { \quotechar \tl_to_str:N ##1 }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Finding sort-key and module}
+%
+% \begin{macro}{\@@_key_get:n}
+%   Sets \cs{l_@@_index_macro_tl}, \cs{l_@@_index_key_tl}, and
+%   \cs{l_@@_index_module_tl} from |#1|.  The base function is stored by
+%   \cs{@@_key_get_base:nN} in \cs{l_@@_index_macro_tl}, falling back to
+%   |#1| if it contains markup or has no signature.
+%
+%   The starting point for the \meta{key} is \cs{l_@@_index_key_tl} as a
+%   string.  If it the first character is a backslash, remove
+%   it.  Then recognize |expl| functions and variables by the presence
+%   of |:| or~|_| and \TeX{}/\LaTeXe{} commands by the presence of~|@|.
+%   For |expl| names, we call \cs{@@_key_func:} or \cs{@@_key_var:},
+%   which are responsible for removing some characters and finding the
+%   module name, while for \TeX{}/\LaTeXe{} commands the module name is
+%   |TeX|, and others have an empty module name.
+%    \begin{macrocode}
+\cs_new_protected:Npe \@@_key_get:n #1
+  {
+    \exp_not:N \@@_key_get_base:nN {#1} \exp_not:N \l_@@_index_macro_tl
+    \__kernel_tl_set:Ne \exp_not:N \l_@@_index_key_tl
+      { \exp_not:N \tl_to_str:N \exp_not:N \l_@@_index_macro_tl }
+    \tl_clear:N \exp_not:N \l_@@_index_module_tl
+    \tl_if_in:NnTF \exp_not:N \l_@@_index_key_tl { \tl_to_str:n { __ } }
+      { \bool_set_true:N \exp_not:N \l_@@_index_internal_bool }
+      { \bool_set_false:N \exp_not:N \l_@@_index_internal_bool }
+    \exp_not:N \tl_if_head_eq_charcode:VNT
+      \exp_not:N \l_@@_index_key_tl \c_backslash_str
+      { \exp_not:N \@@_key_pop: }
+    \tl_if_in:NnTF \exp_not:N \l_@@_index_key_tl { \token_to_str:N : }
+      { \exp_not:N \@@_key_func: }
+      {
+        \tl_if_in:NnTF \exp_not:N \l_@@_index_key_tl { \token_to_str:N _ }
+          { \exp_not:N \@@_key_var: }
+          {
+            \tl_if_in:NnT \exp_not:N \l_@@_index_key_tl { \token_to_str:N @ }
+              { \tl_set:Nn \exp_not:N \l_@@_index_module_tl { TeX } }
+          }
+      }
+  }
+\cs_new_protected:Npn \@@_key_pop:
+  {
+    \__kernel_tl_set:Ne \l_@@_index_key_tl
+      { \tl_tail:N \l_@@_index_key_tl }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_key_trim_module:n, \@@_key_drop_underscores:}
+%   Helper that removes from \cs{l_@@_index_module_tl} everything after
+%   the first occurence of |#1|.  Helper that removes any leading
+%   underscore from \cs{l_@@_index_key_tl}.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_key_trim_module:n #1
+  {
+    \cs_set:Npn \@@_tmpa:w ##1 #1 ##2 \q_stop
+      { \exp_not:n {##1} }
+    \__kernel_tl_set:Ne \l_@@_index_module_tl
+      { \exp_after:wN \@@_tmpa:w \l_@@_index_module_tl #1 \q_stop }
+  }
+\cs_new_protected:Npn \@@_key_drop_underscores:
+  {
+    \tl_if_head_eq_charcode:VNT \l_@@_index_key_tl _
+      { \@@_key_pop: \@@_key_drop_underscores: }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_key_func:}
+%   The function \cs{@@_key_func:} is used if there is a colon, so
+%   either for usual \pkg{expl3} functions or for keys from
+%   \pkg{l3keys}.  After removing from the key a leading dot (for the
+%   latter case), and any leading underscore, the module name is the
+%   part before any colon or underscore.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_key_func:
+  {
+    \tl_if_head_eq_charcode:VNT \l_@@_index_key_tl .
+      { \@@_key_pop: }
+    \@@_key_drop_underscores:
+    \tl_set_eq:NN \l_@@_index_module_tl \l_@@_index_key_tl
+    \exp_args:No \@@_key_trim_module:n { \token_to_str:N : }
+    \exp_args:No \@@_key_trim_module:n { \token_to_str:N _ }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_key_var:, \@@_key_get_module:}
+%   The function \cs{@@_key_var:} covers cases with no~|:| but with~|_|,
+%   typically variables but occasionally non-\pkg{expl3} functions such
+%   as \Lua{} function with underscores.  First test the second
+%   character: if that is~|_| then assume we have a proper variable,
+%   otherwise use the part before any underscore as the module name.
+%   For variables, distinguish quarks and scan marks (starting with |q|
+%   and~|s|), then drop the first letter (local/global/constant marker)
+%   and underscores to improve the index sorting.
+%   Then get the module as the first (underscore-delimited) \enquote{word}.
+%   In the past, we distinguished according to how many such words there
+%   were, to detect commands like \cs[no-index]{c_zero}, which should be
+%   sorted as |int| variables, and \cs[no-index]{l_tmpa_dim}, which should
+%   be sorted in the |dim| and not the |tmpa| module.
+%   Now the first case has been deprecated for some time, while |tmpa| and
+%   similar are special-cased through an explicit list given below.
+%   The way it works is that if the module is in a list of special names
+%   that are not valid modules, then we try the last word, and if that
+%   also fails (for instance in the deprecated \cs[no-index]{c_one_hundred})
+%   we empty the module completely.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_key_var:
+  {
+    \exp_args:Ne \tl_if_head_eq_charcode:nNTF
+      { \exp_args:No \str_tail:n \l_@@_index_key_tl } _
+      {
+        \str_case:en { \str_head:N \l_@@_index_key_tl }
+          {
+            { q } { \tl_set:Nn \l_@@_index_module_tl { quark } }
+            { s } { \tl_set:Nn \l_@@_index_module_tl { scan } }
+          }
+        \@@_key_pop:
+        \@@_key_pop:
+        \@@_key_drop_underscores:
+        \tl_if_empty:NT \l_@@_index_module_tl
+          {
+            \seq_set_split:NoV \l_@@_tmpa_seq
+              { \token_to_str:N _ } \l_@@_index_key_tl
+            \seq_get_left:NN \l_@@_tmpa_seq \l_@@_index_module_tl
+            \clist_if_in:NoT \g_@@_non_modules_clist \l_@@_index_module_tl
+              {
+                \seq_get_right:NN \l_@@_tmpa_seq \l_@@_index_module_tl
+                \clist_if_in:NoT \g_@@_non_modules_clist \l_@@_index_module_tl
+                  {
+                    \tl_clear:N \l_@@_index_module_tl
+                  }
+              }
+          }
+      }
+      {
+        \tl_set_eq:NN \l_@@_index_module_tl \l_@@_index_key_tl
+        \exp_args:No \@@_key_trim_module:n { \token_to_str:N _ }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}{\g_@@_non_modules_clist}
+%   List of names that appear as the first word in an \pkg{expl3}
+%   command, but that are not true modules, so that they should be
+%   sorted differently in an index.
+%    \begin{macrocode}
+\clist_new:N \g_@@_non_modules_clist
+\clist_gset:Ne \g_@@_non_modules_clist
+  {
+    \tl_to_str:n
+      {
+
+        alignment, ampersand, atsign, backslash, catcode, circumflex,
+        code, colon, document, dollar, e, empty, false, hash, inf,
+        initex, job, left, log, math, mark, max, minus, nan, nil, no,
+        novalue, other, parameter, percent, pi, recursion, right, space,
+        stop, term, tilde, tmpa, tmpb, true, underscore, zero, one, two,
+        three, four, five, six, seven, eight, nine, ten, eleven, twelve,
+        thirteen, fourteen, fifteen, sixteen, thirty, hundred
+
+      }
+  }
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Change history}
+%
+% Set the change history to use \tn{part}.
+% Allow control names to be hyphenated in here\dots
+%    \begin{macrocode}
+\GlossaryPrologue
+  {
+    \part*{Change~History}
+    {\GlossaryParms\ttfamily\hyphenchar\font=`\-}
+    \markboth{Change~History}{Change~History}
+    \addcontentsline{toc}{part}{Change~History}
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\msg_new:nnn { l3doc } { print-changes-howto }
+  {
+    Generate~the~change~list~by~executing\\
+    \iow_indent:n
+      { makeindex~-s~gglo.ist~-o~\c_sys_jobname_str.gls~\c_sys_jobname_str.glo }
+  }
+\tl_gput_right:Nn \PrintChanges
+  { \AtEndDocument { \msg_info:nn { l3doc } { print-changes-howto } } }
+%    \end{macrocode}
+%
+%^^A The standard \changes command modified slightly to better cope with
+%^^A this multiple file document.
+%^^A\def\changes@#1#2#3{%
+%^^A  \let\protect\@unexpandable@protect
+%^^A  \edef\@tempa{\noexpand\glossary{#2\space\currentfile\space#1\levelchar
+%^^A                                 \ifx\saved@macroname\@empty
+%^^A                                   \space
+%^^A                                   \actualchar
+%^^A                                   \generalname
+%^^A                                 \else
+%^^A                                   \expandafter\@gobble
+%^^A                                   \saved@macroname
+%^^A                                   \actualchar
+%^^A                                   \string\verb\quotechar*%
+%^^A                                   \verbatimchar\saved@macroname
+%^^A                                   \verbatimchar
+%^^A                                 \fi
+%^^A                                 :\levelchar #3}}%
+%^^A  \@tempa\endgroup\@esphack}
+%
+% \subsection{Default configuration}
+%
+%    \begin{macrocode}
+\bool_if:NTF \g_@@_typeset_implementation_bool
+  {
+    \RecordChanges
+    \CodelineIndex
+    \EnableCrossrefs
+    \AlsoImplementation
+  }
+  {
+    \CodelineNumbered
+    \DisableCrossrefs
+    \OnlyDescription
+  }
+%    \end{macrocode}
+%
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+% \subsection{Internal macros for \LaTeX3 sources}
+%
+% These definitions are only used by the \LaTeX3 documentation; they are
+% not necessary for third-party users of \cls{l3doc}.  In time this will
+% be broken into a separate package that is specifically loaded in the
+% various \pkg{expl3} modules, \emph{etc.}
+%
+%    \begin{macrocode}
+%<*cfg>
+%    \end{macrocode}
+%
+% The Guilty Parties.
+%    \begin{macrocode}
+\tl_const:Nn \Team
+  {
+    The~\LaTeX3~Project\thanks
+      {\url{https://www.latex-project.org/latex3/}}
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\NewDocumentCommand{\ExplMakeTitle}{mm}
+  {
+    \title
+      {
+       The~\pkg{#1}~package \\ #2
+      }
+    \author
+      {
+       The~\LaTeX3~Project\thanks{E-mail:~
+       \href{mailto:latex-l@listserv.uni-heidelberg.de}
+            {latex-l@listserv.uni-heidelberg.de}}
+      }
+    \date{Released~\ExplFileDate}
+    \maketitle
+  }
+%    \end{macrocode}
+%
+% \subsection{Math extras}
+%
+% For \pkg{l3fp}.
+%
+%    \begin{macrocode}
+\AtBeginDocument
+  {
+    \clist_map_inline:nn
+      {
+       asin, acos, atan, acot,
+       asinh, acosh, atanh, acoth, round, floor, ceil
+      }
+      { \exp_args:Nc \DeclareMathOperator{#1}{#1} }
+  }
+%    \end{macrocode}
+%
+% \begin{macro}{\nan}
+%    \begin{macrocode}
+\NewDocumentCommand { \nan } { } { \text { \texttt { nan } } }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</cfg>
+%    \end{macrocode}
+%
+%
+% \subsection{Makeindex configuration}
+%
+%    \begin{macrocode}
+%<*docist>
+%    \end{macrocode}
+%
+% The makeindex style \file{l3doc.ist} is used in place of the usual
+% \file{gind.ist} to ensure that |I| is used in the sequence |I J K| not
+% |I II II|, which would be the default makeindex behaviour.
+%
+% Will: Do we need this?
+%
+% Frank: at the moment we do not distribute or generate this file.
+%        \file{gind.ist} is used instead.
+%
+% \begin{macro}[do-not-index={\\,\n}]{}
+%    \begin{macrocode}
+actual '='
+quote '!'
+level '>'
+preamble
+"\n \\begin{theindex} \n \\makeatletter\\scan@allowedfalse\n"
+postamble
+"\n\n \\end{theindex}\n"
+item_x1   "\\efill \n \\subitem "
+item_x2   "\\efill \n \\subsubitem "
+delim_0   "\\pfill "
+delim_1   "\\pfill "
+delim_2   "\\pfill "
+% The next lines will produce some warnings when
+% running Makeindex as they try to cover two different
+% versions of the program:
+lethead_prefix   "{\\bfseries\\hfil "
+lethead_suffix   "\\hfil}\\nopagebreak\n"
+lethead_flag       1
+heading_prefix   "{\\bfseries\\hfil "
+heading_suffix   "\\hfil}\\nopagebreak\n"
+headings_flag       1
+
+% and just for source3:
+% Remove R so I is treated in sequence I J K not I II III
+page_precedence "rnaA"
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</docist>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex
