@@ -82,15 +82,14 @@
 %   bookmarksnumbered=false,
 %   plainpages=false,
 %   pdfview=FitH}
-% \let\OriginMF\MacroFont
-% \def\MacroFont{\color{spot}\OriginMF}
-% \pretocmd{\macrocode}{\color{code}}{}{}
-% \AtBeginEnvironment{macrocode}{\let\MF\MacroFont\def\MacroFont{\color{code}\OriginMF}}
-% \AtEndEnvironment{macrocode}{\let\MacroFont\MF}
+% \let\OriginalMF\MacroFont
+% \def\MacroFont{\color{spot}\OriginalMF}
+% \makeatletter
+% \gdef\macro@font{\color{code}\OriginalMF}
+% \makeatother
 % \AtBeginEnvironment{quote}{\color{verb}}
 % \AtBeginEnvironment{flushleft}{\color{verb}}
-% \AtBeginEnvironment{verbatim}{\let\MF\MacroFont\def\MacroFont{\color{verb}\OriginMF}}
-% \AtEndEnvironment{verbatim}{\let\MacroFont\MF}
+% \AtBeginEnvironment{verbatim}{\color{verb}\def\MacroFont{\color{verb}\OriginalMF}}
 % \makeatletter
 % \def\index@prologue{\section*{索引}%
 %                  \markboth{索引}{索引}%
@@ -305,7 +304,7 @@
 %    后，我更新了一些杂项。
 % \end{abstract}
 %
-%
+% \renewcommand{\contentsname}{\hfil 目\quad 录\hfil}
 % \newpage
 %
 % \addtocontents{toc}{\protect\begin{multicols}{2}}
