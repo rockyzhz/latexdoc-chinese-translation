@@ -1,6 +1,7 @@
 ## Customization
 auxiliary-files
 auxiliary-files/*
+l3doc-zh-cn/l3doc.cls
 
 ## Repository Related Files:
 ref/*
