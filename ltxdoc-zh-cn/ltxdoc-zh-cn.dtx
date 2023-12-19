@@ -1,0 +1,722 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 1993-2022
+% The LaTeX Project and any individual authors listed elsewhere
+% in this file.
+%
+% This file is part of the LaTeX base system.
+% -------------------------------------------
+%
+% It may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%    https://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008 or later.
+%
+% This file has the LPPL maintenance status "maintained".
+%
+% The list of all files belonging to the LaTeX base distribution is
+% given in the file `manifest.txt'. See also `legal.txt' for additional
+% information.
+%
+% The list of derived (unpacked) files belonging to the distribution
+% and covered by LPPL is defined by the unpacking scripts (with
+% extension .ins) which are part of the distribution.
+%
+% \fi
+% \iffalse
+%
+%<class>\NeedsTeXFormat{LaTeX2e}
+%<class>\ProvidesClass{ltxdoc}
+%<class>         [2022/06/22 v2.1h Standard LaTeX documentation class]
+%
+%<*driver>
+\documentclass{ltxdoc}
+\GetFileInfo{ltxdoc.cls}
+\providecommand\dst{\expandafter{\normalfont\scshape docstrip}}
+
+\usepackage[T1]{fontenc}
+\usepackage{tabularray}
+\usepackage{caption}
+
+%%%%%%%%%%%%% 以下设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[fontset=source]{ctex}
+
+%^^A \newCJKfontfamily[song]\songti{SourceHanSerifSC-regular.otf} %%自定义宋体 \sognti ，作为文章中文主字体
+\newCJKfontfamily[Hei]\Heiti{SourceHanSansSC-regular.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+%^^A \newCJKfontfamily[hei]\heiti{SourceHanSansSC-Light.otf} %%自定义黑体 \heiti ，在幻灯片中黑体(SimHei)最漂亮
+\newCJKfontfamily[kai]\kaiti{FandolKai-regular.otf} %%设置中文字体楷体 \kaiti ，用于强调
+\newCJKfontfamily[heitixt]\heitixt{思源黑体_CN_LightItalic.ttf} %% 自定义\heitixt命令，显示思源黑体斜体
+%%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%% 以下设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{indentfirst} %%% 首行缩进
+\setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
+\linespread{1.35} %%% 设置行间距
+%%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%% 以下设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=red]{hyperref}
+%%%%%%%%%%%% 以上设置书签、目录 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%% 以下在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
+\makeatletter
+\def\hlinew#1{%
+\noalign{\ifnum0=`}\fi\hrule \@height #1 \futurelet
+\reserved@a\@xhline}
+\makeatother%
+%%%%%%% 以上在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
+
+%%%%%%% 以下自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\footnotesep}{0.5cm} %%%设置几第脚注之间的距离
+\setlength{\skip\footins}{3em} %%%设置脚注与正文之间的距离
+%%\renewcommand\footnoterule{} %%%定义脚注线为空
+\renewcommand\footnoterule{
+     \kern -3pt                         % This -3 is negative
+     \hrule width 0.6\textwidth height 0.6pt % of the sum of this 1
+     \kern 2pt} %%%
+%%%%%%% 以上自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%% 以下制作索引 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage {makeidx}
+\makeindex
+%%%%%%% 以上制作索引 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\renewcommand{\contentsname}{\heiti 目\ 录}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\renewcommand{\refname}{\heiti 参考文献}
+\renewcommand{\tablename}{表}
+\renewcommand{\abstractname}{\heiti 摘\ 要}
+
+\title{{\huge \Heiti 在}\ {\huge \textbf{\LaTeXe}}\ {\huge \Heiti 中使用} \\[2pt]
+       {\Huge \textbf{\texttt{ltxdoc.dtx}}}\ {\huge \Heiti 文件}\
+        \thanks{该文件的版本号为 \fileversion，最新修订日期为 \filedate。}\\[4pt]
+        包含\ \texttt{ltxdoc.cls}\ 的代码}
+\date{\filedate}
+\author{David Carlisle\\[4pt] 黄旭华\ \ \ \ 翻译}
+
+\begin{document}
+ \MaintainedByLaTeXTeam{latex}
+ \maketitle
+  \tableofcontents
+\newpage
+ \DocInput{ltxdoc-zh-cn.dtx}
+\end{document}
+%</driver>
+%
+% \fi
+%
+% \providecommand\pkg[1]{\texttt{#1}}
+%
+%
+% \changes{v2.0i}{1994/04/29}{Update the documentation.}
+% \changes{v2.0s}{1998/08/17}{(RmS) Documentation fixes.}
+% \changes{v2.1a}{2020/08/21}{Integration of new hook management interface}
+%
+% \section[\LaTeX\ {\heiti 的源文档}]{\LaTeX\ {\heiti 的源文档}}
+%
+% 该类文件(class file)用于记录 \LaTeX\ 的源文件(source files)。然而，您可能会发现
+% 它通常作为一个类(class)用于排版以“doc”格式生成的文件的文档(documentation)。
+%
+% 标准发行版(standard distribution)中的每个文档文件(documented file)都带有扩展名|dtx|。
+% docstrip 系统将从源代码中提取适当的类包(class package)或 initex 文件。可以
+% 使用 \LaTeXe\ 直接处理每个 |dtx| 文件，例如：
+%\begin{verbatim}
+% latex2e docclass.dtx
+%\end{verbatim}
+% 将生成 Class 和 package 接口(interface)的文档。
+%
+% 如果您对 |sources2e.tex| 文件进行了 \LaTeX\ 编译，则用于生成 \LaTeXe\ 格式的每个文件
+% (即不包括标准类和包)将一起打印在一个文档中。这样做的好处是，可以生成所有源文件的
+% 宏使用情况(macro usage)的完整索引。
+%
+% 如果需要自定义这些文件的排版，有两个选择：
+% \begin{itemize}
+% \item 在输入源文件(source file)之前，您可以使用 \dst\ 和“driver”模块(module)来提取
+% 一个小的 \LaTeX\ 文件，可以编辑该文件以使用所需的任何类或包的选项。
+% \item 您可以创建一个 |ltxdoc.cfg| 文件。无论何时使用 |ltxdoc| 类，都会读取此配置文件，
+% 因此可以用该配置文件来自定义所有源文件(source files)的排版，而无需编辑许多
+% 小驱动程序文件(small driver files)。
+%\end{itemize}
+%
+% 第二种选择通常更方便。下一节将讨论各种可能性。
+%
+% \section{\heiti 定制}
+%
+% 最简单的定制(customisation)形式是将更多选项传递给 |ltxdoc| 加载的 |article| 类。
+% 例如，如果希望将所有文档格式化为 A4 纸，请在 |ltxdoc.cfg| 中添加下面这一行：
+%\begin{verbatim}
+% \PassOptionsToClass{a4paper}{article}
+%\end{verbatim}
+%
+% 所有源文件(source files)分为两部分，以 |\MaybeStop| 分隔。第一部分(应该)包含“user(用户)”文档。
+% 第二部分是源代码(source code)的完整文档列表。|doc| 宏包提供了 |\OnlyDescription| 命令，
+% 该命令禁止显示代码列表。这也可以在配置文件中使用，但由于稍后读取 |doc| 包，因此必须
+% 必须将 |\OnlyDescription| 的执行(execution)延迟到读取 |doc| 包之后。最简单的方法是使用 |\AtBeginDocument|。
+% 因此，您可以将以下内容放在 |ltxdoc.cfg| 中。
+%\begin{verbatim}
+% \AtBeginDocument{\OnlyDescription}
+%\end{verbatim}
+%
+% 如果您的文档依赖于使用旧版的 \pkg{doc}，则可以通过传递 \texttt{doc2}\ 选项来
+% 请求类加载 \pkg{doc}\ 2版。
+%
+% 如果处理了完整的源代码清单 |sources2e.tex|，那么默认情况下会生成索引(index)和
+% 更新历史记录(change history)，但是通常不会为单个文件生成索引。
+%
+% 例如，考虑 |ltclass.dtx|，它包含新类和包接口命令的源代码。在没有 |cfg| 文件的情况下，
+% 将生成一个~19~页的文档。使用上面的配置，就生成一个可读性稍微好一点的文档(4~页)。
+%
+% 相反，如果您真的想详细阅读源代码清单，您会想要一个索引。同样，可以使用 doc 包提供的
+% 索引命令，但必须延迟其执行。
+%\begin{verbatim}
+% \AtBeginDocument{\CodelineIndex\EnableCrossrefs}
+% \AtEndDocument{\PrintIndex}
+%\end{verbatim}
+%
+% |doc| 包使用 MakeIndex 和 |gind| 样式写入要排序的索引文件(index files)，因此可以使用以下命令
+%\begin{verbatim}
+% makeindex -s gind.ist ltclass.idx
+%\end{verbatim}
+% 然后重新运行 \LaTeX
+%
+% 与打印更改历史记录(print a Change history)类似，您可以添加
+%\begin{verbatim}
+% \AtBeginDocument{\RecordChanges}
+% \AtEndDocument{\PrintChanges}
+%\end{verbatim}
+% 到 |ltxdoc.cfg|，并将 MakeIndex 与以下命令一起使用
+%\begin{verbatim}
+% makeindex -s gglo.ist -o ltclass.gls ltclass.glo
+%\end{verbatim}
+%
+% 最后，如果您不想列出 |source2e.tex| 的所有节(sections)，则只能在 |cfg| 文件中使用 |\includeonly|：
+%\begin{verbatim}
+% \includeonly{ltvers,ltboxes}
+%\end{verbatim}
+%
+% \MaybeStop{}
+%
+%
+% \section{\heiti 选项}
+%
+%    \begin{macrocode}
+%<*class>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\DeclareOption{a5paper}{\@latexerr{Option not supported}%
+   {}}
+%    \end{macrocode}
+%    阻止加载配置文件(config file)。
+%    \begin{macrocode}
+\newif\ifltxdoc@load@cfg@ \ltxdoc@load@cfg@true
+\DeclareOption{nocfg}{\ltxdoc@load@cfg@false}
+%    \end{macrocode}
+%
+%    支持将 \pkg{doc}\ 回滚到版本 2：
+% \changes{v2.1e}{2022/05/27}{Support rolling  back doc to version 2}
+%    \begin{macrocode}
+\let\ltxdoc@doc@version\@empty  % 默认情况下使用当前版本
+\DeclareOption{doc2}{\def\ltxdoc@doc@version{=v2}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\DeclareOption*{%
+    \PassOptionsToClass  {\CurrentOption}{article}}
+%    \end{macrocode}
+%
+% \section{\heiti 选项处理}
+%
+%    \begin{macrocode}
+\ProcessOptions
+%    \end{macrocode}
+%
+% \section{\heiti 局部配置}
+% 导入局部配置文件(如果存在)。
+%    \begin{macrocode}
+\ifltxdoc@load@cfg@
+\InputIfFileExists{ltxdoc.cfg}
+           {\typeout{*************************************^^J%
+                     * 使用局部配置文件 ltxdoc.cfg        ^^J%
+                     *************************************}}
+           {}
+\else
+   \typeout{*************************************^^J%
+            * 忽略局部配置文件                   ^^J%
+            *************************************}
+\fi
+%    \end{macrocode}
+%
+%
+% \section{\heiti 加载 article 和 doc}
+%
+%    \begin{macrocode}
+\LoadClass{article}
+%    \end{macrocode}
+%
+%    默认情况下，加载当前 \pkg{doc}\ 版本(\cs{ltxdoc@doc@version}\ 为空)。如果
+%    给定选项 \texttt{doc2}，则加载版本2(\cs{ltxdoc@doc@version}\ 包含 \texttt{=v2})。
+% \changes{v2.1e}{2022/05/27}{Support rolling  back doc to version 2}
+%    \begin{macrocode}
+\RequirePackage{doc}[\ltxdoc@doc@version]
+%    \end{macrocode}
+%
+% 使 \verb+|+ 成为“短 verb”字符，但不能在文档前言中，因为活动字符(active character)可能会干扰加载的包。
+%    \begin{macrocode}
+\AtBeginDocument{\MakeShortVerb{\|}}
+%    \end{macrocode}
+%
+% 由于“doc”文档往往有很多等宽材料(monospaced material)，请设置一些 |tt| 替换
+% (substitutions)以便静默地进行。
+% \changes{v2.0p}{1995/11/02}{Add font substitutions}
+% \changes{v2.0t}{1999/04/17}{Replaced octal number, CAR}
+%    \begin{macrocode}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}{<-> ssub * cmtt/m/n}{}
+\DeclareFontFamily{OMS}{cmtt}{\skewchar\font 48}  % '60
+\DeclareFontShape{OMS}{cmtt}{m}{n}{<-> ssub * cmsy/m/n}{}
+\DeclareFontShape{OMS}{cmtt}{bx}{n}{<-> ssub * cmsy/b/n}{}
+%    \end{macrocode}
+% 此替换(substitution)位于标准 fd 文件中，但不是静默的(silent)。
+%    \begin{macrocode}
+\DeclareFontShape{OT1}{cmss}{m}{it}{<->ssub*cmss/m/sl}{}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\CodelineNumbered
+\DisableCrossrefs
+%    \end{macrocode}
+%
+% 稍微增加文本宽度，以便在 |macrocode| 环境中使用标准字体(standard fonts)以显示 72 栏代码。
+% \changes{v2.0c}{1994/03/15}{Set \cs{textwidth}.}
+%    \begin{macrocode}
+\setlength{\textwidth}{355pt}
+%    \end{macrocode}
+%
+% 对于较长的命令名，请稍微增加边距宽度(marginpar width)。并将左侧边距(left margin)增加相似的量。
+% \changes{v2.0l}
+%      {1994/05/25}{Increase \cs{marginparwidth}}
+% \changes{v2.0q}{1995/11/28}
+%      {Increase \cs{marginparwidth} and page margin.}
+%    \begin{macrocode}
+\addtolength\marginparwidth{30pt}
+\addtolength\oddsidemargin{20pt}
+\addtolength\evensidemargin{20pt}
+%    \end{macrocode}
+%
+%
+%    \begin{macrocode}
+\setcounter{StandardModuleDepth}{1}
+%    \end{macrocode}
+%
+% \section{\heiti 有用的缩写}
+%
+%   |\cmd{\foo}| 按原样打印 |\foo|。它可以在移动参数(moving arguments)中使用。它{\kaiti 不能}用于记录定义为“|\outer|”的命令，
+%   也不能用于诸如 |\iftrue| 或由 |\newif| 定义的条件。\texttt{doc}\ 包中已经提供的 |\cs{foo}| 也会为喜欢这种语法的人打印 |\foo|。
+%   (第二种形式可用于记录所有类型的命令，因此上述限制不适用)
+% \begin{macro}{\cmd}
+% \changes{v2.0k}{1994/05/21}{New definition, so \cmd\{ works.}
+% \begin{macro}{\cs}
+% \changes{v2.0d}{1994/03/17}{Add \cs{cs}}
+% \changes{v2.1h}{2022/06/22}{Update \cs{cmd} definition to work with new \cs{cs}}
+%    \begin{macrocode}
+%\DeclareRobustCommand\cs[1]...                  %稍后定义
+%\def\cmd#1{\cs{\expandafter\cmd@to@cs\string#1}}%不能与新的\cs一起用
+\def\cmd#1{\texttt{\char`\\\expandafter\cmd@to@cs\string#1}}
+\def\cmd@to@cs#1#2{\char\number`#2\relax}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \changes{v2.0r}{1996/01/11}{Removed \cs{star} since useless pr/2039}
+%
+% \begin{macro}{\marg}
+% \changes{v2.0d}{1994/03/17}{Add \cs{marg}}
+%    |\marg{text}| 打印 \marg{text}，“强制参数(mandatory argument)” 。
+%    \begin{macrocode}
+\providecommand\marg[1]{%
+  {\ttfamily\char`\{}\meta{#1}{\ttfamily\char`\}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\oarg}
+%    |\oarg{text}| 打印 \oarg{text}，“可选参数(optional argument)”。
+%    \begin{macrocode}
+\providecommand\oarg[1]{%
+  {\ttfamily[}\meta{#1}{\ttfamily]}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\parg}
+%    |\parg{te,xt}| 打印 \parg{te,xt}，“图像模式参数(picture mode argument)”。
+% \changes{v2.0h}{1994/04/28}{Add \cs{parg}}
+% \changes{v2.0o}{1995/08/09}{Use \cs{meta} when showing arguments}
+%    \begin{macrocode}
+\providecommand\parg[1]{%
+  {\ttfamily(}\meta{#1}{\ttfamily)}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{\heiti 旧注释}
+%
+% \LaTeXe\ 源包含大量继承自 \LaTeX2.09\ 的代码。此代码中的注释(comments)不是为了排版而设计的，
+% 并且不包含必要的 \LaTeX\ 标记。\texttt{oldcomments}\ 环境对这些注释进行排版，自动检测
+% 何时出现控制序列(control sequence)，并隐式(implicitly)添加 |\verb|。这个过程不会产生
+% 特别漂亮的页面，但它允许我们完整地记录新节(new sections)，并对所有旧代码进行
+% 某种形式的排版注释(typeset comments)。
+% \changes{v2.0e}{1994/03/18}{Use a fixed font.}
+%
+% 扫描控件名称(control names)并将其放入 tt。实际上会(错误地)扫描以前的 |\\|，但这并不重要，
+% 因为在实践中，这几乎从来没有后面跟着字母(letter)。(即 |\\foo|)会将 |foo| 放在 |\ttfamily| 中。
+%    \begin{macrocode}
+\def\oc@scan#1{%
+  \ifx\oc@bslash#1%
+                      \egroup\let\next\oc@bslash\else
+  \ifcat a\noexpand#1%
+                      #1\let\next\oc@scan\else
+  \ifx\oc@percent#1%
+                      \def\next{\char`\%\egroup}%
+  \else
+                      #1\let\next\egroup
+  \fi\fi\fi\next}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\oc@bslash{\bgroup\oc@ttf\char`\\\oc@scan}%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\oc@verb#1{%
+  \catcode`#1\active
+  \uccode`\~`#1%
+  \uppercase{\def~{{\oc@ttf\char`#1}}}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\begingroup
+  \obeyspaces%
+  \catcode`\/=\catcode`\\
+  /catcode`/\/active
+  /catcode`<=/catcode`{%
+  /catcode`>=/catcode`}%
+  /catcode`/{/active%
+  /catcode`/}/active%
+  /gdef/oldc< \end{oldcomments}>%
+  /gdef/begmac<    \begin{macrocode}>%
+  /gdef/obs</def <</oc@ttf/ >>>%
+/endgroup%
+%    \end{macrocode}
+%
+% \changes{v2.0y}{2019/09/16}{Say that oldcomments may not be accurate (gh/180)}
+%    \begin{macrocode}
+\begingroup
+  \catcode`\/=\catcode`\\
+  \catcode`\\=13
+  /catcode`/|=/catcode`/%
+  /catcode`/%=13
+  /gdef/oldcomments{|
+    /makeatletter
+    /let/do/oc@verb/dospecials
+    /frenchspacing/@vobeyspaces/obs
+    /raggedright
+    /oc@verb/>|
+    /oc@verb/<|
+    /let\/oc@bslash
+    /let%/oc@percent
+    /obeylines
+    /parindent/z@
+    /ttfamily/expandafter/let/expandafter/oc@ttf/the/font
+    /rmfamily
+    /textit{Historical /LaTeX/,2.09 comments (not necessarily accurate any more):}
+    /hfuzz/maxdimen
+    }
+/endgroup
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\begingroup
+  \sloppy%
+  \obeylines%
+  \gdef\oc@percent#1^^M{%
+    \ifvmode%
+    \def\commentline{#1}%
+    \ifx\commentline\oldc%
+    \textit{End of historical \LaTeX\,2.09 comments.}
+    \end{oldcomments}%
+    \else%
+    \ifx\commentline\begmac%
+    \begin{macrocode}%
+    \else%
+    \leavevmode%
+    #1^^M%
+    \fi\fi%
+    \else%
+    {\oc@ttf\char`\%}#1^^M%
+    \fi}%
+\endgroup%
+%    \end{macrocode}
+%
+%
+% \section{DocInclude}
+%
+%    \begin{macrocode}
+\@addtoreset{CodelineNo}{part}
+%    \end{macrocode}
+%
+% \begin{macro}{\DocInclude}
+% 或多或少与 |\include| 完全相同，但在 |dtx| 文件上使用 |\DocInput|，而在 |tex| 文件上不使用 |\input|。
+% \changes{v2.0b}{1994/03/14}{Rename from \cs{docinclude}}
+% \changes{v2.0f}{1994/03/25}{Use \cs{part}}
+% \changes{v2.0u}{1999/08/08}{Also works for .fdd (M. Schroeder)}
+%    \begin{macrocode}
+\def\partname{File}
+%    \end{macrocode}
+%
+%
+%
+% \changes{v2.0z}{2020/05/17}{Support spaces \emph{within} filenames
+%    (gh/218)}
+%    \begin{macrocode}
+\newcommand*{\DocInclude}[1]{%
+  \relax
+  \clearpage
+  \docincludeaux
+  \IfFileExists{#1.fdd}%
+    {\def\currentfile{#1.fdd}}%
+    {\def\currentfile{#1.dtx}}%
+  \ifnum\@auxout=\@partaux
+    \@latexerr{\string\include\space cannot be nested}\@eha
+  \else
+    \set@curr@file{#1}%
+    \edef\@curr@file{\@strip@tex@ext\@curr@file}%
+    \expandafter\@docinclude\expandafter{\@curr@file}
+ \fi}
+\def\@docinclude#1 {\clearpage
+%    \end{macrocode}
+%
+% \changes{v2.1bj}{2020/10/04}{Quotes around the aux file name removed,
+%                       they are no longer needed and upset BibTeX (gh/400)}
+%    \begin{macrocode}
+\if@filesw \immediate\write\@mainaux{\string\@input{#1.aux}}\fi
+\@tempswatrue\if@partsw \@tempswafalse\edef\@tempb{#1}\@for
+\@tempa:=\@partlist\do{\ifx\@tempa\@tempb\@tempswatrue\fi}\fi
+\if@tempswa \let\@auxout\@partaux \if@filesw
+\immediate\openout\@partaux "#1.aux"
+\immediate\write\@partaux{\relax}\fi
+\@filehook@set@CurrentFile
+%    \end{macrocode}
+% 我们需要保存(并稍后恢复)与索引相关的各种命令，这些命令可能会被包含的文件更改。
+%    \begin{macrocode}
+\let\@ltxdoc@PrintIndex\PrintIndex
+\let\PrintIndex\relax
+\let\@ltxdoc@PrintChanges\PrintChanges
+\let\PrintChanges\relax
+\let\@ltxdoc@theglossary\theglossary
+\let\@ltxdoc@endtheglossary\endtheglossary
+\part{\currentfile}%
+  {\let\ttfamily\relax
+  \xdef\filekey{\filekey, \thepart={\ttfamily\currentfile}}}%
+\DocInput{\currentfile}%
+\let\PrintIndex\@ltxdoc@PrintIndex
+\let\PrintChanges\@ltxdoc@PrintChanges
+\let\theglossary\@ltxdoc@theglossary
+\let\endtheglossary\@ltxdoc@endtheglossary
+\clearpage
+\@writeckpt{#1}\if@filesw \immediate\closeout\@partaux \fi
+\else\@nameuse{cp@#1}\fi\let\@auxout\@mainaux}
+%    \end{macrocode}
+%
+% \changes{v2.0x}{2018/03/15}{Set up \cs{protect} in index entries}
+%    \begin{macrocode}
+\gdef\codeline@wrindex#1{\if@filesw
+%    \end{macrocode}
+%   在索引项(index entries)中将 \cs{protect} 设置为合适的值(我们不能使用 |\set@display@protect|，
+%   因为这会导致命令后出现不同的空格数，具体取决于写入索引之前发生的展开的数量)。
+%    \begin{macrocode}
+      \begingroup
+        \let\protect\noexpand
+        \immediate\write\@indexfile
+            {\string\indexentry{#1}%
+            {\filesep\number\c@CodelineNo}}%
+      \endgroup\fi}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\let\filesep\@empty
+%    \end{macrocode}
+%
+%
+%  \begin{macro}{\aalph}
+% 特殊形式的 |\alph| 作为当前 |source2e.tex| 包含 26 个以上的文件。
+% \changes{v2.0n}{1994/05/27}{Use uppercase letters, for makeindex}.
+%    \begin{macrocode}
+\def\aalph#1{\@aalph{\csname c@#1\endcsname}}
+\def\@aalph#1{%
+  \ifcase#1\or a\or b\or c\or d\or e\or f\or g\or h\or i\or
+         j\or k\or l\or m\or n\or o\or p\or q\or r\or s\or
+         t\or u\or v\or w\or x\or y\or z\or A\or B\or C\or
+         D\or E\or F\or G\or H\or I\or J\or K\or L\or M\or
+         N\or O\or P\or Q\or R\or S\or T\or U\or V\or W\or
+         X\or Y\or Z\else\@ctrerr\fi}
+%    \end{macrocode}
+%  \end{macro}
+%
+% \begin{macro}{\docincludeaux}
+% \changes{v2.06}{1994/03/31}{Use \cs{footnotesize} in file key.}
+% \changes{v2.0k}{1994/05/21}{Use \cs{aalph}}
+% \changes{v2.0v}{2017/03/13}{Use \cs{parbox}[t] in file
+%         key to maintain space between the text block and the page foot.}
+%    \begin{macrocode}
+\def\docincludeaux{%
+  \def\thepart{\aalph{part}}\def\filesep{\thepart-}%
+  \let\filekey\@gobble
+  \g@addto@macro\index@prologue{%
+    \gdef\@oddfoot{\parbox[t]{\textwidth}{\strut\footnotesize
+       \raggedright{\bfseries File Key:} \filekey}}%
+    \let\@evenfoot\@oddfoot}%
+  \global\let\docincludeaux\relax
+ \gdef\@oddfoot{%
+   \expandafter\ifx\csname ver@\currentfile\endcsname\relax
+    File \thepart: {\ttfamily\currentfile} %
+   \else
+    \GetFileInfo{\currentfile}%
+    File \thepart: {\ttfamily\filename} %
+    Date: \filedate\ %
+    Version \fileversion
+    \fi
+    \hfill\thepage}%
+ \let\@evenfoot\@oddfoot}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\MaintainedByLaTeXTeam}
+% \changes{v2.0v}{2015/03/25}{macro added}
+% \changes{v2.0w}{2015/03/25}{use display block not footnote text}
+% 生成对错误数据库(bug database)的样板引用(boilerplate reference)。
+%    \begin{macrocode}
+\def\MaintainedBy#1{\gdef\@maintainedby{#1}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\let\@maintainedby\@empty
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\MaintainedByLaTeXTeam#1{%
+{\gdef\@maintainedby{%
+此文件由 \LaTeX{} 项目团队维护。\\%
+可以在以下位置打开 Bug 报告(类别 \texttt{#1})\\%
+\url{https://latex-project.org/bugs.html}.}}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 2em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\large \@date}%
+    \ifx\@maintainedby\@empty
+    \else
+    \vskip 1em%
+    \fbox{\fbox{\begin{tabular}{@{}l@{}}\@maintainedby\end{tabular}}}%
+    \fi
+  \end{center}%
+  \par
+  \vskip 1.5em}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%    \begin{macrocode}
+\def\task#1#2{}
+%    \end{macrocode}
+%
+%
+% \changes{v2.1f}{2022/06/03}{define \cs{pkg} and other commands}
+% \changes{v2.1f}{2022/06/03}{allow \_ in macro names}
+% l3doc.cls 的一些功能
+% \changes{v2.1g}{2022/06/14}{define \cs{pkg} but delay until begin document}
+%    \begin{macrocode}
+\DeclareRobustCommand\cs[1]{\texttt{\bslash\detokenize{#1}}}%
+\AtBeginDocument{%
+  \renewcommand\PrintMacroName[1]{\MacroFont\detokenize{#1}}%
+%    \end{macrocode}
+%    如果有人加载了 \texttt{csquotes}\ 或在前言中做了一些定义，我们会提供这些延迟(delated)。
+%    \begin{macrocode}
+  \providecommand\LuaTeX{Lua\TeX}
+  \providecommand\cls{\textsf}
+  \providecommand\pkg{\textsf}
+  \providecommand\enquote[1]{``#1''}
+  \providecommand\url{\texttt}
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</class>
+%    \end{macrocode}
+%
+%
+%
+% \section{\heiti 配置文件}
+%
+%
+%    \begin{macrocode}
+%<*cfg>
+%
+%
+% 这是我们用来格式化 LaTeX 内核源代码的 ltxdoc 配置文件。
+%
+%
+% 版权所有2006、2007、2011 Heiko Oberdiek (海科·奥伯代克)
+% 版权所有2014-2021 LaTeX\ 项目
+%
+\ProvidesFile{ltxdoc.cfg}%
+  [2022/06/14 v2.0d ltxdoc.cls 配置 (LaTeX 项目)]
+\PassOptionsToClass{a4paper}{article}
+% hyperref 和 hypdoc 现在加载较晚(或由用户加载)，因此我们必须等待一些调整，
+% 直到完成为止
+\AddToHook{package/hyperref/after}{%
+%%  \RequirePackage{hypdoc}%       % 这现在由 doc 触发
+  \RequirePackage{pdftexcmds}\relax
+  \ifnum\pdf@strcmp{\jobname}{inputenc}=0 %
+    \hypersetup{pdfencoding=auto}%
+    \pdfstringdefDisableCommands{%
+      \def\meta#1{% inputenc.dtx
+        \9060\010#1\9060\011%
+      }%
+    }%
+  \else
+  \fi
+  \pdfstringdefDisableCommands{%
+    \let\env\relax % longtable.dtx
+    \let\mytt\relax % tabularx.dtx
+  }%
+}
+% 对于 LaTeX 内核之外的包文档来说，这应该可以很好地工作，但是如果不行，您可
+% 以使用“nocfg”选项来阻止加载，即,
+%
+%   \documentclass[nocfg]{ltxdoc]
+%
+% 或者提供自己的配置文件
+\endinput
+%</cfg>
+%    \end{macrocode}
+% \Finale
+%
