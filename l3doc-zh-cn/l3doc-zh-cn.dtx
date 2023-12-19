@@ -67,6 +67,16 @@ and all files in that bundle must be distributed together.
 
 % ^^A ================ 中文版特别设置 ============================
 \usepackage[fontset=source]{ctex}
+\ctexset{contentsname={\hfil 目\quad 录\hfil}}
+\IndexPrologue
+  {
+    \section*{索引}
+    \markboth{索引}{索引}
+    \addcontentsline{toc}{section}{索引}
+    斜体数字指向相应条目描述的页面，
+    下划线数字指向定义的代码行，
+    其它的都指向使用条目的页面。
+  }
 % ^^A =================== 设置颜色 ===============================
 \usepackage{xcolor}
 \definecolor{spot}{HTML}{003399}
@@ -76,14 +86,10 @@ and all files in that bundle must be distributed together.
 \def\MacroFont{\color{spot}\OriginalMF}
 \makeatletter
 \pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
-\patchcmd{\l@section}
-  {\hfil}
-  {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
-  {}{}
 \makeatother
 \AtBeginEnvironment{quote}{\color{verb}}
 \AtBeginEnvironment{flushleft}{\tt\color{verb}}
-\AtBeginEnvironment{verbatim}{\def\MacroFont{\color{verb}\OriginalMF}}
+\AtBeginEnvironment{verbatim}{\color{verb}\def\MacroFont{\color{verb}\OriginalMF}}
 \ExplSyntaxOn
 \pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
 \patchcmd{\__codedoc_typeset_aux:n}{\color[gray]{0.5}}{\color{spot}}{}{}
@@ -111,210 +117,154 @@ and all files in that bundle must be distributed together.
 %</class>
 % \fi
 %
-% \title{The \cls{l3doc} class -- experimental\thanks{%
-%    根据广泛需求，我们现在发布了这个实验性类的文档。
+% \title{\huge\bfseries\color{spot}\cls{l3doc} 文档类\Large\ —— 实验性质\thanks{%
+%    根据广泛需求，我们现在发布了这个实验性的类文档。
 %    但请注意，它绝不是最终版本，并且很有可能会经历修改，甚至是
 %    \emph{不兼容的修改}！因此，如果类发生变化，可能需要进行更新才能继续使用。}}
 %
-% \author{\Team}
-% \date{Released 2023-12-11}
+% \author{}
+% \date{
+%   \begin{tabular}{c@{\hspace{\ccwd}}c@{\hspace{2\ccwd}}l}
+%     \Team & 2023年12月11日 & 发布\\[6pt]
+%     张泓知 & \zhtoday & 【译】
+%   \end{tabular}
+% }
 % \maketitle
 % \tableofcontents
 %
 % \begin{documentation}
 %
 %
-% \section{Introduction}
+% \section{介绍}
 %
-% Code and documentation for this class have been written prior to the
-% change of \pkg{doc} from version 2 to version 3, which already shows
-% how far behind this class currently is. So take the following
-% warning seriously please:
+% 在 \pkg{doc} 从版本 2 变更为版本 3 之前编写了此类的代码和文档，这已经显示出这个类目前的落后程度。所以请认真对待以下警告：
 %
-%  \begin{quote}
-% \textbf{It is much less stable than the main \pkg{expl3} packages.\\
-%   Use at own risk!}
+%  \begin{quote}\color{red}
+% \textbf{它的稳定性远不如主要的 \pkg{expl3} 包。\\
+%   请自行承担风险！}
 %  \end{quote}
 %
-% This is an ad-hoc class for documenting the \pkg{expl3} bundle, a
-% collection of modules or packages that make up \LaTeX3's programming
-% environment.  Eventually it will replace the \cls{ltxdoc} class for
-% \LaTeX3, but not before the good ideas in \pkg{hypdoc}, \cls{xdoc2},
-% \pkg{docmfp}, and \cls{gmdoc} are incorporated.
+% 这是一个专门用于记录 \pkg{expl3} 捆绑包的类，它是组成 \LaTeX3 编程环境的模块或包的集合。最终它将取代 \cls{ltxdoc} 类作为 \LaTeX3 的文档类，但在吸收 \pkg{hypdoc}、\cls{xdoc2}、\pkg{docmfp} 和 \cls{gmdoc} 中的优秀思想之前不会这样做。
 %
-% It is written as a \enquote{self-contained} docstrip file: executing
-% |latex l3doc.dtx| generates the \file{l3doc.cls} file and typesets
-% this documentation; execute |tex l3doc.dtx| to only generate
-% \file{l3doc.cls}.
+% 它被编写为一个“自包含”的 docstrip 文件：执行 |latex l3doc.dtx| 将生成文件 \file{l3doc.cls} 并排版此文档；执行 |tex l3doc.dtx| 将只生成 \file{l3doc.cls}。
 %
-% \section{Features of other packages}
+% \section{其他包的特性}
 %
-% This class builds on the \pkg{ltxdoc} class and the \pkg{doc} package,
-% but in the time since they were originally written some improvements
-% and replacements have appeared that we would like to use as
-% inspiration.
+% 这个类基于 \pkg{ltxdoc} 类和 \pkg{doc} 宏包，但在它们最初编写之后，一些改进和替代方案出现了，我们希望能够借鉴这些新特性。
 %
-% These packages or classes are \pkg{hypdoc}, \pkg{docmfp}, \pkg{gmdoc},
-% and \pkg{xdoc}.  I have summarised them below in order to work out
-% what sort of features we should aim at a minimum for \pkg{l3doc}.
+% 这些包或类有 \pkg{hypdoc}、\pkg{docmfp}、\pkg{gmdoc} 和 \pkg{xdoc}。我在下面对它们进行了总结，以便确定我们至少应该为 \pkg{l3doc} 设定什么样的最低特性。
 %
-% \subsection{The \pkg{hypdoc} package}
+% \subsection{\pkg{hypdoc} 包}
 %
-% This package provides hyperlink support for the \pkg{doc} package.  I
-% have included it in this list to remind me that cross-referencing
-% between documentation and implementation of methods is not very
-% good. (\emph{E.g.}, it would be nice to be able to automatically
-% hyperlink the documentation for a function from its implementation and
-% vice-versa.)
+% 此包为 \pkg{doc} 包提供了超链接支持。我将它包含在此列表中是为了提醒我，文档和方法实现之间的交叉引用并不是很好。（例如，能够自动地从方法实现链接到其文档说明，反之亦然，将会很不错。）
 %
-% \subsection{The \pkg{docmfp} package}
+% \subsection{\pkg{docmfp} 包}
 %
 % \begin{itemize}
-%   \item Provides \cs{DescribeRoutine} and the \env{routine}
-%     environment (\emph{etc.}) for MetaFont and MetaPost code.
-%   \item Provides \cs{DescribeVariable} and the \env{variable}
-%     environment (\emph{etc.})  for more general code.
-%   \item Provides \cs{Describe} and the \env{Code} environment
-%     (\emph{etc.})  as a generalisation of the above two
-%     instantiations.
-%   \item Small tweaks to the DocStrip system to aid non-\LaTeX{} use.
+%   \item 为 MetaFont 和 MetaPost 代码提供了 \cs{DescribeRoutine} 和 \env{routine} 环境（等等）。
+%   \item 为更通用的代码提供了 \cs{DescribeVariable} 和 \env{variable} 环境（等等）。
+%   \item 提供了 \cs{Describe} 和 \env{Code} 环境（等等）作为上述两个实例的一般化。
+%   \item 对 DocStrip 系统进行了小的调整，以帮助非 \LaTeX{} 的使用。
 % \end{itemize}
 %
-% \subsection{The \pkg{xdoc2} package}
+% \subsection{\pkg{xdoc2} 包}
 %
 % \begin{itemize}
-%   \item Two-sided printing.
-%   \item \cs{NewMacroEnvironment}, \cs{NewDescribeEnvironment}; similar
-%     idea to \pkg{docmfp} but more comprehensive.
-%   \item Tons of small improvements.
+%   \item 双面打印支持。
+%   \item \cs{NewMacroEnvironment}、\cs{NewDescribeEnvironment}；与 \pkg{docmfp} 类似的概念但更全面。
+%   \item 大量小改进。
 % \end{itemize}
 %
-% \subsection{The \pkg{gmdoc} package}
+% \subsection{\pkg{gmdoc} 包}
 %
-% Radical re-implementation of \pkg{doc} as a package or class.
+% 将 \pkg{doc} 作为包或类进行了根本性的重新实现。
 % \begin{itemize}
-%   \item Requires no |\begin{macrocode}| blocks!
-%   \item Automatically inserts |\begin{macro}| blocks!
-%   \item And a whole bunch of other little things.
+%   \item 不需要 |\begin{macrocode}| 块！
+%   \item 自动插入 |\begin{macro}| 块！
+%   \item 还有许多其他细微的改进。
 % \end{itemize}
 %
-% \section{Problems \& Todo}
-%
-% Problems at the moment:
-% (1)~not flexible in the types of things that can be documented;
-% (2)~no obvious link between the |\begin{function}| environment for
-%     documenting things to the |\begin{macro}| function that's used
-%     analogously in the implementation.
-%
-% The \env{macro} should probably be renamed to \env{function} when it
-% is used within an implementation section.  But they should have the
-% same syntax before that happens!
-%
-% Furthermore, we need another \enquote{layer} of documentation commands
-% to account for \enquote{user-macro} as opposed to
-% \enquote{code-functions}; the \pkg{expl3} functions should be
-% documented differently, probably, to the \pkg{ltcmd} user macros (at
-% least in terms of indexing).
-%
-% In no particular order, a list of things to do:
+% \section{问题与待办事项}
+
+% 目前存在的问题：
+% (1)~对可以记录的内容类型不够灵活；
+% (2)~|\begin{function}| 环境用于记录内容，与在实现中类似地使用的 |\begin{macro}| 函数之间没有明显的联系。
+
+% 在用于实现部分时，\env{macro} 可能应该改名为 \env{function}。但在这种改名发生之前，它们应该具有相同的语法！
+
+% 此外，我们需要另一层文档命令来处理“用户宏”与“代码函数”；\pkg{expl3} 函数可能需要不同的文档方式（至少在索引方面），
+% 与 \pkg{ltcmd} 用户宏不同。
+
+% 以下是一些待完成事项的列表，没有特定顺序：
 % \begin{itemize}
-%   \item Rename \env{function}/\env{macro} environments to better
-%     describe their use.
-%   \item Generalise \env{function}/\env{macro} for documenting
-%     \enquote{other things}, such as environment names, package
-%     options, even keyval options.
-%   \item New function like \tn{part} but for files (remove awkward
-%     \enquote{File} as \tn{partname}).
-%   \item Something better to replace \cs{StopEventually}; I'm thinking
-%     two environments \env{documentation} and \env{implementation} that
-%     can conditionally typeset/ignore their material.  (This has been
-%     implemented but needs further consideration.)
-%   \item Hyperlink documentation and implementation of macros (see the
-%     \textsc{dtx} file of \pkg{svn-multi} v2 as an example).  This is
-%     partially done, now, but should be improved.
+%   \item 将 \env{function}/\env{macro} 环境重命名，以更好地描述其用途。
+%   \item 普遍化 \env{function}/\env{macro}，用于记录“其他内容”，如环境名称、包选项，甚至键值选项。
+%   \item 像 \tn{part} 一样新增一个用于文件的函数（删除笨拙的 \enquote{File} 作为 \tn{partname}）。
+%   \item 寻找更好的替代方案来取代 \cs{StopEventually}；我考虑使用两个环境\hfil\break \env{documentation} 和 \env{implementation}，
+%     它们可以有条件地排版/忽略其内容。（这已经被实现，但需要进一步考虑。）
+%   \item 将宏的文档和实现进行超链接（参考 \pkg{svn-multi} v2 的 \textsc{dtx} 文件）。现在这部分已经部分完成，但需要改进。
 % \end{itemize}
 %
-% \section{Documentation}
+% \section{文档}
 %
-% \subsection{Configuration}
+% \subsection{配置}
 %
-% Before class options are processed, \pkg{l3doc} loads a configuration
-% file \file{l3doc.cfg} if it exists, allowing you to customise the
-% behaviour of the class without having to change the documentation
-% source files.
+% 在处理类选项之前，\pkg{l3doc} 如果存在配置文件 \file{l3doc.cfg}，将加载它，
+% 允许你在不必更改文档源文件的情况下定制类的行为。
 %
-% For example, to produce documentation on letter-sized paper instead of
-% the default A4 size, create \file{l3doc.cfg} and include the line
+% 例如，要在信纸大小的纸张上生成文档而不是默认的 A4 大小，创建 \file{l3doc.cfg}，
+% 并包含以下内容：
 % \begin{verbatim}
 % \PassOptionsToClass{letterpaper}{l3doc}
 % \end{verbatim}
 %
-% By default, \pkg{l3doc} selects the |T1| font encoding and loads the
-% Latin Modern fonts.  To prevent this, use the class option
-% |cm-default|.
+% 默认情况下，\pkg{l3doc} 选择 |T1| 字体编码并加载 Latin Modern 字体。
+% 要阻止这一行为，可以使用类选项 |cm-default|。
 %
-% \subsection{Class options}
+% \subsection{类选项}
 %
-% The class recognises a number of options, some of which are generally
-% useful and some of which are aimed squarely at use by the kernel team only.
+% 该类识别了许多选项，其中一些是通常有用的，另一些则专门针对内核团队使用。
 %
 % \DescribeOption{full}
 % \DescribeOption{onlydoc}
-% When the \texttt{full} option is set (the standard setting), both the
-% documentation and implementation parts of the source are typeset. If on the
-% other hand the \texttt{onlydoc} option is set, only the documentation part
-% is typeset.
+% 当设置 \texttt{full} 选项时（标准设置），源文件的文档和实现部分都会排版。
+% 另一方面，如果设置了 \texttt{onlydoc} 选项，则只会排版文档部分。
 %
 % \DescribeOption{lm-default}
-% Selects whether the standard font set up is Latin Modern in the \texttt{T1}
-% encoding (the standard setting) or leaves the font setup unchanged.
+% 选择标准字体设置是在 \texttt{T1} 编码下的 Latin Modern（标准设置），
+% 还是保持字体设置不变。
 %
 % \DescribeOption{kernel}
-% Determines whether \pkg{l3doc} treats |\__kernel_| commands and
-% |\(c|g|l)__kernel_| variables as allowable in code. In general,
-% \emph{no} internal material from outside the current module is allowed.
-% However, for bootstrapping the \pkg{expl3} kernel, a small number of
-% cross-module functions are needed. To suppress the error message that
-% would otherwise arise, the class option \texttt{kernel} may be given.
+% 确定 \pkg{l3doc} 是否将 |\__kernel_| 命令和 |\(c|g|l)__kernel_| 变量视为代码中可接受的内容。
+% 一般来说，不允许来自当前模块外部的内部内容。然而，为了引导 \pkg{expl3} 内核，
+% 需要一些跨模块的功能。为了避免否则会出现的错误消息，可以使用类选项 \texttt{kernel}。
 %
 % \DescribeOption{check}
-% When the \texttt{check} option is given, the class will record all commands
-% defined and documented in a \texttt{\meta{name}.cmds} file. This will show
-% which are both documented and defined, which are only documented and which
-% are only defined. (Here, \enquote{defined} means listed using a
-% \texttt{macro} or \texttt{variable} environment in the implementation part of
-% the source file).
+% 给定 \texttt{check} 选项时，类将记录在 \texttt{\meta{name}.cmds} 文件中定义和记录的所有命令。
+% 这将显示哪些命令既被记录又被定义，哪些仅被记录，以及哪些仅被定义。
+% （这里，“定义”指的是在源文件的实现部分使用 \texttt{macro} 或 \texttt{variable} 环境列出的命令。）
 %
 % \DescribeOption{checktest}
-% When \texttt{checktest} is given as an option, the class will check that each
-% function entry in the implementation part of the source is marked using
-% \cs{UnitTest}.
+% 给定 \texttt{checktest} 选项时，类将检查源文件实现部分中的每个函数条目是否使用了 \cs{UnitTest} 进行了标记。
 %
 % \DescribeOption{show-notes}
 % \DescribeOption{hide-notes}
-% These complementary options determine if the information given using the
-% \cs{NB} and \cs{NOTE} commands is printed.
+% 这些互补选项确定是否打印使用 \cs{NB} 和 \cs{NOTE} 命令提供的信息。
 %
 % \DescribeOption{cs-break}
 % \DescribeOption{cs-break-nohyphen}
-% The commands \cs{cmd} and \cs{cs} allow hyphenation of control sequences
-% after (most) underscores. By default, a hyphen is used to mark the
-% hyphenation, but this can be changed with the \texttt{cs-break-nohyphen}
-% class option. To disable hyphenation of control sequences entirely, use
-% \texttt{cs-break = false}.
+% 命令 \cs{cmd} 和 \cs{cs} 允许在大多数下划线后进行连字符的处理。
+% 默认情况下，会使用连字符标记连字符位置，但可以使用 \texttt{cs-break-nohyphen}
+% 类选项进行更改。若要完全禁用控制序列的连字符处理，使用 \texttt{cs-break = false}。
 %
-% \subsection{Partitioning documentation and implementation}
+% \subsection{文档和实现的分割}
 %
-% \pkg{doc} uses the \cs{OnlyDocumentation}/\cs{AlsoImplementation}
-% macros to guide the use of \cs{StopEventually}|{}|, which is intended
-% to be placed to partition the documentation and implementation within
-% a single \file{.dtx} file.
+% \pkg{doc} 使用 \cs{OnlyDocumentation}/\cs{AlsoImplementation} 宏来指导\hfil\break
+% \cs{StopEventually}|{}| 的使用，该命令用于在单个 \file{.dtx} 文件中分隔文档和实现部分。
 %
-% This isn't very flexible, since it assumes that we \emph{always} want
-% to print the documentation.  For the \pkg{expl3} sources, I wanted to
-%  be able to input \file{.dtx} files in two modes: only displaying
-% the documentation, and only displaying the implementation.  For
-% example:
+% 这并不十分灵活，因为它假定我们总是要打印文档部分。对于 \pkg{expl3} 源文件，
+% 我希望能够以两种模式输入 \file{.dtx} 文件：只显示文档部分和只显示实现部分。
+% 例如：
 % \begin{verbatim}
 % \DisableImplementation
 % \DocInput{l3basics,l3prg,...}
@@ -323,66 +273,50 @@ and all files in that bundle must be distributed together.
 % \DocInputAgain
 % \end{verbatim}
 %
-% The idea being that the entire \pkg{expl3} bundle can be documented,
-% with the implementation included at the back.  Now, this isn't
-% perfect, but it's a start.
+% \pkg{expl3}包的整个文档，包括实现部分在最后。这不是完美的，但是这是一个开始。
 %
-% Use |\begin{documentation}...\end{documentation}| around the
-% documentation, and |\begin{implementation}...\end{implementation}|
-% around the implementation.  The
-% \cs{EnableDocumentation}/\cs{EnableImplementation} causes them to
-% be typeset when the \file{.dtx} file is \cs{DocInput}; use
-% \cs{DisableDocumentation}/\cs{DisableImplementation} to omit the
-% contents of those environments.
+% 在文档部分使用 |\begin{documentation}...\end{documentation}|，
+% 在实现部分使用 |\begin{implementation}...\end{implementation}|。
 %
-% Note that \cs{DocInput} now takes comma-separated arguments, and
-% \cs{DocInputAgain} can be used to re-input all \file{.dtx} files
-% previously input in this way.
+% \cs{EnableDocumentation}/\cs{EnableImplementation} 使其在 \file{.dtx} 文件
+% \cs{DocInput} 时能够排版；使用 \cs{DisableDocumentation}/\cs{DisableImplementation}
+% 可以省略这些环境的内容。
 %
-% \subsection{General text markup}
+% 注意，\cs{DocInput} 现在接受逗号分隔的参数，并且 \cs{DocInputAgain}
+% 可以重新输入以这种方式先前输入的所有 \file{.dtx} 文件。
 %
-% Many of the commands in this section come from \pkg{ltxdoc} with some
-% improvements.
+% \subsection{一般文本标记}
+%
+% 本节中的许多命令来自于 \pkg{ltxdoc}，做了一些改进。
 %
 % \begin{function}{\cmd, \cs}
 %   \begin{syntax}
 %     \cmd{\cmd} \oarg{options} \meta{control sequence}\\
 %     \cs{cs} \oarg{options} \marg{csname}
 %   \end{syntax}
-%   These commands are provided to typeset control sequences.
-%   |\cmd\foo| produces \enquote{\cmd\foo} and |\cs{foo}| produces the
-%   same.  In general, \cs{cs} is more robust since
-%   it doesn't rely on catcodes being \enquote{correct} and is therefore
-%   recommended.
+%   这些命令用于排版控制序列。|\cmd\foo| 生成 \enquote{\cmd\foo}，
+%   而 |\cs{foo}| 也生成相同的效果。通常情况下，\cs{cs} 更健壮，
+%   因为它不依赖于类别码是否 \enquote{正确}，因此更推荐使用。
 %
-%   These commands are aware of the |@@| \pkg{l3docstrip} syntax and
-%   replace such instances correctly in the typeset documentation.
-%   This only happens after a |%<@@=|\meta{module}|>| declaration.
+%   这些命令知道 |@@| \pkg{l3docstrip} 语法，并正确替换文档中的这些实例。
+%   这仅在 |%<@@=|\meta{module}|>| 声明之后发生。
 %
-%   Additionally, commands can be used in the argument of \cs{cs}.  For
-%   instance, |\cs{\meta{name}:\meta{signature}}| produces
-%   \cs[no-index]{\meta{name}:\meta{signature}}.
+%   此外，命令可以用在 \cs{cs} 的参数中。例如，
+%   |\cs{\meta{name}:\meta{signature}}| 生成 \cs[no-index]{\meta{name}:\meta{signature}}。
 %
-%   The \meta{options} are a key--value list which can contain the
-%   following keys:
+%   \meta{选项} 是一个键值列表，可以包含以下键：
 %   \begin{itemize}
-%     \item |index=|\meta{name}: the \meta{csname} is indexed as if
-%       one had written \cs{cs}\Arg{name}.
-%     \item |no-index|: the \meta{csname} is not indexed.
-%     \item |module=|\meta{module}: the \meta{csname} is indexed in
-%       the list of commands from the \meta{module}; the \meta{module}
-%       can in particular be |TeX| for \enquote{\TeX{} and \LaTeXe{}}
-%       commands, or empty for commands which should be placed in the
-%       main index.  By default, the \meta{module} is deduced
-%       automatically from the command name.
-%     \item |replace| is a boolean key (\texttt{true} by default) which
-%       indicates whether to replace |@@| as \pkg{l3docstrip} does.
+%     \item |index=|\meta{name}：将 \meta{csname} 索引，就好像写了 \cs{cs}\Arg{name} 一样。
+%     \item |no-index|：不索引 \meta{csname}。
+%     \item |module=|\meta{module}：在 \meta{module} 的命令列表中索引 \meta{csname}；
+%       特别的，\meta{module} 可以是 |TeX|，表示 \enquote{\TeX{} 和 \LaTeXe{}}
+%       命令，或者为空，表示放在主索引中。默认情况下，\meta{module} 从命令名称中自动推断。
+%     \item |replace| 是一个布尔键（默认为 \texttt{true}），表示是否像 \pkg{l3docstrip}
+%       那样替换 |@@|。
 %   \end{itemize}
-%   These commands allow hyphenation of control sequences after (most) underscores.
-%   By default, a hyphen is used to mark the hyphenation, but this can be changed with
-%   the \texttt{cs-break-nohyphen} class option.
-%   To disable hyphenation of control sequences entirely, use
-%   \texttt{cs-break = false}.
+%   这些命令允许在大多数下划线后进行连字符处理。
+%   默认情况下，会使用连字符标记连字符位置，但可以使用 \texttt{cs-break-nohyphen}
+%   类选项进行更改。若要完全禁用控制序列的连字符处理，使用 \texttt{cs-break = false}。
 % \end{function}
 %
 %
@@ -390,44 +324,37 @@ and all files in that bundle must be distributed together.
 %   \begin{syntax}
 %     \cs{tn} \oarg{options} \marg{csname}
 %   \end{syntax}
-%   Analoguous to \cs{cs} but intended for \enquote{traditional} \TeX{}
-%   or \LaTeXe{} commands; they are indexed accordingly.  This is in
-%   fact equivalent to \cs{cs} |[module=TeX, replace=false,|
-%   \meta{options}|]| \Arg{csname}.
+%   与 \cs{cs} 类似，但用于“传统” \TeX{} 或 \LaTeXe{} 命令；它们会相应地进行索引。
+%   实际上，这相当于 \cs{cs} |[module=TeX, replace=false,|
+%   \meta{options}|]| \Arg{csname}。
 % \end{function}
 %
 % \begin{function}{\meta}
 %   \begin{syntax}
 %     \cs{meta} \Arg{name}
 %   \end{syntax}
-%   \cs{meta} typesets the \meta{name} italicised in \meta{angle
-%     brackets}.  Within a \env{function} environment or similar, angle
-%   brackets |<...>| are set up to be a shorthand for |\meta{...}|.
+%   \cs{meta} 以斜体在 \meta{angle brackets} 中排版 \meta{name}。
+%   在 \env{function} 等环境中，尖括号 |<...>| 被设置为 |\meta{...}| 的简写。
 %
-%   This function has additional functionality over its \pkg{ltxdoc}
-%   versions; underscores can be used to subscript material as in math
-%   mode.  For example, |\meta{arg_{xy}}| produces
-%   \enquote{\meta{arg_{xy}}}.
+%   与其 \pkg{ltxdoc} 版本相比，此函数有额外功能；下划线可以用于标记数学模式中的下标。
+%   例如，|\meta{arg_{xy}}| 生成 \enquote{\meta{arg_{xy}}}。
 % \end{function}
 %
 % \begin{function}{\Arg, \marg, \oarg, \parg}
 %   \begin{syntax}
 %     |\Arg| \Arg{name}
 %   \end{syntax}
-%   Typesets the \meta{name} as for \cs{meta} and wraps it in braces.
+%   将 \meta{name} 以 \cs{meta} 的方式排版，并用大括号包裹。
 %
-%   The \cs{marg}/\cs{oarg}/\cs{parg} versions follow from \pkg{ltxdoc}
-%   in being used for \enquote{mandatory} or \enquote{optional} or
-%   \enquote{picture} brackets as per \LaTeXe{} syntax.
+%   \cs{marg}/\cs{oarg}/\cs{parg} 版本从 \pkg{ltxdoc} 派生，
+%   分别用于 \LaTeXe{} 语法中的“必选”、“可选”或“图片”方括号。
 % \end{function}
 %
 % \begin{function}{\file, \env, \pkg, \cls}
 %   \begin{syntax}
 %     \cs{pkg} \Arg{name}
 %   \end{syntax}
-%   These all take one argument and are intended to be used as semantic
-%   commands for representing files, environments, package names, and
-%   class names, respectively.
+%   这些命令都接受一个参数，用于表示文件、环境、包名和类名的语义命令。
 % \end{function}
 %
 % \begin{function}{\NB, \NOTE}
@@ -437,20 +364,17 @@ and all files in that bundle must be distributed together.
 %     \qquad\meta{comments}
 %     \verb|\end{NOTE}|
 %   \end{syntax}
-%   Make notes in the source that are not typeset by default. When the \verb|show-notes|
-%   class option is active, the comments are typeset in a detokenized and verbatim mode, respectively.
+%   在源文件中做注释，默认情况下不进行排版。
+%   当激活 \verb|show-notes| 类选项时，注释以非标记和抄录的方式排版。
 % \end{function}
 %
-% \subsection{Describing functions in the documentation}
-%
+% \subsection{在文档中描述函数}
+% 
 % \DescribeEnv{function}
 % \DescribeEnv{variable}
-% Two heavily-used environments are defined to describe \pkg{expl3} functions
-% and variables.  If describing a variable, use the latter environment; it
-% behaves identically to the \env{function} environment.
+% 有两个经常使用的环境来描述 \pkg{expl3} 的函数和变量。如果描述一个变量，使用后者的环境；它与 \env{function} 环境的行为完全相同。
 % \DescribeEnv{syntax}
-% Both of the above environments are typically combined with the \env{syntax}
-% environment, to describe their syntax.
+% 通常，上述两个环境会与 \env{syntax} 环境结合使用，以描述它们的语法。
 % \begin{framed}
 %   \vspace{-\baselineskip}
 % \begin{verbatim}
@@ -459,7 +383,7 @@ and all files in that bundle must be distributed together.
 %     \cs{package_function_one:N} \meta{cs}
 %     \cs{package_function_two:n} \marg{Argument}
 %   \end{syntax}
-% Descriptive text here ...
+% 这里是描述的文字 ...
 % \end{function}
 % \end{verbatim}
 %   \hrulefill
@@ -471,23 +395,19 @@ and all files in that bundle must be distributed together.
 %         \cs[no-index]{package_function_one:N} \meta{cs}
 %         \cs[no-index]{package_function_two:n} \marg{Argument}
 %       \end{syntax}
-%       \emph{Descriptive text here …}
+%       \emph{这里是描述的文字 ...}
 %     \end{function}
 %   \end{minipage}
 % \end{framed}
 %
-% Function environments take an optional argument to indicate whether
-% the function(s) it describes are expandable (use |EXP|) or
-% restricted-expandable (use |rEXP|) or defined in conditional forms
-% (use |TF|, |pTF|, or |noTF|).  Note that |pTF| implies |EXP| since
-% predicates must always be expandable, and that |noTF| means that the
-% function without |TF| should be documented in addition to |TF|.  For
-% the conditional forms |TF| and |pTF|, the argument of the
-% \env{function} environment is \emph{not} in fact a command that
-% exists: in the example below, \cs[no-index]{tl_if_empty:N} does not
-% exist, but its conditional forms \cs{tl_if_empty:NT},
-% \cs{tl_if_empty:NF}, \cs{tl_if_empty:NTF} and predicate form
-% \cs{tl_if_empty_p:N} exist:
+% 函数环境可以带有可选参数，表示所描述的函数是可展开的（使用|EXP|）、
+% 受限可展开的（使用|rEXP|），或以条件形式定义（使用|TF|、|pTF|或|noTF|）。
+% 注意，|pTF| 意味着 |EXP|，因为谓词必须始终是可展开的，
+% 而|noTF|表示函数在没有|TF|的情况下应该另外进行文档化。对于条件形式|TF|
+% 和|pTF|，\env{function}环境的参数实际上\emph{并不是}一个存在的命令：
+% 在下面的示例中，\cs[no-index]{tl_if_empty:N}并不存在，
+% 但它的条件形式\cs{tl_if_empty:NT}、\cs{tl_if_empty:NF}、\cs{tl_if_empty:NTF}，
+% 以及谓词形式\cs{tl_if_empty_p:N}是存在的：
 % \begin{framed}
 %   \vspace{-\baselineskip}
 % \begin{verbatim}
@@ -496,8 +416,7 @@ and all files in that bundle must be distributed together.
 %     \cs{tl_if_empty_p:N} \meta{tl~var}
 %     \cs{tl_if_empty:NTF} \meta{tl~var} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Tests if the \meta{token list variable} is entirely empty
-%   (\emph{i.e.}~contains no tokens at all).
+%   检查\meta{token list variable}是否完全为空（即不包含任何标记）。
 % \end{function}
 % \end{verbatim}
 %   \hrulefill
@@ -509,26 +428,22 @@ and all files in that bundle must be distributed together.
 %         \cs{tl_if_empty_p:N} \meta{tl~var}
 %         \cs{tl_if_empty:NTF} \meta{tl~var} \Arg{true code} \Arg{false code}
 %       \end{syntax}
-%       Tests if the \meta{token list variable} is entirely empty
-%       (\emph{i.e.}~contains no tokens at all).
+%       检查\meta{token list variable}是否完全为空（即不包含任何标记）。
 %     \end{function}
 %   \end{minipage}
 % \end{framed}
 %
 % \DescribeEnv{texnote}
-% This environment is used to call out sections within \env{function}
-% and similar environments that are only of interest to seasoned
-% \TeX{} developers.
+% 这个环境用于突出显示仅对经验丰富的 \TeX{} 开发人员感兴趣的
+% \env{function} 和类似环境中的部分内容。
 %
-% \subsection{Describing functions in the implementation}
+% \subsection{描述实现中的函数}
 %
 % \DescribeEnv{macro}
-% The well-used environment from \LaTeXe{} for marking up the
-% implementation of macros/functions remains the \env{macro}
-% environment.  Some changes in \pkg{l3doc}: it now accepts
-% comma-separated lists of functions, to avoid a very large number of
-% consecutive |\end{macro}| statements.
-% Spaces and new lines are ignored (the option |[verb]| prevents this).
+% 在 \LaTeXe{} 中用于标记宏/函数实现的常用环境仍然是 \env{macro} 环境。
+% 在 \pkg{l3doc} 中有一些变化：现在它接受逗号分隔的函数列表，
+% 以避免大量连续的 |\end{macro}| 语句。
+% 空格和换行被忽略（选项 |[verb]| 可以防止这种情况）。
 % \begin{verbatim}
 % % \begin{macro}{\foo:N, \foo:c}
 % %   \begin{macrocode}
@@ -536,61 +451,51 @@ and all files in that bundle must be distributed together.
 % %   \end{macrocode}
 % % \end{macro}
 % \end{verbatim}
-% If you are documenting an auxiliary macro, it's generally not
-% necessary to highlight it as much and you also don't need to check it
-% for, say, having a test function and having a documentation chunk
-% earlier in a \env{function} environment.  \pkg{l3doc} will pick up these
-% cases from the presence of |__| in the name, or you may force marking
-% as internal by using |\begin{macro}[int]| to mark it as such. The margin
-% call-out is then printed in grey for such cases.
+% 如果你正在文档化辅助宏，通常不需要如此突出它，
+% 也不需要检查它是否具有测试函数，
+% 是否在 \env{function} 环境中先有文档块。
+% \pkg{l3doc} 将从名称中的 |__| 的存在或使用 |\begin{macro}[int]|
+% 强制标记为内部来识别这些情况。
+% 对于这些情况，边距标注将以灰色打印出来。
 %
-% For documenting \pkg{expl3}-type conditionals, you may also pass this
-% environment a |TF| option (and omit it from the function name) to
-% denote that the function is provided with |T|, |F|, and |TF| suffixes.
-% A similar |pTF| option prints both |TF| and |_p| predicate forms.
-% An option |noTF| prints both the |TF| forms and a form with neither
-% |T| nor |F|, to document functions such as \cs[no-index]{prop_get:NN}
-% which also have conditional forms (\cs[no-index]{prop_get:NNTF}).
+% 对于文档化 \pkg{expl3} 类型的条件语句，
+% 你也可以在环境中传递 |TF| 选项（并从函数名称中省略它），
+% 表示该函数提供了 |T|、|F| 和 |TF| 后缀。
+% 类似的 |pTF| 选项会打印出 |TF| 和 |_p| 谓词形式。
+% 选项 |noTF| 会打印出 |TF| 形式和既没有 |T| 也没有 |F| 的形式，
+% 用于文档化诸如 \cs[no-index]{prop_get:NN} 这样也有条件形式的函数
+% （\cs[no-index]{prop_get:NNTF}）。
 %
-% In a very small number of cases, there is no user documentation for
-% a \enquote{public} function. In these rare cases, the option
-% |no-user-doc| may be added to suppress the undefined reference that
-% would otherwise then arises.
+% 在极少数情况下，一个“公共”函数没有用户文档。
+% 在这些罕见情况下，可以添加选项 |no-user-doc| 来抑制未定义引用。
 %
 % \DescribeMacro{\TestFiles}
-% \cs{TestFiles}\marg{list of files} is used to indicate which test
-% files are used for the current code; they are printed in the
-% documentation.
+% \cs{TestFiles}\marg{文件列表} 用于指示当前代码使用的测试文件；
+% 它们将在文档中打印出来。
 %
 % \DescribeMacro{\UnitTested}
-% Within a \env{macro} environment, it is a good idea to mark whether a
-% unit test has been created for the commands it defines.  This is
-% indicated by writing \cs{UnitTested} anywhere within |\begin{macro}|
-%   \dots |\end{macro}|.
+% 在 \env{macro} 环境中，标记命令是否已创建单元测试是个好主意。
+% 这可通过在 |\begin{macro}| ... |\end{macro}| 之间的任何位置写入
+% \cs{UnitTested} 来表示。
 %
-% If the class option |checktest| is enabled, then it is an \emph{error}
-% to have a \env{macro} environment without a call to
-% \file{Testfiles}.  This is intended for large packages such as
-% \pkg{expl3} that should have absolutely comprehensive tests suites and
-% whose authors may not always be as sharp at adding new tests with new
-% code as they should be.
+% 如果启用了类选项 |checktest|，那么在没有调用 \file{Testfiles} 的
+% \env{macro} 环境中会产生一个\emph{错误}。
+% 这是为了像 \pkg{expl3} 这样的大型包设计的，这些包应该有完全详尽的测试套件，
+% 其作者在添加新代码时可能不总是如应该般及时添加新测试。
 %
 % \DescribeMacro{\TestMissing}
-% If a function is missing a test, this may be flagged by writing (as
-% many times as needed) \cs{TestMissing} \marg{explanation of test
-%   required}.  These missing tests are summarised in the listing
-% printed at the end of the compilation run.
+% 如果一个函数缺少测试，可以通过写（需要多次）\cs{TestMissing} 
+% \marg{explanation of test required} 来标记这些缺失的测试。
+% 这些缺失的测试将在编译运行结束时的列表中进行总结打印。
 %
 % \DescribeEnv{variable}
-% When documenting variable definitions, use the \env{variable}
-% environment instead.  Here it behaves identically to the
-% \env{macro} environment, except that if the class option |checktest|
-% is enabled, variables are not required to have a test file.
+% 在文档化变量定义时，使用 \env{variable} 环境代替。
+% 它的行为与 \env{macro} 环境完全相同，只是如果启用了类选项 |checktest|，
+% 则不需要为变量提供测试文件。
 %
 % \DescribeEnv{arguments}
-% Within a \env{macro} environment, you may use the \env{arguments}
-% environment to describe the arguments taken by the function(s).  It
-% behaves like a modified enumerate environment.
+% 在 \env{macro} 环境中，你可以使用 \env{arguments} 环境描述函数的参数。
+% 它的行为类似于修改后的 enumerate 环境。
 % \begin{verbatim}
 % % \begin{macro}{\foo:nn, \foo:VV}
 % % \begin{arguments}
@@ -604,31 +509,26 @@ and all files in that bundle must be distributed together.
 % \end{verbatim}
 %
 %
-% \subsection{Keeping things consistent}
+% \subsection{保持一致性}
 %
-% Whenever a function is either documented or defined with
-% \env{function} and \env{macro} respectively, its name is stored in a
-% sequence for later processing.
+% 每当使用 \env{function} 或 \env{macro} 文档化或定义一个函数时，
+% 其名称都会存储在一个序列中以供以后处理。
 %
-% At the end of the document (\emph{i.e.}, after the \file{.dtx} file
-% has finished processing), the list of names is analysed to check
-% whether all defined functions have been documented and vice versa. The
-% results are printed in the console output.
+% 在文档末尾（即在处理完 \file{.dtx} 文件之后），会分析名称列表，
+% 检查是否所有已定义的函数都已经文档化，反之亦然。结果将打印在控制台输出中。
 %
-% If you need to do more serious work with these lists of names, take a
-% look at the implementation for the data structures and methods used to
-% store and access them directly.
+% 如果你需要对这些名称列表进行更严格的处理，
+% 可以查看数据结构和用于直接存储和访问它们的方法的实现。
 %
-% \subsection{Documenting templates}
+% \subsection{文档化模板}
 %
-% The following macros are provided for documenting templates; might end
-% up being something completely different but who knows.
+% 提供以下宏用于文档化模板；可能最终会变成完全不同的内容，但谁知道呢。
 % \begin{quote}\parskip=0pt\obeylines
 %   |\begin{TemplateInterfaceDescription}| \Arg{template type name}
 %   |  \TemplateArgument{none}{---}|
-%   \textsc{or one or more of these:}
+%   \textsc{或者一个或多个这些：}
 %   |  \TemplateArgument| \Arg{arg no} \Arg{meaning}
-%   \textsc{and}
+%   \textsc{和}
 %   |\TemplateSemantics|
 %   |  | \meta{text describing the template type semantics}
 %   |\end{TemplateInterfaceDescription}|
@@ -636,11 +536,11 @@ and all files in that bundle must be distributed together.
 %
 % \begin{quote}\parskip=0pt\obeylines
 %   |\begin{TemplateDescription}| \Arg{template type name} \Arg{name}
-%   \textsc{one or more of these:}
+%   \textsc{一个或多个这些：}
 %   |  \TemplateKey| \marg{key name} \marg{type of key}
 %   |    |\marg{textual description of meaning}
 %   |    |\marg{default value if any}
-%   \textsc{and}
+%   \textsc{和}
 %   |\TemplateSemantics|
 %   |  | \meta{text describing special additional semantics of the template}
 %   |\end{TemplateDescription}|
@@ -649,9 +549,9 @@ and all files in that bundle must be distributed together.
 % \begin{quote}\parskip=0pt\obeylines
 %   |\begin{InstanceDescription}| \oarg{text to specify key column width (optional)}
 %   \hfill\marg{template type name}\marg{instance name}\marg{template name}
-%   \textsc{one or more of these:}
+%   \textsc{一个或多个这些：}
 %   |  \InstanceKey| \marg{key name} \marg{value}
-%   \textsc{and}
+%   \textsc{和}
 %   |\InstanceSemantics|
 %   |  | \meta{text describing the result of this instance}
 %   |\end{InstanceDescription}|
@@ -661,7 +561,7 @@ and all files in that bundle must be distributed together.
 %
 % \begin{implementation}
 %
-% \section{\pkg{l3doc} implementation}
+% \section{\pkg{l3doc} 代码实现}
 %
 %    \begin{macrocode}
 %<*class>
@@ -671,19 +571,18 @@ and all files in that bundle must be distributed together.
 %<@@=codedoc>
 %    \end{macrocode}
 %
-% \subsection{Variables}
+% \subsection{变量}
 %
 % \begin{variable}{\g_docinput_clist}
-%   The list of files which have been input through \cs{DocInput}.
+%   通过 \cs{DocInput} 输入的文件列表。
 %    \begin{macrocode}
 \clist_new:N \g_docinput_clist
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\g_doc_functions_seq, \g_doc_macros_seq}
-%   All functions documented through \env{function}, and all macros
-%   introduced through \env{macro}.  They can be compared to see what
-%   documentation or code is missing.
+%   通过 \env{function} 文档化的所有函数和通过 \env{macro} 引入的所有宏。
+%   可以进行比较，查看文档或代码缺失的部分。
 %    \begin{macrocode}
 \seq_new:N \g_doc_functions_seq
 \seq_new:N \g_doc_macros_seq
