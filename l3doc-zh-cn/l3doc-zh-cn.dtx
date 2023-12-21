@@ -77,6 +77,52 @@ and all files in that bundle must be distributed together.
     下划线数字指向定义的代码行，
     其它的都指向使用条目的页面。
   }
+\makeatletter
+\ExplSyntaxOn
+\cs_set_protected:Npn \__codedoc_print_end_definition:
+  {
+    \seq_set_map:NNn \l__codedoc_tmpa_seq
+      \g__codedoc_nested_names_seq
+      { \__codedoc_macro_end_wrap_item:n {##1} }
+      %%
+    \int_compare:nTF { \seq_count:N \l__codedoc_tmpa_seq <= 3 }
+      {
+        \seq_use:Nnnn \l__codedoc_tmpa_seq
+          { \,~和~ } { \,,~ } { \,,~和~ }
+      }
+      { \seq_item:Nn \l__codedoc_tmpa_seq {1}\,~以及其它的 }
+    \@ 定义结束。
+    \__codedoc_print_documented:
+  }
+\cs_set_protected:Npn \__codedoc_print_documented:
+  {
+    \seq_gset_filter:NNn \g__codedoc_nested_names_seq
+      \g__codedoc_nested_names_seq
+      {
+        ! \bool_lazy_any_p:n
+          {
+            { \__codedoc_if_macro_internal_p:n {##1} }
+            { \l__codedoc_macro_deprecated_bool }
+            { \l__codedoc_macro_nodoc_bool }
+          }
+      }
+    \seq_if_empty:NF \g__codedoc_nested_names_seq
+      {
+        \int_set:Nn \l__codedoc_tmpa_int
+          { \seq_count:N \g__codedoc_nested_names_seq }
+        \int_compare:nNnTF \l__codedoc_tmpa_int = 1 {这个} {这些}
+        \bool_if:NTF \l__codedoc_macro_var_bool {变量} {函数}
+        \int_compare:nNnTF \l__codedoc_tmpa_int = 1 {} {}
+        被记录在第
+        \__codedoc_get_hyper_target:eN
+          { \seq_item:Nn \g__codedoc_nested_names_seq { 1 } }
+          \l__codedoc_tmpa_tl
+        \exp_args:Ne \pageref { \l__codedoc_tmpa_tl } 页。
+      }
+    \seq_gclear:N \g__codedoc_nested_names_seq
+  }
+\ExplSyntaxOff
+\makeatother
 % ^^A =================== 设置颜色 ===============================
 \usepackage{xcolor}
 \definecolor{spot}{HTML}{003399}
@@ -130,6 +176,7 @@ and all files in that bundle must be distributed together.
 %   \end{tabular}
 % }
 % \maketitle
+%
 % \tableofcontents
 %
 % \begin{documentation}
@@ -257,7 +304,7 @@ and all files in that bundle must be distributed together.
 % 默认情况下，会使用连字符标记连字符位置，但可以使用 \texttt{cs-break-nohyphen}
 % 类选项进行更改。若要完全禁用控制序列的连字符处理，使用 \texttt{cs-break = false}。
 %
-% \subsection{文档和实现的分割}
+% \subsection{文档和代码实现的分割}
 %
 % \pkg{doc} 使用 \cs{OnlyDocumentation}/\cs{AlsoImplementation} 宏来指导\hfil\break
 % \cs{StopEventually}|{}| 的使用，该命令用于在单个 \file{.dtx} 文件中分隔文档和实现部分。
@@ -590,11 +637,10 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_detect_internals_bool, \l_@@_detect_internals_tl}
-%   If \texttt{true}, \pkg{l3doc} will check for use of internal
-%   commands \cs[no-index]{__\meta{pkg}_\ldots{}} from other packages in
-%   the argument of the \texttt{macro} environment, and in the code typeset in
-%   \texttt{macrocode} environments, but not in~\cs{cs}.  Also a token list
-%   to store temporary data for this purpose.
+%   如果为 \texttt{true}，\pkg{l3doc} 将检查在 \texttt{macro} 环境的参数中，
+%   以及在 \texttt{macrocode} 环境中排版的代码中使用其他包中的内部命令
+%   \cs[no-index]{__\meta{pkg}_\ldots{}}，但不包括在~\cs{cs} 中。
+%   还有一个记载临时数据的记号列表用于此目的。
 %    \begin{macrocode}
 \bool_new:N \l_@@_detect_internals_bool
 \bool_set_true:N \l_@@_detect_internals_bool
@@ -604,9 +650,8 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_output_coffin}
-%   The \env{function} environment is typeset by combining coffins
-%   containing various pieces (function names, description, \emph{etc.})
-%   into this coffin.
+%   \env{function} 环境通过将包含各种部分（函数名称、描述、\emph{等等}）
+%   的线槺组合成一个线槺来排版。
 %    \begin{macrocode}
 \coffin_new:N \l_@@_output_coffin
 %    \end{macrocode}
@@ -614,10 +659,9 @@ and all files in that bundle must be distributed together.
 %
 % \begin{variable}
 %   {\l_@@_functions_coffin, \l_@@_descr_coffin, \l_@@_syntax_coffin}
-%   These coffins contain respectively the list of function names
-%   (argument of the \env{function} environment), the text between
-%   |\begin{function}| and |\end{function}|, and the syntax given in the
-%   \env{syntax} environment.
+%   这些线槺分别包含函数名称列表（\env{function} 环境的参数）、
+%   |\begin{function}| 和 |\end{function}| 之间的文本，
+%   以及在 \env{syntax} 环境中给出的语法。
 %    \begin{macrocode}
 \coffin_new:N \l_@@_functions_coffin
 \coffin_new:N \l_@@_descr_coffin
@@ -626,27 +670,24 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\g_@@_syntax_box}
-%   The contents of the \env{syntax} environment are typeset in this box
-%   before being transferred to \cs{l_@@_syntax_coffin}.
+%   在转移到 \cs{l_@@_syntax_coffin} 之前，\env{syntax} 环境的内容被排版在这个盒子中。
 %    \begin{macrocode}
 \box_new:N \g_@@_syntax_box
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_in_function_bool}
-%   True when inside a \texttt{function} or \texttt{variable}
-%   environment.  Used by the \texttt{syntax} environment to determine
-%   its behaviour.
+%   当在 \texttt{function} 或 \texttt{variable} 环境中时为真。
+%   被 \texttt{syntax} 环境用于确定其行为。
 %    \begin{macrocode}
 \bool_new:N \l_@@_in_function_bool
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_long_name_bool, \l_@@_trial_width_dim}
-%   The boolean \cs{l_@@_long_name_bool} is \texttt{true} if the width
-%   \cs{l_@@_trial_width_dim} of the coffin \cs{l_@@_functions_coffin}
-%   (containing the current function names) is bigger than the space
-%   available in the margin.
+%   如果线槺 \cs{l_@@_functions_coffin}（包含当前函数名称）的宽度
+%   \cs{l_@@_trial_width_dim} 大于边距中可用的空间，则布尔值
+%   \cs{l_@@_long_name_bool} 为 \texttt{true}。
 %    \begin{macrocode}
 \bool_new:N \l_@@_long_name_bool
 \dim_new:N \l_@@_trial_width_dim
@@ -654,8 +695,7 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_nested_macro_int}
-%   The nesting of \env{macro} environments (this is now~$0$ outside a
-%   \env{macro} environment).
+%   \env{macro} 环境的嵌套层级（在 \env{macro} 环境外现在为~$0$）。
 %    \begin{macrocode}
 \int_new:N \l_@@_nested_macro_int
 %    \end{macrocode}
@@ -668,9 +708,8 @@ and all files in that bundle must be distributed together.
 %     \g_@@_not_tested_seq,
 %     \g_@@_testfiles_seq,
 %   }
-%   A boolean describing whether the current macro has tests, and some
-%   global structures which contain information about test files and
-%   which tests are missing.
+%   一个布尔值，描述当前宏是否有测试，并且一些全局结构包含了关于测试文件以及
+%   哪些测试缺失的信息。
 %    \begin{macrocode}
 \bool_new:N \l_@@_macro_tested_bool
 \prop_new:N \g_@@_missing_tests_prop
@@ -693,9 +732,8 @@ and all files in that bundle must be distributed together.
 %     \l_@@_override_module_tl,
 %     \l_@@_macro_documented_tl,
 %   }
-%   Contain information about some options of function/macro
-%   environments.  We initialize \cs{l_@@_override_module_tl} to avoid
-%   overriding module names by an empty name (meaning no module).
+%   包含有关函数/宏环境某些选项的信息。我们初始化 \cs{l_@@_override_module_tl}
+%   以避免通过空名称（表示无模块）覆盖模块名称。
 %    \begin{macrocode}
 \bool_new:N \l_@@_macro_deprecated_bool
 \bool_new:N \l_@@_macro_internal_bool
@@ -721,7 +759,7 @@ and all files in that bundle must be distributed together.
 %     \g_@@_show_notes_bool,
 %     \g_@@_kernel_bool
 %   }
-%   Information about package options.
+%   关于包选项的信息。
 %    \begin{macrocode}
 \bool_new:N \g_@@_lmodern_bool
 \bool_new:N \g_@@_checkfunc_bool
@@ -734,7 +772,7 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_tmpa_tl, \l_@@_tmpb_tl, \l_@@_tmpa_int, \l_@@_tmpa_seq}
-%   Some temporary variables.
+%   一些临时变量。
 %    \begin{macrocode}
 \tl_new:N \l_@@_tmpa_tl
 \tl_new:N \l_@@_tmpb_tl
@@ -744,49 +782,42 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_names_block_tl}
-%   List of local sequence variables (produced through
-%   \cs{@@_lseq_name:n}), one for each set of variants in a
-%   \env{function} or \env{macro} environment.  More precisely these
-%   sequences are named after the base forms, such as \cs{clist_count:n}
-%   or \cs{clist_count:N} (which are not variants).  Each of these
-%   sequences have the base name (without any signature) as their first
-%   item, followed by the list of variant's signatures, or
-%   \cs{scan_stop:} to denote the absence of signature (no colon).
+%   本地序列变量列表（通过 \cs{@@_lseq_name:n} 生成），
+%   每个都对应于 \env{function} 或 \env{macro} 环境中一组变体。
+%   更准确地说，这些序列以基本形式命名，如 \cs{clist_count:n}
+%   或 \cs{clist_count:N}（它们不是变体）。每个序列都有基本名称
+%   （没有任何签名）作为其第一项，后跟变体签名的列表，
+%   或者使用 \cs{scan_stop:} 表示无签名（无冒号）。
 %    \begin{macrocode}
 \tl_new:N \l_@@_names_block_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\g_@@_variants_seq}
-%   Stores rather temporarily the list of variants (signatures only) of
-%   a function/macro that is being documented.  It is global because we
-%   need it to keep its value throughout cells of an alignment.
+%   暂时存储正在文档化的函数/宏的变体列表（仅签名）。
+%   它是全局的，因为我们需要在对齐的单元格中保持其值。
 %    \begin{macrocode}
 \seq_new:N \g_@@_variants_seq
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_names_verb_bool}
-%   Set to |true| if the main argument of a macro/function environment
-%   should be used as is, without removing any comma or space.
+%   如果宏/函数环境的主参数应该保留原样，不移除任何逗号或空格，则设置为 |true|。
 %    \begin{macrocode}
 \bool_new:N \l_@@_names_verb_bool
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_names_seq}
-%   List of functions/environments/\ldots{} appearing as arguments of a
-%   given \env{function} or \env{macro} environment.  These are the
-%   names after conversion of |_@@| and |@@| to |__|\meta{module name}
-%   and other sanitizing.
+%   函数/环境等作为给定 \env{function} 或 \env{macro} 环境参数出现的名称列表。
+%   这些名称经过 |_@@| 和 |@@| 转换为 |__|\meta{module name} 和其他清理。
 %    \begin{macrocode}
 \seq_new:N \l_@@_names_seq
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\g_@@_nested_names_seq}
-%   Collects all macros in nested \env{macro} environments, to use them
-%   in the \enquote{End definition} text.
+%   收集所有嵌套 \env{macro} 环境中的宏，以在“End definition”文本中使用。
 %    \begin{macrocode}
 \seq_new:N \g_@@_nested_names_seq
 %    \end{macrocode}
@@ -798,15 +829,13 @@ and all files in that bundle must be distributed together.
 %     \l_@@_index_module_tl, \l_@@_index_internal_bool,
 %     \l_@@_macro_do_not_index_tl
 %   }
-%   When analyzing a control sequence found within a \env{macrocode}
-%   environment, \cs{l_@@_index_macro_tl} holds the control sequence
-%   (partially a string), \cs{l_@@_index_key_tl} holds the future
-%   sort key in the index, and \cs{l_@@_index_module_tl} is the
-%   subindex in which the control sequence should be listed.
-%   \cs{l_@@_index_internal_bool} indicates when the control sequence is
-%   internal and should be indexed in a slightly different subindex.
-%   Finally, \cs{l_@@_macro_do_not_index_tl} indicates control sequences
-%   which should not be indexed in a specifiv \env{macro} envronment.
+%   当分析 \env{macrocode} 环境中发现的控制序列时，
+%   \cs{l_@@_index_macro_tl} 保存控制序列（部分为字符串），
+%   \cs{l_@@_index_key_tl} 保存索引中的未来排序键，
+%   \cs{l_@@_index_module_tl} 是控制序列应该列入的子索引。
+%   \cs{l_@@_index_internal_bool} 表示控制序列是内部的，
+%   应在略微不同的子索引中索引。
+%   最后，\cs{l_@@_macro_do_not_index_tl} 表示不应在特定 \env{macro} 环境中索引的控制序列。
 %    \begin{macrocode}
 \tl_new:N \l_@@_index_macro_tl
 \tl_new:N \l_@@_index_key_tl
@@ -817,14 +846,14 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\g_@@_module_name_tl}
-%   The module name, set when reading a line |<@@=|\meta{module}|>|.
+%   模块名称，在读取行 |<@@=|\meta{module}|>| 时设置。
 %    \begin{macrocode}
 \tl_new:N \g_@@_module_name_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\c_@@_iow_rule_tl, \c_@@_iow_midrule_tl}
-%   $40$~equal signs.
+%   $40$ 个等号。
 %    \begin{macrocode}
 \tl_const:Nn \c_@@_iow_rule_tl
   { ======================================== }
@@ -835,10 +864,9 @@ and all files in that bundle must be distributed together.
 %
 % \begin{variable}
 %   {\l_@@_macro_box, \l_@@_macro_index_box, \l_@@_macro_int}
-%   A vertical box in which the names given to the macro environment are
-%   typeset, a horizontal box in which we store the targets created by
-%   indexing commands, and the number of macros so far (including those
-%   from surrounding \env{macro} environments).
+%   用于储存宏环境中给定的名称的垂直盒子，
+%   储存索引命令创建的目标的水平盒子，
+%   以及到目前为止的宏数量（包括周围 \env{macro} 环境中的宏）。
 %    \begin{macrocode}
 \box_new:N \l_@@_macro_box
 \box_new:N \l_@@_macro_index_box
@@ -854,8 +882,7 @@ and all files in that bundle must be distributed together.
 %     \l_@@_cmd_noindex_bool,
 %     \l_@@_cmd_replace_bool,
 %   }
-%   Variables used to control the behaviour of \cs{cmd}, \cs{cs} and
-%   \cs{tn}.
+%   用于控制 \cs{cmd}、\cs{cs} 和 \cs{tn} 行为的变量。
 %    \begin{macrocode}
 \tl_new:N \l_@@_cmd_tl
 \tl_new:N \l_@@_cmd_index_tl
@@ -866,8 +893,7 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_in_implementation_bool}
-%   This boolean is \texttt{true} within the \env{implementation}
-%   environment, and \texttt{false} anywhere else.
+%   在 \env{implementation} 环境内为 \texttt{true}，其他地方为 \texttt{false}。
 %    \begin{macrocode}
 \bool_new:N \l_@@_in_implementation_bool
 %    \end{macrocode}
@@ -878,8 +904,7 @@ and all files in that bundle must be distributed together.
 %     \g_@@_typeset_documentation_bool,
 %     \g_@@_typeset_implementation_bool
 %   }
-%   These booleans control whether the documentation/implementation
-%   should be typeset.  By default both should be.
+%   控制是否排版文档/实现的布尔值。默认情况下，两者都应为真。
 %    \begin{macrocode}
 \bool_new:N \g_@@_typeset_documentation_bool
 \bool_new:N \g_@@_typeset_implementation_bool
@@ -889,9 +914,7 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\g_@@_base_name_tl, \l_@@_variants_prop}
-%   The name of the macro which is being documented (without its
-%   signature), and a property list mapping base forms of variants to
-%   all variants which have the same base form.
+%   正在文档化的宏名称（不带签名），以及将变体的基本形式映射到具有相同基本形式的所有变体的属性列表。
 %    \begin{macrocode}
 \tl_new:N \g_@@_base_name_tl
 \prop_new:N \l_@@_variants_prop
@@ -899,10 +922,8 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_function_label_clist, \l_@@_no_label_bool}
-%   Option of a \env{function} environment which replaces the label that
-%   would normally be inserted by labels for the given list of control
-%   sequences.  This is only useful to avoid duplicate labels when a
-%   function's documentation appears multiple times.
+%   \env{function} 环境的选项，用于替换给定控制序列列表的标签，
+%   通常情况下标签会被多次插入函数文档，这样可以避免重复标签。
 %    \begin{macrocode}
 \clist_new:N \l_@@_function_label_clist
 \bool_new:N \l_@@_no_label_bool
@@ -910,7 +931,7 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_date_added_tl, \l_@@_date_updated_tl}
-%   Values of some options of the \env{function} environment.
+%   \env{function} 环境选项的值。
 %    \begin{macrocode}
 \tl_new:N \l_@@_date_added_tl
 \tl_new:N \l_@@_date_updated_tl
@@ -918,8 +939,7 @@ and all files in that bundle must be distributed together.
 % \end{variable}
 %
 % \begin{variable}{\l_@@_macro_argument_tl}
-%   Save the argument of a \env{macro} or \env{function} environment for
-%   use in error messages.
+%   保存 \env{macro} 或 \env{function} 环境的参数，以便在错误消息中使用。
 %    \begin{macrocode}
 \tl_new:N \l_@@_macro_argument_tl
 %    \end{macrocode}
@@ -930,10 +950,10 @@ and all files in that bundle must be distributed together.
 % \int_new:N \c@CodelineNo
 %    \end{macrocode}
 %
-% \subsection{Variants and helpers}
+% \subsection{变量和辅助函数}
 %
 % \begin{macro}{\@@_tmpa:w, \@@_tmpb:w}
-%   Auxiliary macros for temporary use.
+%   用于临时使用的辅助宏。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_tmpa:w ?
 \cs_new_eq:NN \@@_tmpb:w ?
@@ -945,7 +965,7 @@ and all files in that bundle must be distributed together.
 %     \seq_set_split:NoV,
 %     \tl_to_str:f
 %   }
-%   A few missing variants.
+%   一些缺失的变体。
 %    \begin{macrocode}
 \cs_generate_variant:Nn \seq_set_split:Nnn { NoV }
 \cs_generate_variant:Nn \tl_to_str:n { f }
@@ -953,11 +973,10 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}[TF]{\@@_if_almost_str:n}
-%   Used to test if the argument of |\cmd| or other macros to be indexed
-%   is almost a string or not: for instance this is \texttt{false} if |#1|
-%   contains |\meta{...}|.  The surprising |f|-expansion is there to
-%   cope with the case of |#1| starting with \cs{c_backslash_str}
-%   which should be expanded and considered to be \enquote{normal}.
+%   用于测试 |\cmd| 或其他要索引的宏的参数是否几乎是字符串：
+%   例如，如果 |#1| 包含 |\meta{...}|，则为 \texttt{false}。
+%   意外的 |f| 展开是为了处理以 \cs{c_backslash_str} 开头的 |#1|，
+%   应该被展开并视为“正常”。
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn \@@_if_almost_str:n #1 { TF , T , F }
   {
@@ -972,8 +991,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_trim_right:Nn, \@@_trim_right:No}
-%   Removes all material after |#2| in the token list variable~|#1|.
-%   Perhaps combine with \cs{@@_key_trim_module:n}?
+%   在 token 列表变量 ~|#1| 中移除 |#2| 后的所有内容。
+%   可能与 \cs{@@_key_trim_module:n} 结合使用？
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_trim_right:Nn #1#2
   {
@@ -985,7 +1004,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}[TF]{\@@_str_if_begin:nn, \@@_str_if_begin:oo}
-%   True if the first string starts with the second.
+%   如果第一个字符串以第二个字符串开头，则为真。
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn \@@_str_if_begin:nn #1#2 { TF , T , F }
   {
@@ -1002,16 +1021,13 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}{\@@_replace_at_at:N}
 % \begin{macro}{\@@_replace_at_at_aux:Nn}
-%   The goal is to replace |@@| by the current module name.  We take
-%   advantage of this function to also detect internal macros.  If there is
-%   no \meta{module~name}, do nothing.  Otherwise, sanitize the catcodes
-%   of |@| and~|_|, temporarily change |@@@@| to |aa| with different catcodes and later to |@@|, and replace |__@@| and |_@@| and |@@| by
-%   |__|\meta{module~name}.  The result contains |_| with category
-%   code letter because this is what the |macrocode| environment
-%   expects.  Other use cases can apply \cs{tl_to_str:n} if needed.
-%   Note that we include spaces between the
-%   |@| in the code below, since it is also processed through the same
-%   replacement rules.
+%   目标是将 |@@| 替换为当前模块名称。我们利用此函数还可检测内部宏。
+%   如果没有 \meta{module~name}，则不执行任何操作。
+%   否则，规范化 |@| 和 |_| 的分类码，临时将 |@@@@| 更改为具有不同分类码的 |aa|，
+%   稍后变为 |@@|，并将 |__@@|、|_@@| 和 |@@| 替换为 |__|\meta{module~name}。
+%   结果中包含带有字母分类码的 |_|，因为这是 |macrocode| 环境的预期。
+%   其他用例可通过 \cs{tl_to_str:n} 应用。
+%   注意，下面的代码中包括 |@| 之间的空格，因为它也经过相同的替换规则处理。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replace_at_at:N #1
   {
@@ -1041,15 +1057,12 @@ and all files in that bundle must be distributed together.
 %     \@@_detect_internals_aux:N,
 %     \@@_if_detect_internals_ok:NF
 %   }
-%   After splitting at each |__| and removing the leading item from the
-%   sequence (since it does not follow |__|), remove everything after
-%   any space or end-of-line to get a good approximation of the control
-%   sequence (for the warning message).  Then check if that starts with
-%   something allowed: |@@| module name and |:| or |_|, or if the
-%   relevant boolean is set |kernel_| (it seems safe to assume we will
-%   not define a |\__kernel:...| command).  For the message itself
-%   remove anything after any |_| or |:| (with either catcode) to get a
-%   guess of the module name.
+%   在每个 |__| 处分割后，移除序列的开头项目（因为它不是跟在 |__| 后面），
+%   移除任何空格或行尾后的所有内容，以得到控制序列的良好近似（用于警告消息）。
+%   然后检查该序列是否以允许的内容开头：
+%   |@@| 模块名称和 |:| 或 |_|，或者相关的布尔值设置为 |kernel_|（似乎可以安全地假设我们不会定义 |\__kernel:...| 命令）。
+%   对于消息本身，移除任何 |_| 或 |:| 后的所有内容（具有任一分类码），
+%   以获得模块名称的猜测。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_detect_internals:N #1
   {
@@ -1107,10 +1120,9 @@ and all files in that bundle must be distributed together.
 % \begin{macro}[rEXP]{\@@_signature_base_form:n}
 % \begin{macro}
 %   {\@@_signature_base_form_aux:n, \@@_signature_base_form_aux:w}
-%   Expands to the \enquote{base form} of the signature.  For instance,
-%   given |noxcfvV| it would obtain |nnnNnnn|, or given |ow| it would
-%   obtain |nw|.  The loop stops at the first token that is not
-%   recognized; the rest is enclosed in \cs{exp_not:n}.
+%   扩展为签名的“基本形式”。例如，对于 |noxcfvV|，将得到 |nnnNnnn|，
+%   或对于 |ow|，将得到 |nw|。循环停在第一个无法识别的令牌处；
+%   其余部分被封装在 \cs{exp_not:n} 中。
 %    \begin{macrocode}
 \cs_new:Npn \@@_signature_base_form:n #1
   { \@@_signature_base_form_aux:n #1 \q_stop }
@@ -1138,10 +1150,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_predicate_from_base:n}
-%   Get predicate from a function's base name.  The code is not broken
-%   by functions with no signature.  The |n|-type version can be used
-%   for keys and other non-control sequences.  The output after
-%   |e|-expansion is a string.
+%   从函数的基本名称获取谓词。代码不受没有签名的函数影响。
+%   |n| 类型的版本可用于键和其他非控制序列。
+%   在 |e|-展开后的输出是一个字符串。
 %    \begin{macrocode}
 \cs_new:Npn \@@_predicate_from_base:n #1
   {
@@ -1155,8 +1166,8 @@ and all files in that bundle must be distributed together.
 % \begin{macro}{\@@_split_function_do:nn, \@@_split_function_do:on}
 % \begin{macro}{\@@_get_function_name:n, \@@_get_function_signature:n}
 % \begin{macro}{\@@_split_function_auxi:w, \@@_split_function_auxii:w}
-%   Similar to internal functions defined in \pkg{l3basics}, but here we
-%   operate on strings directly rather than control sequences.
+%   类似于 \pkg{l3basics} 中定义的内部函数，但在这里我们直接在字符串上操作，
+%   而不是控制序列。
 %    \begin{macrocode}
 \cs_new:Npn \@@_get_function_name:n #1
   { \@@_split_function_do:nn {#1} { \use_i:nnn } }
@@ -1186,12 +1197,10 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}[rEXP]{\@@_key_get_base:nN}
-%   Get the base form of a function and store it.  As part of getting
-%   the base form, change trailing |T| or |F| to |TF|, skipping that
-%   change if the function contains no colon to avoid changing for
-%   instance some names ending in \texttt{PDF} or similar.  The various
-%   letters |z| serve as end-delimiters different from any outcome of
-%   \cs{tl_to_str:n}.
+%   获取函数的基本形式并存储。作为获取基本形式的一部分，
+%   将尾部的 |T| 或 |F| 更改为 |TF|，如果函数不包含冒号，
+%   则跳过此更改，以避免更改一些以 \texttt{PDF} 结尾或类似结尾的名称。
+%   各种字母 |z| 作为不同于 \cs{tl_to_str:n} 任何结果的终止符。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_key_get_base:nN #1#2
   {
@@ -1240,10 +1249,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_base_form_signature_do:nnn}
-%   Do |#2{#1}| if there is no signature, or if |#1| contains two colons
-%   in a row (this covers the weird function |\::N| and so on).
-%   Otherwise apply |#3| with the following two arguments: the base form
-%   of |#1|, and the original signature with an extra pair of braces.
+%   如果没有签名，或者 |#1| 中包含连续两个冒号（这包括奇怪的函数 |\::N| 等），
+%   则执行 |#2{#1}|。否则，应用 |#3|，并使用以下两个参数：|#1| 的基本形式，
+%   以及原始签名和额外的一对大括号。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_base_form_signature_do:nnn #1#2#3
   {
@@ -1272,9 +1280,8 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}[pTF]{\@@_date_compare:nNn}
 % \begin{macro}{\@@_date_compare_aux:nnnNnnn, \@@_date_compare_aux:w}
-%   Expects |#1| and |#3| to be dates in the format YYYY-MM-DD (but
-%   accepts YYYY or YYYY-MM too).  Compares them using |#2| (one of |<|,
-%   |=|, |>|), filling in zeros for missing data.
+%   假设 |#1| 和 |#3| 是格式为 YYYY-MM-DD 的日期（也接受 YYYY 或 YYYY-MM）。
+%   使用 |#2|（其中之一为 |<|、|=| 或 |>|）进行比较，对缺失数据填充零。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_date_compare:nNn #1#2#3 { TF , T , F , p }
   { \@@_date_compare_aux:w #1--- \q_mark #2 #3--- \q_stop }
@@ -1316,20 +1323,18 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_gprop_name:n, \@@_lseq_name:n}
-%   We need to keep track of some information about control sequences
-%   (and other strings) that are being (or have been) documented.  Some
-%   is stored into global props and some into local seqs, whose name
-%   does not follow conventions: it is \cs[no-index]{g_@@} or
-%   \cs[no-index]{l_@@} followed by a space and by the string, which can
-%   be arbitrary.  We cannot reasonably use a single big |prop| for
-%   speed reasons.
+%   我们需要跟踪一些有关正在（或已经）文档化的控制序列（和其他字符串）的信息。
+%   一些信息存储在全局属性中，一些存储在本地序列中，
+%   其名称不遵循惯例：它是 \cs[no-index]{g_@@} 或 \cs[no-index]{l_@@}，
+%   后面跟着一个空格和字符串，这个字符串可以是任意的。
+%   由于速度原因，我们不能合理地使用一个大的 |prop|。
 %    \begin{macrocode}
 \cs_new:Npn \@@_gprop_name:n #1 { g_@@ ~ \tl_to_str:n {#1} }
 \cs_new:Npn \@@_lseq_name:n #1 { l_@@ ~ \tl_to_str:n {#1} }
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Messages}
+% \subsection{信息}
 %
 %    \begin{macrocode}
 \msg_new:nnnn { l3doc } { no-signature-TF }
@@ -1364,7 +1369,7 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% \subsection{Options and configuration}
+% \subsection{选项和配置}
 %
 %    \begin{macrocode}
 \DeclareKeys [ l3doc / options ]
@@ -1400,11 +1405,10 @@ and all files in that bundle must be distributed together.
 \PassOptionsToClass { a4paper } { article }
 %    \end{macrocode}
 %
-% Input a local configuration file, if it exists, with a message to the
-% console that this has happened. Since we distribute a \file{.cfg} file
-% with the class, this should usually always be true. Therefore, check
-% for \cs{ExplMakeTitle} (defined in \enquote{our} \file{.cfg} file) and
-% only output the informational message if it's not found.
+% 如果存在本地配置文件，则输入该文件，并向控制台输出已发生此操作的消息。
+% 因为我们与类一起分发了一个 \file{.cfg} 文件，所以通常情况下这应该是真的。
+% 因此，检查 \cs{ExplMakeTitle}（在我们的 \file{.cfg} 文件中定义），
+% 只有当找不到它时才输出信息性消息。
 %
 %    \begin{macrocode}
 \msg_new:nnn { l3doc } { input-cfg }
@@ -1422,7 +1426,7 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 %
-% \subsection{Class and package loading}
+% \subsection{类文件与宏包加载}
 %
 %    \begin{macrocode}
 \LoadClass{article}
@@ -1449,9 +1453,8 @@ and all files in that bundle must be distributed together.
 \raggedbottom
 %    \end{macrocode}
 %
-% Depending on the option, load the package \pkg{lmodern} to set the
-% font.  Then replace the italic typewriter font with the oblique shape
-% instead; the former makes my skin crawl. (Will, Aug 2011)
+% 根据选项加载 \pkg{lmodern} 包设置字体。然后将斜的打字机字体替换为
+% 斜的字形；前者让我感到不适。（Will, Aug 2011）
 %    \begin{macrocode}
 \bool_if:NT \g_@@_lmodern_bool
   {
@@ -1464,16 +1467,15 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% Must be last, as usual.
+% 必须放在最后，像往常一样。
 %    \begin{macrocode}
 \RequirePackage{hypdoc}
 %    \end{macrocode}
 %
-% \subsection{Configuration and tweaks}
+% \subsection{配置和调整}
 %
 % \begin{macro}{\MakePrivateLetters}
-%   A few more letters are \enquote{private} in a \LaTeX3 programming
-%   environment.
+%   在 \LaTeX3 编程环境中，还有一些字母是“私有的”。
 %    \begin{macrocode}
 \cs_gset:Npn \MakePrivateLetters
   {
@@ -1485,7 +1487,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{CodelineNo}
-%   Some configurations which have to do with line numbering.
+%   与行编号有关的一些配置。
 %    \begin{macrocode}
 \setcounter{StandardModuleDepth}{1}
 \@addtoreset{CodelineNo}{part}
@@ -1496,9 +1498,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\verbatim, \endverbatim}
-%   In \file{.dtx} documents, the \env{verbatim} environment adds extra
-%   space because it only removes the first \enquote{\%} sign, and not
-%   the indentation (typically a space).  Fix it with \pkg{fancyvrb}:
+%   在 \file{.dtx} 文档中，\env{verbatim} 环境会因为只删除第一个“\%”符号，
+%   而不是缩进（通常是一个空格），导致额外的空间。用 \pkg{fancyvrb} 修复它：
 %    \begin{macrocode}
 \fvset{gobble=2}
 \cs_gset_eq:NN \verbatim \Verbatim
@@ -1507,12 +1508,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\ifnot@excluded}
-%   This function tests whether a macro name stored in
-%   \tn{macro@namepart} was excluded from indexing by \tn{DoNotIndex}.
-%   Rather than trying to fix catcodes that come into here, turn
-%   everything to string catcodes.  This is slightly inefficient as we
-%   could have ensured that \tn{index@excludelist} has string catcodes
-%   in the first place.
+%   此函数测试存储在 \tn{macro@namepart} 中的宏名称是否被 \tn{DoNotIndex} 排除
+%   了索引。与其尝试修复传入的类别码，不如将所有内容转换为字符串类别码。
+%   这略微低效，因为我们本可以确保 \tn{index@excludelist} 一开始就是字符串类别码。
 %    \begin{macrocode}
 \cs_set_protected:Npn \ifnot@excluded
   {
@@ -1525,11 +1523,9 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}{\pdfstringnewline}
 % \begin{macro}{\@@_pdfstring_newline:w}
-%   We avoid some hyperref warnings by making |\\| (almost) trivial in
-%   bookmarks: more precisely it might be used with a star and an
-%   optional argument, which we thus remove using an \pkg{ltcmd}
-%   expandable command.  Since there cannot be trailing optional
-%   arguments, pick up an extra mandatory one and put it back.
+%   通过使书签中的 |\\|（几乎）变得微不足道，我们避免了一些 hyperref 警告。
+%   更确切地说，它可能与星号和可选参数一起使用，因此我们使用 \pkg{ltcmd}
+%   可扩展命令将其删除。由于不能有尾随的可选参数，所以捡起额外的必选参数并将其放回。
 %    \begin{macrocode}
 \cs_new:Npn \pdfstringnewline { : ~ }
 \DeclareExpandableDocumentCommand
@@ -1540,25 +1536,22 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 % \end{macro}
 %
-% \subsection{Design}
+% \subsection{设计}
 %
-% Increase the text width slightly so that width the standard fonts
-% 72~columns of code may appear in a \env{macrocode} environment.
-% Increase the marginpar width slightly, for long command names.  And
-% increase the left margin by a similar amount.
+% 稍微增加文本宽度，以便在 \env{macrocode} 环境中显示 72 列标准字体的代码。
+% 稍微增加边注宽度，以适应较长的命令名称。同时，将左边距增加相同的量。
 %    \begin{macrocode}
 \setlength   \textwidth      { 385pt }
 \addtolength \marginparwidth {  30pt }
 \addtolength \oddsidemargin  {  20pt }
 \addtolength \evensidemargin {  20pt }
 %    \end{macrocode}
-% (These were introduced when \cls{article} was the documentclass, but
-% I've left them here for now to remind me to do something about them
-% later.)
+% （这些设置是在使用 \cls{article} 文档类时引入的，但我暂时保留它们，
+% 以便提醒自己稍后处理。）
 %
 % \begin{macro}{\list}
 % \begin{macro}{\@@_oldlist:nn}
-%   Customise lists.
+%   自定义列表。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_oldlist:nn \list
 \cs_gset:Npn \list #1 #2
@@ -1571,15 +1564,14 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\partname}
-%   Use \enquote{File} as a name in Part titles.
+%   在部 (Part) 标题中使用“File”作为名称。
 %    \begin{macrocode}
 \tl_gset:Nn \partname {File}
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\l@section, \l@subsection}
-%   Customise the table of contents (as we have so many sections).
-%   Different design and/or structure is called for).
+%   自定义目录（因为有许多章节，需要不同的设计和/或结构）。
 %    \begin{macrocode}
 \@addtoreset{section}{part}
 \cs_gset:Npn \l@section #1#2
@@ -1603,13 +1595,12 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Text markup}
+% \subsection{文本标记}
 %
-% Make "|" and |"| be \enquote{short verb} characters, but not in the
-% document preamble, where an active character may interfere with
-% packages that are loaded.  Remove these short-hands at the end of the
-% document before reading the \file{.aux} file, as they may appear in
-% labels (for instance, \pkg{l3fp} documents an operation "||").
+% 使 "|" 和 |"| 成为“短引用”字符，但不在文档导言部分使用，
+% 因为活动字符可能会干扰加载的包。在读取 \file{.aux} 文件之前，
+% 在文档末尾删除这些短引用，因为它们可能出现在标签中
+% （例如，\pkg{l3fp} 中有一个“||”的操作）。
 %    \begin{macrocode}
 \AtBeginDocument
   {
@@ -1625,7 +1616,7 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}{\eTeX, \IniTeX, \Lua, \LuaTeX, \pdfTeX, \XeTeX,
 %   \pTeX, \upTeX, \epTeX, \eupTeX}
-%   Some commands for logos.
+%   一些 logo 的命令。
 %    \begin{macrocode}
 \providecommand*\eTeX{\hologo{eTeX}}
 \providecommand*\IniTeX{\hologo{iniTeX}}
@@ -1642,10 +1633,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\cmd, \cs, \tn}
-%   They rely on a common auxiliary \cs{@@_cmd:nn} which receives as
-%   arguments the options and some tokens whose string representation
-%   starts with a backslash (to support cases such as |\cs{pkg_\ldots}|,
-%   we do not turn the whole argument into a string).
+%   它们依赖于一个共同的辅助命令 \cs{@@_cmd:nn}，接收选项和一些以反斜杠开头的
+%   标记的字符串表示（以支持诸如 |\cs{pkg_\ldots}| 这样的情况，我们不将整个参数转换为字符串）。
 %    \begin{macrocode}
 \DeclareDocumentCommand \cmd { O{} m }
   { \@@_cmd:no {#1} { \token_to_str:N #2 } }
@@ -1661,7 +1650,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\meta}
-%   A document-level command.
+%   一个文档级别的命令。
 %    \begin{macrocode}
 \DeclareDocumentCommand \meta { m }
   { \@@_meta:n {#1} }
@@ -1674,7 +1663,7 @@ and all files in that bundle must be distributed together.
 %     \@@_pdfstring_cs:w,
 %     \@@_pdfstring_meta:w
 %   }
-%   To work within a bookmark, these commands must be expandable.
+%   为了在书签中工作，这些命令必须是可展开的。
 %    \begin{macrocode}
 \DeclareExpandableDocumentCommand
   { \@@_pdfstring_cmd:w } { o m } { \token_to_str:N #2 }
@@ -1693,10 +1682,10 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\Arg, \marg, \oarg, \parg}
-%   |\marg{text}| prints \marg{text}, \enquote{mandatory argument}.\\
-%   |\oarg{text}| prints \oarg{text}, \enquote{optional argument}.\\
-%   |\parg{te,xt}| prints \parg{te,xt}, \enquote{picture mode argument}.
-%   Finally, \cs{Arg} is the same as \cs{marg}.
+%   |\marg{text}| 输出 \marg{text}, \enquote{必选参数}.\\
+%   |\oarg{text}| 输出 \oarg{text}, \enquote{可选参数}.\\
+%   |\parg{te,xt}| 输出 \parg{te,xt}, \enquote{图形模式参数}.
+%   最后，\cs{Arg} 与 \cs{marg} 相同。
 %    \begin{macrocode}
 \newcommand\Arg[1]
   { \texttt{\char`\{} \meta{#1} \texttt{\char`\}} }
@@ -1707,7 +1696,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\file, \env, \pkg, \cls}
-%   This list may change\dots this is just my preference for markup.
+%   这个列表可能会改变……这只是我对标记的偏好。
 %    \begin{macrocode}
 \DeclareRobustCommand \file {\nolinkurl}
 \DeclareRobustCommand \env {\texttt}
@@ -1718,8 +1707,7 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}{\EnableDocumentation, \EnableImplementation}
 % \begin{macro}{\DisableDocumentation, \DisableImplementation}
-%   Control whether to typeset the documentation/implementation or not.
-%   These simply set two switches.
+%   控制是否排版文档/实现。这些只是设定了两个开关。
 %    \begin{macrocode}
 \NewDocumentCommand \EnableDocumentation { }
   { \bool_gset_true:N \g_@@_typeset_documentation_bool }
@@ -1735,10 +1723,7 @@ and all files in that bundle must be distributed together.
 %
 % \begin{environment}{documentation}
 % \begin{environment}{implementation}
-%   If the documentation/implementation should be typeset, then simply
-%   set the boolean \cs{l_@@_in_implementation_bool} which indicates
-%   whether we are within the implementation section.  Otherwise use
-%   \cs{comment} (and a paired \cs{endcomment}).
+%   如果需要排版文档/实现，只需设置布尔值 \cs{l_@@_in_implementation_bool}，指示是否在实现部分。否则使用 \cs{comment}（和配对的 \cs{endcomment}）。
 %    \begin{macrocode}
 \NewDocumentEnvironment { documentation } { }
   {
@@ -1759,8 +1744,7 @@ and all files in that bundle must be distributed together.
 % \end{environment}
 %
 % \begin{environment}{variable}
-%   The \env{variable} environment behaves as a \env{function} or
-%   \env{macro} environment depending on the part of the document.
+%   \env{variable} 环境根据文档部分的不同行为类似于 \env{function} 或 \env{macro} 环境。
 %    \begin{macrocode}
 \DeclareDocumentEnvironment { variable } { O{} +v }
   {
@@ -1778,8 +1762,7 @@ and all files in that bundle must be distributed together.
 %
 % \begin{environment}{function}
 % \begin{environment}{macro}
-%   Environment for documenting function(s), and environment for
-%   documenting the implementation of a macro.
+%   用于记录函数的环境，以及用于记录宏实现的环境。
 %    \begin{macrocode}
 \DeclareDocumentEnvironment { function } { O{} +v }
   { \@@_function:nnw {#1} {#2} }
@@ -1792,10 +1775,7 @@ and all files in that bundle must be distributed together.
 % \end{environment}
 %
 % \begin{environment}{syntax}
-%   Syntax block placed next to the list of functions to illustrate
-%   their use.  TODO: test that the \env{syntax} environment is only
-%   used inside the \env{function} environment, and that it only appears
-%   once.
+%   语法块放置在函数列表旁边，用于说明它们的用法。TODO：测试 \env{syntax} 环境是否仅在 \env{function} 环境内使用，且仅出现一次。
 %    \begin{macrocode}
 \NewDocumentEnvironment { syntax } { }
   { \@@_syntax:w }
@@ -1807,7 +1787,7 @@ and all files in that bundle must be distributed together.
 % \end{environment}
 %
 % \begin{environment}{texnote}
-%   Used to describe information destined to \TeX{} experts only.
+%   用于描述仅供 \TeX{} 专家阅读的信息。
 %    \begin{macrocode}
 \NewDocumentEnvironment { texnote } { }
   {
@@ -1822,8 +1802,7 @@ and all files in that bundle must be distributed together.
 % \end{environment}
 %
 % \begin{environment}{arguments}
-%   This environment is designed to be used within a \env{macro}
-%   environment to describe the arguments of the macro/function.
+%   此环境设计用于在 \env{macro} 环境中描述宏/函数的参数。
 %    \begin{macrocode}
 \NewDocumentEnvironment { arguments } { }
   {
@@ -1840,8 +1819,7 @@ and all files in that bundle must be distributed together.
 % \end{environment}
 %
 % \begin{macro}{\CodedocExplain, \CodedocExplainEXP, \CodedocExplainREXP, \CodedocExplainTF}
-%   Explanation of stars and |TF| notations, for use in third-party
-%   packages.
+%   解释星号和 |TF| 符号的用法，供第三方包使用。
 %    \begin{macrocode}
 \NewDocumentCommand { \CodedocExplain } { }
   { \CodedocExplainEXP \ \CodedocExplainREXP \ \CodedocExplainTF }
@@ -1875,9 +1853,9 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Implementing text markup}
+% \subsection{实现文本标记}
 %
-% Keys for \cs{cmd}, \cs{cs} and \cs{tn}.
+% \cs{cmd}、\cs{cs}和\cs{tn}的键。
 %    \begin{macrocode}
 \keys_define:nn { l3doc/cmd }
   {
@@ -1889,18 +1867,14 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 % \begin{macro}[do-not-index={\\,\_,\1,\c,\2}]{\@@_cmd:nn, \@@_cmd:no}
-%   Apply the key--value \meta{options}~|#1| after setting some
-%   default values.  Then (unless |replace=false|) replace |@@| in~|#2|,
-%   which is a bit tricky: the |_| must be given the catcode expected by
-%   \cs{@@_replace_at_at:N}, but should be reverted to their original
-%   catcode (normally active, needed for line-breaking) without
-%   rescanning the whole argument.  Then typeset the command in
-%   \tn{verbatim@font}, after turning it to harmless characters if
-%   needed (and keeping the underscore breakable); in any case, spaces
-%   must be turned into \tn{@xobeysp} and we must use \tn{@} to avoid
-%   longer spaces after a control sequence that ends for instance with a
-%   colon (empty signature).  Finally, produce an index entry.
-%   Indexing is suppressed when \cs{l_@@_cmd_noindex_bool} is true.
+%   在设置一些默认值后应用键-值 \meta{options}~|#1|。然后（除非 |replace=false|）
+%   替换 |@@| 中的~|#2|，这有点棘手：|_| 必须给出 \cs{@@_replace_at_at:N} 期望
+%   的类别码，但应该在不重新扫描整个参数的情况下恢复到其原始的类别码（通常是活动的，
+%   需要进行换行）。然后，在将其转换为无害字符后（保持下划线可断行），将命令设置为 
+%   \tn{verbatim@font} 中进行排版；在任何情况下，空格必须转换为 \tn{@xobeysp}，
+%   我们必须使用 \tn{@} 来避免在控制序列之后产生更长的空格，例如以冒号结尾的控制
+%   序列（空签名）。最后，生成索引条目。当 \cs{l_@@_cmd_noindex_bool} 为 true 
+%   时，索引被抑制。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_cmd:nn #1#2
   {
@@ -1918,11 +1892,10 @@ and all files in that bundle must be distributed together.
         \tl_replace_all:NnV \l_@@_cmd_tl { _ } \l_@@_tmpb_tl
       }
 %    \end{macrocode}
-% Typesetting.
-% Note the replacement for the underscore is to permit linebreaks.
-% The \texttt{underscore} package adds the linebreak,
-% and the regex results in applying the breakable underscore only to the \emph{last}
-% of a run of underscores, and not if the underscore follows a backslash.
+% 排版。
+% 注意下划线的替换是为了允许换行。
+% \texttt{underscore} 宏包添加了换行，
+% 正则表达式导致仅将可断行的下划线应用于下划线的 \emph{最后一个}，而不是下划线跟在反斜杠后面的情况。
 %    \begin{macrocode}
     \mode_if_math:T { \mbox }
       {
@@ -1944,7 +1917,7 @@ and all files in that bundle must be distributed together.
         \@
       }
 %    \end{macrocode}
-% Indexing.
+% 索引。
 %    \begin{macrocode}
     \bool_if:NT \l_@@_allow_indexing_bool
      {
@@ -1980,12 +1953,11 @@ and all files in that bundle must be distributed together.
 %     \@@_ensuremath_sb:n,
 %     \@@_meta_original:n
 %   }
-%   Store |#1| in \cs{l_@@_tmpa_tl} and replaces every underscore,
-%   regardless of its category (\enquote{math toggle},
-%   \enquote{alignment}, \enquote{superscript}, \enquote{subscript},
-%   \enquote{letter}, \enquote{other}, or \enquote{active}) by
-%   \cs{@@_ensuremath_sb:n} (which creates math subscripts), then runs
-%   the code used for \tn{meta} in \pkg{doc.sty}.
+% 将 |#1| 存储在 \cs{l_@@_tmpa_tl} 中，并替换每个下划线，无论其类别是什么
+% （\enquote{math toggle}、\enquote{alignment}、\enquote{superscript}、
+% \enquote{subscript}、\enquote{letter}、\enquote{other} 或 
+% \enquote{active}），都用 \cs{@@_ensuremath_sb:n} 替换（这会创建数学下
+% 标），然后运行 \pkg{doc.sty} 中用于 \tn{meta} 的代码。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_meta:n #1
   {
@@ -2020,15 +1992,14 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Common between \env{macro} and \env{function}}
+% \subsubsection{\env{macro} 和 \env{function} 之间共通的部分}
 %
 % \begin{macro}
 %   {
 %     \@@_typeset_exp:, \@@_typeset_rexp:,
 %     \@@_typeset_TF:, \@@_typeset_aux:n
 %   }
-%   Used by \cs{@@_macro_single:nNN} and in the \env{function} environment
-%   to typeset conditionals and auxiliary functions.
+%   被 \cs{@@_macro_single:nNN} 使用，也在 \env{function} 环境中用于排版条件语句和辅助函数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_typeset_exp:
   {
@@ -2068,9 +2039,8 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}
 %   {\@@_get_hyper_target:nN, \@@_get_hyper_target:oN, \@@_get_hyper_target:eN}
-%   Create a \pkg{hyperref} anchor from a macro name~|#1| and stores it
-%   in the token list variable~|#2|.  For instance, |\prg_replicate:nn|
-%   gives |doc/function//prg/replicate:nn|.
+% 从宏名称 |#1| 创建一个 \pkg{hyperref} 锚点，并将其存储在记号列表变量 |#2| 
+% 中。例如，|\prg_replicate:nn| 变成 |doc/function//prg/replicate:nn|。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_get_hyper_target:nN #1#2
   {
@@ -2084,16 +2054,13 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_names_get_seq:nN}
-%   The argument~|#1| (argument of a |function| or |macro| environment)
-%   has catcodes $10$ (space), $12$ (other) and $13$ (active).  Sanitize
-%   catcodes.  If the |verb| option was used, output a one-item
-%   sequence.  Otherwise, remove any \enquote{\%} character at the
-%   beginning of a line.  Remove tabs and newlines.  Finally, convert
-%   |_@@| and |@@| to |__|\meta{module name} (if it is non-empty).  At
-%   this point, \cs{l_@@_tmpa_tl} contains a comma-delimited list of
-%   names, where |@| and~|_| have category code letter.  Turn it to a
-%   string, parse it as a comma-delimited list (in particular this
-%   removes spaces), and output a sequence of function/macro names.
+% 参数 |#1|（在 |function| 或 |macro| 环境的参数）的类别码为 $10$（空格），
+% $12$（其他）和 $13$（活动）。对类别码进行清理。如果使用了 |verb| 选项，则
+% 输出一个单项序列。否则，移除位于行首的任何 \enquote{\%} 字符。移除制表符和
+% 换行符。最后，将 |_@@| 和 |@@| 转换为 |__|\meta{module name}（如果非空）。
+% 此时，\cs{l_@@_tmpa_tl} 包含一个逗号分隔的名称列表，其中 |@| 和~|_| 的类
+% 别码为字母。将其转换为字符串，解析为逗号分隔的列表（特别是移除了空格），并
+% 输出一系列函数/宏名称。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_names_get_seq:nN #1#2
   {
@@ -2119,18 +2086,14 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_names_parse:, \@@_names_parse_one:n}
-%   The goal is to group variants together.  We populate
-%   \cs{l_@@_names_block_tl} with local sequence variable named with
-%   \cs{@@_lseq_name:n} after the base forms.  When encountering a new
-%   base form, set the corresponding local sequence to hold the
-%   \meta{base name} (stripped of the signature) and add the local
-%   sequence to the list \cs{l_@@_names_block_tl}.  In all cases append
-%   the signature to the local sequence, which thus takes the form
-%   \meta{base name}, \meta{signature_1}, \meta{signature_2} and so on.
-%   If the original function had no signature (no colon) then use
-%   \cs{scan_stop:} as the signature (there can be no variant).  We
-%   special case commands |#1| starting with |\::|, namely weird
-%   functions named |\::N| and the like.
+% 目标是将变体组合在一起。我们使用 \cs{@@_lseq_name:n} 在基本形式后创建局部
+% 序列变量，并将其填充到 \cs{l_@@_names_block_tl} 中。当遇到新的基本形式时，
+% 设置相应的局部序列来保存 \meta{base name}（去除签名），并将局部序列添加到
+% 列表 \cs{l_@@_names_block_tl} 中。在所有情况下，将签名附加到局部序列中，
+% 因此它采用了这样的形式：\meta{base name}、\meta{signature_1}、
+% \meta{signature_2} 等等。如果原始函数没有签名（没有冒号），则使用 
+% \cs{scan_stop:} 作为签名（没有变体）。我们特别处理以 |\::| 开头的命令 |#1|，
+% 即命名为 |\::N| 等的奇怪函数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_names_parse:
   {
@@ -2180,18 +2143,14 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}{\@@_names_typeset:}
 % \begin{macro}{\@@_names_typeset_auxi:n}
-%   This code is in particular used when typesetting function names in a
-%   \env{function} environment.  The mapping over \cs{l_@@_names_block_tl}
-%   cannot use \cs{tl_map_inline:Nn} because the code following |\\|
-%   would not be expandable, thus breaking \tn{bottomrule}.
+%   此代码特别用于在 \env{function} 环境中排版函数名称时。对于 
+%   \cs{l_@@_names_block_tl} 的映射不能使用 \cs{tl_map_inline:Nn}，因为跟在 
+%   |\\| 之后的代码将不可展开，因此会破坏 \tn{bottomrule}。
 %
-%   Call \cs{@@_names_typeset_auxi:n} on each local sequence (which
-%   holds a set of variants).  The first step is to pop the base form
-%   and change spaces to category other so
-%   that they get displayed eventually.  Then store the variants in
-%   \cs{g_@@_variants_seq}, remove the first, which will be displayed
-%   more prominently, and reconstruct the actual name, passing it to
-%   \cs{@@_names_typeset_auxii:n}.
+%   对每个局部序列（其中包含一组变体）调用 \cs{@@_names_typeset_auxi:n}。第
+%   一步是弹出基本形式，并将空格更改为其他类别码，以便最终显示出来。然后将变体
+%   存储在 \cs{g_@@_variants_seq} 中，移除第一个（它将更显眼地显示），并重建
+%   实际名称，将其传递给 \cs{@@_names_typeset_auxii:n}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_names_typeset:
   {
@@ -2223,10 +2182,9 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}
 %   {\@@_names_typeset_auxii:n, \@@_names_typeset_auxii:e}
-%   In case the option |pTF| was given, typeset predicates before the
-%   |TF| functions.  In case the option |noTF| was given, typeset the
-%   non-|TF| function as well.  Pass the relevant boolean in both cases
-%   to control whether to append |TF|.
+%   如果给定选项 |pTF|，在 |TF| 函数之前排版谓词。
+%   如果给定选项 |noTF|，也排版非 |TF| 函数。
+%   在这两种情况下都传递相关的布尔值，控制是否追加 |TF|。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_names_typeset_auxii:n #1
   {
@@ -2245,11 +2203,10 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_names_typeset_block:nN, \@@_names_typeset_block:eN}
-%   Names in \env{function} and \env{macro} environments are typeset
-%   differently.  To distinguish the two note that
-%   \cs{l_@@_nested_macro_int} is at least one when in an \env{macro}
-%   environment (we assume \env{function} is not nested inside it).  A
-%   block is a function with all its variants.
+%   \env{function} 和 \env{macro} 环境中的名称排版方式不同。
+%   要区分这两者，请注意当处于 \env{macro} 环境时 \cs{l_@@_nested_macro_int} 至少为1
+%   （我们假设 \env{function} 不会嵌套在其中）。
+%   一个块是包含其所有变体的函数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_names_typeset_block:nN
   {
@@ -2263,10 +2220,9 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}[pTF]{\@@_if_macro_internal:n}
 % \begin{macro}[EXP]{\@@_if_macro_internal_aux:w}
-%   Determines whether the given macro should be considered internal or
-%   public.  If an option such as |int| was given then the answer is
-%   \cs{l_@@_macro_internal_bool}, otherwise check for whether the macro
-%   name contains~|__|.
+%   确定给定的宏应视为内部还是公共。
+%   如果给出诸如 |int| 的选项，则答案是 \cs{l_@@_macro_internal_bool}，
+%   否则检查宏名称是否包含 |__|。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_macro_internal:n #1 { p , T , F , TF }
   {
@@ -2288,11 +2244,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_names_block_base_map:N}
-%   The \cs{l_@@_names_block_tl} contains sequence variables
-%   corresponding to different base functions and their variants.  For
-%   each such sequence, put the first and second items in
-%   \cs{l_@@_tmpa_tl} and \cs{l_@@_tmpb_tl} and build the base
-%   function's name.
+%   \cs{l_@@_names_block_tl} 包含与不同基本函数及其变体对应的序列变量。
+%   对于每个这样的序列，将第一个和第二个项目放入 \cs{l_@@_tmpa_tl} 和 \cs{l_@@_tmpb_tl} 中，
+%   并构建基本函数的名称。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_names_block_base_map:N #1
   {
@@ -2316,7 +2270,7 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{The \env{function} environment}
+% \subsubsection{\env{function} 环境}
 %
 %    \begin{macrocode}
 \keys_define:nn { l3doc/function }
@@ -2370,10 +2324,8 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}[do-not-index={\A,\Z,\d,\1,\2,\3}]
 %     {\@@_date_set:Nn,\@@_date_set_past:Nn}
-%   Normalize the date into the format \texttt{YYYY-MM-DD}; more
-%   precisely month and day are allowed to be single digits.  The
-%   \cs{@@_date_set_past:Nn} function only allows dates in the past (or
-%   same day).
+%   将日期标准化为格式 \texttt{YYYY-MM-DD}；更精确地说，允许月份和日期为单个数字。
+%   函数 \cs{@@_date_set_past:Nn} 仅允许过去（或同一天）的日期。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_date_set:Nn #1#2
   {
@@ -2401,20 +2353,14 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}{\@@_function:nnw}
 %   \begin{arguments}
-%     \item Key--value list.
-%     \item Comma-separated list of functions; input has already been
-%       sanitised by catcode changes before reading the argument.
+%     \item 键-值列表。
+%     \item 逗号分隔的函数列表；输入在读取参数之前已经通过改变类别码进行了清理。
 %   \end{arguments}
 % \begin{macro}{\@@_function_end:}
-%   Make sure any paragraph is finished, and similar safe practices at
-%   the beginning of an environment which will typeset material.
-%   Initialize some variables.  Parse the key--value list.  Clean up the
-%   list of functions, then go through them to extract some data.  After
-%   this, typeset the function names in the coffin
-%   \cs{l_@@_functions_coffin} and measure it to know if it fits in the
-%   margin.  Finally, start a vertical coffin for the main part of the
-%   environment.  This coffin stops when the environment ends, then all
-%   the pieces are assembled into a single coffin, which is typeset.
+%   确保任何段落都已结束，并确保环境开始时类似的安全实践。
+%   初始化一些变量。解析键-值列表。清理函数列表，然后遍历其中提取一些数据。
+%   在此之后，在存放函数名的装订盒 \cs{l_@@_functions_coffin} 中排版函数名称，并测量其大小以确定是否适合边距。
+%   最后，开始一个垂直装订盒用于环境的主要部分。当环境结束时，此装订盒停止，然后所有部分被组装成一个单一的装订盒，并进行排版。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function:nnw #1#2
   {
@@ -2440,10 +2386,8 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}
 %   {\@@_function_typeset_start:, \@@_function_typeset_stop:}
-%   At the start of the \env{function} environment, before performing
-%   any assignment, close the last paragraph, and set up the typesetting
-%   scene.  Further code typesets a coffin, so we end the paragraph and
-%   allow a page break.
+%   在 \env{function} 环境开始之前，在执行任何赋值之前，关闭上一个段落，并设置排版场景。
+%   进一步的代码排版一个装订盒，因此我们结束段落并允许换页。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_typeset_start:
   {
@@ -2459,8 +2403,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_function_init:}
-%   Complain if \texttt{function} environments are nested.  Clear
-%   various variables.
+%   如果嵌套了 \texttt{function} 环境，则发出警告。清除各种变量。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_init:
   {
@@ -2487,7 +2430,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_shorthand_meta:, \@@_shorthand_meta:w}
-%   Allow |<...>| to be used as markup for |\meta{...}|.
+%   允许使用 |<...>| 作为 |\meta{...}| 的标记。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_shorthand_meta:
   { \mode_if_math:TF { < } { \@@_shorthand_meta:w } }
@@ -2496,7 +2439,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_function_reset:}
-%   Clear some variables.
+%   清除一些变量。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_reset:
   {
@@ -2506,11 +2449,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_function_typeset:}
-%   Typeset in the coffin \cs{l_@@_functions_coffin} the functions listed in
-%   \cs{l_@@_names_block_tl} and the relevant dates, then set
-%   \cs{l_@@_long_name_bool} to be \texttt{true} if this coffin is
-%   larger than the available width in the margin.  The function
-%   \cs{@@_typeset_functions:} is quite involved hence given later.
+%   在装订盒 \cs{l_@@_functions_coffin} 中排版 \cs{l_@@_names_block_tl} 中列出的函数以及相关日期，
+%   然后如果此装订盒大于边距中可用的宽度，则将 \cs{l_@@_long_name_bool} 设置为 \texttt{true}。
+%   函数 \cs{@@_typeset_functions:} 相当复杂，因此稍后给出。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_typeset:
   {
@@ -2526,11 +2467,8 @@ and all files in that bundle must be distributed together.
 %
 % \begin{macro}
 %   {\@@_function_descr_start:w, \@@_function_descr_stop:}
-%   The last step in \cs{@@_function:nnw} (the beginning of a
-%   \env{function} environment) is to open a coffin which will capture
-%   the description of the function, namely the body of the
-%   \env{function} environment.  This is closed by \cs{@@_function_end:}
-%   (the end of a \env{function} environment).
+%   \cs{@@_function:nnw} 的最后一步（\env{function} 环境的开始）是打开一个装订盒，用于捕获函数的描述，即 \env{function} 环境的正文。
+%   这由 \cs{@@_function_end:}（\env{function} 环境的结束）关闭。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_descr_start:w
   {
@@ -2543,11 +2481,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_function_assemble:}
-%   The box \cs{g_@@_syntax_box} contains the contents of the syntax
-%   environment if it was used.  Now that we have all the pieces, join
-%   together the syntax coffin, the names coffin, and the description
-%   coffin.  The relative positions depend on whether the names coffin
-%   fits in the margin.  Then typeset the combination.
+%   \cs{g_@@_syntax_box} 包含语法环境的内容（如果使用了）。现在我们有了所有的部分，将语法装订盒、名称装订盒和描述装订盒组合在一起。
+%   相对位置取决于名称装订盒是否适合边距。然后排版组合内容。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_assemble:
   {
@@ -2593,12 +2528,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_typeset_functions:}
-%   This function builds the \cs{l_@@_functions_coffin} by typesetting the
-%   function names (with variants) and the relevant dates in a
-%   \env{tabular} environment.  The use of rules \tn{toprule},
-%   \tn{midrule} and \tn{bottomrule} requires whatever lies between the
-%   last |\\| and the rule to be expandable, making our lives a bit
-%   complicated.
+%   此函数通过在 \env{tabular} 环境中排版函数名称（带有变体）和相关日期来构建 \cs{l_@@_functions_coffin}。
+%   使用 \tn{toprule}、\tn{midrule} 和 \tn{bottomrule} 的规则要求最后一个 |\\| 和规则之间的任何内容都是可展开的，
+%   这使得我们的工作变得有些复杂。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_typeset_functions:
   {
@@ -2621,7 +2553,7 @@ and all files in that bundle must be distributed together.
 % \begin{macro}
 %   {\@@_typeset_function_block:nN, \@@_typeset_function_block:eN}
 % \begin{macro}{\@@_function_index:n, \@@_function_index:e}
-%   |#1| is a csname, |#2| a boolean indicating whether to add |TF| or not.
+%   |#1| 是一个控制序列名称，|#2| 是一个布尔值，指示是否添加 |TF|。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_typeset_function_block:nN #1#2
   {
@@ -2653,7 +2585,7 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% |#1| is the function, |#2| whether to add |TF|.
+% |#1| 是函数，|#2| 是否添加 |TF|。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_typeset_variant_list:nN #1#2
   {
@@ -2668,7 +2600,7 @@ and all files in that bundle must be distributed together.
         \textrm(
 %    \end{macrocode}
 %
-%   Set long variant lists in a parbox, short lists set natural length.
+%   设置长变体列表在一个段落盒子中，短列表设置自然长度。
 %    \begin{macrocode}
         \dim_compare:nNnTF { \box_wd:N \l_tmpa_box } > { .4\columnwidth }
           {
@@ -2690,7 +2622,7 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% |#1| is the function name, |#2| whether to add |TF|.
+% |#1| 是函数名，|#2| 是否添加 |TF|。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_function_extra_labels:
   {
@@ -2723,9 +2655,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_typeset_dates:}
-%   To display metadata for when functions are added/modified.
-%   This function must be expandable since it produces rules for use in
-%   alignments.
+%   用于显示函数添加/修改时的元数据。
+%   此函数必须是可展开的，因为它生成用于对齐的规则。
 %    \begin{macrocode}
 \cs_new:Npn \@@_typeset_dates:
   {
@@ -2749,7 +2680,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_syntax:w, \@@_syntax_end:}
-%   Implement the \env{syntax} environment.
+%   实现 \env{syntax} 环境。
 %    \begin{macrocode}
 \dim_new:N \l_@@_syntax_dim
 \cs_new_protected:Npn \@@_syntax:w
@@ -2789,10 +2720,10 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{The \env{macro} environment}
+% \subsubsection{\env{macro} 环境}
 %
-% Keyval for the \env{macro} environment.
-% TODO: provide document command for documenting keys.
+% \env{macro} 环境的键值。
+% TODO: 提供文档命令以记录键。
 %    \begin{macrocode}
 \keys_define:nn { l3doc/macro }
   {
@@ -2858,13 +2789,11 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_macro:nnw}
-%   The arguments are a key--value list of \meta{options} and a
-%   comma-list of \meta{names}, read verbatim by \pkg{ltcmd}.  First
-%   initialize some variables before applying the \meta{options}, then
-%   parse the \meta{names} to get a sequence of macro names, then apply
-%   \cs{@@_macro_single:nNN} to each (this step is more subtle than
-%   \cs{seq_map_function:NN} because of |TF|/|pTF|/|noTF|).  Finally typeset
-%   the macro names in the margin.
+%   参数是一个 \meta{选项} 的键-值列表和一个逗号分隔的 \meta{名称} 列表，
+%   由 \pkg{ltcmd} 以逐字方式读取。在应用 \meta{选项} 之前，先初始化一些变量，
+%   然后解析 \meta{名称} 以获取宏名称序列，然后对每个应用 
+%   \cs{@@_macro_single:nNN}（这一步比较微妙，因为涉及到 |TF|/|pTF|/|noTF|）。
+%   最后在边缘上排版宏名称。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro:nnw #1#2
   {
@@ -2883,9 +2812,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_init:}
-%   The booleans hold various key--value options,
-%   \cs{l_@@_nested_macro_int} counts the number of \env{macro}
-%   environments around the current point (is $0$ outside).
+%   布尔值保存各种键-值选项，\cs{l_@@_nested_macro_int} 计算当前点周围的 \env{macro} 环境数量（在外部为 $0$）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_init:
   {
@@ -2918,8 +2845,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_reset:}
-%   We ensure that \cs{cs} commands nested inside a macro whose module
-%   is imposed are not affected.
+%   确保被强制模块的宏内的 \cs{cs} 命令不受影响。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_reset:
   {
@@ -2929,10 +2855,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_save_names:}
-%   The list of names defined in a set of \env{macro} environments is
-%   eventually used to display on which page they are documented.  If
-%   the |documented-as| key is given, use that, otherwise find names in
-%   \cs{l_@@_names_block_tl}.
+%   在一组 \env{macro} 环境中定义的名称列表最终用于显示其文档的页面。如果给出了 
+%   |documented-as| 键，则使用该键，否则在 \cs{l_@@_names_block_tl} 中查找名
+%   称。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_save_names:
   {
@@ -2949,18 +2874,14 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_exclude_index:}
-%   Some control sequences in a \env{macrocode} environment shouldn't
-%   be indexed, for different reasons. This macro parses the argument
-%   of the |do-not-index| option and locally removes the given macros
-%   from the index.
+%   在 \env{macrocode} 环境中的某些控制序列不应该被索引，原因各不相同。此宏解析 
+%   |do-not-index| 选项的参数，并从索引中局部移除给定的宏。
 %
-%   The optional argument to \env{macro} is not scanned with verbatim
-%   catcodes, so we use \cs{tl_set_rescan:NnV} to rescan the commands
-%   with the same catcodes as \cs{DoNotIndex}. The scanned token list
-%   contains spaces after control sequences, which are not there when
-%   \cs{DoNotIndex} is used. Since \cs{seq_set_from_clist:Nn} removes
-%   spaces around the items, we can abuse that and \cs{seq_use:Nn} to
-%   normalise each item. After that \cs{DoNotIndex} can do its thing.
+%   \env{macro} 的可选参数不使用逐字的类别码扫描，所以我们使用 
+%   \cs{tl_set_rescan:NnV} 以与 \cs{DoNotIndex} 相同的类别码重新扫描命令。扫
+%   描的标记列表包含控制序列后面的空格，在使用 \cs{DoNotIndex} 时不存在。由于 
+%   \cs{seq_set_from_clist:Nn} 移除了项目周围的空格，我们可以滥用这一点和 
+%   \cs{seq_use:Nn} 来规范化每个项目。然后 \cs{DoNotIndex} 就可以起作用了。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_exclude_index:
   {
@@ -2980,7 +2901,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_dump:}
-%   This calls |\makelabel{}|
+%   它调用了 |\makelabel{}|
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_dump:
   {
@@ -3004,8 +2925,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_typeset_block:nN}
-%   Used to typeset a macro and its variants.  |#1| is the macro name,
-%   |#2| is a boolean controlling whether to add |TF|.
+%   用于排版宏及其变体。|#1| 是宏名称，|#2| 是控制是否添加|TF|的布尔值。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_typeset_block:nN #1#2
   {
@@ -3026,17 +2946,13 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_single:nNN}
-%   The arguments are |#1| a macro name (without |TF|), |#2| a boolean
-%   determining whether or not to index, and |#3| whether or not to add |TF|.
-%   Let's start to mess around with \cls{doc}'s \env{macro} environment.
-%   See \file{doc.dtx} for a full explanation of the original
-%   environment.  It's rather \emph{enthusiastically} commented.
+%   参数是 |#1|（不含|TF|的宏名称），|#2| 是确定是否索引的布尔值，|#3| 是是否添加|TF|的布尔值。
+%   让我们开始操作 \cls{doc} 的 \env{macro} 环境。
+%   参见 \file{doc.dtx} 以了解原始环境的详细解释。它被相当“热情地”注释了。
 %   \begin{arguments}
-%     \item Macro/function/whatever name; input has already been
-%       sanitised.
+%     \item 宏/函数/等名称；输入已经经过了净化。
 %   \end{arguments}
-%   The assignments to \cs{saved@macroname} and \cs{saved@indexname}
-%   are used by \pkg{doc}'s \cs{changes} mechanism.
+%   对 \cs{saved@macroname} 和 \cs{saved@indexname} 的赋值是为了 \pkg{doc} 的 \cs{changes} 机制。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_single:nNN #1#2#3
   {
@@ -3072,14 +2988,10 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_typeset_one:nN}
-%   For a long time, \cls{l3doc} collected the macro names as labels in
-%   the first items of nested \tn{trivlist}, but these were not closed
-%   properly with \tn{endtrivlist}.  Also, it interacted in surprising
-%   ways with \pkg{hyperref} targets.  Now, we collect typeset macro
-%   names by hand in the box \cs{l_@@_macro_box}.  The fixed-size space
-%   |\MacroFont\ | could be replaced by an customizable horizontal
-%   space; it is important for it to be the same for all macros.
-%   |#1| is the macro name, |#2| whether to add |TF|.
+%   长时间以来，\cls{l3doc} 将宏名称作为嵌套的 \tn{trivlist} 中的标签收集起来，但是这些并没有用 \tn{endtrivlist} 正确关闭。
+%   而且，它与 \pkg{hyperref} 的目标产生了令人惊讶的交互方式。现在，我们手动在盒子 \cs{l_@@_macro_box} 中收集排版的宏名称。
+%   固定大小的空格 |\MacroFont\ | 可以被可定制的水平空格所取代；对所有宏而言，重要的是它们都是相同的。
+%   |#1| 是宏名称，|#2| 是否添加 |TF|。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_typeset_one:nN #1#2
   {
@@ -3096,8 +3008,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_print_macroname:nN}
-%   In the name, spaces are replaced by other spaces to ensure they get
-%   displayed in case there are any.
+%   在名称中，空格被替换为其他空格，以确保它们能够显示（如果有的话）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_print_macroname:nN #1#2
   {
@@ -3142,7 +3053,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_print_testfile:n, \@@_print_testfile_aux:n}
-%   Used to show that a macro has a test, somewhere.
+%   用于显示某个宏是否有测试。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_print_testfile:n #1
   {
@@ -3200,9 +3111,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_test_missing:n}
-%   Keys in \cs{g_@@_missing_tests_prop} are lists of macros given as
-%   arguments of one \env{macro} environment.  Values are pairs of a
-%   file name and a comment about the missing tests.
+%   \cs{g_@@_missing_tests_prop} 中的键是以一个 \env{macro} 环境的参数给出的一组宏的列表。
+%   值是文件名和关于缺少测试的注释的对。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_test_missing:n #1
   {
@@ -3223,12 +3133,9 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_end:}
-%   It is too late for anyone to declare a test file for this macro, so
-%   we can check now whether the macro is tested.  If the \env{macro}
-%   environment which is being ended is the outermost one, then wrap
-%   each macro in \tn{texttt} (with the addition of |TF| if relevant)
-%   and typeset two informations: that this ends the definition of some
-%   macros, and that they are documented on some page.
+%   现在对于任何人来说都太晚了，来为这个宏声明一个测试文件，所以我们现在可以检查这个宏是否经过了测试。
+%   如果正在结束的 \env{macro} 环境是最外层的环境，则用 \tn{texttt}（如果有的话，附加 |TF|）包裹每个宏，并显示两个信息：
+%   这结束了一些宏的定义，并且它们被记录在某一页上。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_end:
   {
@@ -3241,9 +3148,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_end_check_tested:}
-%   If the |checktest| option was issued and the macro is not an
-%   auxiliary nor a variable (and it does not have a test), then add it
-%   to the sequence of non-tested macros.
+%   如果发出了 |checktest| 选项，并且该宏不是辅助的也不是变量（并且它没有测试），则将其添加到未经测试的宏序列中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_end_check_tested:
   {
@@ -3268,8 +3173,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_macro_end_style:n}
-%   Style for the extra information at the end of a top-level
-%   \env{macro} environment.
+%   顶层 \env{macro} 环境结束时额外信息的样式。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_end_style:n #1
   {
@@ -3285,11 +3189,9 @@ and all files in that bundle must be distributed together.
 %     \@@_macro_end_wrap_item:n,
 %     \@@_print_documented:
 %   }
-%   Surround each item by \tn{texttt}, replacing |_|
-%   by \tn{_} as well.  Then list the
-%   macro names through \cs{seq_use:Nnnn}, unless there are too many.
-%   Finally, if the macro is neither auxiliary nor internal, add a link
-%   to where it is documented.
+%   将每个项目用 \tn{texttt} 包围起来，同时将 |_|
+%   替换为 \tn{_}。然后通过 \cs{seq_use:Nnnn} 列出宏名称，除非太多了。
+%   最后，如果宏既不是辅助的也不是内部的，则添加指向其文档位置的链接。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_macro_end_wrap_item:n #1
   {
@@ -3343,18 +3245,16 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Misc}
+% \subsubsection{杂项}
 %
 % \begin{macro}{\DescribeOption}
-%   For describing package options: retained for consistency, but updated for
-%   \pkg{doc}~v3.
+%   用于描述包选项的功能：为保持一致性而保留，但针对 \pkg{doc} v3 进行了更新。
 %    \begin{macrocode}
 \NewDocElement[idxtype = option, idxgroup = options]{Option}{optionenv}  
 %    \end{macrocode}
 % \end{macro}
 %
-% Here are some definitions for additional markup that helps to
-% structure your documentation.
+% 这里有一些额外标记的定义，有助于构建您的文档结构。
 %
 % \begin{environment}{danger}
 % \begin{environment}{ddanger}
@@ -3364,17 +3264,16 @@ and all files in that bundle must be distributed together.
 %     |\end{[d]danger}|
 %   \end{syntax}
 %   \begin{danger}
-%     Provides a danger bend, as known from the \TeX{}book.
+%     提供了来自 \TeX{}book 中所知的危险符号。
 %   \end{danger}
-%   The actual character from the font |manfnt|:
+%   来自 |manfnt| 字体的实际字符：
 %    \begin{macrocode}
 \font \manual = manfnt \scan_stop:
 \cs_gset:Npn \dbend { {\manual\char127} }
 %    \end{macrocode}
 %
-% Defines the single danger bend. Use it whenever there is a feature in
-% your package that might be tricky to use.  FIXME: Has to be fixed when
-% in combination with a macro-definition.
+% 定义单个危险符号。每当包中有可能使用的特性比较棘手时使用它。
+% FIXME：在与宏定义组合使用时必须修复。
 %    \begin{macrocode}
 \newenvironment {danger}
   {
@@ -3389,9 +3288,7 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 % \begin{ddanger}
-%   Use the double danger bend if there is something which could cause
-%   serious problems when used in a wrong way. Better the normal user
-%   does not know about such things.
+%   如果有一些东西在错误使用时可能会导致严重问题，请使用双重危险符号。最好普通用户不要了解此类情况。
 % \end{ddanger}
 %    \begin{macrocode}
 \newenvironment {ddanger}
@@ -3407,9 +3304,9 @@ and all files in that bundle must be distributed together.
 % \end{environment}
 % \end{environment}
 %
-% \subsubsection{NB and NOTE}
+% \subsubsection{NB 和 NOTE}
 %
-% These macros are intended for additional notes added to the source that are not typeset.
+% 这些宏旨在添加到源文件中的额外注释，不进行排版。
 %
 % \begin{macro}{\NB}
 % \NB{wspr}{this is what I think about this!}
@@ -3458,10 +3355,9 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{environment}
 %
-% \subsection{Footnote support}
-% The environments \env{function} and \env{variable} are boxes
-% and so looses footnotes. The following implements support.
-% It relies currently on an internal from hyperref to get the correct targets.
+% \subsection{脚注支持}
+% \env{function} 和 \env{variable} 环境是盒子，因此会失去脚注。以下实现了对其的支持。
+% 目前依赖于 hyperref 内部机制来获取正确的目标。
 % 
 %    \begin{macrocode}
 \providecommand\Hy@footnote@currentHref{}
@@ -3491,7 +3387,7 @@ and all files in that bundle must be distributed together.
 \AddToHook{env/variable/begin}{\def\footnote{\@@_fn_footnote:nn{variable}}} 
 %    \end{macrocode}
 %
-% \subsection{Documenting templates}
+% \subsection{建立模板的文档}
 %
 %    \begin{macrocode}
 \newenvironment{TemplateInterfaceDescription}[1]
@@ -3556,17 +3452,14 @@ and all files in that bundle must be distributed together.
   { \par \bigskip }
 %    \end{macrocode}
 %
-% \subsection{Inheriting doc}
+% \subsection{继承文档}
 %
-% Code here is taken from \pkg{doc}, stripped of comments and translated
-% into \pkg{expl3} syntax. New features are added in various places.
+% 这里的代码来自于 \pkg{doc}，去除了注释并转换成了 \pkg{expl3} 语法。在各个地方增加了新功能。
 %
 % \begin{macro}
 %   {\StopEventually, \MaybeStop, \Finale, \AlsoImplementation, \OnlyDescription}
 % \begin{variable}{\g_@@_finale_tl}
-%   TODO: remove these four commands altogether, document that it is
-%   better to use the \env{documentation} and \env{implementation}
-%   environments.
+% TODO：彻底移除这四个命令，并记录最好使用 \env{documentation} 和 \env{implementation} 环境。
 %    \begin{macrocode}
 \DeclareDocumentCommand \OnlyDescription { }
   { \bool_gset_false:N \g_@@_typeset_implementation_bool }
@@ -3584,8 +3477,7 @@ and all files in that bundle must be distributed together.
       { #1 \endinput }
   }
 %    \end{macrocode}
-%    We also need to support doc V3 \cs{MaybeStop} if it is around
-%    (which may not be the case).
+% 我们还需要支持 doc V3 的 \cs{MaybeStop}（可能不存在）。
 %    \begin{macrocode}
 \cs_if_exist:NT \MaybeStop  
    { \RenewCommandCopy \MaybeStop \StopEventually }
@@ -3600,8 +3492,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_input:n}
-%   Inputting a file, with some setup: the module name should be empty
-%   before the first |<@@=|\meta{module}|>| line in the file.
+%   对文件进行输入，并进行一些设置：在文件中的第一个 |<@@=|\meta{module}|>| 行之前，模块名应为空。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_input:n #1
   {
@@ -3614,8 +3505,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\DocInput}
-%   Modified from \pkg{doc} to accept comma-list input (who has commas
-%   in filenames?).
+%   从 \pkg{doc} 修改而来，可以接受逗号分隔的输入（文件名里有逗号吗？）。
 %    \begin{macrocode}
 \DeclareDocumentCommand \DocInput { m }
   {
@@ -3629,8 +3519,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\DocInputAgain}
-%   Uses \cs{g_docinput_clist} to re-input whatever's already been
-%   \tn{DocInput}-ed until now.  May be used multiple times.
+%   使用 \cs{g_docinput_clist} 重新输入到目前为止已经 \tn{DocInput} 进来的内容。可以多次使用。
 %    \begin{macrocode}
 \DeclareDocumentCommand \DocInputAgain { }
   { \clist_map_function:NN \g_docinput_clist \@@_input:n }
@@ -3638,9 +3527,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\DocInclude}
-%   More or less exactly the same as \tn{include}, but uses
-%   \tn{DocInput} on a \file{.dtx} file, not \tn{input} on a \file{.tex}
-%   file.
+%   几乎与 \tn{include} 完全相同，但是使用 \tn{DocInput} 处理 \file{.dtx} 文件，而不是处理 \file{.tex} 文件。
 %
 %    \begin{macrocode}
 \NewDocumentCommand \DocInclude { m }
@@ -3703,15 +3590,12 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% Here, |MMMMI| (for page references) and |MMMMV| (for codeline
-% references) are interpreted by |makeindex| as an uppercase Roman
-% number pages, and should be large enough to avoid collisions with
-% other uses of uppercase Roman number pages.  Two subtle differences
-% between \cs{@wrindex} and \cs{codeline@wrindex} are that the first
-% must be a delayed write because the page number is not known yet, and
-% it must close a group and finish some space-hack.
-%
-% We also provide versions for our use that refer
+% 在这里，|MMMMI|（用于页面引用）和 |MMMMV|（用于代码行引用）被 |makeindex| 
+% 解释为大写罗马数字页码，应该足够大，以避免与大写罗马数字页码的其他用途发生冲
+% 突。 \cs{@wrindex} 和 \cs{codeline@wrindex} 之间有两个细微差别，第一个必
+% 须延迟写入，因为页面号尚不知道，第二个必须关闭一组并完成一些空间调整。
+% 
+% 我们还提供了适用于我们用途的版本，引用的方式是
 %    \begin{macrocode}
 \cs_gset_protected:Npn \@wrindex #1
   {
@@ -3745,11 +3629,10 @@ and all files in that bundle must be distributed together.
       }
   }
 %    \end{macrocode}
-% We already have a single |HD.xx| target per code line.  It would be
-% better to have a target |CL.\the\c@CodelineNo| per code line and
-% change |hdclindex{\the\c@HD@hypercount}| to a mechanism closer to
-% |hdpindex|, but we need to understand better the different types of
-% indexings, and there are subtleties with indexing |\{| and |\}|.
+% 每行代码都已经有一个单独的 |HD.xx| 目标了。最好是每行代码都有一个 
+% |CL.\the\c@CodelineNo| 目标，并且将 |hdclindex{\the\c@HD@hypercount}| 
+% 更改为更接近 |hdpindex| 的机制，但我们需要更好地理解不同类型的索引，并且对于
+% 索引 |\{| 和 |\}| 有一些微妙之处。
 % \end{macro}
 %
 % \begin{macro}{\docincludeaux}
@@ -3789,22 +3672,12 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{The \env{macrocode} environment}
+% \subsubsection{\env{macrocode} 环境}
 %
 % \begin{macro}{\xmacro@code, \@@_xmacro_code:n, \@@_xmacro_code:w}
-%   Hook into the \texttt{macrocode} environment in a dirty way:
-%   \tn{xmacro@code} is responsible for grabbing (and tokenizing) the
-%   body of the environment.  Redefine it to pass what it grabs to
-%   \cs{@@_xmacro_code:n}.  This new macro replaces all |@@| by the
-%   appropriate module name.  One exceptional case is the
-%   |<@@=|\meta{module}|>| lines themselves, where |@@| should not be
-%   modified.  Actually, we search for such lines, to set the module
-%   name automatically.  We need to be careful: no |<@@=| should appear
-%   as such in the code below since \pkg{l3doc} is also typeset using
-%   this code.
-%   At each |<@@=| found, replace the \meta{module} in the code behind
-%   it, update the \meta{module}, and loop to check for further
-%   occurrences of |<@@=|.
+%   以一种独特的方式钩入 \texttt{macrocode} 环境：
+%   \tn{xmacro@code} 负责获取（和标记化）环境的主体。重新定义它以将其获取的内容传递给 \cs{@@_xmacro_code:n}。这个新宏将所有的 |@@| 替换为适当的模块名称。唯一的例外是 |<@@=|\meta{module}|>| 行本身，其中 |@@| 不应修改。事实上，我们搜索这样的行来自动设置模块名称。我们需要小心：在下面的代码中不应出现任何 |<@@=|，因为 \pkg{l3doc} 也是使用此代码排版的。
+%   每次找到 |<@@=|，替换它后面的代码中的 \meta{module}，更新 \meta{module}，并循环检查是否有进一步的 |<@@=| 出现。
 %    \begin{macrocode}
 \group_begin:
   \char_set_catcode_other:N \^^A
@@ -3859,9 +3732,9 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{At end document}
+% \subsection{文档结束时}
 %
-% Print all defined and documented macros/functions.
+% 打印所有已定义和已记录的宏/函数。
 %
 %    \begin{macrocode}
 \iow_new:N \g_@@_func_iow
@@ -3929,7 +3802,7 @@ and all files in that bundle must be distributed together.
 \AtEndDocument { \@@_show_functions_defined: }
 %    \end{macrocode}
 %
-% TODO: use \cs{iow_term:e}.
+% TODO: 用 \cs{iow_term:e}.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_functions_typeout:nN #1#2
   {
@@ -4006,14 +3879,12 @@ and all files in that bundle must be distributed together.
 \AtEndDocument { \@@_show_not_tested: }
 %    \end{macrocode}
 %
-% \subsection{Indexing}
+% \subsection{索引}
 %
-% \subsubsection{Necessary patching}
+% \subsubsection{必要的修补}
 %
-% The following is useful to set up \pkg{hyperref} targets, for instance
-% for the purpose of indexing.  Contrarily to \pkg{hypdoc} we do not try
-% to save pdf destinations, as this leads to too many \pdfTeX{} warnings
-% on early runs.
+% 以下内容对于设置 \pkg{hyperref} 的目标很有用，例如为了索引的目的。
+% 与 \pkg{hypdoc} 不同的是，我们不尝试保存 PDF 目标，因为这会在早期运行时产生太多 \pdfTeX{} 警告。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_target:
   {
@@ -4023,7 +3894,7 @@ and all files in that bundle must be distributed together.
     \group_end:
   }
 %    \end{macrocode}
-% Force targets on every code line.
+% 强制在每行代码上创建目标。
 %    \begin{macrocode}
 \cs_set_nopar:Npe \theCodelineNo
   {
@@ -4034,12 +3905,10 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% Inside the table of contents (and other similar lists introduced by
-% \cs{@starttoc}), we suppress indexing.  This is because \cs{cmd},
-% \cs{cs}, or \cs{tn} appearing in titles only gets typeset in the
-% second run, and getting their indexing right would require even more
-% runs than we already need.  Besides, it is not useful to index uses of
-% some command in the table of contents.
+% 在目录（以及由 \cs{@starttoc} 引入的其他类似列表）中，我们抑制索引。
+% 这是因为标题中出现的 \cs{cmd}、\cs{cs} 或 \cs{tn} 只会在第二次运行时排版，
+% 并且正确地对其进行索引需要比我们已经需要的运行次数更多。
+% 此外，在目录中索引某些命令的用法并不实用。
 %    \begin{macrocode}
 \bool_new:N \l_@@_allow_indexing_bool
 \bool_set_true:N \l_@@_allow_indexing_bool
@@ -4055,9 +3924,9 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% \subsubsection{Userspace commands}
+% \subsubsection{用户空间命令}
 %
-% Fix index (for now):
+% 修复索引（暂时）：
 %    \begin{macrocode}
 \g@addto@macro \theindex { \MakePrivateLetters }
 \cs_gset:Npn \verbatimchar {&}
@@ -4067,7 +3936,7 @@ and all files in that bundle must be distributed together.
 \setcounter { IndexColumns } { 2 }
 %    \end{macrocode}
 %
-% Set up the Index to use \tn{part}
+% 设置索引使用 \tn{part}
 %    \begin{macrocode}
 \IndexPrologue
   {
@@ -4082,8 +3951,7 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 % \begin{macro}{\SpecialIndex}
-%   An attempt at affecting how commands which appear within the
-%   \env{macrocode} environment are treated in the index.
+% 尝试影响出现在 \env{macrocode} 环境中的命令在索引中的处理方式。
 %    \begin{macrocode}
 \cs_gset_protected:Npn \SpecialIndex #1
   {
@@ -4105,12 +3973,10 @@ and all files in that bundle must be distributed together.
   { \AtEndDocument { \msg_info:nn { l3doc } { print-index-howto } } }
 %    \end{macrocode}
 %
-% \subsubsection{Internal index commands}
+% \subsubsection{内部索引命令}
 %
 % \begin{macro}{\it@is@a}
-%   The index of one-character commands within the \env{macrocode}
-%   environment is produced using \tn{it@is@a} \meta{char}.  Alter that
-%   command.
+%   在 \env{macrocode} 环境中，一字符命令的索引是通过 \tn{it@is@a} \meta{char} 来生成的。可以修改该命令。
 %    \begin{macrocode}
 \cs_gset_protected:Npn \it@is@a #1
   {
@@ -4153,11 +4019,9 @@ and all files in that bundle must be distributed together.
 %     \@@_special_index_aux:nnnnnn,
 %     \@@_special_index_set:Nn,
 %   }
-%   Remotely based on Heiko's replacement to play nicely with
-%   \pkg{hypdoc}.  We use \tn{verb} or a \tn{verbatim@font} construction
-%   depending on whether the number of tokens in |#2| is equal to its
-%   number of characters: if it is not then that suggests that there is
-%   a construct such as |\meta{...}|.
+%   远程基于 Heiko 的替换方法，可以与 \pkg{hypdoc} 友好地配合使用。我们使用 
+%   \tn{verb} 或 \tn{verbatim@font} 结构，这取决于 |#2| 中的令牌数是否等于
+%   其字符数：如果不等，则表明存在诸如 |\meta{...}| 这样的结构。
 %    \begin{macrocode}
 \tl_new:N \l_@@_index_escaped_macro_tl
 \tl_new:N \l_@@_index_escaped_key_tl
@@ -4170,8 +4034,8 @@ and all files in that bundle must be distributed together.
 % \item key
 % \item macro
 % \item module
-% \item index `type' (\texttt{main}/\texttt{usage}/\emph{etc.})
-% \item boolean whether internal command
+% \item 索引“类型”（\texttt{main}/\texttt{usage}/\emph{等等}）
+% \item 是否是内部命令的布尔值
 % \end{arguments}
 %    \begin{macrocode}
   {
@@ -4207,10 +4071,10 @@ and all files in that bundle must be distributed together.
 % \begin{arguments}
 % \item key
 % \item macro
-% \item index subheading string
-% \item index subheading text
-% \item index subheading suffix (appended to both arg 3 and 4)
-% \item index `type' (\texttt{main}/\texttt{usage}/\emph{etc.})
+% \item 索引子标题字符串
+% \item 索引子标题文本
+% \item 索引子标题后缀（附加到参数 3 和 4）
+% \item 索引“类型”（\texttt{main}/\texttt{usage}/\emph{等等}）
 % \end{arguments}
 %    \begin{macrocode}
   {
@@ -4242,10 +4106,8 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 % \begin{macro}{\hdpindex, \@@_old_hdpindex:nn, \hdclindex, \@@_old_hdclindex:nnn, \@@_hdindex:nn, \c_@@_active_minus_tl, \@@_hdindex_aux:nn, \@@_hdindex_aux:w}
-%   Note that |#3| here could contain |MMMMI-| or |MMMMV-| more than once
-%   if several successive code lines have been merged into a range
-%   somehow.  Note incidentally that the dash is active in some of our
-%   sources, like |interface3.tex| or |source2e.tex|.
+%   注意，如果几个连续的代码行以某种方式合并成一个范围，则 |#3| 可能会包含 |MMMMI-| 或 |MMMMV-| 多次。
+%   顺便提一下，破折号在我们的某些源文件中是活跃的，比如 |interface3.tex| 或 |source2e.tex|。
 %    \begin{macrocode}
 \group_begin:
 \char_set_active_eq:NN - \scan_stop:
@@ -4323,7 +4185,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_quote_special_char:N}
-% Quote some special characters.
+% 引用一些特殊字符。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_quote_special_char:N #1
   {
@@ -4336,22 +4198,15 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Finding sort-key and module}
+% \subsubsection{查找排序键和模块}
 %
 % \begin{macro}{\@@_key_get:n}
-%   Sets \cs{l_@@_index_macro_tl}, \cs{l_@@_index_key_tl}, and
-%   \cs{l_@@_index_module_tl} from |#1|.  The base function is stored by
-%   \cs{@@_key_get_base:nN} in \cs{l_@@_index_macro_tl}, falling back to
-%   |#1| if it contains markup or has no signature.
+% 从 |#1| 设置 \cs{l_@@_index_macro_tl}、\cs{l_@@_index_key_tl} 和 \cs{l_@@_index_module_tl}。
+% 基本函数由 \cs{@@_key_get_base:nN} 存储在 \cs{l_@@_index_macro_tl} 中，如果包含标记或没有签名，则回退到 |#1|。
 %
-%   The starting point for the \meta{key} is \cs{l_@@_index_key_tl} as a
-%   string.  If it the first character is a backslash, remove
-%   it.  Then recognize |expl| functions and variables by the presence
-%   of |:| or~|_| and \TeX{}/\LaTeXe{} commands by the presence of~|@|.
-%   For |expl| names, we call \cs{@@_key_func:} or \cs{@@_key_var:},
-%   which are responsible for removing some characters and finding the
-%   module name, while for \TeX{}/\LaTeXe{} commands the module name is
-%   |TeX|, and others have an empty module name.
+% \meta{key} 的起始点是字符串 \cs{l_@@_index_key_tl}。
+% 如果第一个字符是反斜杠，则删除它。然后通过存在 |:| 或~|_| 的方式识别 |expl| 函数和变量，通过存在 |@| 的方式识别 \TeX{}/\LaTeXe{} 命令。
+% 对于 |expl| 名称，我们调用 \cs{@@_key_func:} 或 \cs{@@_key_var:}，负责删除一些字符并找到模块名称，而对于 \TeX{}/\LaTeXe{} 命令，模块名称是 |TeX|，其他命令的模块名称为空。
 %    \begin{macrocode}
 \cs_new_protected:Npe \@@_key_get:n #1
   {
@@ -4385,9 +4240,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_key_trim_module:n, \@@_key_drop_underscores:}
-%   Helper that removes from \cs{l_@@_index_module_tl} everything after
-%   the first occurence of |#1|.  Helper that removes any leading
-%   underscore from \cs{l_@@_index_key_tl}.
+% 辅助函数，从 \cs{l_@@_index_module_tl} 中删除第一次出现 |#1| 之后的所有内容。
+% 辅助函数，删除 \cs{l_@@_index_key_tl} 的任何前导下划线。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_key_trim_module:n #1
   {
@@ -4405,11 +4259,8 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_key_func:}
-%   The function \cs{@@_key_func:} is used if there is a colon, so
-%   either for usual \pkg{expl3} functions or for keys from
-%   \pkg{l3keys}.  After removing from the key a leading dot (for the
-%   latter case), and any leading underscore, the module name is the
-%   part before any colon or underscore.
+%   函数 \cs{@@_key_func:} 用于处理带有冒号的情况，通常用于 \pkg{expl3} 函数或者来自 \pkg{l3keys} 的键。
+%   在处理键时，会移除前导的句点（对于后一种情况），以及任何前导下划线，模块名称即是在冒号或下划线之前的部分。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_key_func:
   {
@@ -4424,25 +4275,15 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{macro}{\@@_key_var:, \@@_key_get_module:}
-%   The function \cs{@@_key_var:} covers cases with no~|:| but with~|_|,
-%   typically variables but occasionally non-\pkg{expl3} functions such
-%   as \Lua{} function with underscores.  First test the second
-%   character: if that is~|_| then assume we have a proper variable,
-%   otherwise use the part before any underscore as the module name.
-%   For variables, distinguish quarks and scan marks (starting with |q|
-%   and~|s|), then drop the first letter (local/global/constant marker)
-%   and underscores to improve the index sorting.
-%   Then get the module as the first (underscore-delimited) \enquote{word}.
-%   In the past, we distinguished according to how many such words there
-%   were, to detect commands like \cs[no-index]{c_zero}, which should be
-%   sorted as |int| variables, and \cs[no-index]{l_tmpa_dim}, which should
-%   be sorted in the |dim| and not the |tmpa| module.
-%   Now the first case has been deprecated for some time, while |tmpa| and
-%   similar are special-cased through an explicit list given below.
-%   The way it works is that if the module is in a list of special names
-%   that are not valid modules, then we try the last word, and if that
-%   also fails (for instance in the deprecated \cs[no-index]{c_one_hundred})
-%   we empty the module completely.
+%   函数 \cs{@@_key_var:} 处理没有 |:| 但有 |_| 的情况，通常是变量，偶尔是带有下划线的非 \pkg{expl3} 函数（比如 Lua 函数）。
+%   首先检测第二个字符：如果是 |_|，则认为是正确的变量；否则将下划线之前的部分作为模块名称。
+%   对于变量，区分 quarks 和 scan marks（以 |q| 和 |s| 开头），然后去掉第一个字母（局部/全局/常量标记）和下划线，以改善索引排序。
+%   然后获取模块作为第一个（以下划线分隔的）“单词”。
+%   以前我们根据有多少这样的“单词”来区分，以便检测诸如 \cs[no-index]{c_zero} 这样的命令，它应该按照 |int| 变量排序，
+%   以及 \cs[no-index]{l_tmpa_dim}，它应该在 |dim| 而不是 |tmpa| 模块中排序。
+%   现在第一种情况已经被弃用了一段时间，而 |tmpa| 和类似的情况是通过下面显式列表特殊处理的。
+%   工作原理是，如果模块在一个非有效模块名称的列表中，那么我们尝试最后一个词，如果也失败了（比如在弃用的 \cs[no-index]{c_one_hundred} 中），
+%   我们就完全清空模块。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_key_var:
   {
@@ -4481,9 +4322,7 @@ and all files in that bundle must be distributed together.
 % \end{macro}
 %
 % \begin{variable}{\g_@@_non_modules_clist}
-%   List of names that appear as the first word in an \pkg{expl3}
-%   command, but that are not true modules, so that they should be
-%   sorted differently in an index.
+%   包含在 \pkg{expl3} 命令中出现的第一个单词列表，但它们不是真正的模块，因此在索引中应该按不同方式排序。
 %    \begin{macrocode}
 \clist_new:N \g_@@_non_modules_clist
 \clist_gset:Ne \g_@@_non_modules_clist
@@ -4504,10 +4343,10 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsection{Change history}
+% \subsection{历次更新}
 %
-% Set the change history to use \tn{part}.
-% Allow control names to be hyphenated in here\dots
+% 将变更历史设置为使用 \tn{part}。
+% 允许在此处将控制命令连字符化\dots
 %    \begin{macrocode}
 \GlossaryPrologue
   {
@@ -4549,7 +4388,7 @@ and all files in that bundle must be distributed together.
 %^^A                                 :\levelchar #3}}%
 %^^A  \@tempa\endgroup\@esphack}
 %
-% \subsection{Default configuration}
+% \subsection{默认配置}
 %
 %    \begin{macrocode}
 \bool_if:NTF \g_@@_typeset_implementation_bool
@@ -4571,18 +4410,15 @@ and all files in that bundle must be distributed together.
 %</class>
 %    \end{macrocode}
 %
-% \subsection{Internal macros for \LaTeX3 sources}
+% \subsection{\LaTeX3 源文件的内部宏}
 %
-% These definitions are only used by the \LaTeX3 documentation; they are
-% not necessary for third-party users of \cls{l3doc}.  In time this will
-% be broken into a separate package that is specifically loaded in the
-% various \pkg{expl3} modules, \emph{etc.}
+% 这些定义仅供 \LaTeX3 文档使用；对于 \cls{l3doc} 的第三方用户来说并非必需。以后这将被拆分成一个专门在各种 \pkg{expl3} 模块中加载的单独包。
 %
 %    \begin{macrocode}
 %<*cfg>
 %    \end{macrocode}
 %
-% The Guilty Parties.
+% 负责人。
 %    \begin{macrocode}
 \tl_const:Nn \Team
   {
@@ -4609,9 +4445,9 @@ and all files in that bundle must be distributed together.
   }
 %    \end{macrocode}
 %
-% \subsection{Math extras}
+% \subsection{数学扩展}
 %
-% For \pkg{l3fp}.
+% 用于 \pkg{l3fp}。
 %
 %    \begin{macrocode}
 \AtBeginDocument
@@ -4636,20 +4472,17 @@ and all files in that bundle must be distributed together.
 %    \end{macrocode}
 %
 %
-% \subsection{Makeindex configuration}
+% \subsection{Makeindex 配置}
 %
 %    \begin{macrocode}
 %<*docist>
 %    \end{macrocode}
 %
-% The makeindex style \file{l3doc.ist} is used in place of the usual
-% \file{gind.ist} to ensure that |I| is used in the sequence |I J K| not
-% |I II II|, which would be the default makeindex behaviour.
+% 用 \file{l3doc.ist} 样式文件代替通常的 \file{gind.ist}，以确保在序列 |I J K| 中使用 |I| 而不是默认的 makeindex 行为 |I II III|。
 %
-% Will: Do we need this?
+% Will: 我们需要这个吗？
 %
-% Frank: at the moment we do not distribute or generate this file.
-%        \file{gind.ist} is used instead.
+% Frank: 目前我们不分发或生成此文件。我们使用 \file{gind.ist}。
 %
 % \begin{macro}[do-not-index={\\,\n}]{}
 %    \begin{macrocode}
