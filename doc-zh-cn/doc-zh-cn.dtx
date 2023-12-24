@@ -367,9 +367,7 @@
 % 个代码将会被执行（加载文档类 \texttt{ltxdoc} 等）；或者，你可以使用 \texttt{docstrip}
 % 程序将其提取为一个单独的文件。下面的行号是由 \DOC{} 的格式化添加的。
 % 注意，类 \cls{ltxdoc} 预加载了 \DOC{} 包。
-% \footnote{译者注：下面代码中，第 4 行在英文版中是不存在的，出于编译中文的需要，添加上了 
-%           \pkg{ctex} 宏包的引用，被 \env{macrocode} 环境抄录 (verbatim) 下来了；另外，
-%           第 19 行在英文原文中是 \texttt{\bslash DocInput\{doc.dtx\}} ，出于方便中文
+% \footnote{译者注：下面代码中，第 18 行在英文原文中是 \texttt{\bslash DocInput\{doc.dtx\}} ，出于方便中文
 %           读者对照原文阅读以及后续增量更新的需求，在本项目中， |doc.dtx| 是英文版的源文
 %           件，而中文版译文的源文件则更名为 |doc-zh-cn.dtx| 。}
 % \changes{v1.7a}{1992/03/06}{添加了可派生出 docstrip 驱动文件的示例。}
@@ -378,7 +376,11 @@
 %<*driver>
 \documentclass{ltxdoc}
 
+%    \end{macrocode}
+% \iffalse
 \usepackage[fontset=source]{ctex}
+% \fi
+%    \begin{macrocode}
 \usepackage[T1]{fontenc}
 \usepackage{xspace}
 
