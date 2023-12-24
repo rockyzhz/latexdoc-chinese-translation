@@ -160,10 +160,6 @@
 ]
 %%%%%%%%%%%%%%%%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-\newcommand{\HHuge}{\fontsize{39pt}{\baselineskip}\selectfont} %%定义HHuge 为30pt
-\newcommand{\Hhuge}{\fontsize{30pt}{\baselineskip}\selectfont} %%定义Hhuge 为28pt
-
 %%% 以下输入带圈的数字，调用时的命令：如 \char"2469 生成 ⑩ %%%%
 %%详参目录中的“latex 如何添加圆圈数字？ - Tsingke - 博客园.mhtml”%%%%
 \xeCJKDeclareCharClass{CJK}{%
@@ -234,6 +230,7 @@
 \definecolor{spot}{HTML}{003399}
 \definecolor{code}{HTML}{a25e26}
 \definecolor{verb}{HTML}{007f00}
+\AtBeginEnvironment{cmdsyntax}{\color{spot}}
 \AtBeginEnvironment{quote}{\color{verb}}
 \AtBeginEnvironment{flushleft}{\tt\color{verb}}
 \AtBeginEnvironment{verbatim}{\color{verb}\def\MacroFont{\color{verb}\OriginalMF}}
@@ -254,9 +251,12 @@
   bookmarks=true,
   hidelinks,%
   colorlinks,
-  linkcolor=spot,
-  urlcolor=spot,
-  citecolor=spot,%
+  % linkcolor=spot,
+  % urlcolor=spot,
+  % citecolor=spot,%
+  allcolors=spot,
+  runcolor=spot,
+  filecolor=spot,
   pageanchor=true,
   hyperindex=true,
   linktocpage=true
@@ -290,7 +290,6 @@
 \crefname{table}{表}{表}
 \crefname{algorithm}{算法}{算法}
 \newcommand{\crefpairconjunction}{\hspace{0.1mm}和}
-\definecolor{mycolor}{RGB}{72,70,124}  %%自定的颜色mycolor(和超链接中的页码的颜色相同),在varioref.sty文件中应用该颜色即 \color{mycolor}文本
 %%%%%%%%%%%% 以上设置交叉引用的排版格式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -443,7 +442,7 @@ Hyper\hologo{TeX}\ 规范(specification)\,\footnote{\ 这是从 Arthur Smith~(�
 \end{description}
 
 \subsection[宏包和 \cs{hypersetup}\ 选项的值]{{\heiti 宏包和} \cs{hypersetup}\ {\heiti 选项的值}}
-\marginpar{\footnotesize \heiti \color{red}{7.00s版本新增}}当在宏包选项或 \cs{hypersetup} \xpackage{hyperref}\ 中设置键(key)，通常将结果存储在内部变量(internal variables)中，或执行某些代码或设置内部布尔值(internal boolean)。在这里，包和类的作者{\kaiti 不应该}依赖于键处理的名称或细节。
+\marginpar{\footnotesize \heiti \color{spot}{7.00s版本新增}}当在宏包选项或 \cs{hypersetup} \xpackage{hyperref}\ 中设置键(key)，通常将结果存储在内部变量(internal variables)中，或执行某些代码或设置内部布尔值(internal boolean)。在这里，包和类的作者{\kaiti 不应该}依赖于键处理的名称或细节。
 
 但是由于其他宏包有时需要知道设置了哪个值，所以可以使用可展开的(expandable) \cs{GetDocumentProperties}\ 来检索某些值。这些值由 \cs{exp\_not:n}\ 包围返回，因此可以在 \cs{edef}\ 中安全地使用。例如，你可以使用下面的语句来获得 pdf 作者(pdfauthor)。
 
@@ -920,8 +919,8 @@ http://somewhere/path/file.pdf#nameddest=chapter.4
   pdfauthor           & text           &                           & 设置文档信息“Author”(作者)字段                                                                                                                                                                                                         \\
   pdfsubject          & text           &                           & 设置文档信息“Subject”(主题)字段                                                                                                                                                                                                        \\
   pdfcreator          & text           &                           & 设置文档信息“Creator”(创建者)字段                                                                                                                                                                                                       \\
-  pdfcreationdate     & date           &                           & 设置创建日期，请参阅下表了解格式说明。\\
-  pdfmoddate          & date           &                           & 设置修改日期，请参阅下表了解格式说明。\\
+  pdfcreationdate     & date           &                           & 设置创建日期，请参阅下表了解格式说明。                                                                                                                                                                                                          \\
+  pdfmoddate          & date           &                           & 设置修改日期，请参阅下表了解格式说明。                                                                                                                                                                                                          \\
   addtopdfcreator     & text           &                           & 将其他文本添加到文档信息“Creator”(创建者)字段                                                                                                                                                                                                 \\
   pdfkeywords         & text           &                           & 设置文档信息“Keywords”(关键字)字段                                                                                                                                                                                                      \\
   pdftrapped          & name           & empty                     & 设置文档信息Trapped条目。可能的值为 \verb|True|、\verb|False| 和 \verb|Unknown|。空值(empty value)表示未设置条目。                                                                                                                                      \\
@@ -1086,14 +1085,14 @@ Acrobat中的每个链接都有自己的放大级别(magnification level)，该�
   \hlinew{1.0pt}
   \endfirsthead
 
-  \multicolumn{3}{l}{\footnotesize ({\kaiti 前接上表})}                                                                                                            \\
+  \multicolumn{3}{l}{\footnotesize ({\kaiti 前接上表})}                                                                                                              \\
   \hlinew{1.0pt}
   {\Heiti \xpackage{hyperref}\ 的全部选项} & {\Heiti 值}             & {\Heiti 说明}                                                                                     \\
   \hlinew{0.7pt}
   \endhead
 
   \hlinew{1.0pt}
-  \multicolumn{3}{r}{\footnotesize ({\kaiti 后续下表})}                                                                                                            \\
+  \multicolumn{3}{r}{\footnotesize ({\kaiti 后续下表})}                                                                                                              \\
   \endfoot
 
   \hlinew{1.0pt}
@@ -1101,120 +1100,120 @@ Acrobat中的每个链接都有自己的放大级别(magnification level)，该�
   %%%% 以上是重复表头的设置 %%%%%%%%%%%%%%%%%%%%%%%%
   {\Heiti \xpackage{hyperref}\ 的全部选项} & {\Heiti 值}             & {\Heiti 说明}                                                                                     \\
   \hlinew{0.7pt}
-  allbordercolors                   &                        & 设置所有边框颜色选项(border color options)                                                                \\
-  allcolors                         &                        & 设置所有颜色选项(不带边框和字段选项)                                                                             \\
-  anchorcolor                       & \textit{black}         & 设置锚点的颜色，被大多数驱动程序忽略。                                                                             \\
-  backref                           & \textit{false}         & 做回书目的引用(do bibliographical back references)                                                     \\
-  baseurl                           & \textit{empty}         & 设置文档的基本URL                                                                                      \\
-  bookmarks                         & \textit{true}          & 制作书签(make bookmarks)                                                                            \\
-  bookmarksnumbered                 & \textit{false}         & 将章节编号(section numbers)放入书签                                                                      \\
-  bookmarksopen                     & \textit{false}         & 打开书签树(bookmark tree)                                                                            \\
-  bookmarksopenlevel                & \ttfamily\ci{maxdimen} & 书签打开的级别(level)                                                                                  \\
-  bookmarkstype                     & \textit{toc}           & 指定要模仿(mimic)哪个“toc”文件                                                                           \\
-  breaklinks                        & \textit{false}         & 允许链接换行                                                                                          \\
-  CJKbookmarks                      & \textit{false}         & 生成CJK书签                                                                                         \\
-  citebordercolor                   & \textit{0 1 0}         & 引用周围边界(border around cites)的颜色                                                                  \\
-  citecolor                         & \textit{green}         & 引用链接(citation links)的颜色                                                                         \\
-  colorlinks                        & \textit{false}         & 彩色链接(color links)                                                                               \\
-                                    & \textit{true}          & (\textsf{tex4ht}，\textsf{dviwindo})                                                             \\
-  debug                             & \textit{false}         & 提供所定义锚(anchors)的详细信息；与verbose相同                                                                 \\
-  destlabel                         & \textit{false}         & 目的地(destinations)由锚点创建后的第一个 \verb|\label| 命名                                                    \\
-  draft                             & \textit{false}         & 不要进行任何超链接(hyperlinking)                                                                         \\
-  driverfallback                    &                        & 如果未指定或检测到驱动程序，则默认                                                                               \\
-  dvipdfm                           &                        & 使用 \textsf{dvipdfm}\ 后端(backend)                                                                \\
-  dvipdfmx                          &                        & 使用 \textsf{dvipdfmx}\ 后端(backend)                                                               \\
-  dvips                             &                        & 使用 \textsf{dvips}\ 后端(backend)                                                                  \\
-  dvipsone                          &                        & 使用 \textsf{dvipsone}\ 后端(backend)                                                               \\
-  dviwindo                          &                        & 使用 \textsf{dviwindo}\ 后端(backend)                                                               \\
-  encap                             &                        & 为超索引(hyperindex)设置封装字符(encap character)                                                         \\
-  extension                         & \textit{dvi}           & 链接文件的后缀(suffix of linked files)                                                                 \\
-  filebordercolor                   & \textit{0 .5 .5}       & 文件链接周围边框的颜色                                                                                     \\
-  filecolor                         & \textit{cyan}          & 文件链接的颜色                                                                                         \\
-  final                             & \textit{true}          & draft~(草案)选项的反面(opposite)                                                                       \\
-  frenchlinks                       & \textit{false}         & 链接使用小型大写字母(small caps)代替颜色                                                                      \\
-  hidelinks                         &                        & 隐藏链接(删除颜色和边框)                                                                                   \\
-  hyperfigures                      & \textit{false}         & 将图片(figures)用作超链接                                                                               \\
-  hyperfootnotes                    & \textit{true}          & 设置超链接脚注(hyperlinked footnotes)                                                                  \\
-  hyperindex                        & \textit{true}          & 设置超链接索引(hyperlinked indices)                                                                    \\
-  hypertex                          &                        & 使用 \textsf{Hyper\TeX}\ 后端(backend)                                                              \\
-  hypertexnames                     & \textit{true}          & 将可猜测的名称(guessable names)用作超链接                                                                   \\
-  implicit                          & \textit{true}          & 重新定义 \LaTeX\ 内部结构(internals)                                                                    \\
-  latex2html                        &                        & 使用 \textsf{\LaTeX2HTML}\ 后端(backend)                                                            \\
-  linkbordercolor                   & \textit{1 0 0}         & 链接周围边框的颜色                                                                                       \\
-  linkcolor                         & \textit{red}           & 链接的颜色                                                                                           \\
-  linktoc                           & \textit{section}       & 使文本成为TOC~(目录)、LOF~(图目录)和LOT~(表目录)上的链接                                                           \\
-  linktocpage                       & \textit{false}         & 使页码而不是文本，成为TOC~(目录)、LOF~(图目录)和LOT~(表目录)上的链接                                                     \\
-  menubordercolor                   & \textit{1 0 0}         & 菜单链接((menu links))周围边框的颜色                                                                       \\
-  menucolor                         & \textit{red}           & 菜单链接(menu links)的颜色                                                                             \\
-  nativepdf                         & \textit{false}         & \textsf{dvips}\ 的别名                                                                             \\
-  naturalnames                      & \textit{false}         & 使用 \LaTeX\ 计算的名称作为链接                                                                            \\
-  nesting                           & \textit{false}         & 允许嵌套链接                                                                                          \\
-  next-anchor                       &                        & 允许设置下一个锚点(anchor)的名称                                                                            \\
-  pageanchor                        & \textit{true}          & 在每一页中加一个锚点(anchor)                                                                              \\
-  pagebackref                       & \textit{false}         & 按页码反向引用(backreference)                                                                          \\
-  pdfauthor                         & \textit{empty}         & PDF作者字段(Author field)的文本                                                                        \\
-  pdfborder                         & \textit{0 0 1}         & PDF链接边框的宽度                                                                                      \\
-                                    & \textit{0 0 0}         & (\texttt{colorlinks)}                                                                           \\
-  pdfborderstyle                    &                        & 链接的边框样式(border style)                                                                           \\
-  pdfcenterwindow                   & \textit{false}         & 将文档窗口放置在屏幕中央                                                                                    \\
-  pdfcreator                        & \textit{LaTeX with}    & PDF创建者字段(Creator field)的文本                                                                      \\
-                                    & \textit{hyperref}      &                                                                                                 \\
-  pdfcreationdate                   &                        & 设置创建日期，请参阅第~\ref{sec:pdfdata} 节中的表格，了解更多关于格式的信息。  \\
-  pdfdirection                      & \textit{empty}         & 方向设置(direction setting)                                                                         \\
-  pdfdisplaydoctitle                & \textit{false}         & 在标题栏中显示文档标题而不是文件名                                                                               \\
-  pdfduplex                         & \textit{empty}         & 打印对话框的纸张处理选项                                                                                    \\
-  pdffitwindow                      & \textit{false}         & 调整文档窗口大小以适应文档大小                                                                                 \\
-  pdfhighlight                      & \textit{/I}            & 设置PDF链接的高亮显示(highlighting)                                                                      \\
-  pdfinfo                           & \textit{empty}         & 用于设置文档信息的替代接口                                                                                   \\
-  pdfkeywords                       & \textit{empty}         & PDF关键字字段(Keywords field)的文本                                                                     \\
-  pdflang                           & \textit{relax}         & PDF语言标识符(RFC 3066)                                                                              \\
-  pdfmark                           & \textit{false}         & \textsf{dvips}\ 的一个别名                                                                           \\
-  pdfmenubar                        & \textit{true}          & 使PDF查看器(viewer)的菜单栏可见                                                                           \\
-  pdfmoddate                        &                        & 设置修改日期，请参阅第~\ref{sec:pdfdata} 节中的表格，了解更多关于格式的信息。\\
-  pdfnewwindow                      & \textit{false}         & 建立打开另一个PDF的链接                                                                                   \\
-                                    &                        & 文件启动一个新窗口                                                                                       \\
+  allbordercolors                     &                        & 设置所有边框颜色选项(border color options)                                                                \\
+  allcolors                           &                        & 设置所有颜色选项(不带边框和字段选项)                                                                             \\
+  anchorcolor                         & \textit{black}         & 设置锚点的颜色，被大多数驱动程序忽略。                                                                             \\
+  backref                             & \textit{false}         & 做回书目的引用(do bibliographical back references)                                                     \\
+  baseurl                             & \textit{empty}         & 设置文档的基本URL                                                                                      \\
+  bookmarks                           & \textit{true}          & 制作书签(make bookmarks)                                                                            \\
+  bookmarksnumbered                   & \textit{false}         & 将章节编号(section numbers)放入书签                                                                      \\
+  bookmarksopen                       & \textit{false}         & 打开书签树(bookmark tree)                                                                            \\
+  bookmarksopenlevel                  & \ttfamily\ci{maxdimen} & 书签打开的级别(level)                                                                                  \\
+  bookmarkstype                       & \textit{toc}           & 指定要模仿(mimic)哪个“toc”文件                                                                           \\
+  breaklinks                          & \textit{false}         & 允许链接换行                                                                                          \\
+  CJKbookmarks                        & \textit{false}         & 生成CJK书签                                                                                         \\
+  citebordercolor                     & \textit{0 1 0}         & 引用周围边界(border around cites)的颜色                                                                  \\
+  citecolor                           & \textit{green}         & 引用链接(citation links)的颜色                                                                         \\
+  colorlinks                          & \textit{false}         & 彩色链接(color links)                                                                               \\
+                                      & \textit{true}          & (\textsf{tex4ht}，\textsf{dviwindo})                                                             \\
+  debug                               & \textit{false}         & 提供所定义锚(anchors)的详细信息；与verbose相同                                                                 \\
+  destlabel                           & \textit{false}         & 目的地(destinations)由锚点创建后的第一个 \verb|\label| 命名                                                    \\
+  draft                               & \textit{false}         & 不要进行任何超链接(hyperlinking)                                                                         \\
+  driverfallback                      &                        & 如果未指定或检测到驱动程序，则默认                                                                               \\
+  dvipdfm                             &                        & 使用 \textsf{dvipdfm}\ 后端(backend)                                                                \\
+  dvipdfmx                            &                        & 使用 \textsf{dvipdfmx}\ 后端(backend)                                                               \\
+  dvips                               &                        & 使用 \textsf{dvips}\ 后端(backend)                                                                  \\
+  dvipsone                            &                        & 使用 \textsf{dvipsone}\ 后端(backend)                                                               \\
+  dviwindo                            &                        & 使用 \textsf{dviwindo}\ 后端(backend)                                                               \\
+  encap                               &                        & 为超索引(hyperindex)设置封装字符(encap character)                                                         \\
+  extension                           & \textit{dvi}           & 链接文件的后缀(suffix of linked files)                                                                 \\
+  filebordercolor                     & \textit{0 .5 .5}       & 文件链接周围边框的颜色                                                                                     \\
+  filecolor                           & \textit{cyan}          & 文件链接的颜色                                                                                         \\
+  final                               & \textit{true}          & draft~(草案)选项的反面(opposite)                                                                       \\
+  frenchlinks                         & \textit{false}         & 链接使用小型大写字母(small caps)代替颜色                                                                      \\
+  hidelinks                           &                        & 隐藏链接(删除颜色和边框)                                                                                   \\
+  hyperfigures                        & \textit{false}         & 将图片(figures)用作超链接                                                                               \\
+  hyperfootnotes                      & \textit{true}          & 设置超链接脚注(hyperlinked footnotes)                                                                  \\
+  hyperindex                          & \textit{true}          & 设置超链接索引(hyperlinked indices)                                                                    \\
+  hypertex                            &                        & 使用 \textsf{Hyper\TeX}\ 后端(backend)                                                              \\
+  hypertexnames                       & \textit{true}          & 将可猜测的名称(guessable names)用作超链接                                                                   \\
+  implicit                            & \textit{true}          & 重新定义 \LaTeX\ 内部结构(internals)                                                                    \\
+  latex2html                          &                        & 使用 \textsf{\LaTeX2HTML}\ 后端(backend)                                                            \\
+  linkbordercolor                     & \textit{1 0 0}         & 链接周围边框的颜色                                                                                       \\
+  linkcolor                           & \textit{red}           & 链接的颜色                                                                                           \\
+  linktoc                             & \textit{section}       & 使文本成为TOC~(目录)、LOF~(图目录)和LOT~(表目录)上的链接                                                           \\
+  linktocpage                         & \textit{false}         & 使页码而不是文本，成为TOC~(目录)、LOF~(图目录)和LOT~(表目录)上的链接                                                     \\
+  menubordercolor                     & \textit{1 0 0}         & 菜单链接((menu links))周围边框的颜色                                                                       \\
+  menucolor                           & \textit{red}           & 菜单链接(menu links)的颜色                                                                             \\
+  nativepdf                           & \textit{false}         & \textsf{dvips}\ 的别名                                                                             \\
+  naturalnames                        & \textit{false}         & 使用 \LaTeX\ 计算的名称作为链接                                                                            \\
+  nesting                             & \textit{false}         & 允许嵌套链接                                                                                          \\
+  next-anchor                         &                        & 允许设置下一个锚点(anchor)的名称                                                                            \\
+  pageanchor                          & \textit{true}          & 在每一页中加一个锚点(anchor)                                                                              \\
+  pagebackref                         & \textit{false}         & 按页码反向引用(backreference)                                                                          \\
+  pdfauthor                           & \textit{empty}         & PDF作者字段(Author field)的文本                                                                        \\
+  pdfborder                           & \textit{0 0 1}         & PDF链接边框的宽度                                                                                      \\
+                                      & \textit{0 0 0}         & (\texttt{colorlinks)}                                                                           \\
+  pdfborderstyle                      &                        & 链接的边框样式(border style)                                                                           \\
+  pdfcenterwindow                     & \textit{false}         & 将文档窗口放置在屏幕中央                                                                                    \\
+  pdfcreator                          & \textit{LaTeX with}    & PDF创建者字段(Creator field)的文本                                                                      \\
+                                      & \textit{hyperref}      &                                                                                                 \\
+  pdfcreationdate                     &                        & 设置创建日期，请参阅第~\ref{sec:pdfdata} 节中的表格，了解更多关于格式的信息。                                                \\
+  pdfdirection                        & \textit{empty}         & 方向设置(direction setting)                                                                         \\
+  pdfdisplaydoctitle                  & \textit{false}         & 在标题栏中显示文档标题而不是文件名                                                                               \\
+  pdfduplex                           & \textit{empty}         & 打印对话框的纸张处理选项                                                                                    \\
+  pdffitwindow                        & \textit{false}         & 调整文档窗口大小以适应文档大小                                                                                 \\
+  pdfhighlight                        & \textit{/I}            & 设置PDF链接的高亮显示(highlighting)                                                                      \\
+  pdfinfo                             & \textit{empty}         & 用于设置文档信息的替代接口                                                                                   \\
+  pdfkeywords                         & \textit{empty}         & PDF关键字字段(Keywords field)的文本                                                                     \\
+  pdflang                             & \textit{relax}         & PDF语言标识符(RFC 3066)                                                                              \\
+  pdfmark                             & \textit{false}         & \textsf{dvips}\ 的一个别名                                                                           \\
+  pdfmenubar                          & \textit{true}          & 使PDF查看器(viewer)的菜单栏可见                                                                           \\
+  pdfmoddate                          &                        & 设置修改日期，请参阅第~\ref{sec:pdfdata} 节中的表格，了解更多关于格式的信息。                                                \\
+  pdfnewwindow                        & \textit{false}         & 建立打开另一个PDF的链接                                                                                   \\
+                                      &                        & 文件启动一个新窗口                                                                                       \\
   pdfnonfullscreenpagemode
-                                    & \textit{empty}         & 退出全屏模式时的页面模式(page mode)设置                                                                       \\
-  pdfnumcopies                      & \textit{empty}         & 打印份数                                                                                            \\
-  pdfpagelabels                     & \textit{true}          & 设置PDF页面标签(page labels)                                                                          \\
-  pdfpagelayout                     & \textit{empty}         & 设置PDF页面的布局(layout)                                                                              \\
-  pdfpagemode                       & \textit{empty}         & 设置PDF显示的默认模式(default mode)                                                                      \\
-  pdfpagescrop                      & \textit{empty}         & 设置PDF文档的裁剪尺寸(crop size)                                                                         \\
-  pdfpagetransition                 & \textit{empty}         & 设置 PDF 页面过渡样式(transition style)                                                                 \\
+                                      & \textit{empty}         & 退出全屏模式时的页面模式(page mode)设置                                                                       \\
+  pdfnumcopies                        & \textit{empty}         & 打印份数                                                                                            \\
+  pdfpagelabels                       & \textit{true}          & 设置PDF页面标签(page labels)                                                                          \\
+  pdfpagelayout                       & \textit{empty}         & 设置PDF页面的布局(layout)                                                                              \\
+  pdfpagemode                         & \textit{empty}         & 设置PDF显示的默认模式(default mode)                                                                      \\
+  pdfpagescrop                        & \textit{empty}         & 设置PDF文档的裁剪尺寸(crop size)                                                                         \\
+  pdfpagetransition                   & \textit{empty}         & 设置 PDF 页面过渡样式(transition style)                                                                 \\
   pdfpicktraybypdfsize
-                                    & \textit{empty}         & 设置打印对话框选项                                                                                       \\
-  pdfprintarea                      & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /PrintArea                                                        \\
-  pdfprintclip                      & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /PrintClip                                                        \\
-  pdfprintpagerange                 & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /PrintPageRange                                                   \\
-  pdfprintscaling                   & \textit{empty}         & 打印对话框的页面缩放选项                                                                                    \\
-  pdfproducer                       & \textit{empty}         & PDF创建者字段(Producer field)的文本                                                                     \\
-  pdfremotestartview                & \textit{Fit}           & 远程 PDF 文档的起始视图(starting view)                                                                   \\
-  pdfstartpage                      & \textit{1}             & 打开PDF文档时的页面                                                                                     \\
-  pdfstartview                      & \textit{Fit}           & PDF文档的起始视图(starting view)                                                                       \\
-  pdfsubject                        & \textit{empty}         & PDF主题字段(Subject field)的文本                                                                       \\
-  pdftex                            &                        & 使用 \textsf{pdf\TeX}\ 后端(backend)                                                                \\
-  pdftitle                          & \textit{empty}         & PDF标题字段(Title field)的文本                                                                         \\
-  pdftoolbar                        & \textit{true}          & 使PDF工具栏可见                                                                                       \\
-  pdftrapped                        & \textit{empty}         & 设置文档信息Trapped条目。可能的值为 \texttt{True}、\texttt{False}、\texttt{Unknown}。空值(empty value)表示未设置该条目。    \\
-  pdfview                           & \textit{XYZ}           & 链接遍历(traversal)时的PDF“视图(view)”                                                                  \\
-  pdfviewarea                       & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /ViewArea                                                         \\
-  pdfviewclip                       & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /ViewClip                                                         \\
-  pdfwindowui                       & \textit{true}          & 使PDF用户接口元素(interface elements)可见                                                                \\
-  plainpages                        & \textit{false}         & 将页码锚定为普通阿拉伯文(plain Arabic)                                                                      \\
-  ps2pdf                            &                        & 使用 \textsf{ps2pdf}\ 后端(backend)                                                                 \\
-  psdextra                          & \textit{false}         & 为 PDF 字符串命令定义更多的短名称(short names)                                                                \\
-  raiselinks                        & \textit{false}         & 建立链接(用于 \textsf{Hyper\TeX}\ 后端)                                                                 \\
-  runbordercolor                    & \textit{0 .7 .7}       & “run~(运行)”链接周围边框的颜色                                                                             \\
-  runcolor                          & \textit{filecolor}     & “run~(运行)”的颜色                                                                                   \\
-  setpagesize                       & \textit{true}          & 通过特殊的驱动程序命令设置页面尺寸                                                                               \\
-  tex4ht                            &                        & 使用 \textsf{\TeX4ht}\ 后端(backend)                                                                \\
-  textures                          &                        & 使用 \textsf{Textures}\ 后端(backend)                                                               \\
-  unicode                           & \textit{true}          & Unicode 编码的pdf字符串，从v7.00g版开始，所有引擎默认设置为 true。将加载puenc.def中的很多定义。对于pdflatex，它可以设置为false，但是不推荐这样做。 \\
-  urlbordercolor                    & \textit{0 1 1}         & URL链接周围边框的颜色                                                                                    \\
-  urlcolor                          & \textit{magenta}       & URL链接的颜色                                                                                        \\
-  verbose                           & \textit{false}         & 很随意的(be chatty)                                                                                 \\
-  vtex                              &                        & 使作 \textsf{VTeX}\ 后端(backend)                                                                   \\
-  xetex                             &                        & 使用 \textsf{Xe\TeX}\ 后端(backend)                                                                 \\
+                                      & \textit{empty}         & 设置打印对话框选项                                                                                       \\
+  pdfprintarea                        & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /PrintArea                                                        \\
+  pdfprintclip                        & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /PrintClip                                                        \\
+  pdfprintpagerange                   & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /PrintPageRange                                                   \\
+  pdfprintscaling                     & \textit{empty}         & 打印对话框的页面缩放选项                                                                                    \\
+  pdfproducer                         & \textit{empty}         & PDF创建者字段(Producer field)的文本                                                                     \\
+  pdfremotestartview                  & \textit{Fit}           & 远程 PDF 文档的起始视图(starting view)                                                                   \\
+  pdfstartpage                        & \textit{1}             & 打开PDF文档时的页面                                                                                     \\
+  pdfstartview                        & \textit{Fit}           & PDF文档的起始视图(starting view)                                                                       \\
+  pdfsubject                          & \textit{empty}         & PDF主题字段(Subject field)的文本                                                                       \\
+  pdftex                              &                        & 使用 \textsf{pdf\TeX}\ 后端(backend)                                                                \\
+  pdftitle                            & \textit{empty}         & PDF标题字段(Title field)的文本                                                                         \\
+  pdftoolbar                          & \textit{true}          & 使PDF工具栏可见                                                                                       \\
+  pdftrapped                          & \textit{empty}         & 设置文档信息Trapped条目。可能的值为 \texttt{True}、\texttt{False}、\texttt{Unknown}。空值(empty value)表示未设置该条目。    \\
+  pdfview                             & \textit{XYZ}           & 链接遍历(traversal)时的PDF“视图(view)”                                                                  \\
+  pdfviewarea                         & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /ViewArea                                                         \\
+  pdfviewclip                         & \textit{empty}         & 设置查看器首选项(viewer preferences)的 /ViewClip                                                         \\
+  pdfwindowui                         & \textit{true}          & 使PDF用户接口元素(interface elements)可见                                                                \\
+  plainpages                          & \textit{false}         & 将页码锚定为普通阿拉伯文(plain Arabic)                                                                      \\
+  ps2pdf                              &                        & 使用 \textsf{ps2pdf}\ 后端(backend)                                                                 \\
+  psdextra                            & \textit{false}         & 为 PDF 字符串命令定义更多的短名称(short names)                                                                \\
+  raiselinks                          & \textit{false}         & 建立链接(用于 \textsf{Hyper\TeX}\ 后端)                                                                 \\
+  runbordercolor                      & \textit{0 .7 .7}       & “run~(运行)”链接周围边框的颜色                                                                             \\
+  runcolor                            & \textit{filecolor}     & “run~(运行)”的颜色                                                                                   \\
+  setpagesize                         & \textit{true}          & 通过特殊的驱动程序命令设置页面尺寸                                                                               \\
+  tex4ht                              &                        & 使用 \textsf{\TeX4ht}\ 后端(backend)                                                                \\
+  textures                            &                        & 使用 \textsf{Textures}\ 后端(backend)                                                               \\
+  unicode                             & \textit{true}          & Unicode 编码的pdf字符串，从v7.00g版开始，所有引擎默认设置为 true。将加载puenc.def中的很多定义。对于pdflatex，它可以设置为false，但是不推荐这样做。 \\
+  urlbordercolor                      & \textit{0 1 1}         & URL链接周围边框的颜色                                                                                    \\
+  urlcolor                            & \textit{magenta}       & URL链接的颜色                                                                                        \\
+  verbose                             & \textit{false}         & 很随意的(be chatty)                                                                                 \\
+  vtex                                &                        & 使作 \textsf{VTeX}\ 后端(backend)                                                                   \\
+  xetex                               &                        & 使用 \textsf{Xe\TeX}\ 后端(backend)                                                                 \\
 \end{longtable}
 
 \newpage
@@ -1245,9 +1244,9 @@ Acrobat中的每个链接都有自己的放大级别(magnification level)，该�
 实现过程中使用了 \xpackage{url} 宏包，其命令可用于格式化和微调 URL，但是 \ci{url} 的行为与 \xpackage{url} 宏包中的行为不同：最重要的是，hyperref 的 \cs{url} 会展开命令。
 如果需要原始 \cs{url} 的行为或原样输出 URL，应先加载 url 宏包，然后将该命令复制到某个别名命令中使用。
 {\color{blue}
-  \begin{cmdsyntax}
-    {\large \ci{nolinkurl}\verb|{|\emph{URL}\verb|}|}
-  \end{cmdsyntax}
+\begin{cmdsyntax}
+  {\large \ci{nolinkurl}\verb|{|\emph{URL}\verb|}|}
+\end{cmdsyntax}
 }
 \noindent 使用与上面描述的 \verb|\url|\ 相同的方式编写 \emph{URL}，但不创建超链接(hyperlink)。
 {\color{blue}
@@ -1692,7 +1691,7 @@ PDF坐标系的原点(origin)位于左下角(lower left corner)。
 
 \subsection[“localanchorname”选项]{“localanchorname”{\heiti 选项}}
 
-设置\marginpar{\footnotesize \heiti \color{red}{已弃用 2022-04-27 v7.00o}}锚点时(例如，通过 \verb|\refstepcounter|)，锚点名称将全局设置为当前锚点名称。
+设置\marginpar{\footnotesize \heiti \color{spot}{已弃用 2022-04-27 v7.00o}}锚点时(例如，通过 \verb|\refstepcounter|)，锚点名称将全局设置为当前锚点名称。
 
 例如：
 \begin{verbatim}
@@ -2501,13 +2500,13 @@ draft 选项将宏定义如下：
 \xpackage{hyperref} 包旨在与其他包协同工作，但长期目标是移除补丁并将链接支持移入核心、类和包中。然而，仍然存在多个可能引发冲突的来源，例如：
 
 \begin{itemize}
-    \item 操纵文献机制的包。Peter William 的 \xpackage{harvard} 包得到支持。但推荐使用 Patrick Daly 的 \xpackage{natbib} 包，它具有特定的 \xpackage{hyperref} 钩子以实现可靠的交互，或者使用 \xpackage{biblatex} 包。这两个包涵盖了多种布局和引用样式，都与 \xpackage{hyperref} 兼容。
-    
-    \item 改变 \ci{label} 和 \ci{ref} 宏的包。自 2023-06-01 的 \LaTeX{} 核心和 \xpackage{hyperref}/\xpackage{nameref} 使用了相同的 \ci{label} 定义。\ci{label} 具有外部包的钩子。因此，外部包和类不应该重新定义它们。
-    
-    \item 与索引有关的功能严肃的包。
-    
-    \item 与节标题命令和目录有关的功能严肃的包。
+  \item 操纵文献机制的包。Peter William 的 \xpackage{harvard} 包得到支持。但推荐使用 Patrick Daly 的 \xpackage{natbib} 包，它具有特定的 \xpackage{hyperref} 钩子以实现可靠的交互，或者使用 \xpackage{biblatex} 包。这两个包涵盖了多种布局和引用样式，都与 \xpackage{hyperref} 兼容。
+
+  \item 改变 \ci{label} 和 \ci{ref} 宏的包。自 2023-06-01 的 \LaTeX{} 核心和 \xpackage{hyperref}/\xpackage{nameref} 使用了相同的 \ci{label} 定义。\ci{label} 具有外部包的钩子。因此，外部包和类不应该重新定义它们。
+
+  \item 与索引有关的功能严肃的包。
+
+  \item 与节标题命令和目录有关的功能严肃的包。
 \end{itemize}
 
 \xpackage{hyperref} 包附带一个 \xpackage{xr} 的变种 \xpackage{xr-hyper}\footnote{它将很快与 \xpackage{xr} 包合并}，支持使用 \hologo{LaTeX} 的正常 \cs{label}/\cs{ref} 机制进行跨文档链接。
@@ -2826,11 +2825,11 @@ ntheorem-hyper 宏包已过时，请使用最新的原始宏包(up-to-date origi
 \begin{itemize}
   \item 有些驱动程序根本不支持它们(见上文)。
   \item 驱动程序允许，但链接结果可能包括页脚和/或页眉。目前（2023年）可以通过使用 PDF 管理并至少加载 latex-lab 的 new-or-1 模块来避免这种情况：
-      
-  \begin{verbatim}
+
+        \begin{verbatim}
     \DocumentMetadata{testphase=new-or-1} 
     \end{verbatim}
-    
+
 \end{itemize}
 
 \subsection[脚注]{\heiti 脚注}
