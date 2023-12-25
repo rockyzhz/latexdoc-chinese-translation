@@ -13,7 +13,7 @@
 * URW Palladio L Italic Free Font
 * URW Palladio L Bold Italic Free Font
   
-  是四款免费的字体，但是我并不能确认是不是真的免费，如果有侵权行为，请[联系我][0]（或者[发 Issue][4] ），我会在第一时间予以删除。
+  是四款免费的字体，但是我并不能确认是不是真的免费，如果有侵权问题，请[联系我][0]（或者[发 Issue][4] ），我会在第一时间予以删除。
 
   *The authenticity of the four mentioned fonts as free fonts cannot be confirmed by me. If there is any infringement issue, please [contact me][0] or [raise an issue][4], and I will promptly remove them.*
 
