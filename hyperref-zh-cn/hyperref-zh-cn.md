@@ -7,6 +7,15 @@
 ## 文档字体的选择
 出于本项目的统一，本文档使用了思源字体，因此要编译本文档，需要先安装[思源字体][1]，具体安装方法见[项目说明][2]。把文档的中文翻译版的源代码文件 l3doc-zh-cn.dtx 的第69行 `\usepackage[fontset=source]{ctex}` 改成 `\usepackage[fontset=fandol]{ctex}` 可以使用 **Fandol字体** ，如果改成 `\usepackage{ctex}` 则使用系统自带的字体，具体详情可参考 `ctex` 宏包的说明文档。
 
+另外，本文档中还使用了 **URW Palladio L** 系列的下面四款字体作为英文的正文字体，从[字体网站][3]上来看，
+* URW Palladio L Roman Free Font
+* URW Palladio L Bold Free Font
+* URW Palladio L Italic Free Font
+* URW Palladio L Bold Italic Free Font
+  是四款免费的字体，但是我并不能确认是不是真的免费，如果有侵权行为，请[联系我][0]（或者[发 Issue][4] ），我会在第一时间予以删除。
+
+  *The authenticity of the four mentioned fonts as free fonts cannot be confirmed by me. If there is any infringement issue, please [contact me][0] or [raise an issue][4], and I will promptly remove them.*
+
 ## 如何编译本文档
 可以在命令行运行以下代码来编译本文档：
 ```
@@ -18,5 +27,8 @@ latexmk -xelatex hyperref-doc-zh-cn.tex
 
 **Happy TeXing!**
 
+[0]:mailto:rockyzhz@gmail.com
 [1]:https://texer.cn/wp-content/uploads/Source.rar
 [2]:https://github.com/rockyzhz/latexdoc-chinese-translation#使用思源字体
+[3]:https://www.fontsplace.com/?s=URW+Palladio+L
+[4]:https://github.com/rockyzhz/latexdoc-chinese-translation/issues
