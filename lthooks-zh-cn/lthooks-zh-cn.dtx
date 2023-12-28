@@ -37,7 +37,46 @@
 %
 %<*driver>
 \documentclass{l3doc}
+
+% ^^A =================== 中文版特别设置 =========================
 \usepackage[fontset=source]{ctex}
+\ctexset{contentsname={\hfil 目\quad 录\hfil}}
+\usepackage{multicol}
+\usepackage{xcolor}
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\makeatother
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}}
+\ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
+% ^^A \apptocmd{\__codedoc_function_typeset_start:}{ \allowbreak}{}{}
+^^A \pretocmd{\__codedoc_function_descr_start:w}{\allowbreak}{}{}
+\ExplSyntaxOff
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false}
+\IndexPrologue
+  {
+    \section*{索引}
+    \markboth{索引}{索引}
+    \addcontentsline{toc}{section}{索引}
+    斜体数字指向相应条目描述的页面，
+    下划线数字指向定义的代码行，
+    其它的都指向使用条目的页面。
+  }
+% ^^A =================== 中文版设置结束 =========================
 
 \providecommand\InternalDetectionOff{}
 \providecommand\InternalDetectionOn{}
@@ -61,11 +100,16 @@
 %
 %
 %
-% \title{\LaTeX{}'s hook management\thanks{This module has version
-%    \lthooksversion\ dated \lthooksdate, \copyright\ \LaTeX\
-%    Project.}}
+% \title{\huge\bfseries\color{spot}\LaTeX{} 的钩子管理\thanks{该模块版本号
+%    \lthooksversion\ 日期为 \lthooksdate, \copyright\ \LaTeX\
+%    项目版权所有。}}
 %
-% \author{Frank Mittelbach\thanks{Code improvements for speed and other goodies by Phelype Oleinik}}
+% \author{
+%  \begin{tabular}{c@{\hspace{1em}}l}
+%    Frank Mittelbach\thanks{Phelype Oleinik做了代码改进以使速度更快以及其它好处。}
+%    & 【著】\\
+%    张泓知 & 【译】
+%  \end{tabular}}
 %
 % \maketitle
 %
@@ -92,344 +136,291 @@
 % 钩子将被准备（并排序）以便执行。
 %
 %
-% \section{Package writer interface}
+% \section{包作者接口}
 %
-%    The hook management system is offered as a set of CamelCase
-%    commands for traditional \LaTeXe{} packages (and for use in the
-%    document preamble if needed) as well as \texttt{expl3} commands
-%    for modern packages, that use the L3 programming layer of
-%    \LaTeX{}. Behind the scenes, a single set of data structures is
-%    accessed so that packages from both worlds can coexist and access
-%    hooks in other packages.
+% 钩子管理系统提供了一组 CamelCase 命令，用于传统的 \LaTeXe{} 包
+% （以及必要时在文档导言部分使用），同时也提供了用于现代包的 \texttt{expl3}
+% 命令，这些现代包使用了 \LaTeX{} 的 L3 编程层。在幕后，访问的是一组
+% 单一的数据结构，使得来自两个世界的包可以共存并访问其他包中的钩子。
 %
+% \subsection{\LaTeXe\ 接口}
 %
+% \subsubsection{声明钩子}
 %
-% \subsection{\LaTeXe\ interfaces}
-%
-% \subsubsection{Declaring hooks}
-%
-%  With a few exceptions, hooks have to be declared before they can
-%  be used. The exceptions are the generic hooks for commands and
-%  environments (executed at \cs{begin} and \cs{end}), and the
-%  hooks run when loading files (see section~\ref{sec:generic}).
+% 除了少数例外，钩子必须在使用前声明。这些例外包括命令和环境的通用
+% 钩子（在 \cs{begin} 和 \cs{end} 执行）以及加载文件时运行的钩子
+% （参见第~\ref{sec:generic}节）。
 %
 % \begin{function}{\NewHook}
 %   \begin{syntax}
 %     \cs{NewHook} \Arg{hook}
 %   \end{syntax}
-%   Creates a new \meta{hook}.
-%    If this hook is declared within a package it is suggested
-%    that its name is always structured as follows:
-%    \meta{package-name}\texttt{/}\meta{hook-name}. If necessary you
-%    can further subdivide the name by adding more \texttt{/} parts.
-%    If a hook name is already taken, an error is raised and the hook
-%    is not created.
+%   创建一个新的 \meta{hook}。
+%    如果这个钩子在一个包内声明，建议其名称总是结构化的，形式为：
+%    \meta{package-name}\texttt{/}\meta{hook-name}。如果需要，
+%    您可以通过添加更多的 \texttt{/} 部分来进一步细分名称。
+%    如果钩子名称已经存在，将引发错误并且不会创建该钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%    \meta{hook} 可以使用点语法指定为当前包的名称。
+%    请参见第~\ref{sec:default-label}节。
 % \end{function}
 %
 % \begin{function}{\NewReversedHook}
 %   \begin{syntax}
 %     \cs{NewReversedHook} \Arg{hook}
 %   \end{syntax}
-%     Like \cs{NewHook} declares a new \meta{hook}.
-%     the difference is that the code chunks for this hook are in
-%     reverse order by default (those added last are executed first).
-%     Any rules for the hook are applied after the default ordering.
-%     See sections~\ref{sec:order} and \ref{sec:reversed-order}
-%    for further details.
+%   类似于 \cs{NewHook} 声明一个新的 \meta{hook}。
+%   不同之处在于，该钩子的代码块默认按相反顺序排列（最后添加的先执行）。
+%   钩子的任何规则都将在默认排序之后应用。
+%   详细内容请参见第~\ref{sec:order} 和 \ref{sec:reversed-order} 节。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   \meta{hook} 可以使用点语法指定为当前包的名称。
+%   请参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\NewMirroredHookPair}
 %   \begin{syntax}
 %     \cs{NewMirroredHookPair} \Arg{hook-1} \Arg{hook-2}
 %   \end{syntax}
-%     A shorthand for
-%    \cs{NewHook}\Arg{hook-1}\cs{NewReversedHook}\Arg{hook-2}.
+%   是 \cs{NewHook}\Arg{hook-1}\cs{NewReversedHook}\Arg{hook-2} 的简写。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   \meta{hook} 可以使用点语法指定为当前包的名称。
+%   请参见第~\ref{sec:default-label} 节。
 % \end{function}
-%
 %
 % \begin{function}{\NewHookWithArguments}
 %   \begin{syntax}
 %     \cs{NewHookWithArguments} \Arg{hook} \Arg{number}
 %   \end{syntax}
-%   Creates a new \meta{hook} whose code takes \meta{number} arguments,
-%   and otherwise works exactly like \cs{NewHook}.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%   创建一个具有 \meta{number} 个参数的新 \meta{hook}，在其他方面与 \cs{NewHook} 完全相同。
+%   第~\ref{sec:hook-args} 节详细解释了带参数的钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   \meta{hook} 可以使用点语法指定为当前包的名称。
+%   请参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\NewReversedHookWithArguments}
 %   \begin{syntax}
 %     \cs{NewReversedHookWithArguments} \Arg{hook} \Arg{number}
 %   \end{syntax}
-%   Like \cs{NewReversedHook}, but creates a hook whose code takes
-%   \meta{number} arguments.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%   类似于 \cs{NewReversedHook}，但创建的钩子的代码带有 \meta{number} 个参数。
+%   第~\ref{sec:hook-args} 节详细解释了带参数的钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   \meta{hook} 可以使用点语法指定为当前包的名称。
+%   请参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\NewMirroredHookPairWithArguments}
 %   \begin{syntax}
 %     \cs{NewMirroredHookPairWithArguments} \Arg{hook-1} \Arg{hook-2} \Arg{number}
 %   \end{syntax}
-%   A shorthand for
-%   \cs{NewHookWithArguments}\Arg{hook-1}\Arg{number}\\
-%   \cs{NewReversedHookWithArguments}\Arg{hook-2}\Arg{number}.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%   是 \cs{NewHookWithArguments}\Arg{hook-1}\Arg{number}\\
+%   \cs{NewReversedHookWithArguments}\Arg{hook-2}\Arg{number} 的简写。
+%   第~\ref{sec:hook-args} 节详细解释了带参数的钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   \meta{hook} 可以使用点语法指定为当前包的名称。
+%   请参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 %
-% \subsubsection{Special declarations for generic hooks}
+% \subsubsection{通用钩子的特殊声明}
 %
-%    The declarations here should normally not be used. They are available
-%    to provide support for special use cases mainly involving
-%    generic command hooks.
+% 此处的声明通常不应该被使用。它们提供了对主要涉及通用命令钩子的特殊用例的支持。
 %
-% \changes{v1.0p}{2021/08/20}{Documentation updates for generic hook commands (gh/638)}
+% \changes{v1.0p}{2021/08/20}{针对通用钩子命令的文档更新（gh/638）}
 %
 % \begin{function}{\DisableGenericHook}
 %   \begin{syntax}
 %     \cs{DisableGenericHook} \Arg{hook}
 %   \end{syntax}
-%    After this declaration\footnotemark{} the \meta{hook} is no longer
-%    usable: Any further attempt to add code to it will result in an
-%    error and any use, e.g., via \cs{UseHook}, will simply do nothing.
+%    在此声明之后\footnotemark{}，\meta{hook} 将不再可用：
+%    进一步尝试向其添加代码将导致错误，任何使用，例如 \cs{UseHook}，
+%    都将什么也不做。
 %
-%    This is intended to be used with generic command hooks (see
-%    \texttt{ltcmdhooks-doc}) as depending on the definition of the
-%    command such generic hooks may be unusable. If that is known, a
-%    package developer can disable such hooks up front.
+%    这主要用于通用命令钩子（参见 \texttt{ltcmdhooks-doc}），
+%    因为根据命令的定义，这些通用钩子可能不可用。
+%    如果已知此情况，包开发人员可以提前禁用这些钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
-% \end{function}\footnotetext{In the 2020/06 release this command was
-%    called \cs{DisableHook}, but that name was misleading as it
-%    shouldn't be used to disable non-generic hooks.}
+%    \meta{hook} 可以使用点语法指定为当前包的名称。
+%    请参见第~\ref{sec:default-label} 节。
+% \end{function}\footnotetext{在 2020/06 版本中，此命令称为 \cs{DisableHook}，
+%    但该名称是误导性的，因为它不应用于禁用非通用钩子。}
 %
 %
 % \begin{function}{\ActivateGenericHook}
 %   \begin{syntax}
 %     \cs{ActivateGenericHook} \Arg{hook}
 %   \end{syntax}
-%    This declaration activates a generic hook provided by a package/class
-%    (e.g., one used in code with \cs{UseHook} or
-%    \cs{UseOneTimeHook}) without it being explicitly declared with
-%    \cs{NewHook}).
-%    This command undoes the effect of \cs{DisableGenericHook}.
-%    If the hook is already activated, this command does nothing.
+% 此声明激活了包/类提供的通用钩子
+% （例如，在使用 \cs{UseHook} 或 \cs{UseOneTimeHook} 代码中使用的钩子），
+% 而无需显式使用 \cs{NewHook} 进行声明）。
+% 此命令撤销了 \cs{DisableGenericHook} 的效果。
+% 如果钩子已经被激活，此命令将不做任何操作。
 %
-%    See section~\ref{sec:generic-hooks} for a discussion of when this
-%    declaration is appropriate.
+% 请参见第~\ref{sec:generic-hooks} 节，了解何时使用此声明。
 % \end{function}
 %
 %
 %
 %
 %
-% \subsubsection{Using hooks in code}
-%
+% \subsubsection{在代码中使用钩子}
 %
 % \begin{function}{\UseHook}
 %   \begin{syntax}
 %     \cs{UseHook} \Arg{hook}
 %   \end{syntax}
-%    Execute the code stored in the \meta{hook}.
+%    执行存储在 \meta{hook} 中的代码。
 %
-%    Before \verb=\begin{document}= the fast execution code for a hook
-%    is not set up, so in order to use a hook there it is explicitly
-%    initialized first. As that involves assignments using a hook at
-%    those times is not 100\% the same as using it after
-%    \verb=\begin{document}=.
+%    在 \verb=\begin{document}= 之前，并未设置钩子的快速执行代码，
+%    因此在那里使用钩子时，需要显式地首先进行初始化。
+%    由于这涉及到赋值，在这些时刻使用钩子并非与在 \verb=\begin{document}= 后完全相同。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.
+%    无法使用点语法指定 \meta{hook}。
+%    其前面的 |.| 将被视为文字字符。
 % \end{function}
 %
 % \begin{function}{\UseHookWithArguments}
 %   \begin{syntax}
 %     \cs{UseHookWithArguments} \Arg{hook} \Arg{number} \Arg{arg_1} \ldots \Arg{arg_n}
 %   \end{syntax}
-%    Execute the code stored in the \meta{hook} and pass the arguments
-%    \Arg{arg_1} through \Arg{arg_n} to the \meta{hook}.  Otherwise, it
-%    works exactly like \cs{UseHook}.
-%    The \meta{number} should be the number of arguments declared for
-%    the hook.  If the hook is not declared, this command does nothing
-%    and it will remove \meta{number} items from the input.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%    执行存储在 \meta{hook} 中的代码，并将 \Arg{arg_1} 至 \Arg{arg_n} 参数传递给 \meta{hook}。
+%    否则，其行为与 \cs{UseHook} 完全相同。
+%    \meta{number} 应该是钩子声明的参数数量。
+%    如果钩子未声明，此命令将不执行任何操作，并将从输入中删除 \meta{number} 个项目。
+%    第~\ref{sec:hook-args} 节解释了带参数的钩子。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.
+%    无法使用点语法指定 \meta{hook}。
+%    其前面的 |.| 将被视为文字字符。
 % \end{function}
 %
 % \begin{function}{\UseOneTimeHook}
 %   \begin{syntax}
 %     \cs{UseOneTimeHook} \Arg{hook}
 %   \end{syntax}
-%    Some hooks are only used (and can be only used) in one place, for
-%    example, those in \verb=\begin{document}= or
-%    \verb=\end{document}=. From that point onwards, adding to the hook
-%    through a defined \cs[no-index]{\meta{addto-cmd}} command (e.g.,
-%    \cs{AddToHook} or \cs{AtBeginDocument}, etc.\@) would have no
-%    effect (as would the use of such a command inside the hook code
-%    itself). It is therefore customary to redefine
-%    \cs{\meta{addto-cmd}} to simply  process its argument, i.e.,
-%    essentially make it behave like \cs{@firstofone}.
+%    一些钩子仅在一个地方使用（并且只能在一个地方使用），
+%    例如，在 \verb=\begin{document}= 或 \verb=\end{document}= 中的钩子。
+%    从那时起，通过已定义的 \cs[no-index]{\meta{addto-cmd}} 命令
+%    （例如，\cs{AddToHook} 或 \cs{AtBeginDocument} 等）向钩子添加内容
+%    将不起作用（就像在钩子代码内部使用这样的命令一样）。
+%    因此，习惯上重新定义 \cs{\meta{addto-cmd}} 以简单地处理其参数，
+%    即本质上使其行为类似于 \cs{@firstofone}。
 %
-%    \cs{UseOneTimeHook} does that: it records that the hook has been
-%    consumed and any further attempt to add to it will result in
-%    executing the code to be added immediately.
+%    \cs{UseOneTimeHook} 就是这样做的：它记录钩子已被消耗，
+%    任何进一步尝试向其添加内容都将导致立即执行要添加的代码。
 %
-%    Using \cs{UseOneTimeHook} several times with the same
-%    \Arg{hook} means that it only executes the first time it is used.
-%    For example, if it is used in a command that can be called several times
-%    then the hook executes during only the \emph{first} invocation of that
-%    command; this allows its use as an \enquote{initialization hook}.
+%    多次使用 \cs{UseOneTimeHook} 对同一个 \Arg{hook} 意味着
+%    它只在第一次使用时执行。例如，如果它在可以被多次调用的命令中使用，
+%    则该钩子仅在该命令的 \emph{第一次} 调用时执行；
+%    这允许其用作“初始化钩子”。
 %
-%    Mixing \cs{UseHook} and \cs{UseOneTimeHook} for the same
-%    \Arg{hook} should be avoided, but if this is done then neither will execute
-%    after the first \cs{UseOneTimeHook}.
+%    应避免混合使用 \cs{UseHook} 和 \cs{UseOneTimeHook} 用于同一个 \Arg{hook}，
+%    但如果这样做了，那么在第一次 \cs{UseOneTimeHook} 后，两者都不会再执行。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.    See
-%    section~\ref{sec:default-label} for details.
-%
+%    无法使用点语法指定 \meta{hook}。
+%    其前面的 |.| 将被视为文字字符。详见
+%    第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\UseOneTimeHookWithArguments}
 %   \begin{syntax}
 %     \cs{UseOneTimeHookWithArguments} \Arg{hook} \Arg{number} \Arg{arg_1} \ldots \Arg{arg_n}
 %   \end{syntax}
-%    Works exactly like \cs{UseOneTimeHook}, but passes arguments
-%    \Arg{arg_1} through \Arg{arg_n} to the \meta{hook}.
-%    The \meta{number} should be the number of arguments declared for
-%    the hook.  If the hook is not declared, this command does nothing
-%    and it will remove \meta{number} items from the input.
+%    与 \cs{UseOneTimeHook} 完全相同，但将参数 \Arg{arg_1} 至 \Arg{arg_n} 传递给 \meta{hook}。
+%    \meta{number} 应该是钩子声明的参数数量。
+%    如果钩子未声明，此命令将不执行任何操作，并将从输入中删除 \meta{number} 个项目。
 %
-%    It should be noted that after a one-time hook is used, it is no
-%    longer possible to use \cs{AddToHookWithArguments} or similar with
-%    that hook.  \cs{AddToHook} continues to work as normal.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%    应注意，一次性钩子使用后，将不再可能使用 \cs{AddToHookWithArguments} 或类似方法
+%    添加内容到该钩子。 \cs{AddToHook} 仍然正常工作。
+%    第~\ref{sec:hook-args} 节解释了带参数的钩子。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.    See
-%    section~\ref{sec:default-label} for details.
-%
+%    无法使用点语法指定 \meta{hook}。
+%    其前面的 |.| 将被视为文字字符。详见
+%    第~\ref{sec:default-label} 节。
 % \end{function}
 %
-%
-% \subsubsection{Updating code for hooks}
 %
 % \begin{function}{\AddToHook}
 %   \begin{syntax}
 %     \cs{AddToHook} \Arg{hook}\oarg{label}\Arg{code}
 %   \end{syntax}
-%    Adds \meta{code} to the \meta{hook} labeled by \meta{label}.
-%    When the optional argument \meta{label} is not provided, the
-%    \meta{default label} is used (see section~\ref{sec:default-label}).
-%    If \cs{AddToHook} is used in a package/class, the
-%    \meta{default label} is the package/class name, otherwise it is
-%    \hook{top-level} (the \hook{top-level} label is treated
-%    differently:  see section~\ref{sec:top-level}).
+%    向标记为 \meta{label} 的 \meta{hook} 添加 \meta{code}。
+%    当不提供可选参数 \meta{label} 时，将使用 \meta{默认标签}
+%    （参见第~\ref{sec:default-label} 节）。
+%    如果 \cs{AddToHook} 在包/类中使用，则 \meta{默认标签} 为包/类名，
+%    否则为 \hook{top-level}（\hook{top-level} 标签处理方式不同：
+%    详见第~\ref{sec:top-level} 节）。
 %
-%    If there already exists code under the \meta{label} then the new
-%    \meta{code} is appended to the existing one (even if this is a reversed hook).
-%    If you want to replace existing code under the
-%    \meta{label}, first apply \cs{RemoveFromHook}.
+%    如果 \meta{label} 下已存在代码，则新的 \meta{code} 将附加到现有代码中
+%    （即使这是一个反向钩子）。如果要替换 \meta{label} 下的现有代码，
+%    请先应用 \cs{RemoveFromHook}。
 %
-%    The hook doesn't have to exist for code to be added to
-%    it. However, if it is not declared, then obviously the
-%    added \meta{code} will never be executed.  This
-%    allows for hooks to work regardless of package loading order and
-%    enables packages to add to hooks from other packages without
-%    worrying whether they are actually used in the current document.
-%    See section~\ref{sec:querying}.
+%    钩子不必存在即可向其添加代码。但是，如果未声明，
+%    则显然添加的 \meta{code} 将永远不会执行。
+%    这使得钩子能够在不考虑包装载顺序的情况下工作，
+%    并使得包装可以从其他包装中向钩子添加内容，而无需担心它们实际上是否在当前文档中使用。
+%    详见第~\ref{sec:querying} 节。
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
+%    可以使用点语法指定 \meta{hook} 和 \meta{label}。
+%    详见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\AddToHookWithArguments}
 %   \begin{syntax}
 %     \cs{AddToHookWithArguments} \Arg{hook}\oarg{label}\Arg{code}
 %   \end{syntax}
-%    Works exactly like \cs{AddToHook}, except that the \meta{code} can
-%    access the arguments passed to the hook using \verb|#1|, \verb|#2|,
-%    \ldots, \verb|#n| (up to the number of arguments declared for the
-%    hook).  If the \meta{code} should contain \emph{parameter tokens}
-%    (\verb|#|) that are not supposed to be understood as the arguments
-%    of the hook, such tokens should be doubled.  For example, with
-%    \cs{AddToHook} one can write:
+%    与 \cs{AddToHook} 完全相同，但 \meta{code} 可以访问通过
+%    \verb|#1|、\verb|#2|、\ldots、\verb|#n|（与钩子声明的参数数量相符）
+%    传递给钩子的参数。如果 \meta{code} 中包含不希望被理解为钩子参数的
+%    \emph{参数符号}（\verb|#|），则应将这些符号加倍。例如，使用 \cs{AddToHook}
+%    可以写成：
 %\begin{verbatim}
 %   \AddToHook{myhook}{\def\foo#1{Hello, #1!}}
 %\end{verbatim}
-%    but to achieve the same with \cs{AddToHookWithArguments}, one should
-%    write:
+%    但是要使用 \cs{AddToHookWithArguments} 实现相同效果，应写成：
 %\begin{verbatim}
 %   \AddToHookWithArguments{myhook}{\def\foo##1{Hello, ##1!}}
 %\end{verbatim}
-%    because in the latter case, \verb|#1| refers to the first argument
-%    of the hook \hook{myhook}.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%    因为在后一种情况中，\verb|#1| 指的是钩子 \hook{myhook} 的第一个参数。
+%    第~\ref{sec:hook-args} 节解释了带参数的钩子。
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
+%    可以使用点语法指定 \meta{hook} 和 \meta{label}。
+%    详见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\RemoveFromHook}
 %   \begin{syntax}
 %     \cs{RemoveFromHook} \Arg{hook}\oarg{label}
 %   \end{syntax}
-%    Removes any code labeled by \meta{label} from the \meta{hook}.
-%    When the optional argument \meta{label} is not provided, the
-%    \meta{default label} is used (see section~\ref{sec:default-label}).
+% 从 \meta{hook} 中删除由 \meta{label} 标记的任何代码。
+% 当不提供可选参数 \meta{label} 时，将使用 \meta{default label}
+%（参见第~\ref{sec:default-label} 节）。
 %
-%    If there is no code under the \meta{label} in the \meta{hook},
-%    or if the \meta{hook} does not exist, a warning is issued when
-%    you attempt to \cs{RemoveFromHook}, and the command is ignored.
-%    \cs{RemoveFromHook} should be used only when you know exactly what
-%    labels are in a hook. Typically this will be when some code gets added to a hook 
-%    by a package, then later this code is removed by that same package.
-%    If you want to prevent the execution of code from another
-%    package, use the |voids| rule instead (see section~\ref{sec:rules}).
+% 如果在 \meta{hook} 中不存在 \meta{label} 下的代码，
+% 或者 \meta{hook} 不存在，则在尝试 \cs{RemoveFromHook} 时发出警告，
+% 并忽略该命令。仅当您确切地了解钩子中有哪些标签时，
+% 才应使用 \cs{RemoveFromHook}。通常情况下，
+% 这将是当某个包将某些代码添加到钩子中时，
+% 然后同一个包稍后删除此代码时。
+% 如果您想阻止来自另一个包的代码执行，
+% 则应使用 |voids| 规则（参见第~\ref{sec:rules} 节）。
 %
-%    If the optional \meta{label} argument is \texttt{*}, then all code chunks are
-%    removed. This is rather dangerous as it may well drop code from other
-%    packages (that one may not know about); it should therefore not be used
-%    in packages but only in document preambles!
+% 如果可选的 \meta{label} 参数是 \texttt{*}，
+% 则会删除所有代码块。这相当危险，因为它可能会删除其他包的代码
+%（可能不为人所知）；因此，它不应在包中使用，而只应在文档导言中使用！
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
+% 可以使用点符号语法指定 \meta{hook} 和 \meta{label}，
+% 以表示当前包名称。参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \medskip
 %
-% In contrast to the \texttt{voids} relationship between two labels
-% in a \cs{DeclareHookRule} this is a destructive operation as the
-% labeled code is removed from the hook data structure, whereas the
-% relationship setting can be undone by providing a different
-% relationship later.
+% 与 \cs{DeclareHookRule} 中两个标签之间的 |voids| 关系相比，
+% 这是一种破坏性的操作，因为标记的代码已从钩子数据结构中删除，
+% 而关系设置可以通过稍后提供不同的关系来撤消。
 %
-% A useful application for this declaration inside the document body
-% is when one wants to temporarily add code to hooks and later remove
-% it again, e.g.,
+% 此声明在文档主体内的一个有用应用是当您想临时添加代码到钩子中，
+% 然后稍后再次删除它时，例如，
 %\begin{verbatim}
 %   \AddToHook{env/quote/before}{\small}
 %   \begin{quote}
@@ -439,79 +430,66 @@
 %   \RemoveFromHook{env/quote/before}
 %   ... now back to normal for further quotes
 %\end{verbatim}
-% Note that you can't cancel the setting with
+% 请注意，您无法通过以下方式取消设置：
 %\begin{verbatim}
 %   \AddToHook{env/quote/before}{}
 %\end{verbatim}
-% because that only \enquote{adds} a further empty chunk of code to
-% the hook. Adding \cs{normalsize} would work but that means the hook
-% then contained \cs{small}\cs{normalsize} which means two font size
-% changes for no good reason.
+% 因为这只是“添加”了一个空的代码块到钩子中。添加 \cs{normalsize} 
+% 是可行的，但这意味着钩子中包含了 \cs{small}\cs{normalsize}，
+% 这意味着没有充分理由进行两次字体大小更改。
 %
-% The above is only needed if one wants to typeset several quotes in a
-% smaller typeface. If the hook is only needed once then
-% \cs{AddToHookNext} is simpler, because it resets itself after one use.
+% 上述操作仅在想要以较小字体排版多个引用时才需要。如果钩子仅需要一次使用，
+% 那么 \cs{AddToHookNext} 更简单，因为它在使用一次后会重置自身。
 %
 %
 % \begin{function}{\AddToHookNext}
 %   \begin{syntax}
 %     \cs{AddToHookNext} \Arg{hook}\Arg{code}
 %   \end{syntax}
-%    Adds \meta{code} to the next invocation of the \meta{hook}.
-%    The code is executed after the normal hook code has finished and
-%    it is executed only once, i.e. it is deleted after it was used.
+%    向下一次 \meta{hook} 调用中添加 \meta{code}。
+%    该代码在常规钩子代码执行完毕后执行，并且仅执行一次，即在使用后删除。
 %
-%    Using this declaration is a global operation, i.e., the code is
-%    not lost even if the declaration is used inside a group and the
-%    next invocation of the hook happens after the end of that group. 
-%    If the declaration is
-%    used several times before the hook is executed then all code is
-%    executed in the order in which it was declared.\footnotemark
+%    使用此声明是全局操作，即使声明在组内使用，
+%    并且钩子的下一次调用发生在该组结束之后，代码也不会丢失。
+%    如果在执行钩子之前多次使用声明，则所有代码将按照声明的顺序执行。\footnotemark
 %
-%    If this declaration is used with a one-time hook then the code 
-%    is only ever used if the declaration comes before the hook’s 
-%    invocation.  This is because, in contrast 
-%    to \cs{AddToHook}, the code in this declaration is not 
-%    executed immediately in the case when the invocation of the hook
-%    has already happened---in other words, this code will truly execute
-%    only on the next invocation of the hook (and in the case of a
-%    one-time hook there is no such \enquote{next invocation}).  
-%    This gives you a choice: should my code execute
-%    always, or should it execute only at the point where the
-%    one-time hook is used (and not at all if this is impossible)? For
-%    both of these possibilities there are use cases.
+%    如果此声明与一次性钩子一起使用，
+%    则仅当声明在钩子调用之前时才会使用代码。
+%    这是因为与 \cs{AddToHook} 相比，
+%    在钩子调用已经发生时，此声明中的代码不会立即执行——
+%    换句话说，此代码仅在下一次钩子调用时真正执行
+%    （对于一次性钩子，没有这样的“下一次调用”）。
+%    这给您一个选择：我的代码应该始终执行，
+%    还是仅在一次性钩子使用时执行（如果不可能则不执行）？
+%    对于这两种可能性，都存在使用情况。
 %
-%    It is possible to nest this declaration using the same hook (or
-%    different hooks): e.g.,
+%    可以使用相同钩子（或不同钩子）嵌套此声明，例如，
 %   \begin{quote}
 %     \cs{AddToHookNext}\Arg{hook}\verb={=\meta{code-1}^^A
 %     \cs{AddToHookNext}\Arg{hook}\Arg{code-2}\verb=}=
 %   \end{quote}
-%    will execute \meta{code-1} next time the \meta{hook} is used and at
-%    that point puts \meta{code-2} into  the \meta{hook} so that it gets
-%    executed on following time the hook is run.
+%    将在下一次使用 \meta{hook} 时执行 \meta{code-1}，
+%    并在那时将 \meta{code-2} 放入 \meta{hook} 中，
+%    以便在下次运行钩子时执行它。
 %
-%    A hook doesn't have to exist for code to be added to it.  This
-%    allows for hooks to work regardless of package loading
-%    order.
-%    See section~\ref{sec:querying}.
+%    钩子不一定存在才能向其添加代码。
+%    这使得钩子可以独立于包加载顺序工作。
+%    参见第~\ref{sec:querying} 节。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name.  See section~\ref{sec:default-label}.
-% \end{function}\footnotetext{There is
-%    no mechanism to reorder such code chunks (or delete them).}
+%    可以使用点符号语法指定 \meta{hook}，
+%    以表示当前包名称。参见第~\ref{sec:default-label} 节。
+% \end{function}\footnotetext{没有重新排序此类代码块的机制（或删除它们）。}
 %
 % \begin{function}{\AddToHookNextWithArguments}
 %   \begin{syntax}
 %     \cs{AddToHookNextWithArguments} \Arg{hook}\Arg{code}
 %   \end{syntax}
-%    Works exactly like \cs{AddToHookNext}, but the \meta{code} can
-%    contain references to the arguments of the \meta{hook} as described
-%    for \cs{AddToHookWithArguments} above.
-%   Section~\ref{sec:hook-args} explains hooks with arguments.
+%    功能与 \cs{AddToHookNext} 完全相同，但 \meta{code} 可包含
+%    对 \meta{hook} 参数的引用，正如上面对 \cs{AddToHookWithArguments} 的描述。
+%    第~\ref{sec:hook-args} 节解释了带参数的钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name.  See section~\ref{sec:default-label}.
+%    可以使用点符号语法指定 \meta{hook}，
+%    以表示当前包名称。参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 %
@@ -520,68 +498,54 @@
 %   \begin{syntax}
 %     \cs{ClearHookNext}\Arg{hook}
 %   \end{syntax}
-%    Normally \cs{AddToHookNext} is only used when you know precisely
-%    where it will apply and why you want some extra code at that
-%    point. However, there are a few use cases in which such a
-%    declaration needs to be canceled, for example, when
-%    discarding a page with \cs{DiscardShipoutBox} (but even then not
-%    always), and in such situations \cs{ClearHookNext} can be
-%    used.
+%    通常，仅当您准确知道它将应用在何处以及为何需要一些额外代码时，
+%    才会使用 \cs{AddToHookNext}。然而，在某些情况下，
+%    需要取消这种声明，例如，使用\hfil\break \cs{DiscardShipoutBox} 丢弃页面时
+%    （但甚至在这种情况下也不总是如此），
+%    在这种情况下可以使用 \cs{ClearHookNext}。
 % \end{function}
 %
 %
 %
 %
 %
-% \subsubsection{Hook names and default labels}
+% \subsubsection{钩子名称和默认标签}
 % \label{sec:default-label}
 %
-% It is best practice to use \cs{AddToHook} in packages or classes
-% \emph{without specifying a \meta{label}} because then the package
-% or class name is automatically used, which is helpful if rules are
-% needed, and avoids mistyping the \meta{label}.
+% 在包或类中最好使用 \cs{AddToHook}，\emph{不指定 \meta{label}}，
+% 因为这样可以自动使用包或类名称，如果需要规则，则会很有帮助，
+% 并避免了输入错误的 \meta{label}。
 %
-% Using an explicit \meta{label} is only necessary in very specific
-% situations, e.g., if you want to add several chunks of code into a
-% single hook and have them placed in different parts of the hook
-% (by providing some rules).
+% 仅在非常特定的情况下才需要使用显式的 \meta{label}，例如，
+% 如果要将多个代码块添加到单个钩子中，并希望将它们放置在钩子的不同部分
+% （通过提供一些规则）。
 %
-% The other case is when you develop a larger package with several
-% sub-packages. In that case you may want to use the same
-% \meta{label} throughout the sub-packages in order to avoid
-% that the labels change if you internally reorganize your code.
+% 另一个情况是当您开发具有多个子包的大型包时。
+% 在这种情况下，您可能希望在整个子包中使用相同的 \meta{label}，
+% 以避免在内部重新组织代码时标签发生变化。
 %
-% Except for \cs{UseHook}, \cs{UseOneTimeHook} and \cs{IfHookEmptyTF}
-% (and their \pkg{expl3} interfaces \cs{hook_use:n},
-% \cs{hook_use_once:n} and \cs{hook_if_empty:nTF}), all \meta{hook}
-% and \meta{label} arguments are processed in the same way: first,
-% spaces are trimmed around the argument, then it is fully expanded
-% until only character tokens remain.  If the full expansion of the
-% \meta{hook} or \meta{label} contains a non-expandable non-character
-% token, a low-level \TeX{} error is raised (namely, the \meta{hook} is
-% expanded using \TeX's \cs{csname}\ldots\cs{endcsname}, as such,
-% Unicode characters are allowed in \meta{hook} and \meta{label}
-% arguments).  The arguments of \cs{UseHook}, \cs{UseOneTimeHook}, and
-% \cs{IfHookEmptyTF} are
-% processed much in the same way except that spaces are not trimmed
-% around the argument, for better performance.
+% 除了 \cs{UseHook}、\cs{UseOneTimeHook} 和 \cs{IfHookEmptyTF}
+%（及其 \pkg{expl3} 接口 \cs{hook_use:n}、\cs{hook_use_once:n}
+% 和 \cs{hook_if_empty:nTF}）之外，所有 \meta{hook} 和 \meta{label}
+% 参数的处理方式相同：首先，对参数周围的空格进行修剪，
+% 然后完全展开，直到只剩下字符记号。
+% 如果 \meta{hook} 或 \meta{label} 的完全展开包含一个不可展开的非字符记号，
+% 将引发低级 \TeX{} 错误（即，使用 \TeX{} 的 \cs{csname}\ldots\cs{endcsname}
+% 展开 \meta{hook}，因此 \meta{hook} 和 \meta{label} 参数中允许使用 Unicode 字符）。
+% \cs{UseHook}、\cs{UseOneTimeHook} 和 \cs{IfHookEmptyTF} 的参数处理方式基本相同，
+% 只是不会修剪参数周围的空格，以获得更好的性能。
 %
-% It is not enforced, but highly recommended that the hooks defined by
-% a package, and the \meta{labels} used to add code to other hooks
-% contain the package name to easily identify the source of the code
-% chunk and to prevent clashes.  This should be the standard practice,
-% so this hook management code provides a shortcut to refer to the
-% current package in the name of a \meta{hook} and in a \meta{label}.
-% If the \meta{hook} name or the \meta{label} consist just of a single dot
-% (|.|), or starts with a dot followed by a slash (|./|) then the dot
-% denotes the \meta{default label} (usually the current package or class
-% name---see~\cs{SetDefaultHookLabel}).
-% A \enquote{|.|} or \enquote{|./|} anywhere else in a \meta{hook} or in
-% \meta{label} is treated literally and is not replaced.
+% 虽然不是强制要求，但强烈建议由包定义的钩子和用于向其他钩子添加代码的 \meta{label}，
+% 包含包名称，以便轻松识别代码块的来源并防止冲突。
+% 这应该是标准做法，因此此钩子管理代码提供了一个快捷方式，
+% 用于在 \meta{hook} 名称和 \meta{label} 中引用当前包。
+% 如果 \meta{hook} 名称或 \meta{label} 仅由一个单独的点（|.|）或以点开头，
+% 后跟斜杠（|./|），则该点表示 \meta{default label}
+%（通常是当前包或类名称——参见~\cs{SetDefaultHookLabel}）。
+% \enquote{|.|} 或 \enquote{|./|} 在 \meta{hook} 或 \meta{label} 的任何其他位置都会被按原样处理，不会被替换。
 %
-% For example,
-% inside the package \texttt{mypackage.sty}, the default label is
-% \texttt{mypackage}, so the instructions:
+% 例如，在名为 \texttt{mypackage.sty} 的包中，默认标签是 \texttt{mypackage}，
+% 因此以下说明：
 % \begin{verbatim}
 %   \NewHook   {./hook}
 %   \AddToHook {./hook}[.]{code}     % Same as \AddToHook{./hook}{code}
@@ -589,7 +553,7 @@
 %   \DeclareHookRule{begindocument}{.}{before}{babel}
 %   \AddToHook {file/foo.tex/after}{code}
 % \end{verbatim}
-%    are equivalent to:
+%    等价于：
 % \begin{verbatim}
 %   \NewHook   {mypackage/hook}
 %   \AddToHook {mypackage/hook}[mypackage]{code}
@@ -598,37 +562,28 @@
 %   \AddToHook {file/foo.tex/after}{code}                  % unchanged
 % \end{verbatim}
 %
-% The \meta{default label} is automatically set equal to the name of the
-% current package or class at the time the package is loaded.  If the
-% hook command is used outside of a package, or the current file wasn't
-% loaded with \cs{usepackage} or \cs{documentclass}, then the
-% \texttt{top-level} is used as the \meta{default label}.  This may have
-% exceptions---see \cs{PushDefaultHookLabel}.
+% \meta{default label} 在包加载时自动设置为当前包或类的名称。
+% 如果挂钩命令在包外使用，或者当前文件没有使用 \cs{usepackage} 或 \cs{documentclass} 加载，
+% 那么将使用 \texttt{top-level} 作为 \meta{default label}。
+% 这可能会有例外情况——参见 \cs{PushDefaultHookLabel}。
 %
-% This syntax is available in all \meta{label} arguments and most
-% \meta{hook} arguments, both in the \LaTeXe{} interface, and the \LaTeX3
-% interface described in section~\ref{sec:l3hook-interface}.
+% 此语法适用于所有 \meta{label} 参数和大多数 \meta{hook} 参数，
+% 无论是在 \LaTeXe{} 接口中，还是在第~\ref{sec:l3hook-interface} 节描述的
+% \LaTeX3 接口中。
 %
-% Note,\marginpar{\raggedleft\rightskip5pt\itshape \textbf{Important:}\break The dot-syntax
-% is \textbf{not} available with
-% \cs{UseHook} and some other commands that are typically used within code!}
-% however, that the replacement of |.| by the \meta{default label}
-% takes place when the hook command is executed, so actions that are
-% somehow executed after the package ends will have the wrong
-% \meta{default label} if the dot-syntax is used.  For that reason,
-% this syntax is not available in \cs{UseHook} (and \cs{hook_use:n})
-% because the hook is most of the time used outside of the package file
-% in which it was defined. This syntax is also not available in the hook
-% conditionals \cs{IfHookEmptyTF} (and \cs{hook_if_empty:nTF}), because these
-% conditionals are used in some performance-critical parts of the hook
-% management code, and because they are usually used to refer to other
-% package's hooks, so the dot-syntax doesn't make much sense.
+% 注意，\marginpar{\color{spot}\raggedleft\rightskip5pt\itshape \textbf{重要：}\break
+% 点语法在 \cs{UseHook} 和一些通常在代码中使用的其他命令中\textbf{不可用}！}
+% 但要注意，当执行挂钩命令时，|.| 被 \meta{default label} 替换，
+% 因此在包结束后某种程度上执行的操作，如果使用了点语法，将会有错误的 \meta{default label}。
+% 出于这个原因，这种语法在 \cs{UseHook}（和 \cs{hook_use:n}）中不可用，
+% 因为大多数情况下，挂钩在定义它的包文件之外使用。
+% 这种语法也不适用于挂钩条件语句 \cs{IfHookEmptyTF}（和 \cs{hook_if_empty:nTF}），
+% 因为这些条件语句在挂钩管理代码的一些性能关键部分中使用，
+% 并且通常用于引用其他包的挂钩，因此点语法并不太合适。
 %
-% In some cases, for example in large packages, one may want to separate
-% the code in logical parts, but still use the main package name as the
-% \meta{label}, then the \meta{default label} can be set using
-% \cs{PushDefaultHookLabel}\verb={...}=\,\ldots\cs{PopDefaultHookLabel}
-% or \cs{SetDefaultHookLabel}\verb={...}=.
+% 在某些情况下，例如在大型包中，可能希望将代码分离为逻辑部分，但仍然使用主包名称作为
+% \meta{label}，那么可以使用 \cs{PushDefaultHookLabel}\verb={...}=\,\ldots\hfil\break \cs{PopDefaultHookLabel}
+% 或 \cs{SetDefaultHookLabel}\verb={...}= 设置 \meta{default label}。
 %
 % \begin{function}{\PushDefaultHookLabel,\PopDefaultHookLabel}
 %   \begin{syntax}
@@ -636,167 +591,128 @@
 %     \quad \meta{code}
 %     \cs{PopDefaultHookLabel}
 %   \end{syntax}
-%   \cs{PushDefaultHookLabel} sets the current \meta{default label} to
-%   be used in \meta{label} arguments, or when replacing a leading
-%   ``|.|'' (see above).  \cs{PopDefaultHookLabel} reverts the
-%   \meta{default label} to its previous value.
+% \cs{PushDefaultHookLabel} 设置当前 \meta{default label} 以在 \meta{label} 参数或替换前导的“|.|”时使用。
+% \cs{PopDefaultHookLabel} 将 \meta{default label} 恢复为其先前的值。
 %
-%   Inside a package or class, the \meta{default label} is equal to the
-%   package or class name, unless explicitly changed.  Everywhere else,
-%   the \meta{default label} is |top-level| (see
-%   section~\ref{sec:top-level}) unless explicitly changed.
+% 在包或类中，\meta{default label} 等于包或类名称，除非显式更改。
+% 在其他任何地方，\meta{default label} 是 |top-level|（参见第~\ref{sec:top-level} 节），
+% 除非显式更改。
 %
-%   The effect of \cs{PushDefaultHookLabel} holds until the next
-%   \cs{PopDefaultHookLabel}.  \cs{usepackage} (and \cs{RequirePackage}
-%   and \cs{documentclass}) internally use
-%   \begin{quote}
-%     \cs{PushDefaultHookLabel}\Arg{package name} \\
-%     \null \quad  \meta{package code} \\
-%     \cs{PopDefaultHookLabel}
-%   \end{quote}
-%   to set the \meta{default label} for the package or class file.
-%   Inside the \meta{package code} the \meta{default label} can also be
-%   changed with \cs{SetDefaultHookLabel}.  \cs{input} and other
-%   file input-related commands from the \LaTeX{} kernel do not use
-%   \cs{PushDefaultHookLabel}, so code within files loaded by these
-%   commands does \emph{not} get a dedicated \meta{label}! (that is, the
-%   \meta{default label} is the current active one when the file was
-%   loaded.)
+% \cs{PushDefaultHookLabel} 的效果持续到下一个 \cs{PopDefaultHookLabel}。\hfil\break
+% \cs{usepackage}（以及 \cs{RequirePackage} 和 \cs{documentclass}）内部使用
+% \begin{quote}
+%   \cs{PushDefaultHookLabel}\Arg{package name} \\
+%   \null \quad  \meta{package code} \\
+%   \cs{PopDefaultHookLabel}
+% \end{quote}
+% 来设置包或类文件的 \meta{default label}。
+% 在 \meta{package code} 中，也可以使用\hfil\break \cs{SetDefaultHookLabel} 更改 \meta{default label}。
+% \cs{input} 和其他从 \LaTeX{} 核心中输入文件的命令不使用 \cs{PushDefaultHookLabel}，
+% 因此由这些命令加载的文件中的代码\emph{不}会获得专用的 \meta{label}！
+% （也就是说，\meta{default label} 是加载文件时的当前活动标签。）
 %
-%   Packages that provide their own package-like interfaces
-%   (Ti\textit{k}Z's \cs{usetikzlibrary}, for example) can use
-%   \cs{PushDefaultHookLabel} and \cs{PopDefaultHookLabel} to set
-%   dedicated labels and to emulate \cs{usepackage}-like hook behavior
-%   within those contexts.
+% 提供自己类似包的接口的包（例如 Ti\textit{k}Z 的 \cs{usetikzlibrary}）可以使用
+% \cs{PushDefaultHookLabel} 和 \cs{PopDefaultHookLabel} 设置专用标签，并在这些上下文中模拟
+% 类似 \cs{usepackage} 的挂钩行为。
 %
-%   The |top-level| label is treated differently, and is reserved to the
-%   user document, so it is not allowed to change the
-%   \meta{default label} to |top-level|.
+% |top-level| 标签处理方式不同，并保留给用户文档，因此不允许将 \meta{default label} 更改为 |top-level|。
 % \end{function}
 %
 % \begin{function}{\SetDefaultHookLabel}
 %   \begin{syntax}
 %     \cs{SetDefaultHookLabel} \Arg{default label}
 %   \end{syntax}
-%   Similarly to \cs{PushDefaultHookLabel},
-%   sets the current \meta{default label} to
-%   be used in \meta{label} arguments, or when replacing a leading
-%   ``|.|''. The effect holds until the label is changed again or until
-%   the next \cs{PopDefaultHookLabel}.  The difference between
-%   \cs{PushDefaultHookLabel} and \cs{SetDefaultHookLabel} is that the
-%   latter does not save the current \meta{default label}.
+% \cs{SetDefaultHookLabel} 与 \cs{PushDefaultHookLabel} 类似，
+% 将当前 \meta{default label} 设置为在 \meta{label} 参数中使用，或替换前导的“|.|”时使用。
+% 其效果持续到标签再次更改或到下一个 \cs{PopDefaultHookLabel}。
+% \cs{PushDefaultHookLabel} 和 \cs{SetDefaultHookLabel} 的区别在于后者不保存当前 \meta{default label}。
 %
-%   This command is useful when a large package is composed of several
-%   smaller packages, but all should have the same \meta{label}, so
-%   \cs{SetDefaultHookLabel} can be used at the beginning of each
-%   package file to set the correct label.
+% 当一个大型包由几个较小的包组成，但所有这些包都应具有相同的 \meta{label} 时，
+% \cs{SetDefaultHookLabel} 可以在每个包文件的开头使用以设置正确的标签。
 %
-%   \cs{SetDefaultHookLabel} is not allowed in the main document, where
-%   the \meta{default label} is |top-level| and there is no
-%   \cs{PopDefaultHookLabel} to end its effect.
-%   It is also not allowed to change the \meta{default label} to
-%   |top-level|.
+% 在主文档中不允许使用 \cs{SetDefaultHookLabel}，其中 \meta{default label} 是 |top-level|，
+% 且没有 \cs{PopDefaultHookLabel} 来结束其效果。
+% 同样不允许将 \meta{default label} 更改为 |top-level|。
 % \end{function}
 %
-% \subsubsection{The \texttt{top-level} label}
+% \subsubsection{\texttt{top-level} 标签}
 % \label{sec:top-level}
 %
-% The |top-level| label, assigned to code added from the main document,
-% is different from other labels.  Code added to hooks (usually
-% \cs{AtBeginDocument}) in the preamble is almost always to change
-% something defined by a package, so it should go at the very end of the
-% hook.
+% 为从主文档中添加的代码分配的 |top-level| 标签与其他标签不同。
+% 添加到导言区挂钩（通常是 \cs{AtBeginDocument}）的代码几乎总是用于更改包定义的内容，
+% 因此应该放在挂钩的最末端。
 %
-% Therefore, code added in the |top-level| is always executed at the end
-% of the hook, regardless of where it was declared.  If the hook is
-% reversed (see \cs{NewReversedHook}), the |top-level| chunk is executed
-% at the very beginning instead.
+% 因此，添加在 |top-level| 的代码始终在挂钩的末尾执行，无论它在何处声明。
+% 如果挂钩被反转（参见 \cs{NewReversedHook}），则 |top-level| 代码块将在最开始执行。
 %
-% Rules regarding |top-level| have no effect:  if a user wants to have a
-% specific set of rules for a code chunk, they should use a different
-% label to said code chunk, and provide a rule for that label instead.
+% 关于 |top-level| 的规则不起作用：如果用户想为代码块设置特定规则，
+% 应该为该代码块使用不同的标签，并为该标签提供规则。
 %
-% The |top-level| label is exclusive for the user, so trying to add code
-% with that label from a package results in an error.
+% |top-level| 标签专属于用户，因此试图从包中使用该标签添加代码将导致错误。
 %
-% \subsubsection{Defining relations between hook code}
+% \subsubsection{定义挂钩代码之间的关系}
 % \label{sec:rules}
 %
-% The default assumption is that code added to hooks by different
-% packages are independent and the order in which they are executed is
-% irrelevant. While this is true in many cases it is obviously false
-% in others.
+% 默认假设是由不同包添加到挂钩的代码是独立的，并且它们执行的顺序是不相关的。
+% 虽然在许多情况下这是正确的，但在其他情况下显然是错误的。
 %
-% Before the hook management system was introduced
-% packages had to take elaborate precaution to determine of some other
-% package got loaded as well (before or after) and find some ways to
-% alter its behavior accordingly. In addition is was often the user's
-% responsibility to load packages in the right order so that code
-% added to hooks got added in the right order and some cases even
-% altering the loading order wouldn't resolve the conflicts.
+% 在引入挂钩管理系统之前，包必须采取复杂的预防措施来确定其他包是否也被加载（在前面或后面），
+% 并找到一些方法相应地更改其行为。
+% 此外，通常用户需要负责以正确的顺序加载包，以使添加到挂钩的代码以正确的顺序添加，
+% 有些情况即使更改加载顺序也无法解决冲突。
 %
-% With the new hook management system it is now possible to define
-% rules (i.e., relationships) between code chunks added by different
-% packages and explicitly describe in which order they should be
-% processed.
+% 使用新的挂钩管理系统，现在可以定义（即关系）不同包添加的代码块之间的规则，
+% 并明确描述它们应该被处理的顺序。
 %
 % \begin{function}{\DeclareHookRule}
 %   \begin{syntax}
 %     \cs{DeclareHookRule} \Arg{hook}\Arg{label1}\Arg{relation}\Arg{label2}
 %   \end{syntax}
-%    Defines a relation between \meta{label1} and \meta{label2} for a
-%    given \meta{hook}. If \meta{hook} is \texttt{??} this defines a default
-%    relation for all hooks that use the two labels, i.e., that have
-%    chunks of code labeled with \meta{label1} and \meta{label2}.
-%    Rules specific to a given hook take precedence over default
-%    rules that use \texttt{??} as the \meta{hook}.
+% 为给定的 \meta{hook} 定义 \meta{label1} 和 \meta{label2} 之间的关系。
+% 如果 \meta{hook} 是 \texttt{??}，则为使用这两个标签的所有挂钩定义了默认关系，
+% 即具有标记为 \meta{label1} 和 \meta{label2} 的代码块的挂钩。
+% 对于特定挂钩的规则优先于使用 \texttt{??} 作为 \meta{hook} 的默认规则。
 %
-%    Currently, the supported relations are the following:
-%    \begin{itemize}
+% 目前，支持的关系有以下几种：
 %
-%    \item[\texttt{before} or \texttt{\string<}]
+% \begin{itemize}
 %
-%      Code for \meta{label1} comes before code for \meta{label2}.
+% \item[\texttt{before} 或 \texttt{\string<}]
 %
-%    \item[\texttt{after} or \texttt{\string>}]
-%      Code for \meta{label1} comes after code for \meta{label2}.
+%   \meta{label1} 的代码出现在 \meta{label2} 的代码之前。
 %
-%    \item[\texttt{incompatible-warning}]
+% \item[\texttt{after} 或 \texttt{\string>}]
 %
-%      Only code for either \meta{label1} or \meta{label2} can appear
-%      for that hook (a way to say that two packages---or parts of
-%      them---are incompatible). A warning is raised if both labels
-%      appear in the same hook.
+%   \meta{label1} 的代码出现在 \meta{label2} 的代码之后。
 %
-%    \item[\texttt{incompatible-error}]
+% \item[\texttt{incompatible-warning}]
 %
-%      Like \texttt{incompatible-error} but instead of a warning a
-%      \LaTeX{} error is raised, and the code for both labels are
-%      dropped from that hook until the conflict is resolved.
+%   只能出现 \meta{label1} 或 \meta{label2} 的代码（表示两个包或其部分不兼容）。
+%   如果两个标签同时出现在同一个挂钩中，会发出警告。
 %
-%    \item[\texttt{voids}]
+% \item[\texttt{incompatible-error}]
 %
-%      Code for \meta{label1} overwrites code for \meta{label2}. More
-%      precisely, code for \meta{label2} is dropped for that
-%      hook. This can be used, for example if one package is a
-%      superset in functionality of another one and therefore wants to
-%      undo code in some hook and replace it with its own version.
+%   类似于 \texttt{incompatible-warning}，但是不会发出警告，而是引发 \LaTeX{} 错误，
+%   并在冲突解决前从该挂钩中删除两个标签的代码。
 %
-%    \item[\texttt{unrelated}]
+% \item[\texttt{voids}]
 %
-%       The order of code for \meta{label1} and \meta{label2} is
-%      irrelevant. This rule is there to undo an incorrect rule
-%      specified earlier.
+%   \meta{label1} 的代码覆盖了 \meta{label2} 的代码。
+%   更确切地说，在该挂钩中会删除 \meta{label2} 的代码。
+%   例如，如果一个包在功能上是另一个包的超集，因此希望撤消某个挂钩中的代码并用自己的版本替换，
+%   则可以使用此选项。
 %
-%    \end{itemize}
-%    There can only be a single relation between two labels for a
-%    given hook,
-%    i.e., a later \cs{DeclareHookRule} overwrites any previous
-%    declaration.
+% \item[\texttt{unrelated}]
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
+%   \meta{label1} 和 \meta{label2} 的代码顺序无关紧要。
+%   此规则用于撤销之前指定的不正确规则。
+%
+% \end{itemize}
+%
+% 对于给定挂钩的两个标签之间只能存在一个关系，即后续的 \cs{DeclareHookRule} 会覆盖任何先前的声明。
+%
+% 可以使用点语法指定 \meta{hook} 和 \meta{label}，以表示当前包名称。
+% 请参阅第~\ref{sec:default-label} 节。
 %
 % \end{function}
 %
@@ -805,119 +721,85 @@
 %   \begin{syntax}
 %     \cs{ClearHookRule}\Arg{hook}\Arg{label1}\Arg{label2}
 %   \end{syntax}
-%    Syntactic sugar for saying that \meta{label1} and \meta{label2}
-%    are unrelated for the given \meta{hook}.
+%    这是一种简化的写法，表示给定的 \meta{hook} 中 \meta{label1} 和 \meta{label2} 之间无关联。
 % \end{function}
-%
-%
 %
 % \begin{function}{\DeclareDefaultHookRule}
 %   \begin{syntax}
 %     \cs{DeclareDefaultHookRule}\Arg{label1}\Arg{relation}\Arg{label2}
 %   \end{syntax}
-%   This sets up a relation between \meta{label1} and \meta{label2}
-%    for all hooks unless overwritten by a specific rule for a hook.
-%    Useful for cases where one package has a specific relation to
-%    some other package, e.g., is \texttt{incompatible} or always
-%    needs a special ordering \texttt{before} or \texttt{after}.
-%    (Technically it is just a shorthand for using \cs{DeclareHookRule}
-%    with \texttt{??} as the hook name.)
+%    这为所有挂钩设置了 \meta{label1} 和 \meta{label2} 之间的关系，
+%    除非特定挂钩被另一个规则覆盖。
+%    适用于一个包与另一个包有特定关系的情况，例如，是 \texttt{incompatible} 或总是需要特殊顺序 \texttt{before} 或 \texttt{after}。
+%    （技术上，这只是使用 \cs{DeclareHookRule} 并将 \texttt{??} 作为挂钩名称的简写。）
 %
-%    Declaring default rules is only supported in the document
-%    preamble.\footnotemark{}
+%    声明默认规则仅在文档导言部分支持。\footnotemark{}
 %
-%    The \meta{label} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
-% \end{function}\footnotetext{Trying to do so, e.g., via
-%    \cs{DeclareHookRule} with \texttt{??}  has bad side-effects and
-%    is not supported (though not explicitly caught for performance
-%    reasons).}
+%    可以使用点语法指定 \meta{label}，以表示当前包名称。请参阅第~\ref{sec:default-label} 节。
+% \end{function}\footnotetext{尝试这样做，例如通过使用 \texttt{??} 的 \cs{DeclareHookRule}，
+%    会产生不良的副作用，并且不受支持（尽管出于性能原因未显式捕获）。}
 %
 %
 %
-% \subsubsection{Querying hooks}
+% \subsubsection{查询挂钩}
 % \label{sec:querying}
 %
-% Simpler data types, like token lists, have three possible states; they
-% can:
+% 简单的数据类型，比如记号列表，有三种可能的状态：
 % \begin{itemize}
-%   \item exist and be empty;
-%   \item exist and be non-empty; and
-%   \item not exist (in which case emptiness doesn't apply);
+%   \item 存在但为空；
+%   \item 存在且非空；以及
+%   \item 不存在（此时不存在空的概念）。
 % \end{itemize}
-% Hooks are a bit more complicated:
-% a hook may exist or not, and independently it may or may not be empty.
-% This means that even a hook that doesn't exist may be non-empty and
-%    it can also be disabled.
+% 挂钩稍微复杂一些：
+% 一个挂钩可以存在也可以不存在，独立于此，它可以是空的也可以是非空的。
+% 这意味着即使一个挂钩不存在，它也可能是非空的，而且它也可以被禁用。
 %
-% This seemingly strange state may happen when, for example, package~$A$
-% defines hook \hook{A/foo}, and package $B$ adds some code to that
-% hook.  However, a document may load package $B$ before package $A$, or
-% may not load package $A$ at all.  In both cases some code is added to
-% hook \hook{A/foo} without that hook being defined yet, thus that
-% hook is said to be non-empty, whereas it doesn't exist.  Therefore,
-% querying the existence of a hook doesn't imply its emptiness, neither
-% does the other way around.
+% 这种看似奇怪的状态可能发生在这样的情况下，例如，包 $A$ 定义了挂钩 \hook{A/foo}，
+% 而包 $B$ 向该挂钩添加了一些代码。然而，文档可能在加载包 $A$ 之前加载了包 $B$，或者根本没有加载包 $A$。
+% 在这两种情况下，一些代码被添加到了挂钩 \hook{A/foo} 中，但该挂钩尚未定义，因此该挂钩被认为是非空的，但实际上它并不存在。
+% 因此，查询挂钩的存在性并不意味着它的空值，反之亦然。
 %
-% Given that code or rules can be added to a hook even if it doesn't
-% physically exist yet, means that a querying its existence has no
-% real use case (in contrast to other variables that can only be
-% update if they have already been declared). For that reason only the
-% test for emptiness has a public interface.
+% 由于代码或规则可以添加到一个挂钩，即使它还不存在，所以查询其存在性没有实际用途
+% （与其他变量不同，其他变量只有在已经声明的情况下才能更新）。因此，只有对空值的测试具有公共接口。
 %
-% A hook is said to be empty when no code was added to it, either to
-% its permanent code pool, or to its ``next'' token list.  The hook
-% doesn't need to be declared to have code added to its code pool.
-% A hook is said to exist when it was declared with \cs{NewHook} or
-% some variant thereof.  Generic hooks such as \hook{file} and \hook{env} hooks are
-% automatically declared when code is added to them.
+% 当没有代码添加到挂钩的永久代码池或其“next”记号列表时，挂钩被认为空。挂钩不需要被声明为具有代码池。
+% 当使用 \cs{NewHook} 或其变体声明挂钩时，该挂钩被认为存在。当向其添加代码时，通用挂钩如 \hook{file} 和 \hook{env} 会自动声明。
 %
 % \begin{function}[EXP]{\IfHookEmptyTF}
 %   \begin{syntax}
 %     \cs{IfHookEmptyTF} \Arg{hook} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Tests if the \meta{hook} is empty (\emph{i.e.}, no code was added to
-%   it using either \cs{AddToHook} or \cs{AddToHookNext}) or such code
-%    was removed again (via \cs{RemoveFromHook}), and
-%   branches to either \meta{true code} or \meta{false code} depending
-%   on the result.
+%   检测 \meta{hook} 是否为空（即没有使用 \cs{AddToHook} 或 \cs{AddToHookNext} 添加代码，或者通过 \cs{RemoveFromHook} 将代码移除），
+%   根据结果分别执行 \meta{true code} 或 \meta{false code}。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.
+%    无法使用点语法指定 \meta{hook}。
+%    前导的 |.| 会被视为字面量。
 % \end{function}
 %
 %
 %
-% \subsubsection{Displaying hook code}
+% \subsubsection{显示挂钩代码}
 %
-%    If one has to adjust the code execution in a hook using a hook
-%    rule it is helpful to get some information about the code
-%    associated with a hook, its current order and the existing rules.
+% 如果需要使用挂钩规则调整挂钩中的代码执行顺序，了解挂钩相关信息、当前顺序和现有规则将会很有帮助。
 %
 % \begin{function}{\ShowHook,\LogHook}
 %   \begin{syntax}
 %     \cs{ShowHook} \Arg{hook}
 %     \cs{LogHook}  \Arg{hook}
 %   \end{syntax}
-%   Displays information about the \meta{hook} such as
+%   显示关于 \meta{hook} 的信息，例如：
 %   \begin{itemize}
-%   \item
-%      the code chunks (and their labels) added to it,
-%   \item
-%      any rules set up to order them,
-%   \item
-%      the computed order in which the chunks are executed,
-%   \item
-%      any code executed on the next invocation only.
+%   \item 挂钩中添加的代码块（及其标签），
+%   \item 任何用于排序的设置规则，
+%   \item 计算出的代码块执行顺序，
+%   \item 仅在下一次调用时执行的任何代码。
 %   \end{itemize}
 % \end{function}
 %
-%   \cs{LogHook} prints the information to the |.log| file, and
-%   \cs{ShowHook} prints them to the terminal/command window and starts
-%   \TeX's prompt (only in \cs{errorstopmode}) to wait for user action.
+% \cs{LogHook} 将信息打印到 |.log| 文件中，而 \cs{ShowHook} 将其打印到终端/命令窗口，并在 
+% \cs{errorstopmode} 下启动 \TeX 的提示，等待用户操作。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+% 可以使用点语法指定 \meta{hook}，以表示当前包名称。请参阅第~\ref{sec:default-label} 节。
 %
 %^^A   % Code for the listing below:
 %^^A   \NewHook{example-hook}
@@ -934,8 +816,7 @@
 %     \sffamily\tiny\arabic{FancyVerbLine}}}
 %
 %   \bigskip
-%   Suppose a hook \texttt{example-hook} whose output of
-%   \cs{ShowHook}|{example-hook}| is:
+% 假设有一个名为 \texttt{example-hook} 的钩子，其 \cs{ShowHook}|{example-hook}| 的输出如下：
 %   \begin{verbatim}[numbers=left]
 %   -> The hook 'example-hook':
 %   > Code chunks:
@@ -953,71 +834,57 @@
 %   >     baz, foo, bar.
 %   \end{verbatim}
 %
-%   In the listing above, lines~3 to~5 show the three code chunks added
-%   to the hook and their respective labels in the format
+% 在上面的列表中，第3到第5行展示了添加到钩子的三个代码片段及其相应的标签，格式如下：
 %   \begin{quote}
 %   \quad \meta{label}\verb| -> |\meta{code}
 %   \end{quote}
 %
-%   Line~7 shows the code chunk added by the user in the main document
+% 第7行展示了用户在主文档中添加的代码片段（标记为 |top-level|），格式如下：
 %   (labeled |top-level|) in the format
 %   \begin{quote}
 %   \quad\verb|Document-level (top-level) code (executed |%^^A
 %              \meta{first\texttt{\string|}last}\verb|):|\\
 %   \quad\verb|    -> |\meta{\texttt{top-level} code}
 %   \end{quote}
-%   This code will be either the first or last code executed by the hook
-%   (|last| if the hook is normal, |first| if it is reversed).  This
-%   chunk is not affected by rules and does not take part in sorting.
+% 这段代码将是钩子执行的第一个或最后一个代码（如果钩子是正常的，则为 |last|，如果是反向的，则为 |first|）。
+% 这个代码块不受规则影响，也不参与排序。
 %
-%   Line~9 shows the code chunk for the next execution of the hook in
-%   the format
+% 第9行展示了下一次钩子执行时的代码片段格式，如下：
 %   \begin{quote}
 %   \quad \verb|-> |\meta{next-code}
 %   \end{quote}
-%   This code will be used and disappear at the next
-%   \verb|\UseHook{example-hook}|, in contrast to the chunks mentioned
-%   earlier, which can only be removed from that hook by doing
-%   \verb|\RemoveFromHook{|\meta{label}|}[example-hook]|.
+% 这段代码将在下一次 \verb|\UseHook{example-hook}| 时使用并消失，与之前提到的代码片段相反，
+% 这些代码片段只能通过 \verb|\RemoveFromHook{|\meta{label}|}[example-hook]| 从钩子中移除。
 %
-%   Lines~11 and~12 show the rules declared that affect this hook in the
-%   format
+% 第11和第12行展示了影响该钩子的声明规则的格式，如下：
 %   \begin{quote}
 %   \quad \meta{label-1}\verb+|+\meta{label-2}| with |%^^A
 %         \meta{\texttt{default}?}| relation |\meta{relation}
 %   \end{quote}
-%   which means that the \meta{relation} applies to \meta{label-1} and
-%   \meta{label-2}, in that order, as detailed in \cs{DeclareHookRule}.
-%   If the relation is \texttt{default} it means that this rule applies
-%   to \meta{label-1} and \meta{label-2} in \emph{all} hooks, (unless
-%   overridden by a non-default relation).
+% 这意味着 \meta{relation} 应用于 \meta{label-1} 和 \meta{label-2}，按照 \cs{DeclareHookRule} 中的详细说明顺序执行。
+% 如果关系是 \texttt{default}，则意味着此规则适用于所有钩子中的 \meta{label-1} 和 \meta{label-2}（除非被非默认关系覆盖）。
 %
-%   Finally, line~14 lists the labels in the hook after sorting;
-%   that is, in the order they will be executed when the hook is used.
+% 最后，第14行按顺序列出了排序后钩子中的标签；即，在使用钩子时它们将被执行的顺序。
 %
 %
-% \subsubsection{Debugging hook code}
+% \subsubsection{调试钩子代码}
 %
 % \begin{function}{\DebugHooksOn,\DebugHooksOff}
 %   \begin{syntax}
 %     \cs{DebugHooksOn}
 %   \end{syntax}
-%    Turn the debugging of hook code on or off. This displays most changes
-%    made to the hook data structures. The output is rather coarse and
-%      not really intended for normal use.
+%    打开或关闭钩子代码的调试。这会显示对钩子数据结构的大部分更改。
+%    输出相当粗糙，不适合正常使用。
 % \end{function}
 %
 %
-% \subsection{L3 programming layer (\texttt{expl3}) interfaces}
+% \subsection{L3 层的编程 (\texttt{expl3}) 接口}
 % \label{sec:l3hook-interface}
 %
 %
-% This is a quick summary of the \LaTeX3 programming interfaces for
-% use with packages written in \texttt{expl3}. In contrast to the
-% \LaTeXe{} interfaces they always use mandatory arguments only, e.g.,
-% you always have to specify the \meta{label} for a code chunk.  We
-% therefore suggest to use the declarations discussed in the previous
-% section even in \texttt{expl3} packages, but the choice is yours.
+% 这是关于与 \texttt{expl3} 写的包一起使用的 \LaTeX3 编程接口的快速摘要。
+% 与 \LaTeXe{} 接口不同，它们始终仅使用必需的参数，例如，您总是必须为代码片段指定 \meta{label}。
+% 因此，我们建议即使在 \texttt{expl3} 包中也使用前面讨论过的声明，但选择权在您手中。
 %
 %
 % \begin{function}{
@@ -1030,14 +897,12 @@
 %     \cs{hook_new_reversed:n} \Arg{hook}
 %     \cs{hook_new_pair:nn} \Arg{hook-1} \Arg{hook-2}
 %   \end{syntax}
-%   Creates a new \meta{hook} with normal or reverse ordering of code
-%    chunks. \cs{hook_new_pair:nn} creates a pair of such hooks with
-%    \Arg{hook-2} being a reversed hook.
-%    If a hook name is already taken, an error is raised and the hook
-%    is not created.
+%   创建一个具有正常或反向代码顺序的新 \meta{hook}。
+%   \cs{hook_new_pair:nn} 创建了一对此类钩子，其中 \Arg{hook-2} 是一个反向钩子。
+%   如果钩子名称已经被使用，将引发错误并且不会创建该钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   可以使用点号语法来指定 \meta{hook}，表示当前包的名称。
+%   参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{
@@ -1050,15 +915,12 @@
 %     \cs{hook_new_reversed_with_args:nn} \Arg{hook} \Arg{number}
 %     \cs{hook_new_pair_with_args:nnn} \Arg{hook-1} \Arg{hook-2} \Arg{number}
 %   \end{syntax}
-%   Creates a new \meta{hook} with normal or reverse ordering of code
-%    chunks, that takes \meta{number} arguments from the input stream
-%    when it is used. \cs{hook_new_pair_with_args:nn} creates a pair of
-%    such hooks with \Arg{hook-2} being a reversed hook.
-%    If a hook name is already taken, an error is raised and the hook
-%    is not created.
+%   创建一个具有正常或反向代码顺序的新 \meta{hook}，在使用时从输入流中获取 \meta{number} 个参数。
+%   \cs{hook_new_pair_with_args:nn} 创建了一对此类钩子，其中 \Arg{hook-2} 是一个反向钩子。
+%   如果钩子名称已经被使用，将引发错误并且不会创建该钩子。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%   可以使用点号语法来指定 \meta{hook}，表示当前包的名称。
+%   参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 %
@@ -1067,30 +929,24 @@
 %   \begin{syntax}
 %     \cs{hook_disable_generic:n} \Arg{hook}
 %   \end{syntax}
-%    Marks \Arg{hook} as disabled. Any further attempt to add code to
-%    it or declare it, will result in an error and any call to
-%    \cs{hook_use:n} will simply do nothing.
+%    将 \Arg{hook} 标记为已禁用。任何进一步尝试向其添加代码或声明都将导致错误，
+%    并且任何对 \cs{hook_use:n} 的调用都将不起作用。
 %
-%    This declaration is intended for use with generic hooks that are
-%    known not to work (see \texttt{ltcmdhooks-doc}) if they receive
-%    code.
+%    此声明旨在用于通用钩子，如果它们接收到代码，则已知它们无法正常工作（参见 \texttt{ltcmdhooks-doc}）。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%    可以使用点号语法来指定 \meta{hook}，表示当前包的名称。
+%    参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\hook_activate_generic:n}
 %   \begin{syntax}
 %     \cs{hook_activate_generic:n} \Arg{hook}
 %   \end{syntax}
-%    This is like \cs{hook_new:n} but it does nothing if the hook was previously
-%    declared with \cs{hook_new:n}.  This declaration should be used
-%    only in special situations, e.g., when a command from another package
-%    needs to be altered and it is not clear whether a
-%    generic \hook{cmd} hook (for that command) has been previously 
-%    explicitly declared.
+%    这类似于 \cs{hook_new:n}，但如果钩子之前使用 \cs{hook_new:n} 声明过，
+%    则不会执行任何操作。此声明应仅在特殊情况下使用，
+%    例如，当来自另一个包的命令需要更改，而不清楚是否已经先前显式声明了通用的 \hook{cmd} 钩子（用于该命令）时。
 %
-%    Normally \cs{hook_new:n} should be used instead of this.
+%    通常情况下，应该使用 \cs{hook_new:n} 而不是这个声明。
 % \end{function}
 %
 %
@@ -1101,17 +957,14 @@
 %     \cs{hook_use:n} \Arg{hook}
 %     \cs{hook_use:nnw} \Arg{hook} \Arg{number} \Arg{arg_1} \ldots \Arg{arg_n}
 %   \end{syntax}
-%    Executes the \Arg{hook} code followed (if set up) by the code for next
-%    invocation only, then empties that next invocation code.
-%    \cs{hook_use:nnw} should be used for hooks declared with arguments,
-%    and should be followed by as many brace groups as the declared
-%    number of arguments.
-%    The \meta{number} should be the number of arguments declared for
-%    the hook.  If the hook is not declared, this command does nothing
-%    and it will remove \meta{number} items from the input.
+%    执行 \Arg{hook} 代码，然后执行（如果设置了）下一次调用的代码，
+%    随后清空该下一次调用的代码。
+%    对于使用参数声明的钩子，应使用 \cs{hook_use:nnw}，并且后面应跟着与声明的参数数量相同的大括号组。
+%    \meta{number} 应该是钩子声明的参数数量。
+%    如果钩子未声明，则此命令不起作用，并且将从输入中移除 \meta{number} 个项目。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.
+%    \meta{hook} \emph{不能} 使用点号语法指定。
+%    开头的 |.| 将被视为字面量处理。
 % \end{function}
 %
 % \begin{function}{\hook_use_once:n,\hook_use_once:nnw}
@@ -1119,18 +972,14 @@
 %     \cs{hook_use_once:n} \Arg{hook}
 %     \cs{hook_use_once:nnw} \Arg{hook} \Arg{number} \Arg{arg_1} \ldots \Arg{arg_n}
 %   \end{syntax}
-%     Changes the \Arg{hook} status so that from now on any addition to
-%     the hook code is executed immediately. Then execute any
-%     \Arg{hook} code already set up.
-%    \cs{hook_use_once:nnw} should be used for hooks declared with arguments,
-%    and should be followed by as many brace groups as the declared
-%    number of arguments.
-%    The \meta{number} should be the number of arguments declared for
-%    the hook.  If the hook is not declared, this command does nothing
-%    and it will remove \meta{number} items from the input.
+%     改变 \Arg{hook} 的状态，从现在开始，任何添加到钩子代码的操作都会立即执行。
+%     然后执行已设置的任何 \Arg{hook} 代码。
+%    对于使用参数声明的钩子，应使用 \cs{hook_use_once:nnw}，并且后面应跟着与声明的参数数量相同的大括号组。
+%    \meta{number} 应该是钩子声明的参数数量。
+%    如果钩子未声明，则此命令不起作用，并且将从输入中移除 \meta{number} 个项目。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.
+%    \meta{hook} \emph{不能} 使用点号语法指定。
+%    开头的 |.| 将被视为字面量处理。
 % \end{function}
 %
 % \begin{function}{
@@ -1141,25 +990,18 @@
 %     \cs{hook_gput_code:nnn} \Arg{hook} \Arg{label} \Arg{code}
 %     \cs{hook_gput_code_with_args:nnn} \Arg{hook} \Arg{label} \Arg{code}
 %   \end{syntax}
-%    Adds a chunk of \meta{code} to the \meta{hook} labeled
-%    \meta{label}. If the label already exists the \meta{code} is
-%    appended to the already existing code.
+%    将一段 \meta{code} 添加到标记为 \meta{label} 的 \meta{hook} 中。
+%    如果标签已经存在，则将 \meta{code} 追加到已有的代码后面。
 %
-%    If \cs{hook_gput_code_with_args:nnn} is used, the \meta{code}
-%    can access the arguments passed to \cs{hook_use:nnw}
-%    (or~\cs{hook_use_once:nnw}) with \verb|#1|, \verb|#2|, \ldots,
-%    \verb|#n| (up to the number of arguments declared for the hook).
-%    In that case, if an actual parameter token should be added to the
-%    code, it should be doubled.
+%    如果使用了 \cs{hook_gput_code_with_args:nnn}，那么 \meta{code} 可以访问传递给 \cs{hook_use:nnw}
+%    （或 \cs{hook_use_once:nnw}）的参数，使用 \verb|#1|、\verb|#2|、\ldots、\verb|#n|（最多为钩子声明的参数数量）。
+%    在这种情况下，如果要将实际参数标记添加到代码中，应该使用两个相同的参数标记。
 %
-%    If code is added to an external \meta{hook} (of the kernel or
-%    another package) then the convention is to use the package name
-%    as the \meta{label} not some internal module name or some other
-%    arbitrary string.
+%    如果要向外部的 \meta{hook}（例如内核或其他包）添加代码，那么约定是使用包名称作为 \meta{label}，
+%    而不是某个内部模块名称或其他任意字符串。
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
+%    可以使用点号语法来指定 \meta{hook} 和 \meta{label}，表示当前包的名称。
+%    参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{
@@ -1169,24 +1011,17 @@
 %   \begin{syntax}
 %     \cs{hook_gput_next_code:nn} \Arg{hook} \Arg{code}
 %   \end{syntax}
-%    Adds a chunk of \meta{code} for use only in the next invocation of the
-%    \meta{hook}. Once used it is gone.
+%    添加一段 \meta{code}，仅在下一次 \meta{hook} 调用中使用。使用后即消失。
 %
-%    If \cs{hook_gput_next_code_with_args:nn} is used, the \meta{code}
-%    can access the arguments passed to \cs{hook_use:nnw}
-%    (or~\cs{hook_use_once:nnw}) with \verb|#1|, \verb|#2|, \ldots,
-%    \verb|#n| (up to the number of arguments declared for the hook).
-%    In that case, if an actual parameter token should be added to the
-%    code, it should be doubled.
+%    如果使用了 \cs{hook_gput_next_code_with_args:nn}，那么 \meta{code} 可以访问传递给 \cs{hook_use:nnw}
+%    （或 \cs{hook_use_once:nnw}）的参数，使用 \verb|#1|、\verb|#2|、\ldots、\verb|#n|（最多为钩子声明的参数数量）。
+%    在这种情况下，如果要将实际参数标记添加到代码中，应该使用两个相同的参数标记。
 %
-%    This is simpler than \cs{hook_gput_code:nnn}, the code is simply
-%    appended to the hook in the order of declaration at the very end,
-%    i.e., after all standard code for the hook got executed.
-%    Thus if one needs to undo what the standard does one has to do
-%    that as part of \meta{code}.
+%    这比 \cs{hook_gput_code:nnn} 更简单，代码将按照声明的顺序简单地附加到钩子末尾，
+%    即，在所有标准代码执行完毕后。因此，如果需要撤销标准操作，必须将其作为 \meta{code} 的一部分处理。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%    可以使用点号语法来指定 \meta{hook}，表示当前包的名称。
+%    参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 %
@@ -1194,7 +1029,7 @@
 %   \begin{syntax}
 %     \cs{hook_gclear_next_code:n} \Arg{hook}
 %   \end{syntax}
-%   Undo any earlier \cs{hook_gput_next_code:nn}.
+%   撤销任何之前的 \cs{hook_gput_next_code:nn}。
 % \end{function}
 %
 %
@@ -1203,20 +1038,16 @@
 %   \begin{syntax}
 %     \cs{hook_gremove_code:nn} \Arg{hook} \Arg{label}
 %   \end{syntax}
-%    Removes any code for \meta{hook} labeled \meta{label}.
+%    移除标记为 \meta{label} 的 \meta{hook} 中的任何代码。
 %
-%    If there is no code under the \meta{label} in the \meta{hook},
-%    or if the \meta{hook} does not exist, a warning is issued when
-%    you attempt to use \cs{hook_gremove_code:nn}, and the command is ignored.
+%    如果在 \meta{hook} 中没有 \meta{label} 下的代码，
+%    或者 \meta{hook} 不存在，尝试使用 \cs{hook_gremove_code:nn} 时将发出警告，并且命令将被忽略。
 %
-%    If the second argument is \texttt{*}, then all code chunks are
-%    removed. This is rather dangerous as it drops code from other
-%    packages one may not know about, so think twice before using
-%    that!
+%    如果第二个参数是 \texttt{*}，则会移除所有代码块。
+%    这相当危险，因为会删除其他包中的代码，可能会影响到你不清楚的代码，请在使用之前三思！
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
+%    可以使用点号语法来指定 \meta{hook} 和 \meta{label}，表示当前包的名称。
+%    参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 %
@@ -1224,28 +1055,24 @@
 %   \begin{syntax}
 %     \cs{hook_gset_rule:nnnn} \Arg{hook} \Arg{label1} \Arg{relation} \Arg{label2}
 %   \end{syntax}
-%    Relate \meta{label1} with \meta{label2} when used in \meta{hook}.
-%    See \cs{DeclareHookRule} for the allowed \meta{relation}s.
-%    If \meta{hook} is \texttt{??} a default rule is specified.
+%    在 \meta{hook} 中使用 \meta{label1} 和 \meta{label2} 进行关联。
+%    查看 \cs{DeclareHookRule} 获取允许的 \meta{relation}。
+%    如果 \meta{hook} 是 \texttt{??}，则指定默认规则。
 %
-%    The \meta{hook} and \meta{label} can be specified using the
-%    dot-syntax to denote the current package name.
-%    See section~\ref{sec:default-label}.
-%    The dot-syntax is parsed in both \meta{label} arguments, but it
-%    usually makes sense to be used in only one of them.
+%    可以使用点号语法来指定 \meta{hook} 和 \meta{label}，表示当前包的名称。
+%    参见第~\ref{sec:default-label} 节。
+%    点号语法在两个 \meta{label} 参数中都进行解析，但通常只在其中一个参数中使用才有意义。
 % \end{function}
 %
 % \begin{function}[pTF]{\hook_if_empty:n}
 %   \begin{syntax}
 %     \cs{hook_if_empty:nTF} \Arg{hook} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Tests if the \meta{hook} is empty (\emph{i.e.}, no code was added to
-%   it using either \cs{AddToHook} or \cs{AddToHookNext}), and
-%   branches to either \meta{true code} or \meta{false code} depending
-%   on the result.
+%   检测 \meta{hook} 是否为空（即，未使用 \cs{AddToHook} 或 \cs{AddToHookNext} 添加代码），
+%   并根据结果分别执行 \meta{true code} 或 \meta{false code}。
 %
-%    The \meta{hook} \emph{cannot} be specified using the dot-syntax.
-%    A leading |.| is treated literally.
+%    \meta{hook} \emph{不能} 使用点号语法指定。
+%    开头的 |.| 将被视为字面量处理。
 % \end{function}
 %
 %
@@ -1254,55 +1081,50 @@
 %     \cs{hook_show:n} \Arg{hook}
 %     \cs{hook_log:n}  \Arg{hook}
 %   \end{syntax}
-%   Displays information about the \meta{hook} such as
+%   显示关于 \meta{hook} 的信息，例如
 %   \begin{itemize}
 %   \item
-%      the code chunks (and their labels) added to it,
+%      添加到其中的代码块（及其标签），
 %   \item
-%      any rules set up to order them,
+%      设定的任何用于排序的规则，
 %   \item
-%      the computed order in which the chunks are executed,
+%      计算出的代码块执行顺序，
 %   \item
-%      any code executed on the next invocation only.
+%      仅在下一次调用时执行的任何代码。
 %   \end{itemize}
 %
-%   \cs{hook_log:n} prints the information to the |.log| file, and
-%   \cs{hook_show:n} prints them to the terminal/command window and starts
-%   \TeX's prompt (only if \cs{errorstopmode}) to wait for user action.
+%   \cs{hook_log:n} 将信息打印到 |.log| 文件，
+%   而 \cs{hook_show:n} 将其打印到终端/命令窗口，并启动 \TeX 的提示符
+%   （仅在 \cs{errorstopmode}）等待用户操作。
 %
-%    The \meta{hook} can be specified using the dot-syntax to denote
-%    the current package name. See section~\ref{sec:default-label}.
+%    可以使用点号语法来指定 \meta{hook}，表示当前包的名称。
+%    参见第~\ref{sec:default-label} 节。
 % \end{function}
 %
 % \begin{function}{\hook_debug_on:,\hook_debug_off:}
 %   \begin{syntax}
 %     \cs{hook_debug_on:}
 %   \end{syntax}
-%    Turns the debugging of hook code on or off. This displays changes
-%    to the hook data.
+%    打开或关闭钩子代码的调试。这会显示钩子数据的变化。
 % \end{function}
 %
 %
 %
-% \subsection{On the order of hook code execution} \label{sec:order}
+% \subsection{关于钩子代码执行顺序} \label{sec:order}
 %
-%    Chunks of code for a \meta{hook} under different labels are supposed
-%    to be independent if there are no special rules set up that
-%    define a relation between the chunks. This means that you can't
-%    make assumptions about the order of execution!
+%    如果在不设置特殊规则的情况下，\meta{hook} 下不同标签的代码块被视为独立的，
+%    这意味着你不能对执行顺序做出假设！
 %
-%    Suppose you have the following declarations:
+%    假设你有以下声明：
 %\begin{verbatim}
 %    \NewHook{myhook}
 %    \AddToHook{myhook}[packageA]{\typeout{A}}
 %    \AddToHook{myhook}[packageB]{\typeout{B}}
 %    \AddToHook{myhook}[packageC]{\typeout{C}}
 %\end{verbatim}
-%    then executing the hook with \cs{UseHook} will produce the
-%    typeout \texttt{A} \texttt{B} \texttt{C} in that order.  In other
-%    words, the execution order is computed to be \texttt{packageA},
-%    \texttt{packageB}, \texttt{packageC} which you can verify with
-%    \cs{ShowHook}\texttt{\{myhook\}}:
+%    使用 \cs{UseHook} 执行钩子将按顺序产生类型输出 \texttt{A} \texttt{B} \texttt{C}。
+%    换句话说，执行顺序计算为 \texttt{packageA}、\texttt{packageB}、\texttt{packageC}，
+%    可以使用 \cs{ShowHook}\texttt{\{myhook\}} 进行验证：
 %\begin{verbatim}
 %    -> The hook 'myhook':
 %    > Code chunks:
@@ -1318,27 +1140,22 @@
 %    > Execution order:
 %    >     packageA, packageB, packageC.
 %\end{verbatim}
-%    The reason is that the code chunks are internally saved in a property list
-%    and the initial order of such a property list is the order in
-%    which key-value pairs got added. However, that is only true if
-%    nothing other than adding happens!
+%    原因在于代码块被内部保存在属性列表中，属性列表的初始顺序是添加键-值对的顺序。
+%    但是，这仅在除添加之外没有其他操作时才成立！
 %
-%    Suppose, for example, you want to replace the code chunk for
-%    \texttt{packageA}, e.g.,
+%    举个例子，假设你想替换 \texttt{packageA} 的代码块，比如说，
 %\begin{verbatim}
 %    \RemoveFromHook{myhook}[packageA]
 %    \AddToHook{myhook}[packageA]{\typeout{A alt}}
 %\end{verbatim}
-%    then your order becomes  \texttt{packageB},
-%    \texttt{packageC}, \texttt{packageA} because the label got removed
-%    from the property list and then re-added (at its end).
+%    那么你的顺序变成了 \texttt{packageB}、\texttt{packageC}、\texttt{packageA}，
+%    因为标签从属性列表中移除，然后重新添加（放在末尾）。
 %
-%    While that may not be too surprising,  the execution order is
-%    also sometimes altered if you add a redundant rule, e.g. if you specify
+%    虽然这可能不太令人惊讶，但如果添加了多余的规则，例如，如果指定了
 %\begin{verbatim}
 %    \DeclareHookRule{myhook}{packageA}{before}{packageB}
 %\end{verbatim}
-%    instead of the previous lines we get
+%    而不是之前我们得到的那些行
 %\begin{verbatim}
 %    -> The hook 'myhook':
 %    > Code chunks:
@@ -1354,68 +1171,46 @@
 %    > Execution order (after applying rules):
 %    >     packageA, packageC, packageB.
 %\end{verbatim}
-%    As you can see the code chunks are still in the same order, but
-%    in the execution order for the labels \texttt{packageB} and
-%    \texttt{packageC} have
-%    swapped places.
-%    The reason is that, with the rule there are two orders that
-%    satisfy it, and the algorithm for sorting happened to pick a
-%    different one compared to the case without rules (where it
-%    doesn't run at all as there is nothing to resolve).
-%    Incidentally, if we had instead specified the redundant rule
+% 当你看到代码块时，仍然是相同的顺序，但是在标签 \texttt{packageB} 和 \texttt{packageC} 的执行顺序已经交换了。
+% 原因是，根据规则，有两种满足条件的顺序，而排序算法恰好选择了与没有规则的情况不同的顺序（在没有规则的情况下，算法根本不会运行，因为没有需要解决的内容）。
+% 顺便说一下，如果我们改为指定多余的规则
 %\begin{verbatim}
 %    \DeclareHookRule{myhook}{packageB}{before}{packageC}
 %\end{verbatim}
-%    the execution order would not have changed.
+% 执行顺序就不会改变了。
 %
-%    In summary: it is not possible to rely on the order of execution
-%    unless there are rules that partially or fully define the order
-%    (in which you can rely on them being fulfilled).
+% 总结：除非存在部分或完全定义顺序的规则（你可以依赖它们被满足），否则无法依赖执行顺序。
 %
 %
-% \subsection{The use of \enquote{reversed} hooks} \label{sec:reversed-order}
+% \subsection{使用“反转”钩子} \label{sec:reversed-order}
 %
-%    You may have wondered why you can declare a \enquote{reversed} hook
-%    with \cs{NewReversedHook} and what that does exactly.
+% 也许您想知道为什么可以用 \cs{NewReversedHook} 声明一个“反转”钩子以及它到底是做什么的。
 %
-%    In short: the execution order of a reversed hook (without any
-%    rules!) is exactly reversed to the order you would have gotten for
-%    a hook declared with \cs{NewHook}.
+% 简而言之：一个没有任何规则的反转钩子的执行顺序与使用 \cs{NewHook} 声明的钩子顺序完全相反。
 %
-%    This is helpful if you have a pair of hooks where you expect to see
-%    code added that involves grouping, e.g., starting an environment
-%    in the first and closing that environment in the second hook.
-%    To give a somewhat contrived example\footnote{there are simpler
-%    ways to achieve the same effect.}, suppose there is a package
-%    adding the following:
+% 如果您有一对期望添加涉及分组的代码的钩子，比如在第一个钩子中开始一个环境，在第二个钩子中关闭该环境，这将非常有帮助。举个有些牵强的例子\footnote{有更简单的方法实现相同的效果。}，假设有一个包添加了以下内容：
 %\begin{verbatim}
 %    \AddToHook{env/quote/before}[package-1]{\begin{itshape}}
 %    \AddToHook{env/quote/after} [package-1]{\end{itshape}}
 %\end{verbatim}
-%    As a result, all quotes will be in italics.
-%    Now suppose further that another |package-too| makes the quotes
-%    also in blue and therefore adds:
+% 结果是，所有引用将呈现为斜体。
+% 现在再假设另一个 |package-too| 也使引用变为蓝色，因此添加了以下内容：
 %\begin{verbatim}
 %    \usepackage{color}
 %    \AddToHook{env/quote/before}[package-too]{\begin{color}{blue}}
 %    \AddToHook{env/quote/after} [package-too]{\end{color}}
 %\end{verbatim}
-%    Now if the \hook{env/quote/after} hook would be a normal hook we
-%    would get the same execution order in  both hooks, namely:
+% 现在，如果 \hook{env/quote/after} 钩子是一个普通的钩子，那么在两个钩子中我们将得到相同的执行顺序，即：
 %\begin{verbatim}
 %    package-1, package-too
 %\end{verbatim}
-%    (or vice versa) and as a result, would get:
+% （或相反）结果将是：
 %\begin{verbatim}
 %    \begin{itshape}\begin{color}{blue} ...
 %    \end{itshape}\end{color}
 %\end{verbatim}
-%    and an error message saying that \verb=\begin{color}= was ended by
-%    \verb=\end{itshape}=.
-%    With \hook{env/quote/after} declared as a reversed hook the
-%    execution order is reversed and so all environments are closed in
-%    the correct sequence and \cs{ShowHook} would give us the
-%    following output:
+% 并且会出现一个错误消息，指出 \verb=\begin{color}= 被 \verb=\end{itshape}= 结束了。
+% 如果将 \hook{env/quote/after} 声明为反转钩子，执行顺序就会反转，因此所有环境都以正确的顺序关闭，\cs{ShowHook} 将给出以下输出：
 %\begin{verbatim}
 %    -> The hook 'env/quote/after':
 %    > Code chunks:
@@ -1431,226 +1226,115 @@
 %    >     package-too, package-1.
 %\end{verbatim}
 %
-%    The reversal of the execution order happens before applying any
-%    rules, so if you alter the order you will probably have to alter
-%    it in both hooks, not just in one, but that depends on the use case.
+% 执行顺序的反转发生在应用任何规则之前，因此如果您更改顺序，则可能必须在两个钩子中都进行更改，而不仅仅是一个，但这取决于用例。
 %
 %
 %
 %
-% \subsection{Difference between \enquote{normal} and
-%    \enquote{one-time} hooks}
+% \subsection{“普通”钩子与“一次性”钩子的区别}
 % \label{sec:onetime-hooks}
 %
-%    When executing a hook a developer has the choice of using
-%    either \cs{UseHook} or \cs{UseOneTimeHook} (or their \pkg{expl3}
-%    equivalents \cs{hook_use:n} and \cs{hook_use_once:n}).
-%    This choice affects how \cs{AddToHook} is handled after the hook
-%    has been executed for the first time.
+% 在执行钩子时，开发人员可以选择使用 \cs{UseHook} 或 \cs{UseOneTimeHook}（或它们的 \pkg{expl3} 等效命令 \cs{hook_use:n} 和 \cs{hook_use_once:n}）。
+% 这个选择影响了在钩子第一次执行后如何处理 \cs{AddToHook}。
 %
-%    With normal hooks adding code via \cs{AddToHook} means that the
-%    code chunk is added to the hook data structure and then used each time
-%    \cs{UseHook} is called.
+% 对于普通钩子，通过 \cs{AddToHook} 添加代码意味着代码块被添加到钩子数据结构中，然后每次调用 \cs{UseHook} 时都会使用它。
 %
-%    With one-time hooks it this is handled slightly differently:
-%    After \cs{UseOneTimeHook} has been called, any further attempts to
-%    add code to the hook via \cs{AddToHook} will simply execute the
-%    \meta{code} immediately.
+% 对于一次性钩子，处理方式略有不同：
+% 在调用 \cs{UseOneTimeHook} 后，任何进一步尝试通过 \cs{AddToHook} 向钩子添加代码的操作都将立即执行 \meta{code}。
 %
-%    This has some consequences one needs to be aware of:
-%    \begin{itemize}
-%    \item
+% 这有一些需要注意的后果：
+% \begin{itemize}
+% \item
 %
-%      If \meta{code} is added to a normal hook after the hook was
-%      executed and it is never executed again for one or the other
-%      reason, then this new \meta{code} will never be executed.
+%   如果在钩子执行后向普通钩子添加 \meta{code}，并且由于某种原因它再也不会执行，则新的 \meta{code} 将永远不会被执行。
 %
-%    \item
+% \item
 %
-%      In contrast if that happens with a one-time hook the \meta{code} is
-%      executed immediately.
+%   相比之下，如果这种情况发生在一次性钩子上，则 \meta{code} 会立即执行。
 %
-%    \end{itemize}
-%    In particular this means that construct such as
+% \end{itemize}
+% 具体来说，这意味着类似以下结构的构建：
 %\begin{quote}
 %    \cs{AddToHook}\verb={myhook}=\\
 %    \phantom{\cs{AddToHook}}\verb={= \meta{code-1}
 %                                     \cs{AddToHook}\verb={myhook}=\Arg{code-2}
 %                                     \meta{code-3} \verb=}=
 %\end{quote}
-%    works for one-time hooks\footnote{This is sometimes used with
-%    \cs{AtBeginDocument} which is why it is supported.} (all three
-%    code chunks are executed one after another), but it makes little
-%    sense with a normal hook, because with a normal hook the first time
-%    \verb=\UseHook{myhook}= is executed it would
-%    \begin{itemize}
-%    \item
-%       execute \meta{code-1},
-%    \item
-%       then execute \verb=\AddToHook{myhook}{code-2}= which adds the
-%    code chunk \meta{code-2} to the hook for use on the next invocation,
-%    \item
-%       and finally execute \meta{code-3}.
-%    \end{itemize}
-%    The second time \cs{UseHook} is called it would execute the
-%    above and in addition \meta{code-2} as that was added as a code
-%    chunk to the hook in the meantime. So each time the hook is used
-%    another copy of \meta{code-2} is added and so that code chunk
-%    is executed $\meta{\# of invocations} -1$ times.
+% 对于一次性钩子来说是有效的\footnote{这有时会用于 \cs{AtBeginDocument}，这就是为什么它被支持的原因。}（三个代码块依次执行），但对于普通钩子来说则意义不大，因为对于普通钩子，第一次执行 \verb=\UseHook{myhook}= 时将会：
+% \begin{itemize}
+% \item
+%    执行 \meta{code-1}，
+% \item
+%    然后执行 \verb=\AddToHook{myhook}{code-2}=，将代码块 \meta{code-2} 添加到下一次调用时使用的钩子中，
+% \item
+%    最后执行 \meta{code-3}。
+% \end{itemize}
+% 第二次调用 \cs{UseHook} 时，它将执行上述操作，并且额外执行 \meta{code-2}，因为此时它已被作为代码块添加到钩子中。因此，每次使用钩子时都会添加另一个副本的 \meta{code-2}，所以该代码块将被执行 $\meta{\# of invocations} -1$ 次。
 %
 %
 %
-% \subsection{Generic hooks provided by packages}
+% \subsection{包提供的通用钩子}
 % \label{sec:generic-hooks}
 %
-% \changes{v1.0p}{2021/08/20}{Section on generic hooks added (gh/638)}
+% \changes{v1.0p}{2021/08/20}{添加了通用钩子的章节（gh/638）}
 %
-%    The hook management system also implements a category of hooks
-%    that are called \enquote{Generic Hooks}. Normally a hook has to
-%    be explicitly declared before it can be used in code. This
-%    ensures that different packages are not using the same hook name
-%    for unrelated purposes---something that would result in absolute
-%    chaos.  However, there are a number of \enquote{standard} hooks
-%    where it is unreasonable to declare them beforehand, e.g, each
-%    and every command has (in theory) an associated \texttt{before}
-%    and \texttt{after} hook. In such cases, i.e., for command,
-%    environment or file hooks, they can be used simply by adding code
-%    to them with \cs{AddToHook}. For more specialized generic hooks,
-%    e.g., those provided by \pkg{babel}, you have to additionally
-%    enable them with \cs{ActivateGenericHook} as explained below.
+% 钩子管理系统还实现了一类称为“通用钩子”的钩子。通常，钩子在可以在代码中使用之前必须显式声明。这确保了不同的包不会为不相关的目的使用相同的钩子名称——这会导致绝对混乱。然而，有一些“标准”钩子，对于它们事先声明是不合理的，例如，每个命令（理论上）都有一个关联的 \texttt{before} 和 \texttt{after} 钩子。在这种情况下，即对于命令、环境或文件钩子，可以通过 \cs{AddToHook} 简单地向其中添加代码来使用它们。对于更专门的通用钩子，例如 \pkg{babel} 提供的那些，您需要使用下面解释的 \cs{ActivateGenericHook} 进行额外的启用。
 %
-%    The generic hooks provided by \LaTeX{} are those for
-%    \hook{cmd},
-%    \hook{env},
-%    \hook{file},
-%    \hook{include}
-%    \hook{package}, and
-%    \hook{class},
-%    and all these are available out of the box: you only have to 
-%    use \cs{AddToHook} to
-%    add code to them, but you don't have to add \cs{UseHook} or
-%    \cs{UseOneTimeHook} to your code, because this is already done for
-%    you (or, in the case of \hook{cmd} hooks, the command’s code is
-%    patched at \verb=\begin{document}=, if necessary).
+% \LaTeX{} 提供的通用钩子包括
+% \hook{cmd}、
+% \hook{env}、
+% \hook{file}、
+% \hook{include}、
+% \hook{package} 和
+% \hook{class}，
+% 所有这些都可以直接使用：您只需使用 \cs{AddToHook} 来添加代码，但不必在您的代码中添加 \cs{UseHook} 或 \cs{UseOneTimeHook}，因为这已经为您完成了（或者在 \hook{cmd} 钩子的情况下，在必要时会在 \verb=\begin{document}= 处对命令代码进行修补）。
 %
-%    However, if you want to provide further generic hooks in your own
-%    code, the situation is slightly different. To do this you should 
-%    use \cs{UseHook} or \cs{UseOneTimeHook}, but
-%    \emph{without declaring the hook} with \cs{NewHook}.  As
-%    mentioned earlier, a call to \cs{UseHook} with an undeclared hook
-%    name does nothing. So as an additional setup step, you need to
-%    explicitly activate your generic hook.  Note that a generic hook
-%    produced in this way is always a normal hook.
+% 但是，如果您想在自己的代码中提供进一步的通用钩子，情况稍有不同。为此，您应该使用 \cs{UseHook} 或 \cs{UseOneTimeHook}，但是\emph{不要使用 \cs{NewHook} 声明钩子}。如前所述，对未声明的钩子名称调用 \cs{UseHook} 不起任何作用。因此，作为额外的设置步骤，您需要显式激活您的通用钩子。请注意，以这种方式生成的通用钩子始终是普通钩子。
 %
-%    For a truly generic hook, with a variable part in the hook name,
-%    such upfront activation would be difficult or impossible, because
-%    you typically do not know what kind of variable parts may come up
-%    in real documents.
+% 对于真正的通用钩子，在钩子名称中包含可变部分的提前激活将是困难或不可能的，因为您通常不知道真实文档中可能出现的可变部分的类型。
 %
-%    For example, \pkg{babel} provides hooks such as
-%    \hook{babel/\meta{language}/afterextras}.  However, language
-%    support in \pkg{babel} is often done through external language
-%    packages. Thus doing the activation for all languages inside the
-%    core \pkg{babel} code is not a viable approach. Instead it needs
-%    to be done by each language package (or by the user who wants to
-%    use a particular hook).
+% 例如，\pkg{babel} 提供了诸如 \hook{babel/\meta{language}/afterextras} 的钩子。然而，\pkg{babel} 中的语言支持通常是通过外部语言包完成的。因此，在核心 \pkg{babel} 代码中为所有语言执行激活并不可行。相反，需要由每个语言包执行（或者由希望使用特定钩子的用户执行）。
 %
-%    Because the hooks are not declared with \cs{NewHook} their names
-%    should be carefully chosen to ensure that they are (likely to be)
-%    unique. Best practice is to include the package or
-%    command name, as was done in the \pkg{babel} example above.
+% 由于这些钩子没有使用 \cs{NewHook} 声明，因此它们的名称应谨慎选择，以确保它们（可能）是唯一的。最佳做法是包括包或命令名称，就像上面 \pkg{babel} 的示例中所做的那样。
 %
-%    Generic hooks defined in this way are always normal hooks (i.e.,
-%    you can't implement reversed hooks this way). This is a
-%    deliberate limitation, because it speeds up the processing
-%    considerably.
+% 通过这种方式定义的通用钩子始终是普通钩子（即，您不能以这种方式实现反转钩子）。这是一个故意的限制，因为它大大加快了处理速度。
 %
 %
-% \subsection{Hooks with arguments}
+% \subsection{带参数的钩子}
 % \label{sec:hook-args}
 %
-%    Sometimes it is necessary to pass contextual information to a hook,
-%    and, for one reason or another, it is not feasible to store such
-%    information in macros.  To serve this purpose, hooks can be
-%    declared with arguments, so that the programmer can pass along the
-%    data necessary for the code in the hook to function properly.
+% 有时需要向钩子传递上下文信息，并且由于某种原因，无法将此类信息存储在宏中。为了满足这个目的，可以声明带参数的钩子，以便程序员可以传递钩子中代码所需的数据。
 %
-%    A hook with arguments works mostly like a regular hook, and most
-%    commands that work for regular hooks, also work for hooks that take
-%    arguments.  The differences are when the hook is declared
-%    (\cs{NewHookWithArguments} is used instead of \cs{NewHook}), then
-%    code can be added with both \cs{AddToHook} and
-%    \cs{AddToHookWithArguments}, and when the hook is used
-%    (\cs{UseHookWithArguments} instead of \cs{UseHook}).
+% 带参数的钩子的工作原理基本上与常规钩子相同，大多数适用于常规钩子的命令也适用于带参数的钩子。不同之处在于钩子的声明（使用 \cs{NewHookWithArguments} 而不是 \cs{NewHook}），然后可以使用 \cs{AddToHook} 和 \cs{AddToHookWithArguments} 添加代码，以及钩子的使用（使用 \cs{UseHookWithArguments} 而不是 \cs{UseHook}）。
 %
-%    \medskip
+% \medskip
 %
-%    A hook with arguments must be declared as such (before it is first
-%    used, as all regular hooks) using
-%    \cs{NewHookWithArguments}\Arg{hook}\Arg{number}.  All code added to
-%    that hook can then use \verb|#1| to access the first argument,
-%    \verb|#2| to access the second, and so forth up to the number of
-%    arguments declared.  However, it is still possible to add code with
-%    references to the arguments of a hook that was not yet declared
-%    (we will discuss that later).  At their core, hooks are macros, so
-%    \TeX's limit of 9~arguments applies, and a low-level \TeX{} error
-%    is raised if you try to reference an argument number that doesn't
-%    exist.
+% 带参数的钩子必须像常规钩子一样在首次使用前（所有常规钩子一样）声明，使用 \cs{NewHookWithArguments}\Arg{hook}\Arg{number}。然后添加到该钩子的所有代码都可以使用 \verb|#1| 访问第一个参数，\verb|#2| 访问第二个参数，依此类推，直到声明的参数数量。但是，仍然可以添加带有对尚未声明的钩子参数的引用的代码（稍后我们将讨论这一点）。钩子本质上是宏，所以 \TeX{} 的 9 个参数限制适用，并且如果尝试引用不存在的参数号码，则会引发低级 \TeX{} 错误。
 %
-%    \medskip
+% \medskip
 %
-%    To use a hook with arguments, just write
-%    \cs{UseHookWithArguments}\Arg{hook}\Arg{number} followed by a
-%    braced list of the arguments.  For example, if the hook \hook{test}
-%    takes three arguments, write:
+% 要使用带参数的钩子，只需写 \cs{UseHookWithArguments}\Arg{hook}\Arg{number}，然后接着是参数的大括号列表。例如，如果钩子 \hook{test} 需要三个参数，写法如下：
 %\begin{verbatim}
 %    \UseHookWithArguments{test}{3}{arg-1}{arg-2}{arg-3}
 %\end{verbatim}
-%    then, in the \meta{code} of the hook, all instances of \verb|#1|
-%    will be replaced by \verb|arg-1|, \verb|#2| by \verb|arg-2| and so
-%    on.  If, at the point of usage, the programmer provides more
-%    arguments than the hook is declared to take, the excess arguments
-%    are simply ignored by the hook.  Behaviour is
-%    unpredictable\footnote
-%      {The hook \emph{will} take the declared number of arguments, and
-%       what will happen depends on what was grabbed, and what the hook
-%       code does with its arguments.}
-%    if too few arguments are provided.  If the hook isn't declared,
-%    \meta{number} arguments are removed from the input stream.
+% 然后，在钩子的 \meta{code} 中，所有的 \verb|#1| 将被替换为 \verb|arg-1|，\verb|#2| 将被替换为 \verb|arg-2|，以此类推。如果在使用时，程序员提供的参数多于钩子声明的参数，则超出的参数将被钩子简单地忽略。如果提供的参数过少，则行为是不可预测的\footnote{钩子 \emph{将}采用声明的参数数量，发生了什么取决于被抓取的内容以及钩子代码对其参数的处理。}。如果钩子未被声明，\meta{number} 个参数将从输入流中移除。
 %
-%    \medskip
+% \medskip
 %
-%    Adding code to a hook with arguments can be done with
-%    \cs{AddToHookWithArguments} as well as with the regular
-%    \cs{AddToHook}, to achieve different outcomes.  The main difference
-%    when it comes to adding code to a hook, in this case, is firstly
-%    the possibility of accessing a hook's arguments, of course, and
-%    second, how parameter tokens (\verb|#|$_6$) are treated.
+% 使用 \cs{AddToHookWithArguments} 可以像常规 \cs{AddToHook} 一样向带参数的钩子添加代码，以实现不同的结果。在这种情况下，向钩子添加代码的主要区别在于首先可以访问钩子的参数，当然还有参数标记（\verb|#|$_6$）的处理方式。
 %
-%    Using \cs{AddToHook} in a hook that takes arguments will work as it
-%    does for all other hooks. This allows a package developer to add
-%    arguments to a hook that otherwise had none without having to worry
-%    about compatibility.  This means that, for example:
+% 在带参数的钩子中使用 \cs{AddToHook} 将像对所有其他钩子一样工作。这允许包开发人员向本来没有参数的钩子添加参数，而无需担心兼容性问题。这意味着，例如：
 %\begin{verbatim}
 %    \AddToHook{test}{\def\foo#1{Hello, #1!}}
 %\end{verbatim}
-%    will define the same macro \cs[no-index]{foo} regardless if the
-%    hook \hook{test} takes arguments or not.
+% 无论钩子 \hook{test} 是否带参数，都会定义相同的宏 \cs[no-index]{foo}。
 %
-%    Using \cs{AddToHookWithArguments} allows the \meta{code} added to
-%    access the arguments of the hook with \verb|#1|, \verb|#2|, and so
-%    forth, up to the number of the arguments declared in the hook.
-%    This means that if one wants to add a \verb|#|$_6$ to the
-%    \meta{code} that token must be doubled in the input.  The same
-%    definition from above, using \cs{AddToHookWithArguments}, needs to
-%    be rewritten:
+% 使用 \cs{AddToHookWithArguments} 允许向添加的 \meta{code} 访问钩子的参数，如 \verb|#1|、\verb|#2| 等，直到钩子声明的参数数量。这意味着，如果想要在 \meta{code} 中添加一个 \verb|#|$_6$，那个标记必须在输入中重复。上面的相同定义，使用 \cs{AddToHookWithArguments}，需要重写为：
 %\begin{verbatim}
 %    \AddToHookWithArguments{test}{\def\foo##1{Hello, ##1!}}
 %\end{verbatim}
 %
-%    Extending the above example to use the hook arguments, we could
-%    rewrite something like (now from declaration to usage, to get the
-%    whole picture):
+% 将上述示例扩展为使用钩子参数，我们可以重写类似以下内容的代码（现在从声明到使用，以获得完整的画面）：
 %\begin{verbatim}
 %    \NewHookWithArguments{test}{1}
 %    \AddToHookWithArguments{test}{%
@@ -1660,115 +1344,52 @@
 %    \UseHook{test}{Howdy!}
 %    \ShowCommand\foo
 %\end{verbatim}
-%    Running the code above prints in the terminal:
+% 上述代码运行后会在终端打印：
 %\begin{verbatim}
 %    Defining foo with "Howdy!"
 %    > \foo=macro:
 %    #1->Hello, #1! Some text after: Howdy!.
 %\end{verbatim}
-%    Note how \verb|##1| in the call to \cs{AddToHookWithArguments}
-%    became \verb|#1|, and the \verb|#1| was replaced by the argument
-%    passed to the hook.  Should the hook be used again, with a
-%    different argument, the definition would naturally change.
+% 请注意，在对 \cs{AddToHookWithArguments} 的调用中，\verb|##1| 变为了 \verb|#1|，而 \verb|#1| 被传递给钩子的参数。如果再次使用钩子并提供不同的参数，定义自然会发生变化。
 %
-%    \bigskip
+% \bigskip
 %
-%    It is possible to add code referencing a hook's arguments before
-%    such hook is declared and the number of hooks is fixed.  However,
-%    if some code is added to the hook, that references more arguments
-%    than will be declared for the hook, there will be a low-level
-%    \TeX{} error about an \enquote{Illegal parameter number} at the
-%    time the hook is declared, which will be hard to track down because
-%    at that point \TeX{} can't know whence the offending code came
-%    from.  Thus it is important that package writers explicitly
-%    document how many arguments (if any) each hook can take, so users
-%    of those packages know how many arguments can be referenced, and
-%    equally important, what each argument means.
+% 在声明钩子和确定钩子数量固定之前，可以添加引用钩子参数的代码。但是，如果钩子中添加的某些代码引用的参数多于将为该钩子声明的参数数量，则在钩子声明时会出现低级 \TeX{} 错误，指示“非法参数编号”，这将很难追踪，因为在这一点上 \TeX{} 无法知道引起问题的代码来自何处。因此，包编写者明确记录每个钩子可以接受多少个参数（如果有的话）是非常重要的，以便使用这些包的用户知道可以引用多少个参数，同样重要的是，了解每个参数的含义。
 %
-% \subsection{Private \LaTeX{} kernel hooks}
+% \subsection{私有的 \LaTeX{} 核心钩子}
 %
-%    There are a few places where it is absolutely essential for
-%    \LaTeX{} to function correctly that code is executed in a precisely
-%    defined order. Even that could have been implemented with the
-%    hook management (by adding various rules to ensure the
-%    appropriate ordering with respect to other code added by
-%    packages). However, this makes every document unnecessary
-%    slow, because there has to be sorting even though the result is
-%    predetermined. Furthermore it forces package writers to
-%    unnecessarily add such rules if they add further code to the hook
-%    (or break \LaTeX{}).
+%    有几个地方对于 \LaTeX{} 正确运行而言绝对至关重要，需要按照精确定义的顺序执行代码。即使可以通过钩子管理实现这一点（通过添加各种规则来确保与包添加的其他代码的适当排序），但这会使每个文档变得不必要地缓慢，因为即使结果是预先确定的，也必须进行排序。此外，这会强迫包作者不必要地为钩子添加进一步的规则（或者破坏 \LaTeX{}）。
 %
-%    For that reason such code is not using the hook management, but
-%    instead private kernel commands directly before or after a public
-%    hook with the following naming
-%    convention: \cs{@kernel@before@\meta{hook}} or
-%    \cs{@kernel@after@\meta{hook}}. For example, in
-%    \cs{enddocument} you find
+%    出于这个原因，此类代码不使用钩子管理，而是直接在公共钩子之前或之后使用私有内核命令，命名约定如下：\cs{@kernel@before@\meta{hook}} 或 \cs{@kernel@after@\meta{hook}}。例如，在 \cs{enddocument} 中你会找到：
 %\begin{verbatim}
 %   \UseHook{enddocument}%
 %   \@kernel@after@enddocument
 %\end{verbatim}
-%    which means first the user/package-accessible \hook{enddocument}
-%    hook is executed and then the internal kernel hook. As their name
-%    indicates these kernel commands should not be altered by third-party
-%    packages, so please refrain from that in the interest of
-%    stability and instead use the public hook next to it.\footnote{As
-%    with everything in \TeX{} there is not enforcement of this rule,
-%    and by looking at the code it is easy to find out how the kernel
-%    adds to them. The main reason of this section is therefore to say
-%    \enquote{please don't do that, this is unconfigurable code!}}
+%    这意味着首先执行用户/包可访问的 \hook{enddocument} 钩子，然后执行内部核心钩子。正如它们的名称所示，这些内核命令不应由第三方包更改，请不要这样做，这样有利于稳定性，而是使用其旁边的公共钩子。\footnote{与 \TeX{} 中的所有内容一样，没有强制执行此规则，通过查看代码很容易发现内核如何向其添加内容。因此，这个部分的主要目的是说：“请不要这样做，这是不可配置的代码！”}
 %
 %
 %
-% \subsection{Legacy \LaTeXe{} interfaces}
+% \subsection{遗留的 \LaTeXe{} 接口}
 %
-% \newcommand\onetimetext{This is a one-time hook, so after it
-%   is executed, all further
-%   attempts to add code to it will execute such code immediately
-%   (see section~\ref{sec:onetime-hooks}).}
+% \newcommand\onetimetext{这是一个一次性钩子，因此在执行后，所有进一步尝试添加代码的操作都将立即执行该代码（参见第~\ref{sec:onetime-hooks} 节）。}
 %
-%  \LaTeXe{} offered a small number of hooks together with commands to
-%    add to them. They are listed here and are retained for backwards
-%    compatibility.
+% \LaTeXe{} 提供了一小部分钩子以及用于向其添加代码的命令。它们在这里列出，并保留了向后兼容性。
 %
-%  With the new hook management, several additional hooks have been added
-%    to \LaTeX\ and more will follow. See the next section for what
-%    is already available.
+% 使用新的钩子管理机制，\LaTeX{} 添加了几个额外的钩子，未来还将添加更多。请参见下一节以了解已经可用的内容。
 %
 %
 % \begin{function}{\AtBeginDocument}
 %   \begin{syntax}
 %     \cs{AtBeginDocument} \oarg{label} \Arg{code}
 %   \end{syntax}
-%   If used without the optional argument \meta{label}, it works essentially
-%    like before, i.e., it is adding \meta{code} to the hook
-%    \hook{begindocument}
-%    (which is executed inside \verb=\begin{document}=).
-%    However, all code added this way is labeled with the label
-%    \hook{top-level} (see section~\ref{sec:top-level})
-%    if done outside of a package or class or with the
-%    package/class name if called inside such a file
-%    (see section~\ref{sec:default-label}).
+%   如果不使用可选参数 \meta{label}，它基本上与以前一样，即将 \meta{code} 添加到 \hook{begindocument} 钩子（在 \verb=\begin{document}= 内执行）。
+%    但是，通过这种方式添加的所有代码都使用标签 \hook{top-level} 进行标记（参见第~\ref{sec:top-level} 节），如果在包或类之外进行，或者使用包/类名称，如果在这样的文件内部调用（参见第~\ref{sec:default-label} 节）。
 %
-%    This way one can add code to the hook using
-%    \cs{AddToHook} or \cs{AtBeginDocument} using a different label
-%    and explicitly order the code chunks as necessary, e.g., run some
-%    code before or after another package's code.  When using the
-%    optional argument the call is equivalent to running
-%    \cs{AddToHook} \texttt{\{begindocument\}} \oarg{label}
-%    \Arg{code}.
+%    这样，使用 \cs{AddToHook} 或 \cs{AtBeginDocument} 使用不同的标签显式地按照需要排序代码块，例如，在另一个包的代码之前或之后运行某些代码。当使用可选参数时，该调用等效于运行 \cs{AddToHook} \texttt{\{begindocument\}} \oarg{label} \Arg{code}。
 %
-%    \cs{AtBeginDocument} is a wrapper around the \hook{begindocument}
-%    hook (see section~\ref{sec:begindocument-hooks}), which is a
-%    one-time hook.  As such, after the \hook{begindocument} hook is
-%    executed at \verb=\begin{document}= any attempt to add \meta{code}
-%    to this hook with \cs{AtBeginDocument} or with \cs{AddToHook} will
-%    cause that \meta{code} to execute immediately instead.
-%    See section~\ref{sec:onetime-hooks} for more on one-time hooks.
+%    \cs{AtBeginDocument} 是 \hook{begindocument} 钩子（参见第~\ref{sec:begindocument-hooks} 节）的包装器，它是一个一次性钩子。因此，在 \hook{begindocument} 钩子在 \verb=\begin{document}= 处执行后，任何尝试使用 \cs{AtBeginDocument} 或 \cs{AddToHook} 向该钩子添加 \meta{code} 的操作都将导致该 \meta{code} 立即执行。有关一次性钩子的更多信息，请参见第~\ref{sec:onetime-hooks} 节。
 %
-%    For important packages with known order requirement we may over
-%    time add rules to the kernel (or to those packages) so that they
-%    work regardless of the loading-order in the document.
+%    对于具有已知顺序要求的重要包，我们可能会随着时间的推移向内核（或这些包）添加规则，以便它们不受文档加载顺序的影响而工作。
 % \end{function}
 %
 % \begin{function}{\AtEndDocument}
@@ -1780,473 +1401,280 @@
 %
 %    \bigskip
 %
-%    The few hooks that existed previously in \LaTeXe{} used internally
-%    commands such as \cs{@begindocumenthook} and packages sometimes
-%    augmented them directly rather than working through
-%    \cs{AtBeginDocument}. For that reason there is currently support
-%    for this, that is, if the system detects that such an internal
-%    legacy hook command contains code it adds it to the new hook
-%    system under the label \texttt{legacy} so that it doesn't get
-%    lost.
+%    在 \LaTeXe{} 中之前存在的少量钩子在内部使用诸如 \cs{@begindocumenthook} 之类的命令，有时包直接增强它们而不是通过 \cs{AtBeginDocument} 进行操作。出于这个原因，目前支持这样做，也就是说，如果系统检测到这样一个内部传统钩子命令包含代码，则将其添加到新的钩子系统中，并使用标签 \texttt{legacy} 进行标记，以防止丢失。
 %
-%    However, over time the remaining cases of direct usage need
-%    updating because in one of the future release of \LaTeX{} we will
-%    turn this legacy support off, as it does unnecessary slow down
-%    the processing.
+%    然而，随着时间的推移，剩余的直接使用情况需要更新，因为在未来的某个 \LaTeX{} 发布中，我们将关闭此传统支持，因为它会不必要地减慢处理速度。
 %
 %
-% \section{\LaTeXe{} commands and environments augmented by hooks}
+% \section{\LaTeXe{} 命令和由钩子增强的环境}
 %
-%    In this section we describe the standard hooks that are now
-%    offered by \LaTeX{}, or give pointers to other documents in which
-%    they are described. This section will grow over time (and
-%    perhaps eventually move to usrguide3).  
+%    在本节中，我们描述了现在由 \LaTeX{} 提供的标准钩子，或者提供了指向其他文档的指针，其中对它们进行了描述。本节将随时间而增长（并且可能最终会转移到 usrguide3）。
 %
-% \subsection{Generic hooks}
+% \subsection{通用钩子}
 % \label{sec:generic}
 %
-% As stated earlier, with the exception of generic hooks, all hooks must 
-% be declared with \cs{NewHook} before they can be used.  
-% All generic hooks have names of the form 
-% \enquote{\meta{type}/\meta{name}/\meta{position}}, where \meta{type}
-% is from the predefined list shown below, and \meta{name} is the variable
-% part whose meaning will depend on the \meta{type}. The last component,
-% \meta{position}, has more complex possibilities: 
-% it can always be |before| or |after|; for |env| hooks, it can also be |begin|
-% or |end|; and for |include| hooks it can also be |end|.  Each specific
-% hook is documented below, or in \texttt{ltcmdhooks-doc.pdf} or
-% \texttt{ltfilehook-doc.pdf}.
+% 正如前面所述，除了通用钩子之外，所有钩子在使用之前都必须使用 \cs{NewHook} 声明。
+% 所有通用钩子的名称都采用以下形式：\enquote{\meta{type}/\meta{name}/\meta{position}}，其中 \meta{type} 取自下面预定义的列表，\meta{name} 是其含义将取决于 \meta{type} 的变量部分。
+% 最后一个组成部分 \meta{position} 具有更复杂的可能性：
+% 它始终可以是 |before| 或 |after|；对于 |env| 钩子，还可以是 |begin| 或 |end|；对于 |include| 钩子，还可以是 |end|。每个特定的钩子在下面或 \texttt{ltcmdhooks-doc.pdf} 或 \texttt{ltfilehook-doc.pdf} 中有文档记录。
 %
-% The generic hooks provided by \LaTeX{} belong to one of the six types:
+% \LaTeX{} 提供的通用钩子属于以下六种类型：
 % \begin{description}
-%   \item[env] Hooks executed before and after environments --
-%     \meta{name} is the name of the environment, and available values
-%     for \meta{position} are |before|, |begin|, |end|, and |after|;
-%   \item[cmd] Hooks added to and executed before and after commands --
-%     \meta{name} is the name of the command, and available values
-%     for \meta{position} are |before| and |after|;
-%   \item[file] Hooks executed before and after reading a file --
-%     \meta{name} is the name of the file (with extension), and
-%     available values for \meta{position} are |before| and |after|;
-%   \item[package] Hooks executed before and after loading packages --
-%     \meta{name} is the name of the package, and available values for
-%     \meta{position} are |before| and |after|;
-%   \item[class] Hooks executed before and after loading classes --
-%     \meta{name} is the name of the class, and available values for
-%     \meta{position} are |before| and |after|;
-%   \item[include] Hooks executed before and after \cs{include}d files -- 
-%     \meta{name} is the name of the included file (without the |.tex|
-%     extension), and available values for \meta{position} are |before|,
-%     |end|, and |after|.
+%   \item[env] 在环境之前和之后执行的钩子——\meta{name} 是环境的名称，\meta{position} 的可用值为 |before|、|begin|、|end| 和 |after|；
+%   \item[cmd] 添加到命令之前和之后执行的钩子——\meta{name} 是命令的名称，\meta{position} 的可用值为 |before| 和 |after|；
+%   \item[file] 在读取文件之前和之后执行的钩子——\meta{name} 是文件的名称（带有扩展名），\meta{position} 的可用值为 |before| 和 |after|；
+%   \item[package] 在加载包之前和之后执行的钩子——\meta{name} 是包的名称，\meta{position} 的可用值为 |before| 和 |after|；
+%   \item[class] 在加载类之前和之后执行的钩子——\meta{name} 是类的名称，\meta{position} 的可用值为 |before| 和 |after|；
+%   \item[include] 在 \cs{include} 包含的文件之前和之后执行的钩子——\meta{name} 是包含的文件的名称（不包含 |.tex| 扩展名），\meta{position} 的可用值为 |before|、|end| 和 |after|。
 % \end{description}
 %
-% Each of the hooks above are detailed in the following sections and
-% in linked documentation.
+% 下面详细介绍了上述每个钩子，并提供了链接的文档。
 % ^^A^^A^^A \pho{Wouldn't it be better to document all hooks here?}
 %
-% \subsubsection{Generic hooks for all environments}
+% \subsubsection{所有环境的通用钩子}
 %
-%    Every environment \meta{env} has now four associated hooks coming
-%    with it:
+%    每个环境 \meta{env} 现在都有四个与之关联的钩子：
 %    \begin{description}
 %    \item[\hook{env/\meta{env}/before}]
 %
-%       This hook is executed as part of \cs{begin} as the very first
-%       action, in particular prior to starting the environment group.
-%       Its scope is therefore not restricted by the environment.
+%       这个钩子作为 \cs{begin} 的一部分执行，特别是在开始环境组之前。因此，它的范围不受环境的限制。
 %
 %    \item[\hook{env/\meta{env}/begin}]
 %
-%       This hook is executed as part of \cs{begin} directly in front
-%       of the code specific to the environment start (e.g., the
-%       second argument of \cs{newenvironment}).  Its scope is the
-%       environment body.
+%       这个钩子作为 \cs{begin} 的一部分直接位于特定于环境开始的代码之前（例如，\cs{newenvironment} 的第二个参数）。它的范围是环境主体。
 %
 %    \item[\hook{env/\meta{env}/end}]
 %
-%       This hook is executed as part of \cs{end} directly in front of the
-%       code specific to the end of the environment (e.g., the third
-%       argument of \cs{newenvironment}).
+%       这个钩子作为 \cs{end} 的一部分直接位于特定于环境结束的代码之前（例如，\cs{newenvironment} 的第三个参数）。
 %
 %    \item[\hook{env/\meta{env}/after}]
 %
-%       This hook is executed as part of \cs{end} after the
-%       code specific to the environment end and after the environment
-%       group has ended.
-%       Its scope is therefore not restricted by the environment.
+%       这个钩子作为 \cs{end} 的一部分，在环境结束的代码和环境组结束之后执行。因此，它的范围不受环境的限制。
 %
-%       The hook is implemented as a reversed hook so if two packages
-%       add code to \hook{env/\meta{env}/before} and to
-%       \hook{env/\meta{env}/after} they can add surrounding
-%       environments and the order of closing them happens in the
-%       right sequence.
+%       该钩子实现为一个反向钩子，因此，如果两个包向 \hook{env/\meta{env}/before} 和 \hook{env/\meta{env}/after} 添加代码，它们可以添加周围的环境，且关闭它们的顺序是正确的。
 %
 %    \end{description}
-%    Generic environment hooks are never one-time hooks even with
-%    environments that are supposed to appear only once in a
-%    document.\footnote{Thus if one adds code to such hooks after the
-%    environment has been processed, it will only be executed if the
-%    environment appears again and if that doesn't happen the code
-%    will never get executed.}  In contrast to other hooks there is
-%    also no need to declare them using \cs{NewHook}.
+%    通用环境钩子即使对于只能在文档中出现一次的环境也不是一次性钩子。\footnote{因此，如果在处理环境之后添加代码，只有在环境再次出现且不会发生代码执行时，该代码才会被执行。} 与其他钩子不同，也不需要使用 \cs{NewHook} 声明它们。
 %
-%    The hooks are only executed if \cs{begin}\Arg{env} and
-%    \cs{end}\Arg{env} is used. If the environment code is executed
-%    via low-level calls to \cs[no-index]{\meta{env}} and \cs[no-index]{end\meta{env}}
-%    (e.g., to avoid the environment grouping) they are not
-%    available. If you want them available in code using this method,
-%    you would need to add them yourself, i.e., write something like
+%    这些钩子只有在使用 \cs{begin}\Arg{env} 和 \cs{end}\Arg{env} 时才会执行。如果环境代码是通过对 \cs[no-index]{\meta{env}} 和 \cs[no-index]{end\meta{env}} 进行低级调用（例如，为了避免环境组），则它们不可用。如果要在使用此方法的代码中使用它们，您需要自己添加它们，即编写类似以下内容的代码：
 %\begin{verbatim}
 %  \UseHook{env/quote/before}\quote
 %      ...
 %  \endquote\UseHook{env/quote/after}
 %\end{verbatim}
-%    to add the outer hooks, etc.
+%    以添加外部钩子等。
 %
-%
-%    Largely for compatibility with existing packages, the following
-%    four commands are also available to set the environment hooks; but for
-%    new packages we recommend directly using the hook names and
-%    \cs{AddToHook}.
-%
+%    为了与现有包的兼容性，还提供了以下四个命令来设置环境钩子；但对于新的包，我们建议直接使用钩子名称和 \cs{AddToHook}。
 %
 % \begin{function}{\BeforeBeginEnvironment}
 %   \begin{syntax}
 %     \cs{BeforeBeginEnvironment} \oarg{label} \Arg{env} \Arg{code}
 %   \end{syntax}
-%   This declaration adds to the \hook{env/\meta{env}/before} hook
-%    using the \meta{label}.  If \meta{label} is not given, the
-%    \meta{default label} is used (see section~\ref{sec:default-label}).
+%   此声明使用 \meta{label} 将代码添加到 \hook{env/\meta{env}/before} 钩子中。如果未给出 \meta{label}，则使用 \meta{default label}（参见第~\ref{sec:default-label} 节）。
 % \end{function}
 %
 % \begin{function}{\AtBeginEnvironment}
 %   \begin{syntax}
 %     \cs{AtBeginEnvironment} \oarg{label} \Arg{env} \Arg{code}
 %   \end{syntax}
-%   This is like \cs{BeforeBeginEnvironment} but it adds to the \hook{env/\meta{env}/begin} hook.
+%   这类似于 \cs{BeforeBeginEnvironment}，但它将代码添加到 \hook{env/\meta{env}/begin} 钩子中。
 % \end{function}
 %
 % \begin{function}{\AtEndEnvironment}
 %   \begin{syntax}
 %     \cs{AtEndEnvironment} \oarg{label} \Arg{env} \Arg{code}
 %   \end{syntax}
-%   This is like \cs{BeforeBeginEnvironment} but it adds to the \hook{env/\meta{env}/end} hook.
+%   这类似于 \cs{BeforeBeginEnvironment}，但它将代码添加到 \hook{env/\meta{env}/end} 钩子中。
 % \end{function}
 %
 % \begin{function}{\AfterEndEnvironment}
 %   \begin{syntax}
 %     \cs{AfterEndEnvironment} \oarg{label} \Arg{env} \Arg{code}
 %   \end{syntax}
-%   This is like \cs{BeforeBeginEnvironment} but it adds to the \hook{env/\meta{env}/after} hook.
+%   这类似于 \cs{BeforeBeginEnvironment}，但它将代码添加到 \hook{env/\meta{env}/after} 钩子中。
 % \end{function}
 %
 %
-% \subsubsection{Generic hooks for commands}
+% \subsubsection{命令的通用钩子}
 %
-%    Similar to environments there are now (at least in theory) two
-%    generic hooks available for any \LaTeX{} command. These are
+%    与环境类似，现在（至少在理论上）对于任何 \LaTeX{} 命令都有两个通用钩子可用。它们是：
 %    \begin{description}
 %    \item[\hook{cmd/\meta{name}/before}]
 %
-%       This hook is executed at the very start of the command
-%       execution.
+%       此钩子在命令执行的开头执行。
 %
 %    \item[\hook{cmd/\meta{name}/after}]
-%       This hook is executed at the very end of the command body.  It is
-%       implemented as a reversed hook.
+%       此钩子在命令体的最后执行。它实现为一个反向钩子。
 %    \end{description}
-%    In practice there are restrictions and especially the
-%    \hook{after} hook works only with a subset of commands. Details
-%    about these restrictions are documented in
-%    \texttt{ltcmdhooks-doc.pdf} or with code in
-%    \texttt{ltcmdhooks-code.pdf}.
+%    实际上有一些限制，尤其是 \hook{after} 钩子仅适用于一部分命令。有关这些限制的详细信息可以在 \texttt{ltcmdhooks-doc.pdf} 中找到，或者在 \texttt{ltcmdhooks-code.pdf} 中查看代码。
 %
 %
 %
 %
-% \subsubsection{Generic hooks provided by file loading operations}
+% \subsubsection{文件加载操作提供的通用钩子}
 %
-%    There are several hooks added to \LaTeX{}'s process of loading
-%    file via its high-level interfaces such as \cs{input},
-%    \cs{include}, \cs{usepackage}, \cs{RequirePackage}, etc. These
-%    are documented in \texttt{ltfilehook-doc.pdf} or with code in
-%    \texttt{ltfilehook-code.pdf}.
+%    在通过其高级接口加载文件（例如 \cs{input}、\cs{include}、\cs{usepackage}、\cs{RequirePackage} 等）时，\LaTeX{} 添加了几个钩子。这些钩子在 \texttt{ltfilehook-doc.pdf} 中有文档说明，或者可以在 \texttt{ltfilehook-code.pdf} 中查看代码。
 %
 %
 %
-% \subsection{Hooks provided by \cs{begin}\texttt{\{document\}}}
+% \subsection{\cs{begin}\texttt{\{document\}} 提供的钩子}
 % \label{sec:begindocument-hooks}
 %
-%    Until 2020 \cs{begin}\texttt{\{document\}} offered exactly one
-%    hook that one could add to using
-%    \cs{AtBeginDocument}. Experiences over the years have shown that
-%    this single hook in one place was not enough and as part of
-%    adding the general hook management system a number of additional
-%    hooks have been added at this point. The places for these hooks have
-%    been chosen to provide the same support as offered by external
-%    packages, such as \pkg{etoolbox} and others that augmented
-%    \cs{document} to gain better control.
+%    直到 2020 年，\cs{begin}\texttt{\{document\}} 仅提供了一个可通过 \cs{AtBeginDocument} 添加的钩子。多年的经验表明，在一个地方使用这个单一的钩子是不够的，因此，在添加通用钩子管理系统的过程中，在此处添加了许多其他的钩子。这些钩子的位置被选择为提供与外部包（例如 \pkg{etoolbox} 和其他增强 \cs{document} 以获得更好控制的包）所提供的支持相同。
 %
-%    Supported are now the following hooks (all of them one-time hooks):
+%    现在支持以下钩子（它们都是一次性钩子）：
 %    \begin{description}
 %
 %
 %    \item[\hook{begindocument/before}]
 %
-%      This hook is executed at the very start of \cs{document}, one can
-%      think of it as a hook for code at the end of the preamble
-%      section and this is how it is used by \pkg{etoolbox}'s
-%      \cs{AtEndPreamble}.
+%      此钩子在 \cs{document} 开始时执行，可以将其视为位于导言区末尾的代码的钩子，这就是 \pkg{etoolbox} 的 \cs{AtEndPreamble} 使用它的方式。
 %
 %      \onetimetext
 %
 %    \item[\hook{begindocument}]
 %
-%      This hook is added to by using \cs{AddToHook}\texttt{\{begindocument\}}
-%      or by using \cs{AtBeginDocument} and it is
-%      executed after the \texttt{.aux} file has been read and most
-%      initialization are done, so they can be altered and inspected by
-%      the hook code. It is followed by a small number of further
-%      initializations that shouldn't be altered and are therefore
-%      coming later.
+%      这个钩子是通过使用 \cs{AddToHook}\texttt{\{begindocument\}} 或使用 \cs{AtBeginDocument} 添加的，它在读取 \texttt{.aux} 文件和大多数初始化完成后执行，因此可以被钩子代码修改和检查。它后面紧跟一些不应该被更改的进一步初始化，因此稍后会出现。
 %
-%      The hook should not be used to add material for typesetting as
-%      we are still in \LaTeX's initialization phase and not in the
-%      document body. If such material needs to be added to the document
-%      body use the next hook instead.
+%      该钩子不应该用于添加排版素材，因为我们仍然处于 \LaTeX{} 的初始化阶段，而不是文档主体。如果需要将此类素材添加到文档主体中，请改用下一个钩子。
 %
 %      \onetimetext
 %
 %    \item[\hook{begindocument/end}]
 %
-%      This hook is executed at the end of the \cs{document} code in
-%      other words at the beginning of the document body. The only
-%      command that follows it is \cs{ignorespaces}.
+%      此钩子在 \cs{document} 代码结束时执行，换句话说，在文档主体开始时执行。其后唯一的命令是 \cs{ignorespaces}。
 %
 %      \onetimetext
 %
 %    \end{description}
-%    The generic hooks executed by \cs{begin} also exist, i.e.,
-%    \hook{env/document/before} and \hook{env/document/begin}, but
-%    with this special environment it is better use the dedicated
-%    one-time hooks above.
+%    \cs{begin} 执行的通用钩子也存在，即 \hook{env/document/before} 和 \hook{env/document/begin}，但对于此特殊环境，最好使用上述专用的一次性钩子。
 %
 %
 %
 %
-% \subsection{Hooks provided by \cs{end}\texttt{\{document\}}}
+% \subsection{\cs{end}\texttt{\{document\}} 提供的钩子}
 %
-%    \LaTeXe{} has always provided \cs{AtEndDocument} to add code to the
-%    \verb=\end{document}=, just in front of the code that
-%    is normally executed there. While this was a big improvement over
-%    the situation in \LaTeX\,2.09, it was not flexible enough for a
-%    number of use cases and so packages, such as \pkg{etoolbox},
-%    \pkg{atveryend} and others patched \cs{enddocument} to add
-%    additional points where code could be hooked into.
+%    \LaTeXe{} 一直提供 \cs{AtEndDocument} 来添加代码到 \verb=\end{document}=，就在通常执行的代码前面。尽管这对于 \LaTeX\,2.09 的情况是一个很大的改进，但对于许多用例来说并不够灵活，因此，诸如 \pkg{etoolbox}、\pkg{atveryend} 等包对 \cs{enddocument} 进行了补丁，以添加额外的代码挂载点。
 %
-%    Patching using packages is always problematical as leads to
-%    conflicts (code availability, ordering of patches, incompatible
-%    patches, etc.).  For this reason a number of additional hooks
-%    have been added to the \cs{enddocument} code to allow packages
-%    to add code in various places in a controlled way without the
-%    need for overwriting or patching the core code.
+%    使用包进行补丁总是有问题的，因为会导致冲突（代码可用性、补丁的顺序、不兼容的补丁等）。因此，在 \cs{enddocument} 代码中添加了一些额外的钩子，允许包以受控的方式在各个地方添加代码，而无需覆盖或补丁核心代码。
 %
-%    Supported are now the following hooks (all of them one-time hooks):
+%    现在支持以下钩子（它们都是一次性钩子）：
 %    \begin{description}
 %
 %    \item[\hook{enddocument}]
 %
-%      The hook associated with \cs{AtEndDocument}. It is immediately
-%      called at the beginning of \cs{enddocument}.
+%      与 \cs{AtEndDocument} 相关联的钩子。它在 \cs{enddocument} 开始时立即调用。
 %
-%      When this hook is executed there may be still unprocessed
-%      material (e.g., floats on the deferlist) and the hook may add
-%      further material to be typeset. After it, \cs{clearpage} is
-%      called to ensure that all such material gets typeset. If there
-%      is nothing waiting the \cs{clearpage} has no effect.
+%      当执行此钩子时，可能仍有未处理的素材（例如推迟列表上的浮动体），而钩子可能会添加进一步要排版的素材。之后，调用 \cs{clearpage} 来确保所有这样的素材都被排版。如果没有等待的素材，则 \cs{clearpage} 没有效果。
 %
 %      \onetimetext
 %
 %    \item[\hook{enddocument/afterlastpage}]
 %
-%      As the name indicates this hook should not receive code that
-%      generates material for further pages. It is the right place to
-%      do some final housekeeping and possibly write out some
-%      information to the \texttt{.aux} file (which is still open at
-%      this point to receive data, but since there will be no more pages you
-%      need to write to it using \cs{immediate}\cs{write}). It is also the
-%      correct place to
-%      set up any testing code to be run when the \texttt{.aux} file
-%      is re-read in the next step.
+%      如名称所示，此钩子不应该接收生成更多页面素材的代码。这是做一些最终的收尾工作的正确位置，可能要向 \texttt{.aux} 文件写一些信息（在此时，该文件仍然打开以接收数据，但由于不会再有页面，您需要使用 \cs{immediate}\cs{write} 来写入它）。这也是设置任何在下一步重新读取 \texttt{.aux} 文件时运行的测试代码的正确位置。
 %
-%
-%      After this hook has been executed the \texttt{.aux} file is
-%      closed for writing and then read back in to do some tests
-%      (e.g., looking for missing references or duplicated labels, etc.).
+%      执行此钩子后，\texttt{.aux} 文件将关闭写入，并重新读取以进行一些测试（例如查找缺失引用或重复标签等）。
 %
 %      \onetimetext
 %
 %    \item[\hook{enddocument/afteraux}]
 %
-%      At this point, the \texttt{.aux} file has been reprocessed and so
-%      this is a possible place for final checks and display of
-%      information to the user. However, for the latter you might
-%      prefer the next hook, so that your information is displayed after the
-%      (possibly longish) list of files if that got requested via \cs{listfiles}.
+%      此时，\texttt{.aux} 文件已经被重新处理，因此这是进行最终检查和向用户显示信息的可能位置。但是，对于后者，您可能更喜欢下一个钩子，这样您的信息会显示在（可能较长的）文件列表之后，如果通过 \cs{listfiles} 请求的话。
 %
 %      \onetimetext
 %
 %    \item[\hook{enddocument/info}]
 %
-%      This hook is meant to receive code that write final information
-%      messages to the terminal. It follows immediately after the
-%      previous hook (so both could have been combined, but then
-%      packages adding further code would always need to also supply
-%      an explicit rule to specify where it should go.
+%      此钩子用于接收向终端写入最终信息消息的代码。它紧随上一个钩子之后执行（因此两者可以合并，但是然后添加更多代码的包始终需要提供显式规则来指定它应该放在何处）。
 %
-%      This hook already contains some code added by the kernel (under
-%      the labels \texttt{kernel/filelist} and
-%      \texttt{kernel/warnings}), namely the list of files when
-%      \cs{listfiles} has been used and the warnings for duplicate
-%      labels, missing references, font substitutions etc.
+%      此钩子已经包含内核添加的一些代码（标签重复警告、缺失引用、字体替换等），即在使用 \cs{listfiles} 时列出的文件列表和警告信息。
 %
 %      \onetimetext
 %
 %    \item[\hook{enddocument/end}]
 %
-%      Finally, this hook is executed just in front of the final call
-%      to \cs{@{}@end}.
+%      最后，此钩子在最终调用 \cs{@{}@end} 前执行。
 %
-%      \onetimetext % is it even possible to add code after this one?
+%      \onetimetext % 甚至在此之后添加代码可能吗？
 %
 %    \end{description}
 %
 %
-%    There is also the hook \hook{shipout/lastpage}. This hook is
-%    executed as part of the last \cs{shipout} in the document to
-%    allow package to add final \cs{special}'s to that page. Where
-%    this hook is executed in relation to those from the above list
-%    can vary from document to document. Furthermore to determine correctly
-%    which of the \cs{shipout}s is the last one, \LaTeX{} needs to be run
-%    several times, so initially it might get executed on the wrong
-%    page. See section~\ref{sec:shipout} for where to find the details.
+%    还有一个名为 \hook{shipout/lastpage} 的钩子。此钩子作为文档中最后一个 \cs{shipout} 的一部分执行，以允许包将最终的 \cs{special} 添加到该页面。此钩子相对于上述列表中的钩子的执行时间可以因文档而异。此外，要正确确定哪个 \cs{shipout} 是最后一个，需要多次运行 \LaTeX{}，因此最初它可能在错误的页面上执行。有关详细信息，请参阅第~\ref{sec:shipout} 节。
 %
 %
-%    It is in also possible to use the generic \hook{env/document/end}
-%    hook which is executed by \cs{end}, i.e., just in front of the
-%    first hook above. Note however that the other generic \cs{end}
-%    environment hook, i.e., \hook{env/document/after} will never get
-%    executed, because by that time \LaTeX{} has finished the document
-%    processing.
+%    还可以使用通用的 \hook{env/document/end} 钩子，它是由 \cs{end} 执行的，即在上述的第一个钩子前执行。但是请注意，另一个通用的 \cs{end} 环境钩子，即 \hook{env/document/after}，永远不会被执行，因为此时 \LaTeX{} 已经完成了文档处理。
 %
 %
 %
 %
-% \subsection{Hooks provided by \cs{shipout} operations}
+% \subsection{\cs{shipout} 操作提供的钩子}
 % \label{sec:shipout}
 %
-%    There are several hooks and mechanisms added to \LaTeX{}'s
-%    process of generating pages. These are documented in
-%    \texttt{ltshipout-doc.pdf} or with code in
-%    \texttt{ltshipout-code.pdf}.
+%    在 \LaTeX{} 生成页面的过程中添加了几个钩子和机制。这些内容在 \texttt{ltshipout-doc.pdf} 中有详细记录，或者在 \texttt{ltshipout-code.pdf} 中有相关代码。
 %
 %
-% \subsection{Hooks provided for paragraphs}
+% \subsection{段落提供的钩子}
 % \label{sec:para}
 %
-%    The paragraph processing has been augmented to include a number of
-%    internal and public hooks. These are documented in
-%    \texttt{ltpara-doc.pdf} or with code in
-%    \texttt{ltpara-code.pdf}.
+%    段落处理已经增加了一些内部和公共钩子。这些内容在 \texttt{ltpara-doc.pdf} 中有详细记录，或者在 \texttt{ltpara-code.pdf} 中有相关代码。
 %
 %
 %
-% \subsection{Hooks provided in NFSS commands}
+% \subsection{NFSS 命令提供的钩子}
 %
-%    In languages that need to support for more than one script in
-%    parallel (and thus several sets of fonts, e.g., supporting both Latin and
-%    Japanese fonts), NFSS font commands such as \cs{sffamily} need
-%    to switch both the Latin family to ``Sans Serif'' and in addition
-%    alter a second set of fonts.
+%    对于需要同时支持多个脚本（因此有几套字体，例如支持拉丁字体和日文字体）的语言，NFSS 字体命令如 \cs{sffamily} 需要同时切换拉丁字体为 “Sans Serif”，并且额外修改第二套字体。
 %
-%    To support this, several NFSS commands have hooks to which 
-%    such support can be added.
+%    为了支持这一点，几个 NFSS 命令都有钩子来添加这种支持。
 %    \begin{description}
 %
 %    \item[\hook{rmfamily}]
 %
-%      After \cs{rmfamily} has done its initial checks and prepared a
-%      font series update, this hook is executed before \cs{selectfont}.
+%      在 \cs{rmfamily} 执行了其初始检查并准备字体系列更新后，此钩子在 \cs{selectfont} 之前执行。
 %
 %    \item[\hook{sffamily}]
 %
-%      This is like the \hook{rmfamily} hook, but for the \cs{sffamily} command.
+%      这类似于 \hook{rmfamily} 钩子，但用于 \cs{sffamily} 命令。
 %
 %    \item[\hook{ttfamily}]
 %
-%      This is like the \hook{rmfamily} hook, but for the \cs{ttfamily} command.
+%      这类似于 \hook{rmfamily} 钩子，但用于 \cs{ttfamily} 命令。
 %
 %    \item[\hook{normalfont}]
 %
-%      The \cs{normalfont} command resets the font encoding, family, series
-%      and shape to their document defaults. It then executes this
-%      hook and finally calls \cs{selectfont}.
+%      \cs{normalfont} 命令将字体编码、系列和形状重置为文档默认值。然后执行此钩子，最后调用 \cs{selectfont}。
 %
 %    \item[\hook{expand@font@defaults}]
 %
-%      The internal \cs{expand@font@defaults} command expands and
-%      saves the current defaults for the meta families (rm/sf/tt) and
-%      the meta series (bf/md). If the NFSS machinery has been
-%      augmented, e.g., for Chinese or Japanese fonts, then further
-%      defaults may need to be set at this point. This can be done in
-%      this hook which is executed at the end of this macro.
+%      内部命令 \cs{expand@font@defaults} 展开并保存当前的元系列（rm/sf/tt）和元系列（bf/md）的默认值。如果为了中文或日文等增加了 NFSS 机制，则可能需要在此时设置进一步的默认值。这可以在此钩子中完成，在此宏的末尾执行。
 %
 %    \item[\hook{bfseries/defaults}, \hook{bfseries}]
 %
-%      If the \cs{bfdefault} was explicitly changed by the user, its
-%      new value is used to set the bf series defaults for the meta
-%      families (rm/sf/tt) when \cs{bfseries} is called. The
-%      \hook{bfseries/defaults} hook allows further adjustments to be made
-%      in this case.  This hook is only executed if such a change is
-%      detected. In contrast, the \hook{bfseries} hook is always
-%      executed just before \cs{selectfont} is called to change to the
-%      new series.
+%      如果用户显式更改了 \cs{bfdefault} 的值，则在调用 \cs{bfseries} 时将其新值用于设置元系列（rm/sf/tt）的 bf 系列默认值。在这种情况下，\hook{bfseries/defaults} 钩子允许进一步进行调整。如果检测到这样的更改，则仅执行此钩子。相反，\hook{bfseries} 钩子总是在调用 \cs{selectfont} 以更改新系列之前执行。
 %
 %
 %    \item[\hook{mdseries/defaults}, \hook{mdseries}]
 %
-%       These two hooks are like the previous ones but they are in the
-%      \cs{mdseries} command.
+%       这两个钩子与上面的类似，但是在 \cs{mdseries} 命令中。
 %
 %    \item[\hook{selectfont}]
 %
-%      This hook is executed inside \cs{selectfont}, after the current
-%      values for \textit{encoding}, \textit{family}, \textit{series},
-%      \textit{shape}, and \textit{size} are evaluated and the new font
-%      is selected (and if necessary loaded). After the hook has
-%      executed, NFSS will still do any updates necessary for a new
-%      \textit{size} (such as changing the size of \cs{strut}) and any
-%      updates necessary to a change in \textit{encoding}.
+%      此钩子在 \cs{selectfont} 内执行，用于评估当前的编码、系列、形状和大小，并选择新的字体（如果必要则加载）。在此钩子执行后，NFSS 仍会执行任何必要的更新以适应新的大小（例如更改 \cs{strut} 的大小）和更改编码。
 %
-%      This hook is intended for use cases where, in parallel to a
-%      change in the main font, some other fonts need to be altered 
-%      (e.g., in CJK processing where you may need to deal with several
-%      different alphabets).
+%      此钩子用于在主要字体更改的同时，处理其他字体的情况（例如在处理多种不同字母表的 CJK 处理中）。
 %
 %    \end{description}
 %
 %
 %
-% \subsection{Hook provided by the mark mechanism}
+% \subsection{标记机制提供的钩子}
 %
-%    See \texttt{ltmarks-doc.pdf} for details.
+%    详细内容请参阅 \texttt{ltmarks-doc.pdf}。
 %    \begin{description}
 %
 %    \item[\hook{insertmark}]
 %
-%      This hook allows for a special setup while \cs{InsertMark}
-%      inserts a mark. It is executed in group so local changes only
-%      apply to the mark being inserted.
+%      此钩子允许在 \cs{InsertMark} 插入标记时进行特殊设置。它在分组中执行，因此局部更改仅适用于被插入的标记。
 %
 %    \end{description}
 %
