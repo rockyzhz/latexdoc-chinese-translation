@@ -76,6 +76,52 @@
     下划线数字指向定义的代码行，
     其它的都指向使用条目的页面。
   }
+\makeatletter
+\ExplSyntaxOn
+\cs_set_protected:Npn \__codedoc_print_end_definition:
+  {
+    \seq_set_map:NNn \l__codedoc_tmpa_seq
+      \g__codedoc_nested_names_seq
+      { \__codedoc_macro_end_wrap_item:n {##1} }
+      %%
+    \int_compare:nTF { \seq_count:N \l__codedoc_tmpa_seq <= 3 }
+      {
+        \seq_use:Nnnn \l__codedoc_tmpa_seq
+          { \,~和~ } { \,,~ } { \,,~和~ }
+      }
+      { \seq_item:Nn \l__codedoc_tmpa_seq {1}\,~以及其它的 }
+    \@ 定义结束。
+    \__codedoc_print_documented:
+  }
+\cs_set_protected:Npn \__codedoc_print_documented:
+  {
+    \seq_gset_filter:NNn \g__codedoc_nested_names_seq
+      \g__codedoc_nested_names_seq
+      {
+        ! \bool_lazy_any_p:n
+          {
+            { \__codedoc_if_macro_internal_p:n {##1} }
+            { \l__codedoc_macro_deprecated_bool }
+            { \l__codedoc_macro_nodoc_bool }
+          }
+      }
+    \seq_if_empty:NF \g__codedoc_nested_names_seq
+      {
+        \int_set:Nn \l__codedoc_tmpa_int
+          { \seq_count:N \g__codedoc_nested_names_seq }
+        \int_compare:nNnTF \l__codedoc_tmpa_int = 1 {这个} {这些}
+        \bool_if:NTF \l__codedoc_macro_var_bool {变量} {函数}
+        \int_compare:nNnTF \l__codedoc_tmpa_int = 1 {} {}
+        被记录在第
+        \__codedoc_get_hyper_target:eN
+          { \seq_item:Nn \g__codedoc_nested_names_seq { 1 } }
+          \l__codedoc_tmpa_tl
+        \exp_args:Ne \pageref { \l__codedoc_tmpa_tl } 页。
+      }
+    \seq_gclear:N \g__codedoc_nested_names_seq
+  }
+\ExplSyntaxOff
+\makeatother
 % ^^A =================== 中文版设置结束 =========================
 
 \providecommand\InternalDetectionOff{}
@@ -1684,15 +1730,15 @@
 %
 % \begin{implementation}
 %
-% \section{The Implementation}
+% \section{代码实现}
 %
 %
 %    \begin{macrocode}
 %<@@=hook>
 %    \end{macrocode}
 %
-% \changes{v1.0i}{2021/03/18}{Use \cs{NewModuleRelease}.}
-% \changes{v1.0n}{2021/05/24}{Use \cs{msg_...} instead of \cs{__kernel_msg...}}
+% \changes{v1.0i}{2021/03/18}{使用 \cs{NewModuleRelease}。}
+% \changes{v1.0n}{2021/05/24}{使用 \cs{msg_...} 而不是 \cs{__kernel_msg...}}
 %
 %    \begin{macrocode}
 %<*2ekernel|latexrelease>
@@ -1701,10 +1747,10 @@
 %<latexrelease>                 {The~hook~management~system}
 %    \end{macrocode}
 %
-%  \subsection{Debugging}
+%  \subsection{调试}
 %
 %  \begin{macro}{\g_@@_debug_bool}
-%    Holds the current debugging state.
+%    保持当前调试状态。
 %    \begin{macrocode}
 \bool_new:N \g_@@_debug_bool
 %    \end{macrocode}
@@ -1713,7 +1759,7 @@
 %  \begin{macro}{\hook_debug_on:,\hook_debug_off:}
 %  \begin{macro}{\@@_debug:n}
 %  \begin{macro}{\@@_debug_gset:}
-%    Turns debugging on and off by redefining \cs{@@_debug:n}.
+%    利用重定义 \cs{@@_debug:n} 来打开或关闭调试。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_debug:n \use_none:n
 \cs_new_protected:Npn \hook_debug_on:
@@ -1738,7 +1784,7 @@
 %
 %
 %
-%  \subsection{Borrowing from internals of other kernel modules}
+%  \subsection{从其他内核模块的内部借用}
 %
 %
 % \begin{macro}[EXP]{\@@_str_compare:nn}
@@ -1750,17 +1796,17 @@
 % \InternalDetectionOn
 % \end{macro}
 %
-%  \subsection{Declarations}
+%  \subsection{声明}
 %
 %  \begin{macro}{\l_@@_tmpa_bool}
-%    Scratch boolean used throughout the package.
+%    整个包中都使用的临时布尔值。
 %    \begin{macrocode}
 \bool_new:N \l_@@_tmpa_bool
 %    \end{macrocode}
 %  \end{macro}
 %
 %  \begin{macro}{\l_@@_return_tl,\l_@@_tmpa_tl,\l_@@_tmpb_tl}
-%    Scratch variables used throughout the package.
+%    整个包中使用的临时变量。
 %    \begin{macrocode}
 \tl_new:N \l_@@_return_tl
 \tl_new:N \l_@@_tmpa_tl
@@ -1769,40 +1815,38 @@
 %  \end{macro}
 %
 %  \begin{macro}{\g_@@_all_seq}
-%    In a few places we need a list of all hook names ever defined so
-%    we keep track if them in this sequence.
+%    在一些地方，我们需要所有曾经定义的钩子名称列表，
+%    因此我们在这个序列中对它们进行跟踪。
 %    \begin{macrocode}
 \seq_new:N \g_@@_all_seq
 %    \end{macrocode}
 %  \end{macro}
 %
 % \begin{macro}{\l_@@_cur_hook_tl}
-%   Stores the name of the hook currently being sorted.
+%   存储当前正在排序的钩子的名称。
 %    \begin{macrocode}
 \tl_new:N \l_@@_cur_hook_tl
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\l_@@_work_prop}
-%   A property list holding a copy of the
-%   \cs[no-index]{g_@@_\meta{hook}_code_prop} of the hook being sorted
-%   to work on, so that changes don't act destructively on the hook data
-%   structure.
+%   一个属性列表，保存正在排序的钩子的
+%   \cs[no-index]{g_@@_\meta{hook}_code_prop} 的副本，
+%   以便对其进行操作，以免对钩子数据结构造成破坏性影响。
 %    \begin{macrocode}
 \prop_new:N \l_@@_work_prop
 %    \end{macrocode}
 % \end{macro}
 %
 %  \begin{macro}{\g_@@_used_prop}
-%    All hooks that receive code (for use in debugging display).
+%    所有接收代码的钩子（用于调试显示）。
 %    \begin{macrocode}
 \prop_new:N \g_@@_used_prop
 %    \end{macrocode}
 %  \end{macro}
 %
 % \begin{macro}{\g_@@_hook_curr_name_tl,\g_@@_name_stack_seq}
-%   Default label used for hook commands, and a stack to keep track of
-%   packages within packages.
+%   用于钩子命令的默认标签，并且用一个堆栈来跟踪包中的包。
 %    \begin{macrocode}
 \tl_new:N \g_@@_hook_curr_name_tl
 \seq_new:N \g_@@_name_stack_seq
@@ -1810,7 +1854,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_tmp:w}
-%   Temporary macro for generic usage.
+%   通用的临时宏。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_tmp:w ?
 %    \end{macrocode}
@@ -1818,9 +1862,9 @@
 %
 % \begin{macro}{\c_@@_empty_tl}
 % \begin{macro}{\c_@@_nine_parameters_tl}
-%   An empty token list, and one containing nine parameters.
+%   一个空的记号列表和一个包含九个参数的列表。
 % \changes{v1.1a}{2023/04/06}
-%         {Add auxiliary token lists (hook-args).}
+%         {添加辅助记号列表（hook-args）。}
 %    \begin{macrocode}
 \tl_const:Nn \c_@@_empty_tl { }
 \tl_const:Nn \c_@@_nine_parameters_tl { #1#2#3#4#5#6#7#8#9 }
@@ -1837,8 +1881,8 @@
 %     \prop_put:Nne,
 %     \str_count:e
 %   }
-%   Some variants of \pkg{expl3} functions.
-%   \fmiinline{should probably be moved to expl3}
+%   \pkg{expl3}函数的一些变体。
+%   \fmiinline{可能应该移到expl3}
 %    \begin{macrocode}
 \cs_generate_variant:Nn \tl_gremove_once:Nn { Nx }
 \cs_generate_variant:Nn \tl_show:n { x }
@@ -1851,7 +1895,7 @@
 % \end{macro}
 %
 % \begin{macro}{\s_@@_mark}
-%   Scan mark used for delimited arguments.
+%   用于定界参数的扫描标记。
 %    \begin{macrocode}
 \scan_new:N \s_@@_mark
 %    \end{macrocode}
@@ -1861,9 +1905,9 @@
 %     \@@_use_none_delimit_by_s_mark:w,
 %     \@@_use_i_delimit_by_s_mark:nw
 %   }
-%   Removes tokens until the next \cs{s_@@_mark}.
+%   移除直到下一个\cs{s_@@_mark}的记号。
 % \changes{v1.1a}{2023/04/06}
-%         {Use standard naming scheme (hook-args).}
+%         {使用标准命名方案（hook-args）。}
 %    \begin{macrocode}
 \cs_new:Npn \@@_use_none_delimit_by_s_mark:w #1 \s_@@_mark { }
 \cs_new:Npn \@@_use_i_delimit_by_s_mark:nw #1 #2 \s_@@_mark {#1}
@@ -1871,19 +1915,17 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_tl_set:cn}
-%   Private copies of a few \pkg{expl3} functions.  \pkg{l3debug} will
-%   only add debugging to the public names, not to these copies, so we
-%   don't have to use \cs{debug_suspend:} and \cs{debug_resume:}
-%   everywhere.
+%   \pkg{expl3}函数的私有副本。\pkg{l3debug}只会给公共名称添加调试，
+%   而不会对这些副本进行调试，所以我们不必在每处都使用\cs{debug_suspend:}
+%   和\cs{debug_resume:}。
 %
-%   Functions like \cs{@@_tl_set:Nn} have to be redefined, rather than
-%   copied because in \pkg{expl3} they use
-%   \cs[no-index]{__kernel_tl_(g)set:Nx}, which is also patched by
-%   \pkg{l3debug}.
-% \changes{v1.0h}{2021/01/07}{Manually define some \pkg{l3tl} commands
-%     to work around \pkg{expl3} changes}
+%   像\cs{@@_tl_set:Nn}这样的函数必须被重新定义，而不是复制，因为在
+%   \pkg{expl3}中，它们使用\cs[no-index]{__kernel_tl_(g)set:Nx}，
+%   这也被\pkg{l3debug}所修补。
+% \changes{v1.0h}{2021/01/07}{手动定义一些\pkg{l3tl}命令，以解决
+%     \pkg{expl3}的更改}
 % \changes{v1.1a}{2023/04/06}
-%         {Clean-up unused variants (hook-args).}
+%         {清理未使用的变体（hook-args）。}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_tl_set:cn #1#2
   { \cs_set_nopar:cpx {#1} { \__kernel_exp_not:w {#2} } }
@@ -1892,7 +1934,7 @@
 %
 % \begin{macro}{\@@_tl_gset:Nn,\@@_tl_gset:Nx,
 %               \@@_tl_gset:cn,\@@_tl_gset:co,\@@_tl_gset:cx}
-%   Same as above.
+%   与上述相同。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_tl_gset:Nn #1#2
   { \cs_gset_nopar:Npx #1 { \__kernel_exp_not:w {#2} } }
@@ -1908,7 +1950,7 @@
 %     \@@_tl_gput_right:Ne,
 %     \@@_tl_gput_right:cn,
 %   }
-%   Same as above.
+%   与上述相同。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_tl_gput_right:Nn #1#2
   { \@@_tl_gset:Nx #1 { \__kernel_exp_not:w \exp_after:wN { #1 #2 } } }
@@ -1917,7 +1959,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_tl_gput_left:Nn}
-%   Same as above.
+%   与上述相同。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_tl_gput_left:Nn #1#2
   {
@@ -1928,14 +1970,14 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_tl_gset_eq:NN}
-%   Same as above.
+%   与上述相同。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_tl_gset_eq:NN \tl_gset_eq:NN
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\@@_tl_gclear:N,\@@_tl_gclear:c}
-%   Same as above.
+%   与上述相同。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_tl_gclear:N #1
   { \@@_tl_gset_eq:NN #1 \c_empty_tl }
@@ -1944,9 +1986,9 @@
 % \end{macro}
 %
 %
-% \subsection{Providing new hooks}
+% \subsection{提供新的钩子}
 %
-% \subsubsection{The data structures of a hook}
+% \subsubsection{钩子的数据结构}
 %
 % \DescribeMacro{\g_@@_\meta{hook}_code_prop}
 % \DescribeMacro{\@@\textvisiblespace\meta{hook}}
@@ -1955,185 +1997,123 @@
 % \DescribeMacro{\g_@@_\meta{hook}_parameter_tl}
 % \DescribeMacro{\@@_next\textvisiblespace\meta{hook}}
 % \DescribeMacro{\@@_toplevel\textvisiblespace\meta{hook}}
-%    Hooks have a name (called \meta{hook} in the description below)
-%    and for each hook we have to
-%    provide a number of data structures. These are
+%    钩子有一个名称（在下面的描述中称为\meta{hook}），对于每个钩子，我们必须提供一些数据结构。这些包括：
+%
 %    \begin{description}
-%    \item[\cs{g_@@_\meta{hook}_code_prop}] A property list holding the code
-%    for the hook in separate chunks. The keys are by default the
-%    package names that add code to the hook, but it is possible
-%    for packages to define other keys.
+%    \item[\cs{g_@@_\meta{hook}_code_prop}] 一个属性列表，保存钩子的代码，分开存储。
+%    键默认为添加代码的包名称，但包可以定义其他键。
 %
 %    \item[{\cs[no-index]{g_@@_\meta{hook}_rule_\meta{label1}\string|\meta{label2}_tl}}]
-%    A token list holding the relation between \meta{label1} and
-%    \meta{label2} in the \meta{hook}.  The \meta{labels} are lexically
-%    (reverse) sorted to ensure that two labels always point to the same
-%    token list.  For global rules, the \meta{hook} name is \texttt{??}.
+%    一个记号列表，保存\meta{hook}中\meta{label1}\hfil\break 和\meta{label2}之间的关系。
+%    这些\meta{label}按词法（逆序）排序，以确保两个标签始终指向相同的记号列表。
+%    对于全局规则，\meta{hook}名称为\texttt{??}。
 %
-%    \item[\cs{@@\textvisiblespace\meta{hook}}] The code that is actually executed
-%    when the hook is called in the document is stored in this token
-%    list. It is constructed from the code chunks applying the
-%    information.
-%    This token list is named like that so that in case of an error
-%    inside the hook, the reported token list in the error is shorter,
-%    and to make it simpler to normalize hook names in
-%    \cs{@@_make_name:n}.
+%    \item[\cs{@@\textvisiblespace\meta{hook}}] 当文档中调用钩子时实际执行的代码存储在这个记号列表中。
+%    它是由应用信息的代码块构建而成。
+%    这个记号列表命名为这样是为了在钩子内部出现错误时，报告的错误记号列表更短，
+%    并且使得在\cs{@@_make_name:n}中规范化钩子名称更简单。
 %
-%    \item[\cs{g_@@_\meta{hook}_reversed_tl}] Some hooks are
-%    \enquote{reversed}.  This token list stores a |-| for such hook
-%    so that it can be identified.  The |-| character is used because
-%    $\meta{reversed}1$ is $+1$ for normal hooks and $-1$ for reversed
-%    ones.
+%    \item[\cs{g_@@_\meta{hook}_reversed_tl}] 一些钩子是“反转”的。这个记号列表存储了这样的钩子的|-|，以便识别。
+%    使用|-|字符是因为$\meta{reversed}1$对于普通钩子是$+1$，对于反转的钩子是$-1$。
 %
-%    \item[{\cs[no-index]{g_@@_\meta{hook}_declared_tl}}] This token
-%    list serves as a marker for the hook being officially declared. Its
-%    existence is tested to raise an error in case another declaration
-%    is attempted.
+%    \item[{\cs[no-index]{g_@@_\meta{hook}_declared_tl}}] 这个记号列表作为标记用于正式声明钩子。
+%    如果尝试进行另一个声明，则会检查其存在性并引发错误。
 %
-%    \item[{\cs[no-index]{c_@@_\meta{hook}_parameter_tl}}] This token
-%    list stores the parameter text for a declared hook (its existence
-%    almost completely intersects the token list above), which is used
-%    for managing hooks with arguments.
+%    \item[{\cs[no-index]{c_@@_\meta{hook}_parameter_tl}}] 这个记号列表保存已声明钩子的参数文本（它的存在几乎完全与上面的记号列表相交），
+%    用于管理带参数的钩子。
 %
-%    \item[\cs{@@_toplevel\textvisiblespace\meta{hook}}] This token list stores the code
-%    inserted in the hook from the user's document, in the |top-level|
-%    label.  This label is special, and doesn't participate in sorting.
-%    Instead, all code is appended to it and executed after (or before,
-%    if the hook is reversed) the normal
-%    hook code, but before the |next| code chunk.
+%    \item[\cs{@@_toplevel\textvisiblespace\meta{hook}}] 这个记号列表存储从用户文档中插入到钩子中的代码，位于|top-level|标签中。
+%    这个标签是特殊的，不参与排序。相反，所有代码都被附加到它，并在（如果钩子是反转的，则在）正常的钩子代码之后（或之前）执行，但在|next|代码块之前。
 %
-%    \item[\cs{@@_next\textvisiblespace\meta{hook}}] Finally there is
-%    extra code (normally empty) that is used on the next invocation
-%    of the hook (and then deleted). This can be used to define some
-%    special behavior for a single occasion from within the document.
-%    This token list follows the same naming scheme than the main
-%    \cs{@@\textvisiblespace\meta{hook}} token list.  It is called
-%    \cs{@@_next\textvisiblespace\meta{hook}} rather than
-%    \cs[no-index]{@@\textvisiblespace next_\meta{hook}} because
-%    otherwise a hook whose name is |next_|\meta{hook} would clash
-%    with the next code-token list of the hook called \meta{hook}.
+%    \item[\cs{@@_next\textvisiblespace\meta{hook}}] 最后，有一些额外的代码（通常为空），用于下一次调用钩子时使用（然后删除）。
+%    这可用于在文档内部针对单个情况定义一些特殊行为。
+%    这个记号列表遵循与主\cs{@@\textvisiblespace\meta{hook}}记号列表相同的命名方案。
+%    它被称为\cs{@@_next\textvisiblespace\meta{hook}}，而不是\cs[no-index]{@@\textvisiblespace next_\meta{hook}}，因为否则名为|next_|\meta{hook}的钩子将与称为\meta{hook}的钩子的下一个代码记号列表冲突。
 %
 %    \end{description}
 %
 %
-% \subsubsection{On the existence of hooks}
+% \subsubsection{关于钩子的存在性}
 % \label{sec:existence}
 %
-%    A hook may be in different states of existence. Here we give an
-%    overview of the internal commands to set up hooks and explain how the
-%    different states are distinguished. The actual implementation
-%    then follows in subsequent sections.
+%    一个钩子可能处于不同的存在状态。在这里，我们给出了设置钩子的内部命令的概述，并解释了如何区分不同的状态。
+%    实际的实现随后在后续的章节中进行。
 %
-%    One problem we have to solve is that we need to be able to add
-%    code to hooks (e.g., with \cs{AddToHook}) even if that code has
-%    not yet been declared. For example, one package needs to write
-%    into a hook of another package, but that package may not get
-%    loaded, or is loaded only later. Another problem is that most hooks, 
-%    but not the generic hooks, require a declaration.
+%    我们需要解决的一个问题是，即使代码尚未声明，我们也需要能够向钩子（例如，使用\cs{AddToHook}）添加代码。
+%    例如，一个包需要写入另一个包的钩子，但是该包可能不会被加载，或者仅在稍后加载。
+%    另一个问题是，大多数钩子（但不是通用钩子）需要进行声明。
 %
-%    We therefore distinguish the following states for a hook, which
-%    are managed by four different tests: structure existence
-%    (\cs{@@_if_structure_exist:nTF}), creation
-%    (\cs{@@_if_usable:nTF}), declaration (\cs{@@_if_declared:nTF})
-%    and disabled or not (\cs{@@_if_disabled:nTF})
+%    因此，我们区分了以下钩子的状态，由四个不同的测试管理：结构存在（\cs{@@_if_structure_exist:nTF}）、创建（\cs{@@_if_usable:nTF}）、声明（\cs{@@_if_declared:nTF}）和禁用或未禁用（\cs{@@_if_disabled:nTF}）。
 %    \begin{description}
 %    \setlist[itemize]{leftmargin=5cm,format=\cs}
-%    \item[not existing]
+%    \item[不存在]
 %
-%       Nothing is known about the hook so far. This state can be
-%       detected with \cs{@@_if_structure_exist:nTF}
-%       (which uses the  false branch).
+%       目前对于钩子还一无所知。可以使用\cs{@@_if_structure_exist:nTF}（使用假分支）来检测到此状态。
+%       在此状态下，可以声明钩子、禁用钩子、定义规则或向其中添加代码，但无法使用\cs{UseHook}。
 %
-%       In this state the hook can be declared, disabled, rules can be
-%       defined or code could be added to it, but it is not possible
-%       to use the hook (with \cs{UseHook}).
-
-%    \item[basic data structure set up]
+%    \item[基本数据结构设置]
 %
-%       A hook is this state when its basic data structure has been
-%       set up (using \cs{@@_init_structure:n}). The data structure setup happens
-%       automatically when commands such as \cs{AddToHook}  are used
-%       and the hook is at that point in state \enquote{not existing}.
-%
-%       In this state the four tests give the following results:
+%       当钩子的基本数据结构设置完成时（使用\cs{@@_init_structure:n}），钩子处于此状态。数据结构设置发生在自动进行命令（例如\cs{AddToHook}）使用时，此时钩子处于“不存在”状态。
+%       在此状态下，四个测试的结果如下：
 %     \begin{itemize}
-%       \item [@@_if_structure_exist:nTF]      returns |true|.
-%       \item [@@_if_usable:nTF]   returns |false|.
-%       \item [@@_if_declared:nTF]  returns |false|.
-%       \item [@@_if_disabled:nTF]  returns |false|.
+%       \item [@@_if_structure_exist:nTF]      返回 |true|。
+%       \item [@@_if_usable:nTF]   返回 |false|。
+%       \item [@@_if_declared:nTF]  返回 |false|。
+%       \item [@@_if_disabled:nTF]  返回 |false|。
 %     \end{itemize}
 %
-%       The allowed actions are the same as in the \enquote{not
-%       existing} state.
+%       允许的操作与“不存在”状态下相同。
 %
-%    \item[declared]
+%    \item[已声明]
 %
-%       A hook is in this state it is not disabled and was explicitly declared (e.g.,
-%       with \cs{NewHook}). In this case the four tests give the
-%       following results:
+%       当钩子未被禁用且显式声明（例如，使用\cs{NewHook}）时，钩子处于此状态。在此情况下，四个测试的结果如下：
 %     \begin{itemize}
-%       \item [@@_if_structure_exist:nTF]      returns |true|.
-%       \item [@@_if_usable:nTF]   returns |true|.
-%       \item [@@_if_declared:nTF]  returns |true|.
-%       \item [@@_if_disabled:nTF]  returns |false|.
+%       \item [@@_if_structure_exist:nTF]      返回 |true|。
+%       \item [@@_if_usable:nTF]   返回 |true|。
+%       \item [@@_if_declared:nTF]  返回 |true|。
+%       \item [@@_if_disabled:nTF]  返回 |false|。
 %     \end{itemize}
 %
-%    \item[usable]
+%    \item[可用]
 %
-%       A hook is in this state if it is not disabled, was not
-%       explicitly declared but nevertheless is allowed to be used
-%       (with \cs{UseHook} or \cs{hook_use:n}). This state is only
-%       possible for generic hooks as they do not need to be
-%       declared. Therefore such hooks move directly from state
-%       \enquote{not existing} to \enquote{usable} the moment a
-%       declaration such as \cs{AddToHook} wants to add to the hook
-%       data structure.  In this state the tests give the following
-%       results:
+%       当钩子未被禁用且未显式声明，但仍允许使用（使用\cs{UseHook}或\cs{hook_use:n}）时，钩子处于此状态。此状态仅适用于通用钩子，因为它们无需声明。因此，这样的钩子直接从“不存在”状态转移到“可用”状态，这是因为诸如\cs{AddToHook}之类的声明要添加到钩子数据结构。在此状态下，测试的结果如下：
 %     \begin{itemize}
-%       \item [@@_if_structure_exist:nTF]      returns |true|.
-%       \item [@@_if_usable:nTF]   returns |true|.
-%       \item [@@_if_declared:nTF]  returns |false|.
-%       \item [@@_if_disabled:nTF]  returns |false|.
+%       \item [@@_if_structure_exist:nTF]      返回 |true|。
+%       \item [@@_if_usable:nTF]   返回 |true|。
+%       \item [@@_if_declared:nTF]  返回 |false|。
+%       \item [@@_if_disabled:nTF]  返回 |false|。
 %     \end{itemize}
 %
+%    \item[禁用]
 %
-%    \item[disabled]
-%
-%       A generic hook in any state is moved to this state when
-%       \cs{DisableGenericHook} is used. This changes the tests to give the
-%       following results:
+%       任何状态中的通用钩子在使用\cs{DisableGenericHook}后移动到此状态。这会改变测试的结果如下：
 %     \begin{itemize}
-%       \item [@@_if_structure_exist:nTF]      \emph{unchanged}.
-%       \item [@@_if_usable:nTF]   returns |false|.
-%       \item [@@_if_declared:nTF]  returns |true|.
-%       \item [@@_if_disabled:nTF]  returns |true|.
+%       \item [@@_if_structure_exist:nTF]      \emph{不变}。
+%       \item [@@_if_usable:nTF]   返回 |false|。
+%       \item [@@_if_declared:nTF]  返回 |true|。
+%       \item [@@_if_disabled:nTF]  返回 |true|。
 %     \end{itemize}
-%       The  structure test is unchanged (if the hook was unknown before it is
-%       |false|, otherwise |true|). The usable test returns |false| so that
-%       any \cs{UseHook} will bypass the hook from now on. The
-%       declared test returns true so that any further \cs{NewHook}
-%       generates an error and the disabled test returns true so that
-%       \cs{AddToHook} can return an error.
-% \fmiinline{maybe it should do this only after begin document?}
+%       结构测试不变（如果钩子以前未知，则为|false|，否则为|true|）。
+%       可用测试返回|false|，因此从现在开始，任何\cs{UseHook}都将跳过该钩子。
+%       声明测试返回|true|，因此任何进一步的\cs{NewHook}将生成错误，并且禁用测试返回|true|，以便\cs{AddToHook}可以返回错误。
+% \fmiinline{也许它只应该在文档开始后执行？}
 %
 %    \end{description}
 %
 %
 %
 %
-% \subsubsection{Setting hooks up}
-%
+% \subsubsection{设置钩子}
 %
 %  \begin{macro}{
 %    \hook_new:n,
 %    \hook_new_with_args:nn
 %  }
 %  \begin{macro}{@@_new:nn}
-%    The \cs{hook_new:n} declaration declares a new hook and expects
-%    the hook \meta{name} as its argument, e.g.,
+%    \cs{hook_new:n}声明一个新的钩子，并期望钩子名称\meta{name}作为其参数，例如，
 %    \hook{begindocument}.
 % \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_new_with_args:nn} (hook-args).}
+%         {添加\cs{hook_new_with_args:nn}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_new_with_args:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -2147,12 +2127,10 @@
 \cs_new_protected:Npn \@@_new:nn #1 #2
   {
 %    \end{macrocode}
-%   We check if the hook was already \emph{explicitly} declared with
-%   \cs{hook_new:n}, and if it already exists we complain, otherwise set
-%   the \enquote{created} flag for the hook so that it errors next time
-%   \cs{hook_new:n} is used.
+%   我们检查钩子是否已经被\emph{显式}使用\cs{hook_new:n}声明过，
+%   如果已存在，则发出警告，否则为钩子设置\enquote{created}标志，以便下次使用\cs{hook_new:n}时产生错误。
 % \changes{v1.1d}{2023/05/21}
-%         {Changes to allow support arguments in cmd hooks (cmd-args).}
+%         {更改以支持cmd钩子中的参数（cmd-args）。}
 %    \begin{macrocode}
     \@@_if_declared:nTF {#1}
       { \msg_error:nnn { hooks } { exists } {#1} }
@@ -2162,11 +2140,9 @@
         \cs_undefine:c { c_@@_#1_parameter_tl }
         \@@_make_usable:nn {#1} {#2}
 %    \end{macrocode}
-%   In case there is already code in a hook, but it's undeclared, run
-%   \cs{@@_update_hook_code:n} to make it ready to be executed (see test
-%   \texttt{lthooks-034}).
+%   如果钩子中已经有代码，但尚未声明，运行\cs{@@_update_hook_code:n}以使其准备好执行（参见测试\texttt{lthooks-034}）。
 % \changes{v1.1a}{2023/04/06}
-%         {Update hook code after declaring.}
+%         {在声明后更新钩子代码。}
 %    \begin{macrocode}
         \@@_update_hook_code:n {#1}
       }
@@ -2199,32 +2175,25 @@
 %
 %  \begin{macro}{\@@_make_usable:nn}
 %
-%    This initializes all hook data structures for the hook but if
-%    used on its own doesn't mark the hook as declared (as
-%    \cs{hook_new:n} does, so a later \cs{hook_new:n} on that hook will
-%    not result in an error.  This command is internally used by
-%    \cs{hook_gput_code:nnn} when adding code to a generic hook.
+%    这为钩子初始化了所有钩子数据结构，但如果单独使用，则不会将钩子标记为已声明（如\cs{hook_new:n}所做的那样，因此后续对该钩子的\cs{hook_new:n}不会导致错误。
+%    此命令在向通用钩子添加代码时由\cs{hook_gput_code:nnn}内部使用。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {更改以添加钩子参数（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_make_usable:nn}
 %<latexrelease>                 {Hooks~with~args}
 \cs_new_protected:Npn \@@_make_usable:nn #1 #2
   {
 %    \end{macrocode}
-%   Now we check if the hook's data structure can be safely created
-%   without \pkg{expl3} raising errors, then
-%   we add the hook name to the list of all hooks and
-%   allocate the necessary data structures for the new hook,
-%   otherwise just do nothing.
+%   现在我们检查钩子的数据结构是否可以安全地创建，而不会引发\pkg{expl3}的错误，
+%   然后将钩子名称添加到所有钩子的列表中，并为新钩子分配必要的数据结构，否则什么也不做。
 %    \begin{macrocode}
     \@@_if_usable:nF {#1}
       {
         \seq_gput_right:Nn \g_@@_all_seq {#1}
 %    \end{macrocode}
-%    Here we'll define the \cs[no-index]{c_@@_\meta{hook}_parameter_tl}
-%    to hold a run of parameters up to the number of arguments of the
-%    hook (\verb|#2|).
+%    在这里，我们将定义\cs[no-index]{c_@@_\meta{hook}_parameter_tl}，
+%    以保存参数的一系列直到钩子的参数数量（\verb|#2|）。
 %    \begin{macrocode}
         \__kernel_cs_parm_from_arg_count:nnF
           { \tl_const:cn { c_@@_#1_parameter_tl } } {#2}
@@ -2234,41 +2203,35 @@
               { \exp_not:V \c_@@_nine_parameters_tl }
           }
 %    \end{macrocode}
-%    After that, use \cs{@@_normalise_cs_args:nn} to correct the number
-%    of parameters of the macros
-%    \cs[no-index]{@@_toplevel\textvisiblespace\meta{hook}} and
-%    \cs[no-index]{@@_next\textvisiblespace\meta{hook}}.  We need to be
-%    able to add
-%    code with arguments to a hook without prior knowledge of the number
-%    of arguments of that hook, so \pkg{lthooks} assumes~9 until the
-%    hook is properly declared and the number of arguments is known.
-%    \cs{@@_normalise_cs_args:nn} does the normalisation by using the
-%    \cs[no-index]{c_@@_\meta{hook}_parameter_tl} defined just above.
+% 在此之后，使用 \cs{@@_normalise_cs_args:nn} 来修正宏的参数数量
+% \cs[no-index]{@@_toplevel\textvisiblespace\meta{hook}} 和
+% \cs[no-index]{@@_next\textvisiblespace\meta{hook}}。
+% 我们需要能够向一个钩子添加带有参数的代码，而不需要提前知道该钩子的参数数量，
+% 因此 \pkg{lthooks} 假定为 9，直到该钩子被正确声明并知道参数数量为止。
+% \cs{@@_normalise_cs_args:nn} 使用刚刚上面定义的
+% \cs[no-index]{c_@@_\meta{hook}_parameter_tl} 进行规范化。
 %    \begin{macrocode}
-        \@@_normalise_cs_args:nn { _toplevel } {#1}
-        \@@_normalise_cs_args:nn { _next } {#1}
+    \@@_normalise_cs_args:nn { _toplevel } {#1}
+    \@@_normalise_cs_args:nn { _next } {#1}
 %    \end{macrocode}
-%    This is only used by the actual code of the current hook, so
-%    declare it normally:
+% 这仅由当前钩子的实际代码使用，因此正常声明它：
 %    \begin{macrocode}
-        \@@_code_gset:nn {#1} { }
+    \@@_code_gset:nn {#1} { }
 %    \end{macrocode}
-%    Now ensure that the base data structure for the hook exists:
+% 现在确保钩子的基本数据结构存在：
 %    \begin{macrocode}
-        \@@_init_structure:n {#1}
+    \@@_init_structure:n {#1}
 %    \end{macrocode}
-%    The call to \cs{@@_normalise_code_pool:n} will correct any improper
-%    reference to arguments that don't exist in the hook, raising a
-%    low-level \TeX{} error and doubling the offending parameter tokens.
-%    It has to be done after \cs{@@_init_structure:n} because it
-%    operates on \cs[no-index]{g_@@_\meta{hook}_code_prop}.
+% 调用 \cs{@@_normalise_code_pool:n} 将纠正对钩子中不存在的参数的引用，
+% 引发低级 \TeX{} 错误并使有问题的参数标记翻倍。
+% 必须在 \cs{@@_init_structure:n} 之后执行，因为它作用于
+% \cs[no-index]{g_@@_\meta{hook}_code_prop}。
 %    \begin{macrocode}
-        \@@_normalise_code_pool:n {#1}
+    \@@_normalise_code_pool:n {#1}
 %    \end{macrocode}
-%    The \cs{g_@@_\meta{hook}_labels_clist} holds the sorted list of
-%    labels (once it got sorted). This is used only for debugging.
-%    These are defined conditionally, in case \cs{@@_make_usable:nn}
-%    is being used to redefine a hook.
+% \cs{g_@@_\meta{hook}_labels_clist} 存储了标签的排序列表（一旦排序）。
+% 这仅用于调试。这些是有条件地定义的，以防正在使用 \cs{@@_make_usable:nn}
+% 重新定义一个钩子。
 % \changes{v1.1d}{2023/05/21}
 %         {Changes to allow support arguments in cmd hooks (cmd-args).}
 %    \begin{macrocode}
@@ -2276,23 +2239,19 @@
           {
             \clist_new:c { g_@@_#1_labels_clist }
 %    \end{macrocode}
-%    Some hooks should reverse the default order of code chunks. To
-%    signal this we have a token list which is empty for normal hooks
-%    and contains a \verb=-= for reversed hooks.
+% 一些钩子应该反转代码块的默认顺序。为了表示这一点，我们有一个令牌列表，
+% 对于普通钩子为空，对于反转的钩子包含一个 \verb=-=。
 %    \begin{macrocode}
-            \tl_new:c { g_@@_#1_reversed_tl }
-          }
+    \tl_new:c { g_@@_#1_reversed_tl }
+    }
 %    \end{macrocode}
-%    The above is all in L3 convention, but we also provide an
-%    interface to legacy \LaTeXe{} hooks of the form \cs{@...hook},
-%    e.g., \cs{@begindocumenthook}.
-%    there have been a few of them and they have been added to
-%    using \cs{g@addto@macro}. If there exists such a macro matching
-%    the name of the new hook, i.e.,
-%    \verb+\@+\meta{hook-name}\texttt{hook} and it is not empty then
-%    we add its contents as a code chunk under the label \texttt{legacy}.
+% 上述内容都是遵循 L3 规范，但我们还提供了一个接口来处理类似 \LaTeXe{} 旧版钩子的形式，
+% 如 \cs{@...hook}，例如 \cs{@begindocumenthook}。
+% 有一些这样的钩子，并且它们已经被添加到使用 \cs{g@addto@macro}。
+% 如果存在一个与新钩子名称匹配的这样的宏，即 \verb+\@+\meta{hook-name}\texttt{hook}，
+% 并且它不为空，则我们将其内容作为代码块添加到标签 \texttt{legacy} 下。
 %    \begin{quote}
-%       \textbf{Warning: this support will vanish in future releases!}
+%       \textbf{警告：这种支持将在未来版本中消失！}
 %    \end{quote}
 %
 %    \begin{macrocode}
@@ -2324,20 +2283,16 @@
 %
 %
 % \begin{macro}{\@@_init_structure:n}
-%    This function declares the basic data structures for a hook
-%    without explicit declaring the hook itself.  This is needed to
-%    allow adding to undeclared hooks.  Here it is unnecessary to
-%    check whether all variables exist, since all three are declared
-%    at the same time (either all of them exist, or none).
+% 这个函数声明了一个钩子的基本数据结构，而不是显式地声明钩子本身。
+% 这是为了允许向未声明的钩子添加内容。在这里，不需要检查所有变量是否存在，
+% 因为所有三个变量同时被声明（它们要么都存在，要么都不存在）。
 %
-%    It creates the hook code pool
-%    (\cs[no-index]{g_@@_\meta{hook}_code_prop}) and the |top-level|
-%    and |next| token lists.  A hook is initialized with
-%    \cs{@@_init_structure:n} the first time anything is added to it.
-%    Initializing a hook just with \cs{@@_init_structure:n} will not
-%    make it usable with \cs{hook_use:n}.
+% 它创建了钩子代码池（\cs[no-index]{g_@@_\meta{hook}_code_prop}），
+% 以及 |top-level| 和 |next| 令牌列表。
+% 第一次向钩子添加内容时，使用 \cs{@@_init_structure:n} 对钩子进行初始化。
+% 只使用 \cs{@@_init_structure:n} 初始化钩子并不能使其能够被 \cs{hook_use:n} 使用。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_init_structure:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -2375,10 +2330,9 @@
 %  }
 %  \begin{macro}{\@@_new_reversed:nn}
 %
-%    Declare a new hook. The default ordering of code chunks is
-%    reversed, signaled by setting the token list to a minus sign.
+% 声明一个新的钩子。代码块的默认顺序是反向的，通过将令牌列表设置为减号来表示。
 % \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_new_reversed_with_args:nn} (hook-args).}
+%         {添加 \cs{hook_new_reversed_with_args:nn}（hook-args）}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_new_reversed_with_args:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -2417,9 +2371,9 @@
 %  \end{macro}
 %
 %  \begin{macro}{\hook_new_pair:nn,\hook_new_pair_with_args:nnn}
-%    A shorthand for declaring a normal and a (matching) reversed hook in one go.
+% 一种一次性声明普通和（匹配的）反向钩子的简写方式。
 % \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_new_pair_with_args:nnn} (hook-args).}
+%         {添加 \cs{hook_new_pair_with_args:nnn}（hook-args）}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_new_pair_with_args:nnn}
 %<latexrelease>                 {Hooks~with~args}
@@ -2459,39 +2413,33 @@
 %
 %
 % \begin{macro}{\@@_include_legacy_code_chunk:n}
-%    The \LaTeX{} legacy concept for hooks uses with hooks the
-%    following naming scheme in the code: \cs{@...hook}.
+% \LaTeX{} 遗留钩子的概念在代码中使用以下命名方案：\cs{@...hook}。
 %
-%    If this macro is not empty we add it under the label
-%    \texttt{legacy} to the current hook and then empty it globally.
-%    This way packages or classes directly manipulating commands such
-%    as \cs{@begindocumenthook} still get their hook data added.
-%    \begin{quote}
-%       \textbf{Warning: this support will vanish in future releases!}
-%    \end{quote}
+% 如果此宏不为空，我们将其添加到当前钩子的标签 \texttt{legacy} 下，
+% 然后在全局范围内将其清空。这样，直接操作诸如 \cs{@begindocumenthook} 等命令的包或类
+% 仍然可以添加其钩子数据。
+% \begin{quote}
+%    \textbf{警告：这种支持将在未来版本中消失！}
+% \end{quote}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_include_legacy_code_chunk:n}
 %<latexrelease>                 {Hooks~with~args}
 \cs_new_protected:Npn \@@_include_legacy_code_chunk:n #1
   {
 %    \end{macrocode}
-%    If the macro doesn't exist (which is the usual case) then nothing
-%    needs to be done.
+%    如果宏不存在（通常情况下是这样），则不需要进行任何操作。
 %    \begin{macrocode}
     \tl_if_exist:cT { @#1hook }
       {
 %    \end{macrocode}
-%    Of course if the legacy hook exists but is empty, there is no need
-%    to add anything under \texttt{legacy} the legacy label.
+%    当然，如果遗留钩子存在但为空，就没有必要在遗留标签下添加任何内容。
 %    \begin{macrocode}
         \tl_if_empty:cF { @#1hook }
           {
 %    \end{macrocode}
-%    Here we set \cs{@@_replacing_args_false:} because no legacy code
-%    will reference hook arguments.
-% \changes{v1.1b}{2023/04/16}
-%         {\cs{@@_replacing_args_false:} in
-%          \cs{@@_include_legacy_code_chunk:n}.}
+%    在这里，我们设置 \cs{@@_replacing_args_false:}，因为没有遗留代码会引用钩子参数。
+%    \changes{v1.1b}{2023/04/16}
+%            {\cs{@@_replacing_args_false:} 在 \cs{@@_include_legacy_code_chunk:n} 中。}
 %    \begin{macrocode}
             \@@_replacing_args_false:
             \use:e
@@ -2501,8 +2449,7 @@
               }
             \@@_replacing_args_reset:
 %    \end{macrocode}
-%    Once added to the hook, we need to clear it otherwise it might
-%    get added again  later if the hook data gets updated.
+%    添加到钩子后，我们需要将其清除，否则如果钩子数据更新，可能会在以后再次添加。
 %    \begin{macrocode}
             \@@_tl_gclear:c { @#1hook }
           }
@@ -2529,23 +2476,20 @@
 %
 %
 %
-% \subsubsection{Disabling and providing hooks}
+% \subsubsection{禁用和提供钩子}
 %
-% \changes{v1.0p}{2021/08/20}{Renames of generic hook commands (gh/638)}
+% \changes{v1.0p}{2021/08/20}{通用钩子命令的重命名（gh/638）}
 %
 % \begin{macro}{\hook_disable_generic:n}
 % \begin{macro}{\@@_disable:n}
 % \begin{macro}[pTF]{\@@_if_disabled:n}
 %
-%    Disables a hook by creating its
-%    \cs[no-index]{g_@@_\meta{hook}_declared_tl} so that the hook
-%    errors when used with \cs{hook_new:n}, then it undefines
-%    \cs{@@\textvisiblespace\meta{hook}} so that it may not be executed.
+%    通过创建其 \cs[no-index]{g_@@_\meta{hook}_declared_tl} 来禁用一个钩子，
+%    以便在使用 \cs{hook_new:n} 时出错，然后取消定义 \cs{@@\textvisiblespace\meta{hook}}，
+%    以防止其执行。
 %
-%    This does not clear any code that may be already stored in the
-%    hook's structure, but doesn't allow adding more code.
-%    \cs{@@_if_disabled:nTF} uses that specific combination to check
-%    if the hook is disabled.
+%    这并不清除可能已经存储在钩子结构中的任何代码，但不允许添加更多代码。
+%    \cs{@@_if_disabled:nTF} 使用该特定组合来检查钩子是否已禁用。
 %
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2021/06/01}{\hook_disable_generic:n}
@@ -2585,11 +2529,10 @@
 %
 % \begin{macro}{\hook_activate_generic:n}
 % \begin{macro}{\@@_activate_generic:n}
-%    The \cs{hook_activate_generic:n} declaration declares a new hook if it
-%    wasn't declared already, in which case it only checks that the
-%    already existing hook is not a reversed hook.
+%    \cs{hook_activate_generic:n} 声明了一个新的钩子，如果它还没有被声明的话，
+%    此时它仅检查已经存在的钩子是否不是一个反向钩子。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_activate_generic:n}
 %<latexrelease>                 {Providing~hooks}
@@ -2604,14 +2547,12 @@
 \cs_new_protected:Npn \@@_activate_generic:nn #1 #2
   {
 %    \end{macrocode}
-%    If the hook to be activated was disabled we warn (for now --- this
-%    may change).
+%    如果要激活的钩子已被禁用，我们发出警告（目前是这样的 --- 这可能会改变）。
 %    \begin{macrocode}
     \@@_if_disabled:nTF {#1}
       { \msg_warning:nnn { hooks } { activate-disabled } {#1} }
 %    \end{macrocode}
-%    Otherwise we check if the hook is not declared, and if it isn't,
-%    figure out if it's reversed or not, then declare it accordingly.
+%    否则，我们检查钩子是否未被声明，如果是，则确定它是反向的还是非反向的，然后相应地进行声明。
 %    \begin{macrocode}
       {
         \@@_if_declared:nF {#1}
@@ -2621,10 +2562,8 @@
             \tl_gset:cx { g_@@_#1_reversed_tl }
               { \@@_if_generic_reversed:nT {#1} { - } }
 %    \end{macrocode}
-%    Reflect that we have activated the generic hook and set its
-%    execution code.
-% \changes{v1.0v}{2022/06/15}{Ensure that a newly activated generic hook
-%               gets its execution code set}
+%    反映我们已激活通用钩子并设置其执行代码。
+% \changes{v1.0v}{2022/06/15}{确保新激活的通用钩子得到其执行代码的设置}
 %    \begin{macrocode}
             \@@_update_hook_code:n {#1}
           }
@@ -2667,12 +2606,11 @@
 % \end{macro}
 %
 %
-% \subsection{Parsing a label}
+% \subsection{解析标签}
 %
 % \begin{macro}[EXP]{\@@_parse_label_default:n}
-%   This macro checks if a label was given (not \cs{c_novalue_tl}), and
-%   if so, tries to parse the label looking for a leading \verb|.| to
-%   replace by \cs{@@_currname_or_default:}.
+%   此宏检查是否提供了标签（不是 \cs{c_novalue_tl}），如果提供了标签，
+%   则尝试解析标签以查找一个前导的 \verb|.|，将其替换为 \cs{@@_currname_or_default:}。
 %    \begin{macrocode}
 \cs_new:Npn \@@_parse_label_default:n #1
   {
@@ -2689,13 +2627,11 @@
 %     \@@_parse_dot_label_cleanup:w,
 %     \@@_parse_dot_label_aux:w
 %   }
-%   Start by checking if the label is empty, which raises an error, and
-%   uses the fallback value.  If not,
-%   split the label at a \verb|./|, if any, and check if no tokens are
-%   before the \verb|./|, or if the only character is a \verb|.|.
-%   If these requirements are fulfilled, the leading
-%   \verb|.| is replaced with \cs{@@_currname_or_default:}.  Otherwise
-%   the label is returned unchanged.
+%   首先检查标签是否为空，如果为空则引发错误，并使用回退值。如果不为空，
+%   在可能的情况下将标签分割为 \verb|./|，并检查在 \verb|./| 前是否没有任何标记，
+%   或者前面的唯一字符是 \verb|.|。
+%   如果满足这些要求，则将前导的 \verb|.| 替换为 \cs{@@_currname_or_default:}。
+%   否则，将标签不变地返回。
 %    \begin{macrocode}
 \cs_new:Npn \@@_parse_dot_label:n #1
   {
@@ -2728,9 +2664,8 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\@@_currname_or_default:}
-%   This uses \cs{g_@@_hook_curr_name_tl} if it is set, otherwise it tries
-%   \cs{@currname}.  If neither is set, it raises an error and uses the
-%   fallback value \verb|label-missing|.
+%   如果设置了 \cs{g_@@_hook_curr_name_tl}，则使用它；否则尝试使用 \cs{@currname}。
+%   如果两者都没有设置，则引发错误并使用回退值 \verb|label-missing|。
 %    \begin{macrocode}
 \cs_new:Npn \@@_currname_or_default:
   {
@@ -2750,15 +2685,13 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\@@_make_name:n,\@@_make_name:w}
-%   This provides a standard sanitization of a hook's name.
-%   It uses \cs{cs:w} to build a control sequence out of the hook name,
-%   then uses \cs{cs_to_str:N} to get the string representation of that,
-%   without the escape character.  \cs{cs:w}-based expansion is used
-%   instead of |e|-based because Unicode characters don't behave well
-%   inside \cs{expanded}.  The macro adds the \cs[no-index]{@@\textvisiblespace} prefix to the
-%   hook name to reuse the hook's code token list to build the csname
-%   and avoid leaving \enquote{public} control sequences defined
-%   (as~\cs[no-index]{relax}) in TeX's memory.
+%   这提供了钩子名称的标准清理。
+%   它使用 \cs{cs:w} 构建钩子名称的控制序列，
+%   然后使用 \cs{cs_to_str:N} 获取其字符串表示，不包括转义字符。
+%   使用 \cs{cs:w} 的扩展方式，而不是 |e| 的方式，
+%   因为 Unicode 字符在 \cs{expanded} 内部的行为不佳。
+%   该宏将 \cs[no-index]{@@\textvisiblespace} 前缀添加到钩子名称，
+%   以重用钩子的代码标记列表来构建控制序列，并避免在 TeX 内存中留下 \enquote{公共} 控制序列（如~\cs[no-index]{relax}）。
 %    \begin{macrocode}
 \cs_new:Npn \@@_make_name:n #1
   {
@@ -2774,10 +2707,9 @@
 % \begin{macro}{\@@_normalize_hook_args:Nnn}
 % \begin{macro}{\@@_normalize_hook_rule_args:Nnnnn}
 % \begin{macro}{\@@_normalize_hook_args_aux:Nn}
-%   This is the standard route for normalizing hook and label arguments.  The main
-%   macro does the entire operation within a group so that csnames made
-%   by \cs{@@_make_name:n} are wiped off before continuing.  This means
-%   that this function cannot be used for \cs{hook_use:n}!
+%   这是规范化钩子和标签参数的标准途径。主要宏在一个组内执行整个操作，
+%   这样通过 \cs{@@_make_name:n} 创建的控制序列在继续之前会被清除。
+%   这意味着此函数不能用于 \cs{hook_use:n}！
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_normalize_hook_args_aux:Nn #1 #2
   {
@@ -2820,35 +2752,26 @@
 % \begin{macro}{\@@_curr_name_push:n,\@@_curr_name_push_aux:n}
 % \begin{macro}{\@@_curr_name_pop:}
 % \begin{macro}{\@@_end_document_label_check:}
-%   The token list \cs{g_@@_hook_curr_name_tl} stores the name of the
-%   current package/file to be used as the default label in hooks.
-%   Providing a consistent interface is tricky because packages can
-%   be loaded within packages, and some packages may not use
-%   \cs{SetDefaultHookLabel} to change the default label (in which
-%   case \cs{@currname} is used).
+%   符号列表 \cs{g_@@_hook_curr_name_tl} 存储当前要用作钩子默认标签的包名/文件名。
+%   提供一致的接口很棘手，因为包可以在包中加载，并且一些包可能不使用 \cs{SetDefaultHookLabel} 来更改默认标签（这种情况下使用 \cs{@currname}）。
 %
-%   To pull that one off, we keep a stack that contains the default
-%   label for each level of input.  The bottom of the stack contains the
-%   default label for the |top-level| (this stack should never go
-%   empty). If we're building the format, set the default label to be
-%   |top-level|:
+%   为了实现这一点，我们保持一个堆栈，其中包含每个输入级别的默认标签。
+%   堆栈底部包含 |top-level| 的默认标签（此堆栈不应为空）。如果正在构建格式，则将默认标签设置为 |top-level|：
 %    \begin{macrocode}
 \tl_gset:Nn \g_@@_hook_curr_name_tl { top-level }
 %    \end{macrocode}
 %
-%   Then, in case we're in \pkg{latexrelease} we push something on
-%   the stack to support roll forward.  But in some rare cases,
-%   \pkg{latexrelease} may be loaded inside another package (notably
-%   \pkg{platexrelease}), so we'll first push the |top-level| entry:
+%   然后，在我们位于 \pkg{latexrelease} 中的情况下，我们在堆栈上推送一些内容以支持向前滚动。
+%   但在一些罕见的情况下，\pkg{latexrelease} 可能会在另一个包中加载（尤其是 \pkg{platexrelease}），
+%   因此我们首先推送 |top-level| 条目：
 %   \changes{v1.0i}{2021/03/18}
-%           {Only add \texttt{top-level} if not already there.}
+%           {仅在不存在时添加 \texttt{top-level}。}
 %    \begin{macrocode}
 %<latexrelease>\seq_if_empty:NT \g_@@_name_stack_seq
 %<latexrelease>  { \seq_gput_right:Nn \g_@@_name_stack_seq { top-level } }
 %    \end{macrocode}
-%   then we dissect the \cs{@currnamestack}, adding \cs{@currname} to
-%   the stack:
-% \changes{v1.0f}{2020/11/24}{Support for roll forward (gh/434)}
+%   然后我们分析 \cs{@currnamestack}，将 \cs{@currname} 添加到堆栈：
+% \changes{v1.0f}{2020/11/24}{支持向前滚动（gh/434）}
 %    \begin{macrocode}
 %<latexrelease>\cs_set_protected:Npn \@@_tmp:w #1 #2 #3
 %<latexrelease>  {
@@ -2860,17 +2783,16 @@
 %<latexrelease>  \q_recursion_tail \q_recursion_tail
 %<latexrelease>  \q_recursion_tail \q_recursion_stop
 %    \end{macrocode}
-%   and finally set the default label to be the \cs{@currname}:
+%   最后将默认标签设置为 \cs{@currname}：
 %   \changes{v1.0i}{2021/03/18}
-%           {Remove the (empty) \enquote{top-level} from \cs{@currnamestack}.}
+%           {从 \cs{@currnamestack} 中删除（空的） \enquote{top-level}。}
 %    \begin{macrocode}
 %<latexrelease>\tl_gset:Nx \g_@@_hook_curr_name_tl { \@currname }
 %<latexrelease>\seq_gpop_right:NN \g_@@_name_stack_seq \l_@@_tmpa_tl
 %    \end{macrocode}
 %
-%   Two commands keep track of the stack: when a file is input,
-%   \cs{@@_curr_name_push:n} pushes the current default label onto the
-%   stack and sets the new default label (all in one go):
+%   有两个命令来跟踪堆栈：当输入文件时，
+%   \cs{@@_curr_name_push:n} 将当前默认标签推送到堆栈上并设置新的默认标签（一次完成所有操作）：
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_curr_name_push:n #1
   { \exp_args:Nx \@@_curr_name_push_aux:n { \@@_make_name:n {#1} } }
@@ -2891,9 +2813,7 @@
       }
   }
 %    \end{macrocode}
-%   and when an input is over, the topmost item of the stack is popped,
-%   since that label will not be used again, and \cs{g_@@_hook_curr_name_tl}
-%   is updated to equal the now topmost item of the stack:
+%   当输入结束时，堆栈的顶部项目将被弹出，因为该标签将不再使用，并且 \cs{g_@@_hook_curr_name_tl} 被更新为现在堆栈的顶部项目：
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_curr_name_pop:
   {
@@ -2903,10 +2823,7 @@
   }
 %    \end{macrocode}
 %
-%   At the end of the document we want to check if there was no
-%   \cs{@@_curr_name_push:n} without a matching \cs{@@_curr_name_pop:}
-%   (not a critical error, but it might indicate that something else is
-%   not quite right):
+%   在文档结束时，我们想要检查是否有没有匹配的 \cs{@@_curr_name_push:n} 和 \cs{@@_curr_name_pop:}（这不是一个关键错误，但可能表明其他地方存在问题）：
 %    \begin{macrocode}
 \tl_gput_right:Nn \@kernel@after@enddocument@afterlastpage
   { \@@_end_document_label_check: }
@@ -2922,12 +2839,10 @@
   }
 %    \end{macrocode}
 %
-%   The token list \cs{g_@@_hook_curr_name_tl} is but a mirror of the
-%   top of the stack.
+%   符号列表 \cs{g_@@_hook_curr_name_tl} 仅是堆栈顶部的镜像。
 %
 % \begin{macro}{\@@_set_default_hook_label:n,\@@_set_default_label:n}
-%   Now define a wrapper that replaces the top of the stack with the
-%   argument, and updates \cs{g_@@_hook_curr_name_tl} accordingly.
+%   现在定义一个包装器，用参数替换堆栈的顶部项目，并相应地更新 \cs{g_@@_hook_curr_name_tl}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_set_default_hook_label:n #1
   {
@@ -2953,7 +2868,7 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsection{Adding or removing hook code}
+% \subsection{添加或移除钩子代码}
 %
 % \begin{macro}{\hook_gput_code:nnn,\hook_gput_code_with_args:nnn}
 % \begin{macro}{
@@ -2964,12 +2879,11 @@
 %     \@@_prop_gput_labeled_do:Nnnn
 %    }
 %
-%    With \cs{hook_gput_code:nnn}\Arg{hook}\Arg{label}\Arg{code} a
-%    chunk of \meta{code} is added to an existing \meta{hook} labeled
-%    with \meta{label}.
-% \changes{v1.0o}{2021/07/22}{Do not queue removals (gh/625)}
+%    使用 \cs{hook_gput_code:nnn}\Arg{hook}\Arg{label}\Arg{code}，
+%    将一段 \meta{code} 添加到已存在的带有 \meta{label} 标签的 \meta{hook} 中。
+% \changes{v1.0o}{2021/07/22}{不要排队移除（gh/625）}
 % \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_gput_code_with_args:nnn} (hook-args).}
+%         {添加 \cs{hook_gput_code_with_args:nnn}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_gput_code:nnn}
 %<latexrelease>                 {Hooks~with~args}
@@ -2987,25 +2901,22 @@
   }
 %    \end{macrocode}
 %
-%   If \cs{AddToHookWithArguments} was used, do some sanity checking,
-%   and if it's not possible to use arguments at this point, fall back
-%   to regular \cs{AddToHook} by using \cs{@@_replacing_args_false:}.
+% 如果使用了 \cs{AddToHookWithArguments}，进行一些合理性检查，如果此时不能使用参数，
+% 通过使用 \cs{@@_replacing_args_false:} 回退到常规的 \cs{AddToHook}。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_gput_code:nnn #1 #2 #3
   {
     \@@_chk_args_allowed:nn {#1} { AddToHook }
 %    \end{macrocode}
-%   Then check if the code should be executed immediately, rather than
-%   stored:
-% \changes{v1.0r}{2021/09/06}{Use dedicated conditional (gh/606)}
+%   然后检查代码是否应立即执行，而不是存储：
+% \changes{v1.0r}{2021/09/06}{使用专用条件（gh/606）}
 %    \begin{macrocode}
     \@@_if_execute_immediately:nTF {#1}
       {
 %    \end{macrocode}
-%   \cs{AddToHookWithArguments} can't be used on one-time hooks (that
-%   were already used).
+%   \cs{AddToHookWithArguments} 不能用于一次性钩子（已经使用过的）。
 %    \begin{macrocode}
         \@@_if_replacing_args:TF
           {
@@ -3024,28 +2935,24 @@
 \cs_new_protected:Npn \@@_gput_code_store:nnn #1 #2 #3
   {
 %    \end{macrocode}
-%    Then check if the hook is usable.
+%    然后检查钩子是否可用。
 %    \begin{macrocode}
     \@@_if_usable:nTF {#1}
 %    \end{macrocode}
-%    If so we simply add (or append) the new code to the property list
-%    holding different chunks for the hook. At \verb=\begin{document}=
-%    this is then sorted into a token list for fast execution.
+%    如果可用，我们只需将新代码添加（或附加）到保存钩子不同代码块的属性列表中。
+%    在 \verb=\begin{document}= 时，这些代码将被排序到一个令牌列表中以便快速执行。
 %    \begin{macrocode}
       {
         \@@_hook_gput_code_do:nnn {#1} {#2} {#3}
 %    \end{macrocode}
-%    However, if there is an update within the document we need to alter
-%    this execution code which is done by
-%    \cs{@@_update_hook_code:n}. In the preamble this does nothing.
+%    但是，如果文档中有更新，我们需要修改此执行代码，这通过 \cs{@@_update_hook_code:n} 完成。
+%    在导言部分，这将不起作用。
 %    \begin{macrocode}
         \@@_update_hook_code:n {#1}
       }
 %    \end{macrocode}
 %
-%    If the hook is not usable, before giving up, check if it's not
-%    disabled and otherwise try to declare it as a generic hook, if its
-%    name matches one of the valid patterns.
+%    如果钩子不可用，在放弃之前，检查它是否未禁用，否则尝试将其声明为通用钩子，如果其名称匹配有效模式之一。
 %    \begin{macrocode}
       {
         \@@_if_disabled:nTF {#1}
@@ -3055,39 +2962,35 @@
   }
 %    \end{macrocode}
 %
-%    This macro will unconditionally add a chunk of code to the given hook.
+%    此宏将无条件地向给定的钩子添加一段代码。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）。}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_hook_gput_code_do:nnn #1 #2 #3
   {
 %    \end{macrocode}
-%    However, first some debugging info if debugging is enabled:
+%    但首先，如果启用了调试功能，显示一些调试信息：
 %    \begin{macrocode}
     \@@_debug:n{\iow_term:x{****~ Add~ to~
                       \@@_if_usable:nF {#1} { undeclared~ }
                       hook~ #1~ (#2)
                       \on@line\space <-~ \tl_to_str:n{#3}} }
 %    \end{macrocode}
-%    Then try to get the code chunk labeled \verb=#2= from the hook.
-%    If there's code already there, then append \verb=#3= to that,
-%    otherwise just put \verb=#3=.  If the current label is |top-level|,
-%    the code is added to a dedicated token list
-%    \cs{@@_toplevel\textvisiblespace\meta{hook}} that goes at the end of the
-%    hook (or at the beginning, for a reversed hook), just before
-%   \cs[no-index]{@@_next\textvisiblespace\meta{hook}}.
+%    然后尝试从钩子中获取标记为 \verb=#2= 的代码块。
+%    如果已经有代码存在，那么将 \verb=#3= 附加到其中，否则只是放置 \verb=#3=。
+%    如果当前标签为 |top-level|，则代码将被添加到一个专用的令牌列表 \cs{@@_toplevel\textvisiblespace\meta{hook}} 中，
+%    该列表位于钩子的末尾（或者对于反向钩子，位于开头），就在 \cs[no-index]{@@_next\textvisiblespace\meta{hook}} 之前。
 %    \begin{macrocode}
     \str_if_eq:nnTF {#2} { top-level }
       {
         \str_if_eq:eeTF { top-level } { \@@_currname_or_default: }
           {
 %    \end{macrocode}
-%   If the hook's basic structure does not exist, we need to declare it
-%   with \cs{@@_init_structure:n}.
+%   如果钩子的基本结构不存在，则需要用 \cs{@@_init_structure:n} 声明它。
 %    \begin{macrocode}
             \@@_init_structure:n {#1}
 %    \end{macrocode}
-%   Then append to the \verb|_toplevel| container for the hook.
+%   然后将其附加到钩子的 \verb|_toplevel| 容器中。
 %    \begin{macrocode}
             \@@_cs_gput_right:nnn { _toplevel } {#1} {#3}
           }
@@ -3095,10 +2998,8 @@
       }
       {
 %    \end{macrocode}
-%   When adding to the code pool, we have to double hashes if
-%   \cs{AddToHook} was used (\verb|replacing_args| is false), so that
-%   later it is turned into a single parameter token, rather than a
-%   parameter to the hook macro.
+%   在添加到代码池时，如果使用了 \cs{AddToHook}（\verb|replacing_args| 为 false），我们必须双重哈希，
+%   这样以后它会变成一个单参数令牌，而不是钩子宏的参数。
 %    \begin{macrocode}
         \exp_args:Nx \@@_prop_gput_labeled_cleanup:nnn
           {
@@ -3112,9 +3013,9 @@
   }
 %    \end{macrocode}
 %
-%   Adds code to a hook's code pool.
+%   向钩子的代码池中添加代码。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_prop_gput_labeled_cleanup:nnn #1 #2 #3
   {
@@ -3198,14 +3099,12 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_chk_args_allowed:nn}
-%   This macro checks if it is possible to add code with references to
-%   a hook's arguments for hook \verb|#1|.  It only does something if
-%   the function being run is \verb|replacing_args|.  This macro will
-%   error if the hook is declared and takes no arguments, then it will
-%   set \cs{@@_replacing_args_false:} so that the macro which called it
-%   will add the code normally.
+%   此宏检查是否可以向钩子 \verb|#1| 添加带有引用的代码。
+%   仅在运行函数为 \verb|replacing_args| 时才执行操作。
+%   如果钩子已声明且不带参数，将引发错误，然后设置 \cs{@@_replacing_args_false:}，
+%   以使调用它的宏可以正常添加代码。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_chk_args_allowed:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -3232,11 +3131,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_gput_undeclared_hook:nnn}
-%   Often it may happen that a package $A$ defines a hook \verb=foo=,
-%   but package $B$, that adds code to that hook, is loaded before $A$.
-%   In such case we need to add code to the hook before its declared.
-%   An implicitly declared hook doesn't have arguments (in principle),
-%   so use \cs{c_false_bool} here.
+%   经常会出现这样的情况，一个包 $A$ 定义了一个钩子 \verb=foo=，
+%   但是在加载 $A$ 之前加载了向该钩子添加代码的包 $B$。
+%   在这种情况下，我们需要在其声明之前向钩子添加代码。
+%   隐式声明的钩子没有参数（原则上），所以在这里使用 \cs{c_false_bool}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_gput_undeclared_hook:nnn #1 #2 #3
   {
@@ -3249,23 +3147,19 @@
 % \begin{macro}{\@@_try_declaring_generic_hook:nnn,
 %               \@@_try_declaring_generic_next_hook:nn}
 %
-%   These entry-level macros just pass the arguments along to the
-%   common \cs{@@_try_declaring_generic_hook:nNNnn} with the right
-%   functions to execute when some action is to be taken.
+%   这些入口级宏只是将参数传递给通用的 \cs{@@_try_declaring_generic_hook:nNNnn}，
+%   其中包含在采取某些操作时执行的正确函数。
 %
-%   The wrapper \cs{@@_try_declaring_generic_hook:nnn} then defers
-%   \cs{hook_gput_code:nnn} if the generic hook was declared, or to
-%   \cs{@@_gput_undeclared_hook:nnn} otherwise (the hook was tested for
-%   existence before, so at this point if it isn't generic, it doesn't
-%   exist).
+%   包装器 \cs{@@_try_declaring_generic_hook:nnn} 接着推迟 \cs{hook_gput_code:nnn}，
+%   如果通用钩子已声明，否则推迟到 \cs{@@_gput_undeclared_hook:nnn}（在此之前已经测试了钩子是否存在，
+%   所以此时如果它不是通用的，它就不存在）。
 %
-%   The wrapper \cs{@@_try_declaring_generic_next_hook:nn} for
-%   next-execution hooks does the same: it defers the code to
-%   \cs{hook_gput_next_code:nn} if the generic hook was declared, or
-%   to \cs{@@_gput_next_do:nn} otherwise.
-% \changes{v1.0p}{2021/08/25}{Standardise generic hook names (gh/648)}
+%   包装器 \cs{@@_try_declaring_generic_next_hook:nn} 用于 next-execution 钩子，
+%   它做的事情类似：如果通用钩子已声明，就推迟代码到 \cs{hook_gput_next_code:nn}，
+%   否则推迟到 \cs{@@_gput_next_do:nn}。
+% \changes{v1.0p}{2021/08/25}{标准化通用钩子名称（gh/648）}
 % \changes{v1.1d}{2023/05/21}
-%         {Changes to allow support arguments in cmd hooks (cmd-args).}
+%         {更改以支持命令钩子中的参数（cmd-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_try_declaring_generic_hook:nnn}
 %<latexrelease>                 {Hooks~with~args}
@@ -3320,17 +3214,14 @@
 %               \@@_try_declaring_generic_hook_split:nNNnn}
 %
 %   \cs{@@_try_declaring_generic_hook:nNNnn}
-%   now splits the hook name
-%   at the first \texttt{/} (if any) and first checks if it is a
-%   file-specific hook (they require some normalization) using
-%   \cs{@@_if_file_hook:wTF}. If not then check it is one of a
-%   predefined set for generic names. We also split off the second
-%   component to see if we have to make a reversed hook.  In either case
-%   the function returns \meta{true} for a generic hook and \meta{false}
-%   in other cases.
+% 现在在第一个 \texttt{/} 处（如果有）分割钩子名称，
+% 并首先使用 \cs{@@_if_file_hook:wTF} 检查是否是特定于文件的钩子（它们需要一些规范化）。
+% 如果不是，则检查它是否是预定义集合中的一个通用名称。
+% 我们还分离出第二个组件，看看是否需要创建一个反向钩子。
+% 在任一情况下，该函数对于通用钩子返回 \meta{true}，对于其他情况返回 \meta{false}。
 %
 % \changes{v1.0s}{2021/09/28}
-%                {Correct usage of older \cs{@@_if_file_hook:wTF} (gh/675)}
+%                {修复旧 \cs{@@_if_file_hook:wTF} 的使用（gh/675）}
 %    \begin{macrocode}
 %<latexrelease>\cs_new_protected:Npn \@@_try_declaring_generic_hook:nNNnn #1
 %<latexrelease>  {
@@ -3356,7 +3247,7 @@
 %
 % \begin{macro}[TF]{\@@_try_declaring_generic_hook:wn}
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_try_declaring_generic_hook:wn}
 %<latexrelease>                 {Hooks~with~args}
@@ -3368,15 +3259,11 @@
         \@@_if_usable:nF {#5}
           {
 %    \end{macrocode}
-%    If the hook doesn't exist yet we check if it is a \texttt{cmd}
-%    hook and if so we attempt patching the command in addition to
-%    declaring the hook.
+% 如果这个钩子还不存在，我们会检查它是否是一个 \texttt{cmd} 钩子，如果是，我们会尝试修补这个命令，除了声明这个钩子。
 %
-%    For some commands this will not be possible, in which case
-%    \cs{@@_patch_cmd_or_delay:Nnn} (defined in \texttt{ltcmdhooks})
-%    will generate an appropriate error message.
+% 对于某些命令，这是不可能的，这种情况下，\cs{@@_patch_cmd_or_delay:Nnn}（在 \texttt{ltcmdhooks} 中定义）将生成一个相应的错误消息。
 % \changes{v1.1d}{2023/05/21}
-%         {Changes to allow support arguments in cmd hooks (cmd-args).}
+%         {对命令钩子（cmd-args）进行支持参数的更改。}
 %    \begin{macrocode}
             \str_if_eq:nnT {#1} { cmd }
               {
@@ -3386,12 +3273,9 @@
               }
 %    \end{macrocode}
 %
-%    Declare the hook always even if it can't really be used (error
-%    message generated elsewhere).
+% 即使无法真正使用这个钩子（错误消息将在其他地方生成），也要声明这个钩子。
 %
-%    Here we use \cs{@@_make_usable:nn}, so that a \cs{hook_new:n} is
-%    still possible later.  Generic hooks (except \hook{cmd} hooks) take
-%    no arguments, so use zero as the second argument.
+% 在这里，我们使用 \cs{@@_make_usable:nn}，这样以后仍然可以使用 \cs{hook_new:n}。通用钩子（除了 \hook{cmd} 钩子）不接受参数，所以将零作为第二个参数。
 %    \begin{macrocode}
             \@@_make_usable:nn {#5} { 0 }
           }
@@ -3402,20 +3286,11 @@
       {
 %    \end{macrocode}
 %
-%    Generic hooks are all named \meta{type}/\meta{name}/\meta{place},
-%    where \meta{type} and \meta{place} are predefined
-%    (\cs{c_@@_generic_\meta{type}/./\meta{place}_tl}), and \meta{name}
-%    is the variable component.  Older releases had some hooks with the
-%    \meta{name} in the third part, so the code below supports that
-%    syntax for a while, with a warning.
+% 通用钩子都被命名为 \meta{type}/\meta{name}/\meta{place}，其中 \meta{type} 和 \meta{place} 是预定义的（\cs{c_@@_generic_\meta{type}/./\meta{place}_tl}），\meta{name} 是可变的部分。旧版本中有一些钩子的 \meta{name} 在第三部分，所以下面的代码一段时间内支持这种语法，并会发出警告。
 %
-%    The \cs{exp_after:wN} |...| \cs{exp:w} trick is there to remove the
-%    conditional structure inserted by
-%    \cs{@@_try_declaring_generic_hook:wnTF} and thus allow access to the
-%    tokens that follow it, as is needed to keep things going.
+% \cs{exp_after:wN} |...| \cs{exp:w} 的技巧是为了删除 \cs{@@_try_declaring_generic_hook:wnTF} 插入的条件结构，从而允许访问后续的标记，这对于保持事务正常进行是必要的。
 %
-%    When the deprecation cycle ends, the lines below should all be
-%    replaced by \cs{prg_return_false:}.
+% 当淘汰周期结束时，下面的行应该全部替换为 \cs{prg_return_false:}。
 %    \begin{macrocode}
         \@@_if_deprecated_generic:nTF {#5}
           {
@@ -3432,10 +3307,7 @@
 %     \@@_deprecated_generic_warn:Nn,
 %     \@@_deprecated_generic_warn:Nw,
 %   }
-%   \cs{@@_deprecated_generic_warn:n} will issue a deprecation warning
-%   for a given hook, and mark that hook such that the warning will not
-%   be issued again (multiple warnings can be issued, but only once per
-%   hook).
+%   \cs{@@_deprecated_generic_warn:n} 会针对给定的钩子发出弃用警告，并标记该钩子，以确保不会再次发出警告（可以发出多个警告，但每个钩子只发出一次）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_deprecated_generic_warn:n #1
   { \@@_deprecated_generic_warn:w #1 \s_@@_mark }
@@ -3456,9 +3328,7 @@
 %     \@@_declare_deprecated_generic:NNw,
 %     \@@_declare_deprecated_generic:NNw,
 %   }
-%   Now that the user has been told about the deprecation, we proceed by
-%   swapping \meta{name} and \meta{place} and adding the code to the
-%   correct hook.
+%   现在用户已经被告知了这个废弃情况，我们通过交换 \meta{name} 和 \meta{place} 并将代码添加到正确的钩子中进行下一步处理。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_do_deprecated_generic:Nn #1 #2
   { \@@_do_deprecated_generic:Nw #1 #2 \s_@@_mark }
@@ -3569,10 +3439,7 @@
 %
 %
 % \begin{macro}[pTF]{\@@_if_file_hook:w}
-%   \cs{@@_if_file_hook:wTF} checks if the argument is a valid
-%   file-specific hook (not, for example, |file/before|, but
-%   |file/foo.tex/before|).  If it is a file-specific hook, then it
-%   executes the \meta{true} branch, otherwise \meta{false}.
+%   \cs{@@_if_file_hook:wTF} 检查参数是否是有效的特定文件钩子（例如不是 |file/before|，而是 |file/foo.tex/before|）。如果是特定文件钩子，则执行 \meta{true} 分支，否则执行 \meta{false} 分支。
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2021/11/15}{\@@_if_file_hook:w}
 %<latexrelease>                 {Standardise~generic~hook~names}
@@ -3609,12 +3476,7 @@
 %<latexrelease>\EndIncludeInRelease
 %    \end{macrocode}
 %
-%   When a file-specific hook is found, before being declared it is
-%   lightly normalized by \cs{@@_file_hook_normalize:n}.  The current
-%   implementation just replaces two consecutive slashes (|//|) by a
-%   single one, to cope with simple cases where the user did something
-%   like \verb|\def\input@path{{./mypath/}}|, in which case a hook would
-%   have to be \verb|\AddToHook{file/./mypath//file.tex/after}|.
+%   当找到一个特定于文件的钩子时，在声明之前会被 \cs{@@_file_hook_normalize:n} 轻微规范化。当前的实现仅将两个连续的斜杠（|//|）替换为一个斜杠，以处理用户执行类似于 \verb|\def\input@path{{./mypath/}}| 的简单情况，在这种情况下，一个钩子将会是 \verb|\AddToHook{file/./mypath//file.tex/after}|。
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2020/10/01}{\@@_file_hook_normalize:n}
 %<latexrelease>                 {Standardise~generic~hook~names}
@@ -3623,13 +3485,8 @@
 %<latexrelease>\cs_new:Npn \@@_strip_double_slash:n #1
 %<latexrelease>  { \@@_strip_double_slash:w #1 // \s_@@_mark }
 %    \end{macrocode}
-%   This function is always called after testing if the argument is a
-%   file hook with \cs{@@_if_file_hook:wTF}, so we can assume it has
-%   three parts (it is either \verb|file/.../before| or
-%   \verb|file/.../after|), so we use \verb|#1/#2/#3 //| instead of just
-%   \verb|#1 //| to prevent losing a slash if the file name is empty.
-%   \changes{v1.0h}{2021/01/07}{Assume hook name has at least three
-%     nonempty parts (gh/464)}
+%   这个函数总是在使用 \cs{@@_if_file_hook:wTF} 测试参数是否为文件钩子后调用的，所以我们可以假设它有三部分（要么是 \verb|file/.../before|，要么是 \verb|file/.../after|），因此我们使用 \verb|#1/#2/#3 //| 而不是仅仅 \verb|#1 //|，以防止如果文件名为空，则会丢失一个斜杠。
+%   \changes{v1.0h}{2021/01/07}{假定钩子名称至少有三个非空部分（gh/464）}
 %    \begin{macrocode}
 %<latexrelease>\cs_new:Npn \@@_strip_double_slash:w #1/#2/#3 // #4 \s_@@_mark
 %<latexrelease>  {
@@ -3652,15 +3509,14 @@
 %    \c_@@_generic_env/./begin_tl,\c_@@_generic_env/./end_tl,
 %    \c_@@_generic_include/./end_tl
 %  }
-%    Token lists defining the possible generic hooks.  We don't provide
-%    any user interface to this as this is meant to be static.
+%    定义可能的通用钩子的标记列表。我们不提供任何用户界面，因为这应该是静态的。
 %    \begin{description}
 %    \item[\texttt{cmd}]
-%      The generic hooks used for commands.
+%      用于命令的通用钩子。
 %    \item[\texttt{env}]
-%      The generic hooks used in \cs{begin} and \cs{end}.
+%      用于 \cs{begin} 和 \cs{end} 中的通用钩子。
 %    \item[\texttt{file}, \texttt{package}, \texttt{class}, \texttt{include}]
-%      The generic hooks used when loading a file
+%      在加载文件时使用的通用钩子。
 %    \end{description}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2021/11/15}{\c_@@_generics_prop}
@@ -3674,13 +3530,13 @@
 \tl_const:cn { c_@@_generic_env/./end_tl   } { + }
 %    \end{macrocode}
 %
-% \changes{v1.0t}{2022/04/01}{Support generic \texttt{include/.../excluded} hooks}
+% \changes{v1.0t}{2022/04/01}{支持通用 \texttt{include/.../excluded} 钩子}
 %    \begin{macrocode}
 \tl_const:cn { c_@@_generic_include/./end_tl } { - }
 \tl_const:cn { c_@@_generic_include/./excluded_tl } { + }
 %    \end{macrocode}
 %
-%   Deprecated generic hooks:
+%   废弃的通用钩子：
 %    \begin{macrocode}
 \clist_map_inline:nn { file , package , class , include }
   {
@@ -3703,8 +3559,7 @@
 %  \begin{macro}{\c_@@_generics_reversed_ii_prop,
 %                \c_@@_generics_reversed_iii_prop,
 %                \c_@@_generics_file_prop}
-%    The following generic hooks are supposed to use reverse ordering
-%    (the |ii| and |iii| names are kept for the deprecation cycle):
+%    以下通用钩子应该使用反向排序（|ii| 和 |iii| 的名称保留用于淘汰周期）：
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2021/11/15}{\c_@@_generics_reversed_ii_prop}
 %<latexrelease>                 {Standardise~generic~hook~names}
@@ -3725,18 +3580,15 @@
 % \begin{macro}{
 %     \c_@@_parameter_cmd/./before_tl,\c_@@_parameter_cmd/./after_tl,
 %   }
-%   Token lists defining the number of arguments for a given type of
-%   generic hook.
+%   标记列表定义了特定类型的通用钩子的参数数量。
 % \changes{v1.1d}{2023/05/21}
-%         {Token lists added (cmd-args).}
+%         {添加了标记列表（cmd-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\c_@@_parameter_cmd/./before_tl}
 %<latexrelease>                 {Hooks~with~args}
 %    \end{macrocode}
 %
-%   \hook{cmd} hooks are declared with 9 arguments because they have a
-%   variable number of arguments (depending on the command they are
-%   attached to), so we use the maximum here.
+%   \hook{cmd} 钩子被声明为具有9个参数，因为它们具有可变数量的参数（取决于它们所附加的命令），所以我们在这里使用了最大值。
 %    \begin{macrocode}
 \tl_const:cn { c_@@_parameter_cmd/./before_tl } { #1#2#3#4#5#6#7#8#9 }
 \tl_const:cn { c_@@_parameter_cmd/./after_tl }  { #1#2#3#4#5#6#7#8#9 }
@@ -3753,11 +3605,10 @@
 % \begin{macro}{\hook_gremove_code:nn}
 % \begin{macro}{\@@_gremove_code:nn}
 %
-%    With \cs{hook_gremove_code:nn}\Arg{hook}\Arg{label} any code
-%    for \meta{hook} stored under \meta{label} is removed.
-% \changes{v1.0o}{2021/07/22}{Do not queue removals (gh/625)}
+%    使用 \cs{hook_gremove_code:nn}\Arg{hook}\Arg{label} 可以移除存储在 \meta{label} 下的 \meta{hook} 的任何代码。
+% \changes{v1.0o}{2021/07/22}{不再排队移除（gh/625）}
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_gremove_code:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -3766,21 +3617,14 @@
 \cs_new_protected:Npn \@@_gremove_code:nn #1 #2
   {
 %    \end{macrocode}
-%    First check that the hook code pool exists.  \cs{@@_if_usable:nTF}
-%    isn't used here because it should be possible to remove code from a
-%    hook before its defined (see section~\ref{sec:querying}).
+%    首先检查钩子代码池是否存在。这里不使用 \cs{@@_if_usable:nTF}，因为应该可以在钩子定义之前移除代码（见第~\ref{sec:querying} 节）。
 %    \begin{macrocode}
     \@@_if_structure_exist:nTF {#1}
       {
 %    \end{macrocode}
-%    Then remove the chunk and run \cs{@@_update_hook_code:n} so
-%    that the execution token list reflects the change if we are after
-%    \verb=\begin{document}=.
+%    然后移除代码块并运行 \cs{@@_update_hook_code:n}，以便在我们在 \verb=\begin{document}= 之后对执行标记列表进行反映更改。
 %
-%    If all code is to be removed, clear the code pool
-%    \cs{g_@@_\meta{hook}_code_prop}, the top-level code
-%    \cs{@@_toplevel\textvisiblespace\meta{hook}}, and the next-execution code
-%    \cs{@@_next\textvisiblespace\meta{hook}}.
+%    如果要移除所有代码，则清除代码池 \cs{g_@@_\meta{hook}_code_prop}，顶层代码 \cs{@@_toplevel\textvisiblespace\meta{hook}}，以及下一个执行代码 \cs{@@_next\textvisiblespace\meta{hook}}。
 %    \begin{macrocode}
         \str_if_eq:nnTF {#2} {*}
           {
@@ -3790,8 +3634,7 @@
           }
           {
 %    \end{macrocode}
-%    If the label is |top-level| then clear the token list, as all code
-%    there is under the same label.
+%    如果标签是 |top-level|，则清除标记列表，因为所有代码都在相同的标签下。
 %    \begin{macrocode}
             \str_if_eq:nnTF {#2} { top-level }
               { \@@_toplevel_gset:nn {#1} { } }
@@ -3801,14 +3644,14 @@
               }
           }
 %    \end{macrocode}
-%    Finally update the code, if the hook exists.
+%    最后，如果钩子存在，更新代码。
 %    \begin{macrocode}
         \@@_if_usable:nT {#1}
           { \@@_update_hook_code:n {#1} }
       }
 %    \end{macrocode}
 %
-%    If the code pool for this hook doesn't exist, show a warning:
+%    如果这个钩子的代码池不存在，显示警告：
 %    \begin{macrocode}
       {
         \@@_if_deprecated_generic:nTF {#1}
@@ -3863,23 +3706,17 @@
 % \begin{macro}{\@@_cs_gput_right:nnn}
 % \begin{macro}{\@@_cs_gput_right_fast:nnn,\@@_cs_gput_right_slow:nnn}
 % \begin{macro}{\@@_code_gset_auxi:nnnn,\@@_code_gset_auxi:eeen}
-%   This macro is used to append code to the \verb|toplevel| and
-%   \verb|next| token lists, trating them correctly depending on their
-%   number of arguments, and depending if the code being added should
-%   have parameter tokens understood as parameters, or doubled to be
-%   stored as parameter tokens.
+%   此宏用于将代码附加到 \verb|toplevel| 和 \verb|next| 标记列表中，并根据其参数数量正确处理它们，以及根据被添加的代码是否应将参数标记理解为参数，还是将其加倍以存储为参数标记。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 % \changes{v1.1e}{2023/06/06}
-%         {Short-circuit when the hook is declared without args (gh1078).}
+%         {当钩子声明为无参数时进行简化（gh1078）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_cs_gput_right:nnn}
 %<latexrelease>                 {Hooks~with~args}
 %    \end{macrocode}
 %
-%   Check if the current hook is declared and takes no arguments.  In
-%   this case, we short-circuit and use the simpler and much faster
-%   approach that doesn't require hash-doubling.
+%   检查当前钩子是否已声明且不带参数。在这种情况下，我们进行简化处理，并使用简单且更快速的方法，不需要进行哈希加倍。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_cs_gput_right:nnn #1 #2
   {
@@ -3898,11 +3735,7 @@
 \cs_new_protected:Npn \@@_cs_gput_right_slow:nnn #1 #2 #3
   {
 %    \end{macrocode}
-%   The auxiliary \cs{@@_code_gset_auxi:eeen} just does the assignment
-%   at the end.  Its first argument is the parameter text of the macro,
-%   which is chosen here depending if
-%   \cs[no-index]{c_@@_\meta{hook}_parameter_tl} exists, if the hook is
-%   declared, and if it's a generic hook.
+%   辅助命令 \cs{@@_code_gset_auxi:eeen} 最终只是在末尾执行赋值操作。它的第一个参数是宏的参数文本，在这里的选择取决于 \cs[no-index]{c_@@_\meta{hook}_parameter_tl} 是否存在，钩子是否已声明，以及它是否是通用钩子。
 %    \begin{macrocode}
     \cs_if_exist:cF { @@#1~#2 }
       { \@@_code_gset_aux:nnn {#1} {#2} { } }
@@ -3917,10 +3750,7 @@
           }
       }
 %    \end{macrocode}
-%   Here we take the existing code in the macro, expand it with as many
-%   arguments as it takes, then double the hashes so the code can be
-%   reused. \pho{Maybe can be improved. The case of adding to an empty
-%     cs can be optimised by quickly checking \cs{cs_replacement_spec}.}
+%   这里我们取宏中的现有代码，用它需要的参数进行展开，然后加倍哈希，以便可以重用代码。\pho{也许可以改进。通过快速检查 \cs{cs_replacement_spec}，可以优化添加到空 cs 的情况。}
 %    \begin{macrocode}
       {
         \exp_args:NNo \exp_args:No \@@_double_hashes:n
@@ -3930,8 +3760,7 @@
           }
       }
 %    \end{macrocode}
-%   Now the new code:  if we are replacing arguments, then hashes are
-%   left untouched, otherwise they are doubled.
+%   现在是新代码：如果我们正在替换参数，则哈希保持不变，否则加倍。
 %    \begin{macrocode}
       {
         \@@_if_replacing_args:TF
@@ -3940,13 +3769,13 @@
             {#3}
       }
 %    \end{macrocode}
-%   And finally, the csname which we'll define with all the above.
+%   最后，我们将定义带有以上所有内容的控制序列名称。
 %    \begin{macrocode}
       { @@#1~#2 }
   }
 %    \end{macrocode}
 %
-%   And as promised, the auxiliary that does the definition.
+%   正如承诺的那样，这是执行定义的辅助函数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_code_gset_auxi:nnnn #1 #2 #3 #4
   { \cs_gset:cpn {#4} #1 { #2 #3 } }
@@ -3973,14 +3802,9 @@
 %     \@@_next_gset:nn,
 %     \@@_code_gset_aux:nnn
 %   }
-%   These macros define
-%   \cs[no-index]{@@\meta{type}\textvisiblespace\meta{hook}} (with
-%   \meta{type} being \verb|_next|, \verb|_toplevel|, or empty) with the
-%   given code and the parameters stored in
-%   \cs[no-index]{c_@@_\meta{hook}_parameter_tl} (or none, if that
-%   doesn't exist).
+%   这些宏定义了 \cs[no-index]{@@\meta{type}\textvisiblespace\meta{hook}}（其中 \meta{type} 是 \verb|_next|、\verb|_toplevel| 或为空），其中包含给定的代码以及存储在 \cs[no-index]{c_@@_\meta{hook}_parameter_tl} 中的参数（如果该参数不存在，则为空）。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_code_gset:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -4012,14 +3836,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_normalise_cs_args:nn}
-%   This macro normalises the parameters of the macros
-%   \cs[no-index]{@@\meta{type}\textvisiblespace\meta{hook}} to take the
-%   right number of arguments after a hook is declared.  At this point
-%   we know \cs[no-index]{c_@@_\meta{hook}_parameter_tl} exists, so use
-%   that to count the arguments and use that as \meta{parameter text}
-%   for the newly (re)defined macro.
+%   此宏将 \cs[no-index]{@@\meta{type}\textvisiblespace\meta{hook}} 的参数标准化，以便在钩子声明后采用正确数量的参数。在此时，我们知道 \cs[no-index]{c_@@_\meta{hook}_parameter_tl} 存在，因此使用它来计算参数数量，并将其用作新（重新）定义的宏的 \meta{parameter text}。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_normalise_cs_args:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -4053,27 +3872,16 @@
 %
 % \begin{macro}{\@@_normalise_code_pool:n}
 % \begin{macro}{\@@_set_normalise_fn:nn}
-%   This one's a bit of a hack.  It takes a hook, and iterates over its
-%   code pool (\cs[no-index]{g_@@_\meta{hook}_code_prop}), redefining
-%   each code label to use only valid arguments.  This is used when, for
-%   example, a code is added referencing arguments \verb|#1| and
-%   \verb|#2|, but the hook has only \verb|#1|.  In this example, every
-%   reference to \verb|#2| is changed to \verb|##2|.  This is done
-%   because otherwise \TeX{} will throw a low-level error every time
-%   some change happens to the hook (code is added, a rule is set, etc),
-%   which can get quite repetitive for no good reason.
+%   这个有点巧妙。它接收一个钩子，在其代码池 (\cs[no-index]{g_@@_\meta{hook}_code_prop}) 上进行迭代，重新定义每个代码标签，以仅使用有效的参数。这在以下情况下使用：例如，添加的代码引用了参数 \verb|#1| 和 \verb|#2|，但是钩子只有 \verb|#1|。在这种情况下，每个对 \verb|#2| 的引用都被改为 \verb|##2|。这样做是因为否则，每当钩子发生某些更改（添加代码、设置规则等）时，\TeX{} 将抛出低级错误，这可能没有充分的理由会变得非常重复乏味。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_normalise_code_pool:n}
 %<latexrelease>                 {Hooks~with~args}
 \cs_new_protected:Npn \@@_normalise_code_pool:n #1
   {
 %    \end{macrocode}
-%   First, call \cs{@@_set_normalise_fn:nn} with the hook name to set
-%   everything up, then we'll loop over the
-%   hook's code pool applying the normalisation above.  After that's
-%   done, copy the temporary property list back to the hook's.
+%   首先，使用钩子名称调用 \cs{@@_set_normalise_fn:nn} 来设置所有内容，然后我们将遍历钩子的代码池并应用上面的标准化。完成后，将临时属性列表复制回钩子的属性列表。
 %    \begin{macrocode}
     \@@_set_normalise_fn:nn {#1} { Offending~label:~'##1' }
     \prop_clear:N \l_@@_work_prop
@@ -4082,15 +3890,13 @@
   }
 %    \end{macrocode}
 %
-%   The sole purpose of this function is to define
-%   \cs{@@_normalise_fn:nn}, which will then do the correcting of the
-%   code being added to the hook.
+%   此函数的唯一目的是定义 \cs{@@_normalise_fn:nn}，然后对添加到钩子的代码进行更正。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_set_normalise_fn:nn #1 #2
   {
 %    \end{macrocode}
-%   To start, we define two auxiliary token lists.
-%   \cs[no-index]{l_@@_tmpb_tl} contains:
+%   首先，我们定义两个辅助的记号列表。
+%   \cs[no-index]{l_@@_tmpb_tl} 包含：
 %\begin{verbatim}
 %   {\c__hook_hashes_tl 1}
 %   {\c__hook_hashes_tl 2}
@@ -4109,45 +3915,32 @@
     \tl_set:Nn \exp_not:N \l_@@_tmpb_tl { \l_@@_tmpb_tl }
         }
 %    \end{macrocode}
-%   And \cs[no-index]{l_@@_tmpa_tl} contains:
+%   \cs[no-index]{l_@@_tmpa_tl} 包含：
 %\begin{verbatim}
 %   {\c__hook_hash_tl 1}
 %   {\c__hook_hash_tl 2}
 %   ...
 %   {\c__hook_hash_tl <n>}
 %\end{verbatim}
-%   with \meta{n} being the number of arguments declared for the hook.
+%   其中 \meta{n} 是钩子声明的参数数量。
 %    \begin{macrocode}
     \exp_last_unbraced:NNf
     \cs_set:Npn \@@_tmp:w { \@@_parameter:n {#1} } { }
     \tl_set:Ne \l_@@_tmpa_tl { \@@_braced_cs_parameter:n { @@_tmp:w } }
 %    \end{macrocode}
-%   Now this function does the fun part.  It is meant to be used with
-%   \cs{prop_map_function:NN}, taking a label name in \verb|##1| and the
-%   code stored in that label in \verb|##2|.
+%   现在这个函数做的是有趣的部分。它被设计用于 \cs{prop_map_function:NN}，接收 \verb|##1| 中的标签名称和 \verb|##2| 中存储的代码。
 %    \begin{macrocode}
     \cs_gset_protected:Npx \@@_normalise_fn:nn ##1 ##2
       {
 %    \end{macrocode}
-%   Here we'll define two auxiliary macros:  the first one throws an
-%   error when it detects an invalid argument reference.  It piggybacks
-%   on \TeX's low-level \enquote{Illegal parameter number} error, but it
-%   defines a weirdly-named control sequence so that the error comes out
-%   nicely formatted.  For example, if the label \enquote{badpkg} adds
-%   some code that references argument \verb|#3| in the hook
-%   \enquote{foo}, which takes only two arguments, the error will be:
+%   这里我们将定义两个辅助宏：第一个在检测到无效参数引用时引发错误。它利用 \TeX{} 的低级错误“Illegal parameter number”，但是定义了一个奇怪命名的控制序列，以便错误可以出现漂亮的格式。例如，如果标签“badpkg”添加了一些代码，在钩子“foo”中引用了参数 \verb|#3|，而钩子只有两个参数，那么错误将是：
 %\begin{verbatim}
 %   ! Illegal parameter number in definition of hook 'foo'.
 %   (hooks)             Offending label: 'badpkg'.
 %   <to be read again> 
 %                      3
 %\end{verbatim}
-%   At the point of this definition, the error is raised if the code
-%   happens to reference an invalid argument.  If it was possible to
-%   detect that this definition raised no error, the next step would be
-%   unnecessary.  We'll do all this in a group so this weird definition
-%   doesn't leak out, and set \cs{tex_escapechar:D} to $-1$ so this hack
-%   shows up extra nice in the case of an error.
+%   在此定义的点上，如果代码恰好引用了无效的参数，错误就会被引发。如果能够检测到此定义没有引发错误，下一步将是不必要的。我们将所有这些放在一个组中，以便这个奇怪的定义不会泄漏，并将 \cs{tex_escapechar:D} 设置为 $-1$，这样在出现错误时，这个 hack 将显示得更加漂亮。
 %    \begin{macrocode}
         \group_begin:
           \int_set:Nn \tex_escapechar:D { -1 }
@@ -4161,15 +3954,7 @@
             {##2}
         \group_end:
 %    \end{macrocode}
-%   This next macro, with a much less fabulous name, takes always nine
-%   arguments, and it just transfers the code \verb|##2| under the label
-%   \verb|##1| to the temporary property list.  The first \meta{n}
-%   arguments are taken from \cs[no-index]{l_@@_tmpa_tl}, and the other
-%   $9-\meta{n}$ taken from \cs[no-index]{l_@@_tmpb_tl} (which contains
-%   twice as many \verb|#| tokens as the former).  Then,
-%   \cs{@@_double_hashes:n} is used to double non-argument hashes, and
-%   expand the \cs{c_@@_hash_tl} and \cs{c_@@_hashes_tl} to the actual
-%   parameter tokens.
+%   下一个宏，名称要低调得多，始终接受九个参数，它只是将代码 \verb|##2| 在标签 \verb|##1| 下传输到临时属性列表中。前 \meta{n} 个参数来自 \cs[no-index]{l_@@_tmpa_tl}，而另外的 $9-\meta{n}$ 个参数来自 \cs[no-index]{l_@@_tmpb_tl}（后者包含的 \verb|#| 个数是前者的两倍）。然后，\cs{@@_double_hashes:n} 用于将非参数哈希值加倍，并将 \cs{c_@@_hash_tl} 和 \cs{c_@@_hashes_tl} 展开为实际的参数标记。
 %    \begin{macrocode}
         \cs_set:Npn \exp_not:N \@@_tmp:w
             \exp_not:V \c_@@_nine_parameters_tl
@@ -4178,15 +3963,7 @@
               {##1} { \exp_not:N \@@_double_hashes:n {##2} }
           }
 %    \end{macrocode}
-%   This next macro, with a much less fabulous name, takes always nine
-%   arguments, and it just transfers the code \verb|##2| under the label
-%   \verb|##1| to the temporary property list.  The first \meta{n}
-%   arguments are taken from \cs[no-index]{l_@@_tmpa_tl}, and the other
-%   $9-\meta{n}$ taken from \cs[no-index]{l_@@_tmpb_tl} (which contains
-%   twice as many \verb|#| tokens as the former).  Then,
-%   \cs{@@_double_hashes:n} is used to double non-argument hashes, and
-%   expand the \cs{c_@@_hash_tl} and \cs{c_@@_hashes_tl} to the actual
-%   parameter tokens.
+%   下一个宏，名称要低调得多，始终接受九个参数，它只是将代码 \verb|##2| 在标签 \verb|##1| 下传输到临时属性列表中。前 \meta{n} 个参数来自 \cs[no-index]{l_@@_tmpa_tl}，而另外的 $9-\meta{n}$ 个参数来自 \cs[no-index]{l_@@_tmpb_tl}（后者包含的 \verb|#| 个数是前者的两倍）。然后，\cs{@@_double_hashes:n} 用于将非参数哈希值加倍，并将 \cs{c_@@_hash_tl} 和 \cs{c_@@_hashes_tl} 展开为实际的参数标记。
 %    \begin{macrocode}
         \exp_not:N \@@_tmp:w
           \exp_not:V \l_@@_tmpa_tl
@@ -4207,10 +3984,9 @@
 % \end{macro}
 %
 % \begin{macro}[pTF]{\@@_cs_if_empty:c}
-%   Check if the expansion of a control sequence is empty by looking at
-%   its replacement text.
+%   通过查看其替换文本来检查控制序列的展开是否为空。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_cs_if_empty:c}
 %<latexrelease>                 {Hooks~with~args}
@@ -4243,14 +4019,11 @@
 % \begin{macro}{\@@_braced_hidden_loop:w}
 % \begin{macro}{\@@_cs_parameter_count:N}
 % \begin{macro}{\@@_cs_parameter_count:w,\@@_cs_end:w}
-%   Looks at the \meta{parameter text} of a control sequence, and
-%   returns a run of \enquote{hidden} braced parameters for that macro.
-%   This works as long as the macros take a simple run of zero to nine
-%   arguments.  The parameters are \enquote{hidden} because the
-%   parameter tokens are returned inside \cs{c_@@_hash_tl} instead of
-%   explicitly, so that \cs{@@_double_hashes:n} won't touch these.
+%   查看控制序列的 \meta{parameter text}，并返回该宏的一系列“隐藏”的大括号参数。
+%   只要宏接受从零到九个简单参数的连续运行，这就能正常工作。
+%   这些参数被“隐藏”，因为参数标记是在 \cs{c_@@_hash_tl} 中返回而不是显式地返回，这样 \cs{@@_double_hashes:n} 就不会触及它们。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_braced_cs_parameter:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -4282,9 +4055,7 @@
 %<latexrelease>\EndIncludeInRelease
 %    \end{macrocode}
 %
-%   This function can't be undefined when rolling back because it's used
-%   at the end of this module to adequate the hook data structures to
-%   previous versions.
+%   这个函数在回滚时不能被取消定义，因为它在该模块的末尾用于将钩子数据结构调整到先前版本。
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2020/10/01}{\@@_braced_cs_parameter:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -4297,13 +4068,10 @@
 %
 % \begin{macro}{\@@_braced_parameter:n}
 % \begin{macro}{\@@_braced_real_loop:w}
-%   This one is used in simpler cases, where no special handling of
-%   hashes is required.  This is used only inside
-%   \cs{@@_initialize_hook_code:n}, so it assumes
-%   \cs[no-index]{c_@@_\meta{hook}_parameter_tl} is defined, but should
-%   work otherwise.
+%   在更简单的情况下使用此函数，不需要对井号进行特殊处理。
+%   这仅在 \cs{@@_initialize_hook_code:n} 内部使用，因此它假定 \cs[no-index]{c_@@_\meta{hook}_parameter_tl} 已定义，但在其他情况下也应该有效。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_braced_parameter:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -4340,10 +4108,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_parameter:n}
-%   This is just a shortcut to \verb|e|- or \verb|f|-expand to the
-%   \meta{parameter text} of the hook.
+%   这只是一个快捷方式，用于对钩子的 \meta{parameter text} 进行 \verb|e|- 或 \verb|f|-展开。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_parameter:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -4374,7 +4141,7 @@
 % \end{macro}
 %
 %
-%  \subsection{Setting rules for hooks code}
+%  \subsection{为钩子代码设置规则}
 %
 % \begin{macro}{
 %     \g_@@_??_code_prop,
@@ -4383,36 +4150,31 @@
 %     \c_@@_??_parameter_tl,
 %   }
 %
-%    Initially these variables simply used an empty ``label'' name (not
-%    two question marks). This was a bit unfortunate, because then
-%    \texttt{l3doc} complains about \verb=__= in the middle of a
-%    command name when trying to typeset the documentation. However
-%    using a ``normal'' name such as \texttt{default} has the
-%    disadvantage of that being not really distinguishable from a real
-%    hook name. I now have settled for \texttt{??} which needs some
-%    gymnastics to get it into the csname, but since this is used a
-%    lot, the code should be fast, so this is not done with \texttt{c}
-%    expansion in the code later on.
-%
-%    \cs{@@\textvisiblespace??} isn't used, but it has to be defined to
-%    trick the code into thinking that \texttt{??} is actually a hook.
+% 最初，这些变量只是使用空的“label”名称（不是两个问号）。这有点不太幸
+% 运，因为此时 \texttt{l3doc} 在尝试排版文档时会抱怨命令名中间的
+% \verb=__=。然而，使用“正常”的名称如\texttt{default}的缺点是它与真
+% 实的钩子名称并无真正的区别。我现在选择了\texttt{??}，虽然需要一些巧
+% 妙的技巧才能将其放入csname，但由于这被大量使用，代码应该是快速的，
+% 所以在代码的后续部分并不使用\texttt{c}扩展。
+
+% \cs{@@\textvisiblespace??} 没有被使用，但必须定义它来欺骗代码，让其
+% 认为\texttt{??}实际上是一个钩子。
 %    \begin{macrocode}
 \prop_new:c { g_@@_??_code_prop }
 \prop_new:c { @@~?? }
 %    \end{macrocode}
 %
-%    Default rules are always given in normal ordering (never in
-%    reversed ordering). If such a rule is applied to a reversed
-%    hook it behaves as if the rule is reversed (e.g.,
-%    \texttt{after} becomes \texttt{before})
-%    because those rules are applied first and then the order is reversed.
+% 默认规则总是以正常顺序给出（从不以相反顺序）。如果这样的规则应用
+% 到了一个反转的钩子上，它会表现得好像规则被反转了（例如，
+% \texttt{after} 变成了 \texttt{before}），因为这些规则首先被应用，
+% 然后顺序被反转。
 %    \begin{macrocode}
 \tl_new:c { g_@@_??_reversed_tl }
 %    \end{macrocode}
 %
-%    The parameter text for the \enquote{default} hook is empty.
+% “默认”钩子的参数文本是空的。
 % \changes{v1.1a}{2023/04/06}
-%         {Token list added (hook-args).}
+%         {添加了令牌列表（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\c_@@_??_parameter_tl}
 %<latexrelease>                 {Hooks~with~args}
@@ -4427,12 +4189,10 @@
 %
 %  \begin{macro}{\hook_gset_rule:nnnn}
 %  \begin{macro}{\@@_gset_rule:nnnn}
-%    With
+%    通过
 %    \cs{hook_gset_rule:nnnn}\Arg{hook}\Arg{label1}\Arg{relation}\Arg{label2}
-%    a relation is defined between the two code labels for the given
-%    \meta{hook}.  The special hook \texttt{??} stands for \emph{any}
-%    hook, which sets a default rule (to be used if no other relation
-%    between the two hooks exist).
+%    为给定的\meta{hook}定义了两个代码标签之间的关系。特殊的钩子\texttt{??}代表
+%    “任何”钩子，它设置了一个默认规则（如果两个钩子之间没有其他关系，则使用该规则）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \hook_gset_rule:nnnn #1#2#3#4
   {
@@ -4463,16 +4223,15 @@
         \@@_use_none_delimit_by_s_mark:w
       }
 %    \end{macrocode}
-%    First we ensure the basic data structure of the hook exists:
+% 首先确保钩子的基本数据结构存在：
 %    \begin{macrocode}
     \@@_init_structure:n {#1}
 %    \end{macrocode}
-%    Then we clear any previous relationship between both labels.
+% 然后清除两个标签之间的任何先前关系：
 %    \begin{macrocode}
     \@@_rule_gclear:nnn {#1} {#2} {#4}
 %    \end{macrocode}
-%    Then we call the function to handle the given rule. Throw an error if the
-%    rule is invalid.
+% 接着调用处理给定规则的函数。如果规则无效，抛出错误。
 %    \begin{macrocode}
     \cs_if_exist_use:cTF { @@_rule_#3_gset:nnn }
       {
@@ -4519,21 +4278,17 @@
 %
 % \begin{macro}{\@@_rule_before_gset:nnn, \@@_rule_after_gset:nnn,
 %               \@@_rule_<_gset:nnn, \@@_rule_>_gset:nnn}
-%    Then we add the new rule.  We need to normalize the rules here to
-%    allow for faster processing later.  Given a pair of labels
-%    $l_A$ and $l_B$, the rule $l_A>l_B$ is the same as $l_B<l_A$
-%    only presented differently.  But by normalizing the
-%    forms of the rule to a single representation, say, $l_B<l_A$, reduces
-%    the time spent looking for the rules later considerably.
+%    然后我们添加新规则。我们需要在这里对规则进行规范化，以便后续更快地进行处理。
+%    对于一对标签 $l_A$ 和 $l_B$，规则 $l_A>l_B$ 与 $l_B<l_A$ 是相同的，
+%    只是呈现方式不同。但通过将规则的形式规范化为单一表示，比如 $l_B<l_A$，
+%    可大大减少后续寻找规则所需的时间。
 %
-%    Here we do that normalization by using \cs[no-index]{(pdf)strcmp} to
-%    lexically sort labels $l_A$ and $l_B$ to a fixed order.  This order
-%    is then enforced every time these two labels are used together.
+%    在这里，我们使用\cs[no-index]{(pdf)strcmp}来按字典顺序排列标签 $l_A$ 和 $l_B$，
+%    以固定顺序进行规范化。然后每次这两个标签一起使用时，都会强制执行这个顺序。
 %
-%    Here we use \cs{@@_label_pair:nn}~\Arg{hook}~\Arg{l_A}~\Arg{l_B}
-%    to build a string \texttt{$l_B$\string|$l_A$} with a fixed order, and
-%    use \cs{@@_label_ordered:nnTF} to apply the correct rule to the pair
-%    of labels, depending if it was sorted or not.
+%    这里我们使用 \cs{@@_label_pair:nn}~\Arg{hook}~\Arg{l_A}~\Arg{l_B} 
+%    来构建一个带有固定顺序的字符串 \texttt{$l_B$\string|$l_A$}，
+%    并使用 \cs{@@_label_ordered:nnTF} 来根据是否排序应用正确的规则到这对标签。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_rule_before_gset:nnn #1#2#3
   {
@@ -4554,8 +4309,7 @@
 %  \end{macro}
 %
 % \begin{macro}{\@@_rule_voids_gset:nnn}
-%   This rule removes (clears, actually) the code from label |#3| if
-%   label |#2| is in the hook |#1|.
+%   这个规则如果标签 |#2| 在钩子 |#1| 中，就会从标签 |#3| 中移除（实际上是清除）代码。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_rule_voids_gset:nnn #1#2#3
   {
@@ -4569,8 +4323,7 @@
 %     \@@_rule_incompatible-error_gset:nnn,
 %     \@@_rule_incompatible-warning_gset:nnn,
 %   }
-%   These relations make an error/warning if labels |#2| and |#3| appear
-%   together in hook |#1|.
+%   如果标签 |#2| 和 |#3| 在钩子 |#1| 中同时出现，这些关系将产生错误/警告。
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_rule_incompatible-error_gset:nnn } #1#2#3
   { \@@_tl_gset:cn { g_@@_#1_rule_ \@@_label_pair:nn {#2} {#3} _tl }
@@ -4582,8 +4335,8 @@
 %  \end{macro}
 %
 % \begin{macro}{\@@_rule_unrelated_gset:nnn, \@@_rule_gclear:nnn}
-%    Undo a setting. \cs{@@_rule_unrelated_gset:nnn} doesn't need to do anything,
-%    since we use \cs{@@_rule_gclear:nnn} before setting any rule.
+%    撤销一个设置。\cs{@@_rule_unrelated_gset:nnn} 不需要执行任何操作，
+%    因为我们在设置任何规则之前使用了 \cs{@@_rule_gclear:nnn}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_rule_unrelated_gset:nnn #1#2#3 { }
 \cs_new_protected:Npn \@@_rule_gclear:nnn #1#2#3
@@ -4592,7 +4345,7 @@
 %  \end{macro}
 %
 % \begin{macro}[EXP]{\@@_label_pair:nn}
-%   Ensure that the lexically greater label comes first.
+%   确保字典顺序更大的标签排在前面。
 %    \begin{macrocode}
 \cs_new:Npn \@@_label_pair:nn #1#2
   {
@@ -4606,9 +4359,8 @@
 %  \end{macro}
 %
 % \begin{macro}[pTF]{\@@_label_ordered:nn}
-%   Check that labels |#1| and |#2| are in the correct order (as
-%   returned by \cs{@@_label_pair:nn}) and if so return true, else
-%   return false.
+%   检查标签 |#1| 和 |#2| 是否按正确顺序排列（由 \cs{@@_label_pair:nn} 返回），
+%   如果是则返回 true，否则返回 false。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_label_ordered:nn #1#2 { TF }
   {
@@ -4622,11 +4374,12 @@
 %  \end{macro}
 %
 % \begin{macro}[EXP]{\@@_if_label_case:nnnnn}
-%   To avoid doing the string comparison twice in \cs{@@_initialize_single:NNn}
-%   (once with \cs{str_if_eq:nn} and again with \cs{@@_label_ordered:nn}),
-%   we use a three-way branching macro that will compare |#1| and |#2|
-%   and expand to \cs{use_i:nnn} if they are equal, \cs{use_ii:nn} if
-%   |#1| is lexically greater, and \cs{use_iii:nn} otherwise.
+%   为了避免在 \cs{@@_initialize_single:NNn} 中两次进行字符串比较
+%   （一次是用 \cs{str_if_eq:nn}，另一次是用 \cs{@@_label_ordered:nn}），
+%   我们使用一个三分支的宏来比较 |#1| 和 |#2|，
+%   如果它们相等，则展开为 \cs{use_i:nnn}，
+%   如果 |#1| 字典顺序更大，则展开为 \cs{use_ii:nn}，
+%   否则展开为 \cs{use_iii:nn}。
 %    \begin{macrocode}
 \cs_new:Npn \@@_if_label_case:nnnnn #1#2
   {
@@ -4639,37 +4392,31 @@
 %  \end{macro}
 %
 %  \begin{macro}{\@@_update_hook_code:n}
-%    Before \verb=\begin{document}=  this does nothing, in the body it
-%    reinitializes the hook code using the altered data.
+%    在 \verb=\begin{document}=  之前，这个命令不起作用；在文档正文中，它重新初始化了修改后的数据，
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_update_hook_code:n \use_none:n
 %    \end{macrocode}
 %  \end{macro}
 %
 %  \begin{macro}{\@@_initialize_all:}
-%    Initialize all known hooks (at \verb=\begin{document}=), i.e.,
-%    update the fast execution token lists to hold the necessary code
-%    in the right order.
+%    初始化所有已知的钩子（在 \verb=\begin{document}= 处），即，更新快速执行令牌列表，
+%    以正确顺序保存必要的代码。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_initialize_all:}
 %<latexrelease>                 {Hooks~with~args}
 \cs_new_protected:Npn \@@_initialize_all:
   {
 %    \end{macrocode}
-%    First we change \cs{@@_update_hook_code:n} which so far was a
-%    no-op to now initialize one hook. This way any later updates to
-%    the hook will run that code and also update the execution token
-%    list.
+%    首先，我们将 \cs{@@_update_hook_code:n} 这个到目前为止什么都没做的命令改为现在初始化一个钩子。
+%    这样，以后对钩子的任何更新都会运行该代码，并更新执行令牌列表。
 %    \begin{macrocode}
     \cs_gset_eq:NN \@@_update_hook_code:n \@@_initialize_hook_code:n
 %    \end{macrocode}
-%    Now we loop over all hooks that have been defined and update each
-%    of them.  Here we have to determine if the hook has arguments so
-%    that auxiliaries know what to do with hashes.  We look at
-%    \cs[no-index]{c_@@_\meta{hook}_parameter_tl}, if it has any
-%    parameters, and set \verb|replacing_args| accordingly.
+%    现在我们循环遍历所有已定义的钩子并更新每一个。在这里，我们必须确定钩子是否有参数，
+%    这样辅助命令才知道如何处理井号（hash marks）。我们查看 \cs[no-index]{c_@@_\meta{hook}_parameter_tl}，
+%    如果有任何参数，就相应地设置 \verb|replacing_args|。
 %    \begin{macrocode}
     \@@_debug:n { \prop_gclear:N \g_@@_used_prop }
     \seq_map_inline:Nn \g_@@_all_seq
@@ -4681,8 +4428,7 @@
         \@@_replacing_args_reset:
       }
 %    \end{macrocode}
-%    If we are debugging we show results hook by hook for all hooks
-%    that have data.
+%    如果我们正在调试，我们逐个显示钩子的结果，对于所有具有数据的钩子。
 %    \begin{macrocode}
     \@@_debug:n
       {
@@ -4694,9 +4440,7 @@
           }
       }
 %    \end{macrocode}
-%    After all hooks are initialized we change the ``use'' to just
-%    call the hook code and not initialize it (as it was done in the
-%    preamble.
+%    在所有钩子被初始化之后，我们将“使用”更改为仅调用钩子代码，而不是初始化它（就像在导言部分做的那样）。
 %    \begin{macrocode}
     \@@_post_initialization_defs:
   }
@@ -4734,12 +4478,10 @@
 %
 %
 %  \begin{macro}{\@@_initialize_hook_code:n}
-%    Initializing or reinitializing the fast execution hook code. In
-%    the preamble this is selectively done in case a hook gets used
-%    and at \verb=\begin{document}= this is done for all hooks and
-%    afterwards only if the hook code changes.
+%    初始化或重新初始化快速执行的钩子代码。在导言部分，这是有选择地进行的，以防某个钩子被使用，
+%    而在 \verb=\begin{document}= 处，这是对所有钩子进行的，然后仅在钩子代码更改后进行。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_initialize_hook_code:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -4748,23 +4490,17 @@
     \@@_debug:n
       { \iow_term:x { ^^J Update~code~for~hook~'#1' \on@line :^^J } }
 %    \end{macrocode}
-%    This does the sorting and the updates.
-%    First thing we do is to check if a legacy hook macro exists and
-%    if so we add it to the hook under the label \texttt{legacy}. This
-%    might make the hook non-empty so we have to do this before
-%    the then following test.
+% 这部分负责排序和更新。
+% 首先我们检查旧版钩子宏是否存在，如果存在，我们将其添加到标签 \texttt{legacy} 下的钩子中。
+% 这可能会使钩子变得非空，因此我们必须在随后的测试之前执行此操作。
 %    \begin{macrocode}
     \@@_include_legacy_code_chunk:n {#1}
 %    \end{macrocode}
-%    If there aren't any code
-%    chunks for the current hook, there is no point in even starting
-%    the sorting routine so we make a quick test for that and in that
-%    case just update \cs{@@\textvisiblespace\meta{hook}} to hold the |top-level| and
-%    |next| code chunks. If there are code chunks we call
-%    \cs{@@_initialize_single:NNn} and pass to it ready made csnames
-%    as they are needed several times inside. This way we save a bit
-%    on processing time if we do that up front.
-% \changes{v1.0u}{2022/05/17}{Refuse sorting one-time hooks (gh/818).}
+% 如果当前钩子没有任何代码块，那么甚至启动排序程序都没有意义，所以我们做了一个快速测试，在这种情况下，
+% 只需更新 \cs{@@\textvisiblespace\meta{hook}} 以包含 |top-level| 和 |next| 代码块即可。
+% 如果存在代码块，我们调用 \cs{@@_initialize_single:NNn} 并将其传递给它准备好的控制序列名称，
+% 因为这些名称在内部需要多次使用。这样做可以节省一些处理时间，如果提前进行这些操作。
+% \changes{v1.0u}{2022/05/17}{拒绝对一次性钩子进行排序 (gh/818)。}
 %    \begin{macrocode}
     \@@_if_usable:nT {#1}
       {
@@ -4773,9 +4509,8 @@
             \@@_code_gset:ne {#1}
               {
 %    \end{macrocode}
-%   The hook may take arguments, so we add a run of braced parameters
-%   after the \verb|_next| and \verb|_toplevel| macros, so that the
-%   arguments passed to the hook are forwarded to them.
+% 钩子可能带有参数，因此我们在 \verb|_next| 和 \verb|_toplevel| 宏之后添加了一系列大括号参数，
+% 以便将传递给钩子的参数转发给它们。
 %    \begin{macrocode}
                 \exp_not:c { @@_toplevel~#1 } \@@_braced_parameter:n {#1}
                 \exp_not:c { @@_next~#1 } \@@_braced_parameter:n {#1}
@@ -4783,12 +4518,10 @@
           }
           {
 %    \end{macrocode}
-%    By default the algorithm sorts the code chunks and then saves the
-%    result in a token list for fast execution; this is done by adding the code chunks
-%    one after another, using \cs{tl_gput_right:NV}. When we sort code for
-%    a reversed hook, all we have to do is to add the code chunks in
-%    the opposite order into the token list. So all we have to do
-%    in preparation is to change two definitions that are used later on.
+% 默认情况下，算法对代码块进行排序，然后将结果保存在一个 token list 中以进行快速执行；
+% 这是通过逐个添加代码块来完成的，使用 \cs{tl_gput_right:NV}。
+% 当我们对反向钩子的代码进行排序时，我们所要做的就是按相反的顺序将代码块添加到 token list 中。
+% 因此，在准备阶段，我们需要做的就是更改后续使用的两个定义。
 %    \begin{macrocode}
             \@@_if_reversed:nTF {#1}
               { \cs_set_eq:NN \@@_tl_gput:Nn    \@@_tl_gput_left:Nn
@@ -4797,21 +4530,16 @@
                 \cs_set_eq:NN \@@_clist_gput:NV \clist_gput_right:NV }
 %    \end{macrocode}
 %
-%    When sorting, some relations (namely \verb|voids|) need to
-%    act destructively on the code property lists to remove code that
-%    shouldn't appear in the sorted hook token list, so we make a copy
-%    of the code property list that we can safely work on without
-%    changing the main one.
+% 在排序过程中，某些关系（即 \verb|voids|）需要在代码属性列表上进行破坏性操作，
+% 以删除不应出现在排序后的钩子 token list 中的代码，因此我们制作了代码属性列表的副本，
+% 可以在不更改主要列表的情况下安全地进行操作。
 %    \begin{macrocode}
             \prop_set_eq:Nc \l_@@_work_prop { g_@@_#1_code_prop }
             \@@_initialize_single:ccn
               { @@~#1 } { g_@@_#1_labels_clist } {#1}
 %    \end{macrocode}
-%    For debug display we want to keep track of those hooks that
-%    actually got code added to them, so we record that in plist. We
-%    use a plist to ensure that we record each hook name only once,
-%    i.e., we are only interested in storing the keys and the value is
-%    arbitrary.
+% 对于调试显示，我们希望跟踪实际添加了代码的那些钩子，因此我们在 plist 中记录下来。
+% 我们使用 plist 来确保仅记录每个钩子名称一次，即，我们只对键进行记录，值是任意的。
 %    \begin{macrocode}
             \@@_debug:n
               { \exp_args:NNx \prop_gput:Nnn \g_@@_used_prop {#1} { } }
@@ -4859,9 +4587,8 @@
 %
 %
 % \begin{macro}[EXP]{\@@_tl_csname:n,\@@_seq_csname:n}
-%   It is faster to pass a single token and expand it when necessary
-%   than to pass a bunch of character tokens around.
-%   \fmiinline{note to myself: verify}
+% 更快的方法是传递一个单一的记号，并在需要时展开它，而不是传递一堆字符记号。
+% \fmiinline{自己的备注：验证}
 %    \begin{macrocode}
 \cs_new:Npn \@@_tl_csname:n #1 { l_@@_label_#1_tl }
 \cs_new:Npn \@@_seq_csname:n #1 { l_@@_label_#1_seq }
@@ -4872,34 +4599,29 @@
 %  \begin{macro}{\l_@@_labels_seq,\l_@@_labels_int,\l_@@_front_tl,
 %      \l_@@_rear_tl,\l_@@_label_0_tl}
 %
-%    For the sorting I am basically implementing Knuth's algorithm for
-%    topological sorting as given in TAOCP volume 1 pages 263--266.
-%    For this algorithm we need a number of local variables:
-%    \begin{itemize}
-%    \item
-%       List of labels used in the current hook to label code chunks:
+% 对于排序，我基本上实现了Knuth在《计算机程序设计艺术》第1卷263--266页中给出的拓扑排序算法。
+% 对于这个算法，我们需要一些局部变量：
+% \begin{itemize}
+% \item
+%    用于标记代码块的当前钩子中使用的标签列表：
 %    \begin{macrocode}
 \seq_new:N \l_@@_labels_seq
 %    \end{macrocode}
-%    \item
-%      Number of labels used in the current hook. In Knuth's algorithm
-%      this is called $N$:
+% \item
+%   当前钩子中使用的标签数量。在Knuth的算法中，这被称为 $N$：
 %    \begin{macrocode}
 \int_new:N \l_@@_labels_int
 %    \end{macrocode}
-%    \item
-%      The sorted code list to be build is managed using two pointers
-%      one to the front of the queue and one to the rear. We model this
-%      using token list pointers. Knuth calls them $F$ and $R$:
+% \item
+%   要构建的排序代码列表由两个指针管理，一个指向队列的前端，一个指向后端。我们使用记号列表指针来模拟这一点。
+%   Knuth将它们称为 $F$ 和 $R$：
 %    \begin{macrocode}
 \tl_new:N \l_@@_front_tl
 \tl_new:N \l_@@_rear_tl
 %    \end{macrocode}
-%    \item
-%      The data for the start of the queue is kept in this token list,
-%      it corresponds to what Don calls \texttt{QLINK[0]} but since we
-%      aren't manipulating individual words in memory it is slightly
-%      differently done:
+% \item
+%   队列起始处的数据保存在此记号列表中，它对应于Don称之为 \texttt{QLINK[0]} 的内容，
+%   但由于我们不是在内存中操作单个字，因此稍有不同的处理方式：
 %    \begin{macrocode}
 \tl_new:c { \@@_tl_csname:n { 0 } }
 %    \end{macrocode}
@@ -4910,52 +4632,35 @@
 %
 %  \begin{macro}{\@@_initialize_single:NNn,\@@_initialize_single:ccn}
 %
-%    \cs{@@_initialize_single:NNn} implements the sorting of the code
-%    chunks for a hook and saves the result in the token list for fast
-%    execution (\verb=#4=). The arguments are \meta{hook-code-plist},
-%    \meta{hook-code-tl}, \meta{hook-top-level-code-tl},
-%    \meta{hook-next-code-tl},
-%    \meta{hook-ordered-labels-clist} and \meta{hook-name} (the latter
-%    is only used for debugging---the \meta{hook-rule-plist} is accessed
-%    using the \meta{hook-name}).
+% \cs{@@_initialize_single:NNn} 实现了钩子代码块的排序，并将结果保存在令牌列表中以便快速执行（\verb=#4=）。参数包括 \meta{hook-code-plist}、\meta{hook-code-tl}、\meta{hook-top-level-code-tl}、\meta{hook-next-code-tl}、\meta{hook-ordered-labels-clist} 和 \meta{hook-name}（后者仅用于调试---\meta{hook-rule-plist}通过 \meta{hook-name} 访问）。
 %
-%    The additional complexity compared to Don's algorithm is that we
-%    do not use simple positive integers but have arbitrary
-%    alphanumeric labels. As usual Don's data structures are chosen in
-%    a way that one can omit a lot of tests and I have mimicked that as
-%    far as possible. The result is a restriction I do not test for at
-%    the moment: a label can't be equal to the number 0!
-%  \fmiinline{Needs checking for, just in case ... maybe}
+% 与Don的算法相比，额外的复杂性在于我们不使用简单的正整数，而是任意的字母数字标签。与往常一样，Don的数据结构设计得可以省略很多测试，我尽可能地模仿了这一点。结果是一个我目前不测试的限制：标签不能等于数字 0！
+% \fmiinline{需要检查一下，以防万一...也许}
 %
 %    ^^A #1 <- \@@~#1
 %    ^^A #2 <- \g_@@_#1_labels_clist
 %    ^^A #3 <- #1
 %
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_initialize_single:NNn}
 %<latexrelease>                 {Hooks~with~args}
 \cs_new_protected:Npn \@@_initialize_single:NNn #1#2#3
   {
 %    \end{macrocode}
-%    Step T1: Initialize the data structure \ldots
+%    步骤 T1：初始化数据结构 \ldots
 %    \begin{macrocode}
     \seq_clear:N \l_@@_labels_seq
     \int_zero:N  \l_@@_labels_int
 %    \end{macrocode}
 %
-%    Store the name of the hook:
+%    存储钩子的名称：
 %    \begin{macrocode}
     \tl_set:Nn \l_@@_cur_hook_tl {#3}
 %    \end{macrocode}
 %
-%    We loop over the property list holding the code and record all
-%    the labels listed there. Only the rules for those labels are of interest
-%    to us. While we are at it we count them (which gives us the $N$
-%    in Knuth's algorithm).  The prefix |label_| is added to the variables
-%    to ensure that labels named |front|, |rear|, |labels|, or |return|
-%    don't interact with our code.
+%    我们循环遍历持有代码的属性列表，并记录所有在其中列出的标签。我们只关心那些标签的规则。在此过程中，我们计数（这给了我们 Knuth 算法中的 $N$）。为了确保名为 |front|、|rear|、|labels| 或 |return| 的标签不会与我们的代码发生冲突，我们在变量前加上前缀 |label_|。
 %    \begin{macrocode}
     \prop_map_inline:Nn \l_@@_work_prop
        {
@@ -4965,19 +4670,9 @@
          \seq_clear_new:c { \@@_seq_csname:n {##1} }
        }
 %    \end{macrocode}
-%    Steps T2 and T3: Here we sort the relevant rules into the data structure\ldots
+%    步骤 T2 和 T3：在这里，我们将相关的规则排序到数据结构中 \ldots
 %
-%    This loop constitutes a square matrix of the labels in
-%    \cs{l_@@_work_prop} in the
-%    vertical and the horizontal directions.  However, since the rule
-%    $l_A\meta{rel}l_B$ is the same as $l_B\meta{rel}^{-1}l_A$ we can cut
-%    the loop short at the diagonal of the matrix (\emph{i.e.}, when
-%    both labels are equal), saving a good amount of time.  The way the
-%    rules were set up (see the implementation of \cs{@@_rule_before_gset:nnn}
-%    above) ensures that we have no rule in the ignored side of the
-%    matrix, and all rules are seen.  The rules are applied in
-%    \cs{@@_apply_label_pair:nnn}, which takes the properly-ordered pair
-%    of labels as argument.
+%    这个循环构成了 \cs{l_@@_work_prop} 中标签的垂直和水平方向上的方阵。然而，由于规则 $l_A\meta{rel}l_B$ 与 $l_B\meta{rel}^{-1}l_A$ 是相同的，我们可以在矩阵的对角线处提前结束循环（即，当两个标签相等时），节省了大量时间。规则的设置方式（参见上面的 \cs{@@_rule_before_gset:nnn} 的实现）确保我们在矩阵的被忽略侧没有规则，并且所有规则都被考虑到。规则在 \cs{@@_apply_label_pair:nnn} 中被应用，该命令以正确排序的标签对作为参数。
 %    \begin{macrocode}
     \prop_map_inline:Nn \l_@@_work_prop
       {
@@ -4991,14 +4686,13 @@
           }
       }
 %    \end{macrocode}
-%    Now take a breath, and look at the data structures that have
-%    been set up:
+%    现在休息一下，看看已经设置好的数据结构：
 %    \begin{macrocode}
     \@@_debug:n { \@@_debug_label_data:N \l_@@_work_prop }
 %    \end{macrocode}
 %
 %
-%    Step T4:
+%    步骤 T4：
 %    \begin{macrocode}
     \tl_set:Nn \l_@@_rear_tl { 0 }
     \tl_set:cn { \@@_tl_csname:n { 0 } } { 0 }
@@ -5018,12 +4712,12 @@
     \clist_gclear:N #2
 %    \end{macrocode}
 %
-%    The whole loop gets combined in steps T5--T7:
+%    整个循环在步骤 T5--T7 中组合起来：
 %    \begin{macrocode}
     \bool_while_do:nn { ! \str_if_eq_p:Vn \l_@@_front_tl { 0 } }
       {
 %    \end{macrocode}
-%    This part is step T5:
+%    这部分是步骤 T5：
 %    \begin{macrocode}
         \int_decr:N \l_@@_labels_int
         \prop_get:NVN \l_@@_work_prop \l_@@_front_tl \l_@@_return_tl
@@ -5035,9 +4729,7 @@
         \@@_debug:n{ \iow_term:x{Handled~ code~ for~ \l_@@_front_tl} }
 %    \end{macrocode}
 %
-%    This is step T6, except that we don't use a pointer $P$ to move
-%    through the successors, but instead use \verb=##1= of the mapping
-%    function.
+%    这是步骤 T6，不过我们不使用指针 $P$ 来遍历后继项，而是使用映射函数的 \verb=##1=。
 %    \begin{macrocode}
         \seq_map_inline:cn { \@@_seq_csname:n { \l_@@_front_tl } }
           {
@@ -5053,15 +4745,13 @@
                 }
           }
 %    \end{macrocode}
-%    and here is step T7:
+%    这是步骤 T7：
 %    \begin{macrocode}
         \tl_set_eq:Nc \l_@@_front_tl
                       { \@@_tl_csname:n { \l_@@_front_tl } }
 %    \end{macrocode}
 %
-%    This is step T8: If we haven't moved the code for all labels
-%    (i.e., if \cs{l_@@_labels_int} is still greater than zero) we
-%    have a loop and our partial order can't be flattened out.
+%    这是步骤 T8：如果我们还没有移动所有标签的代码（即，如果 \cs{l_@@_labels_int} 仍大于零），我们就有一个循环，我们的偏序关系无法被展开。
 %    \begin{macrocode}
       }
     \int_compare:nNnF \l_@@_labels_int = 0
@@ -5070,22 +4760,13 @@
         \iow_term:x{Error:~ label~ rules~ are~ incompatible:}
 %    \end{macrocode}
 %
-%    This is not really the information one needs in the error case
-%    but it will do for now \ldots \fmiinline{improve output on a rainy day}
+%    在错误情况下，这不是真正需要的信息，但现在先这样吧 \ldots \fmiinline{在某个雨天改善输出}
 %    \begin{macrocode}
         \@@_debug_label_data:N \l_@@_work_prop
         \iow_term:x{====================}
       }
 %    \end{macrocode}
-%    After we have added all hook code to \verb=#1=, we finish it off
-%    by adding extra code for the |top-level| (\verb=#2=) and for one
-%    time execution (\verb=#3=).  These should normally be empty.  The
-%    |top-level| code is added with \cs{@@_tl_gput:Nn} as that might
-%    change for a reversed hook (then |top-level| is the very first code
-%    chunk added).  The |next| code is always added last (to the right).
-%   The hook may take arguments, so we add a run of braced parameters
-%   after the \verb|_next| and \verb|_toplevel| macros, so that the
-%   arguments passed to the hook are forwarded to them.
+%    在我们将所有钩子代码添加到 \verb=#1= 后，我们通过为 |top-level| (\verb=#2=) 和单次执行 (\verb=#3=) 添加额外的代码来完成它。这些通常应该是空的。|top-level| 代码是用 \cs{@@_tl_gput:Nn} 添加的，因为对于反转钩子，它可能会发生变化（那么 |top-level| 就是添加的第一个代码块）。|next| 代码始终添加在最后（在右侧）。钩子可能带有参数，所以我们在 \verb|_next| 和 \verb|_toplevel| 宏之后添加了一串大括号参数，以便将传递给钩子的参数转发给它们。
 %    \begin{macrocode}
     \exp_args:NNe \@@_tl_gput:Nn #1
       { \exp_not:c { @@_toplevel~#3 } \@@_braced_parameter:n {#3} }
@@ -5185,9 +4866,7 @@
 %
 %
 %  \begin{macro}{\@@_tl_gput:Nn,\@@_clist_gput:NV}
-%    These append either on the right (normal hook) or on the left
-%    (reversed hook). This is setup up in
-%    \cs{@@_initialize_hook_code:n}, elsewhere their behavior is undefined.
+%    这些要么添加在右侧（正常钩子），要么添加在左侧（反转钩子）。这是在 \cs{@@_initialize_hook_code:n} 中设置的，在其他地方它们的行为是未定义的。
 %    \begin{macrocode}
 \cs_new:Npn \@@_tl_gput:Nn    { \ERROR }
 \cs_new:Npn \@@_clist_gput:NV { \ERROR }
@@ -5198,36 +4877,21 @@
 %
 %  \begin{macro}{\@@_apply_label_pair:nnn,\@@_label_if_exist_apply:nnnF}
 %
-%    This is the payload of steps T2 and T3 executed in the loop described
-%    above. This macro assumes |#1| and |#2| are ordered, which means that
-%    any rule pertaining the pair |#1| and |#2| is
-%    \cs{g_@@_\meta{hook}_rule_\#1\string|\#2_tl}, and not
-%    \cs{g_@@_\meta{hook}_rule_\#2\string|\#1_tl}.  This also saves a great deal
-%    of time since we only need to check the order of the labels once.
+%    这是在上面描述的循环中执行的步骤 T2 和 T3 的有效载荷。这个宏假设 |#1| 和 |#2| 是有序的，这意味着与对应对 |#1| 和 |#2| 的任何规则是 \cs{g_@@_\meta{hook}_rule_\#1\string|\#2_tl} 相关，而不是 \cs{g_@@_\meta{hook}_rule_\#2\string|\#1_tl}。这也节省了大量时间，因为我们只需要检查标签的顺序一次。
 %
-%    The arguments here are \meta{label1}, \meta{label2}, \meta{hook}, and
-%    \meta{hook-code-plist}.  We are about to apply the next rule and
-%    enter it into the data structure.  \cs{@@_apply_label_pair:nnn} will
-%    just call \cs{@@_label_if_exist_apply:nnnF} for the \meta{hook}, and
-%    if no rule is found, also try the \meta{hook} name \texttt{??}
-%    denoting a default hook rule.
+%    这里的参数是 \meta{label1}、\meta{label2}、\meta{hook} 和 \meta{hook-code-plist}。我们将要应用下一个规则并将其输入到数据结构中。 \cs{@@_apply_label_pair:nnn} 将只为 \meta{hook} 调用 \cs{@@_label_if_exist_apply:nnnF}，如果找不到规则，还将尝试使用表示默认钩子规则的 \meta{hook} 名称 \texttt{??}。
 %
-%    \cs{@@_label_if_exist_apply:nnnF} will check if the rule exists for
-%    the given hook, and if so call \cs{@@_apply_rule:nnn}.
+%    \cs{@@_label_if_exist_apply:nnnF} 将检查给定钩子的规则是否存在，如果存在，则调用 \cs{@@_apply_rule:nnn}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_apply_label_pair:nnn #1#2#3
   {
 %    \end{macrocode}
-%    Extra complication: as we use default rules and local hook specific
-%    rules we first have to check if there is a local rule and if that
-%    exist use it. Otherwise check if there is a default rule and use
-%    that.
+%    额外的复杂性：由于我们使用默认规则和本地钩子特定规则，我们首先必须检查是否存在本地规则，如果存在，则使用它。否则检查是否存在默认规则，然后使用它。
 %    \begin{macrocode}
     \@@_label_if_exist_apply:nnnF {#1} {#2} {#3}
       {
 %    \end{macrocode}
-%    If there is no hook-specific rule we check for a default one and
-%    use that if it exists.
+%    如果没有钩子特定的规则，我们检查是否存在默认规则，并在存在时使用它。
 %    \begin{macrocode}
         \@@_label_if_exist_apply:nnnF {#1} {#2} { ?? } { }
       }
@@ -5236,10 +4900,7 @@
   {
     \if_cs_exist:w g_@@_ #3 _rule_ #1 | #2 _tl \cs_end:
 %    \end{macrocode}
-%    What to do precisely depends on the type of rule we have
-%    encountered. If it is a \texttt{before} rule it will be handled by the
-%    algorithm but other types need to be managed differently. All
-%    this is done in \cs{@@_apply_rule:nnnN}.
+%    具体要做什么取决于我们遇到的规则类型。如果是一个 \texttt{before} 规则，它将由算法处理，但其他类型需要以不同的方式进行管理。所有这些都在 \cs{@@_apply_rule:nnnN} 中完成。
 %    \begin{macrocode}
       \@@_apply_rule:nnn {#1} {#2} {#3}
       \exp_after:wN \use_none:n
@@ -5254,10 +4915,7 @@
 %
 %
 %  \begin{macro}{\@@_apply_rule:nnn}
-%    This is the code executed in steps T2 and T3 while looping through
-%    the matrix  This is part of step T3. We are about to apply the next
-%    rule and enter it into the data structure. The arguments are
-%    \meta{label1}, \meta{label2}, \meta{hook-name}, and \meta{hook-code-plist}.
+%    这是在循环遍历矩阵时执行的步骤 T2 和 T3 的代码。这是步骤 T3 的一部分。我们将要应用下一个规则并将其输入到数据结构中。参数是 \meta{label1}、\meta{label2}、\meta{hook-name} 和 \meta{hook-code-plist}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_apply_rule:nnn #1#2#3
   {
@@ -5270,9 +4928,7 @@
 % \end{macro}
 %
 %  \begin{macro}{\@@_apply_rule_<:nnn,\@@_apply_rule_>:nnn}
-%    The most common cases are \texttt{\string<} and \texttt{\string>} so we handle
-%    that first.  They are relations $\prec$ and $\succ$ in TAOCP, and
-%    they dictate sorting.
+%    最常见的情况是 \texttt{\string<} 和 \texttt{\string>}，所以我们首先处理它们。它们在 TAOCP 中是关系 $\prec$ 和 $\succ$，并且它们决定了排序。
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_apply_rule_<:nnn } #1#2#3
   {
@@ -5292,9 +4948,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_apply_rule_xE:nnn,\@@_apply_rule_xW:nnn}
-%   These relations make two labels incompatible within a hook.
-%   |xE| makes raises an error if the labels are found in the same
-%   hook, and |xW| makes it a warning.
+%    这些关系使得钩子中的两个标签不兼容。
+%    |xE| 如果在同一个钩子中发现这些标签，就会引发错误；|xW| 则会发出警告。
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_apply_rule_xE:nnn } #1#2#3
   {
@@ -5314,21 +4969,9 @@
 % \end{macro}
 %
 %  \begin{macro}{\@@_apply_rule_->:nnn,\@@_apply_rule_<-:nnn}
-%    If we see \texttt{\detokenize{->}} we have to drop code for label
-%    \verb=#3= and carry on. We could do a little better and drop
-%    everything for that label since it doesn't matter where we put
-%    such empty code. However that would complicate the algorithm a
-%    lot with little gain.\footnote{This also has the advantage that
-%    the result of the sorting doesn't change, as it might otherwise do
-%    (for unrelated chunks) if we aren't careful.} So we still
-%    unnecessarily try to sort it in and depending on the rules that
-%    might result in a loop that is otherwise resolved. If that turns
-%    out to be a real issue, we can improve the code.
+%    如果我们看到 \texttt{\detokenize{->}}，我们必须丢弃标签 \verb=#3= 的代码并继续。我们可以更好地做一点，丢弃该标签的所有内容，因为我们放置这样的空代码并不重要。但是，这会使算法变得更加复杂，而收益很少。\footnote{这也有一个优点，即排序的结果不会改变，否则（如果我们不小心）可能会导致（对于不相关的代码块）结果发生变化。} 因此，我们仍然不必要地尝试对其进行排序，具体取决于规则，这可能会导致一个本来可以解决的循环。如果这变成了一个真正的问题，我们可以改进代码。
 %
-%    Here the code is removed from \cs{l_@@_cur_hook_tl} rather than
-%    \verb=#3= because the latter may be \texttt{??}, and the default
-%    hook doesn't store any code.  Removing it instead from \cs{l_@@_cur_hook_tl}
-%    makes the default rules \verb=->= and  \verb=<-= work properly.
+%    在这里，我们从 \cs{l_@@_cur_hook_tl} 中删除代码，而不是从 \verb=#3=，因为后者可能是 \texttt{??}，而默认钩子不存储任何代码。而是从 \cs{l_@@_cur_hook_tl} 中删除它，可以使默认规则 \verb=->= 和 \verb=<-= 正常工作。
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_apply_rule_->:nnn } #1#2#3
   {
@@ -5363,7 +5006,7 @@
 %     \@@_apply_-rule_xW:nnn,
 %     \@@_apply_-rule_xE:nnn,
 %   }
-%   Reversed rules.
+%   反转规则。
 %    \begin{macrocode}
 \cs_new_eq:cc { @@_apply_-rule_<:nnn } { @@_apply_rule_>:nnn }
 \cs_new_eq:cc { @@_apply_-rule_>:nnn } { @@_apply_rule_<:nnn }
@@ -5376,7 +5019,7 @@
 %
 %
 % \begin{macro}{\@@_msg_pair_found:nnn}
-%   A macro to avoid moving this many tokens around.
+%   一个宏，用来避免移动这么多标记。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_msg_pair_found:nnn #1#2#3
   {
@@ -5412,10 +5055,7 @@
 % \begin{macro}{\hook_show:n,\hook_log:n}
 % \begin{macro}{\@@_log_line:x,\@@_log_line_indent:x}
 % \begin{macro}{\@@_log:nN}
-%   This writes out information about the hook given in its argument
-%   onto the \texttt{.log} file and the terminal, if \cs{show_hook:n} is
-%   used.  Internally both share the same structure, except that at the
-%   end, \cs{hook_show:n} triggers \TeX's prompt.
+%  这个宏根据其参数提供的钩子信息将内容写入到 \texttt{.log} 文件和终端（如果使用了 \cs{show_hook:n}）。在内部，两者共享相同的结构，除了在最后，\cs{hook_show:n} 会触发 TeX 的提示。
 %    \begin{macrocode}
 \cs_new_protected:Npn \hook_log:n #1
   {
@@ -5434,7 +5074,7 @@
 %    \end{macrocode}
 %
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_log:nN}
 %<latexrelease>                 {Hooks~with~args}
@@ -5486,7 +5126,7 @@
           }
 %    \end{macrocode}
 %
-%    If there is code in the |top-level| token list, print it:
+%    如果在 |top-level| 令牌列表中有代码，则打印它：
 %    \begin{macrocode}
         \@@_log_line:x
           {
@@ -5510,9 +5150,7 @@
               { --- }
 %    \end{macrocode}
 %
-%    If the token list is not empty we want to display it but without
-%    the first tokens (the code to clear itself) so we call a helper
-%    command to  get rid of them.
+% 如果令牌列表不为空，我们想要显示它，但不包括第一个标记（用于清除自身的代码），所以我们调用一个辅助命令来去掉它们。
 %    \begin{macrocode}
               {
                 -> ~ \exp_last_unbraced:Nf \@@_log_next_code:w
@@ -5521,9 +5159,7 @@
           }
 %    \end{macrocode}
 %
-%   Loop through the rules in a hook and for every rule found, print it.
-%   If no rule is there, print |---|.  The boolean \cs{l_@@_tmpa_bool}
-%   here indicates if the hook has no rules.
+% 循环遍历钩子中的规则，并对找到的每个规则进行打印。如果没有规则，则打印 |---|。这里的布尔变量 \cs{l_@@_tmpa_bool} 表示钩子是否没有规则。
 %    \begin{macrocode}
         \@@_log_line:x { Rules: }
         \bool_set_true:N \l_@@_tmpa_bool
@@ -5541,8 +5177,7 @@
           { \@@_log_line_indent:x { --- } }
 %    \end{macrocode}
 %
-%   When the hook is declared (that is, the sorting algorithm is applied
-%   to that hook) and not empty
+% 当钩子被声明（即，排序算法应用到该钩子上）且不为空时
 %    \begin{macrocode}
         \bool_lazy_and:nnTF
             { \@@_if_usable_p:n {#1} }
@@ -5697,7 +5332,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_print_args:n}
-%    Pretty-prints the number of arguments of a hook.
+%    美化打印钩子的参数数量。
 %    \begin{macrocode}
 \cs_new:Npn \@@_print_args:nn #1 #2
   {
@@ -5719,13 +5354,7 @@
 %
 % \begin{macro}{\@@_list_rules:nn}
 % \begin{macro}{\@@_list_one_rule:nnn,\@@_list_if_rule_exists:nnnF}
-%   This macro takes a \meta{hook} and an \meta{inline function} and
-%   loops through each pair of \meta{labels} in the \meta{hook}, and if
-%   there is a relation between this pair of \meta{labels}, the
-%   \meta{inline function} is executed with |#1|${}={}$\meta{relation},
-%   |#2|${}={}$\meta{label_1}\verb=|=\meta{label_2},
-%   and |#3|${}={}$\meta{hook} (the latter may be the argument |#1| to
-%   \cs{@@_list_rules:nn}, or \texttt{??} if it is a default rule).
+%    这个宏接受一个 \meta{hook} 和一个 \meta{inline function}，并循环遍历 \meta{hook} 中每一对 \meta{labels}，如果这对 \meta{labels} 之间有关系，那么使用 |#1|${}={}$\meta{relation}，|#2|${}={}$\meta{label_1}\verb=|=\meta{label_2}，以及 |#3|${}={}$\meta{hook}（后者可能是对 \cs{@@_list_rules:nn} 的参数 |#1|，或者如果它是默认规则，则是 \texttt{??}）来执行 \meta{inline function}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_list_rules:nn #1 #2
   {
@@ -5744,9 +5373,7 @@
   }
 %    \end{macrocode}
 %
-%   These two are quite similar to \cs{@@_apply_label_pair:nnn} and
-%   \cs{@@_label_if_exist_apply:nnnF}, respectively, but rather than
-%   applying the rule, they pass it to the \meta{inline function}.
+%   这两个与 \cs{@@_apply_label_pair:nnn} 和 \cs{@@_label_if_exist_apply:nnnF} 非常相似，但不是应用规则，而是将其传递给 \meta{inline function}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_list_one_rule:nnn #1#2#3
   {
@@ -5767,7 +5394,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_debug_print_rules:n}
-%   A shorthand for debugging that prints similar to \cs{prop_show:N}.
+%   用于调试的快捷方式，类似于 \cs{prop_show:N} 打印输出。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_debug_print_rules:n #1
   {
