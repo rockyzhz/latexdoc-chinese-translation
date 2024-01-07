@@ -81,6 +81,8 @@
                  \markboth{{修订记录}}{{修订记录}}%
                  \addcontentsline{toc}{section}{修订记录}}
 \ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
+\patchcmd{\__codedoc_typeset_aux:n}{\color[gray]{0.5}}{\color{spot}}{}{}
 \cs_set_protected:Npn \__codedoc_print_end_definition:
   {
     \seq_set_map:NNn \l__codedoc_tmpa_seq
