@@ -1,4 +1,4 @@
 % this will typeset documentation + code
-\AtBeginDocument{\EnableImplementation}
-\AtEndDocument{\PrintIndex}
+\AtBeginDocument{\EnableImplementation\RecordChanges}
+\AtEndDocument{\PrintIndex\PrintChanges}
 \input{lthooks-zh-cn.dtx}

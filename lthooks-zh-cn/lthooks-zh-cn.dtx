@@ -77,6 +77,9 @@
     其它的都指向使用条目的页面。
   }
 \makeatletter
+\def\glossary@prologue{\section*{{修订记录}}%
+                 \markboth{{修订记录}}{{修订记录}}%
+                 \addcontentsline{toc}{section}{修订记录}}
 \ExplSyntaxOn
 \cs_set_protected:Npn \__codedoc_print_end_definition:
   {
@@ -5418,11 +5421,11 @@
 %
 %
 %
-%  \subsection{Specifying code for next invocation}
+%  \subsection{指定下一次调用的代码}
 %
 % \begin{macro}{\hook_gput_next_code:nn}
 % \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_gput_next_code_with_args:nn} (hook-args).}
+%         {添加 \cs{hook_gput_next_code_with_args:nn}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_gput_next_code:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -5465,20 +5468,12 @@
 %  \end{macro}
 %
 % \begin{macro}{\@@_gput_next_do:nn}
-%   Start by sanity-checking with \cs{@@_chk_args_allowed:nn}.
-%   Then check if the ``next code'' token list is empty:  if so we need
-%   to add a \cs{tl_gclear:c} to clear it, so the code lasts for one
-%   usage only.  The token list is cleared early so that nested usages
-%   don't get lost.  \cs{tl_gclear:c} is used instead of
-%   \cs{tl_gclear:N} in case the hook is used in an expansion-only
-%   context, so the token list doesn't expand before \cs{tl_gclear:N}:
-%   that would make an infinite loop.  Also in case the main code token
-%   list is empty, the hook code has to be updated to add the next
-%   execution token list.
+%   通过 \cs{@@_chk_args_allowed:nn} 进行合法性检查。
+%   然后检查是否“下一个代码”令牌列表为空：如果是，我们需要添加 \cs{tl_gclear:c} 来清除它，以便代码只持续一次使用。令牌列表被提前清除，以防嵌套使用导致遗失。在仅展开的环境中使用钩子时，使用 \cs{tl_gclear:c} 而不是 \cs{tl_gclear:N}，这样在 \cs{tl_gclear:N} 之前令牌列表不会展开：否则会导致无限循环。此外，如果主代码令牌列表为空，则需要更新钩子代码以添加下一个执行的令牌列表。
 % \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%         {添加钩子参数（hook-args）的更改。}
 % \changes{v1.1c}{2023/04/19}
-%         {Initialise hook structure when adding 'next' code (gh/1052).}
+%         {在添加“下一个”代码时初始化钩子结构（gh/1052）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_gput_next_do:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -5513,8 +5508,8 @@
 %  \end{macro}
 %
 %  \begin{macro}{\hook_gclear_next_code:n}
-%    Discard anything set up for next invocation of the hook.
-% \changes{v1.0o}{2021/07/27}{Macro made public}
+%    丢弃为下一次调用钩子设置的任何内容。
+% \changes{v1.0o}{2021/07/27}{宏公开}
 %    \begin{macrocode}
 \cs_new_protected:Npn \hook_gclear_next_code:n #1
   { \@@_normalize_hook_args:Nn \@@_clear_next:n {#1} }
@@ -5522,8 +5517,7 @@
 %  \end{macro}
 %
 % \begin{macro}{\@@_clear_next:n}
-% \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+% \changes{v1.1a}{2023/04/06}{添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_clear_next:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -5539,33 +5533,24 @@
 % \end{macro}
 %
 %
-% \subsection{Using the hook}
+% \subsection{使用钩子}
 %
 % \begin{macro}{\hook_use:n}
 % \begin{macro}[EXP]{\@@_use_initialized:n}
 % \begin{macro}{\@@_preamble_hook:n}
-%   \cs{hook_use:n} as defined here is used in the preamble, where
-%   hooks aren't initialized by default.  \cs{@@_use_initialized:n} is
-%   also defined, which is the non-\tn{protected} version for use within
-%   the document.  Their definition is identical, except for the
-%   \cs{@@_preamble_hook:n} (which wouldn't hurt in the expandable
-%   version, but it would be an unnecessary extra expansion).
+%   此处定义的 \cs{hook_use:n} 用于导言部分，在那里钩子默认不被初始化。
+%   \cs{@@_use_initialized:n} 也被定义，它是用于文档内的非保护版本。
+%   它们的定义是相同的，除了 \cs{@@_preamble_hook:n}（在可展开版本中不会有影响，但这将是一个不必要的额外展开）。
 %
-%   \cs{@@_use_initialized:n} holds the expandable definition while in
-%   the preamble. \cs{@@_preamble_hook:n} initializes the hook in the
-%   preamble, and is redefined to \cs{use_none:n} at |\begin{document}|.
+%   \cs{@@_use_initialized:n} 在导言部分保持可展开的定义。
+%   \cs{@@_preamble_hook:n} 在导言部分初始化钩子，并在 |\begin{document}| 处被重新定义为 \cs{use_none:n}。
 %
-%   Both versions do the same thing internally: they check that the hook exists as
-%   given, and if so they use it as quickly as possible.
+%   这两个版本在内部执行相同的操作：它们检查给定的钩子是否存在，如果存在则尽快使用它。
 %
-%   At |\begin{document}|, all hooks are initialized, and any change in
-%   them causes an update, so \cs{hook_use:n} can be made expandable.
-%   This one is better not protected so that it can expand into nothing
-%   if containing no code. Also important in case of generic hooks that
-%   we do not generate a \cs[no-index]{relax} as a side effect of
-%   checking for a csname. In contrast to the \TeX{} low-level
-%   \verb=\csname ...\endcsname= construct \cs{tl_if_exist:c} is
-%   careful to avoid this.
+%   在 |\begin{document}| 处，所有钩子都被初始化，并且它们的任何更改都会引起更新，因此 \cs{hook_use:n} 可以被制作成可展开的版本。
+%   最好不要保护它，这样如果它不包含任何代码，就可以展开为空。
+%   对于通用钩子而言也很重要，我们不会生成 \cs[no-index]{relax} 作为检查控制序列名的副作用。
+%   与 \TeX{} 低级的 \verb=\csname ...\endcsname= 构造不同，\cs{tl_if_exist:c} 小心避免这种情况。
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_use:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -5652,8 +5637,7 @@
 %
 % \begin{macro}{\hook_use:nnw}
 % \begin{macro}[EXP]{\@@_use_initialized:nnw}
-% \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_use:nnw} (hook-args).}
+% \changes{v1.1a}{2023/04/06}{添加 \cs{hook_use:nnw}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_use:nnw}
 %<latexrelease>                 {Hooks~with~args}
@@ -5707,17 +5691,12 @@
 %
 % \begin{macro}[EXP]{\@@_use:wn}
 % \begin{macro}{\@@_try_file_hook:n,\@@_if_usable_use:n}
-%   \cs{@@_use:wn} does a quick check to test if the current hook is a
-%   file hook: those need a special treatment.  If it is not, the hook
-%   does not exist.  If it is, then \cs{@@_try_file_hook:n} is called,
-%   and checks that the current hook is a file-specific hook using
-%   \cs{@@_if_file_hook:wTF}.  If it's not, then it's a generic |file/|
-%   hook and is used if it exist.
+%   \cs{@@_use:wn} 进行了一个快速检查，以测试当前钩子是否是文件钩子：这些需要特殊处理。
+%   如果不是，钩子不存在。如果是，那么调用 \cs{@@_try_file_hook:n}，并使用 \cs{@@_if_file_hook:wTF} 检查当前钩子是否是文件特定钩子。
+%   如果不是，那么它就是一个通用的 |file/| 钩子，如果存在则使用它。
 %
-%   If it is a file-specific hook, it passes through the same
-%   normalization as during declaration, and then it is used if defined.
-%   \cs{@@_if_usable_use:n} checks if the hook exist, and calls
-%   \cs{@@_preamble_hook:n} if so, then uses the hook.
+%   如果它是一个文件特定的钩子，它将通过与声明期间相同的规范化流程，然后如果定义了就使用它。
+%   \cs{@@_if_usable_use:n} 检查钩子是否存在，如果存在，则调用 \cs{@@_preamble_hook:n}，然后使用该钩子。
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2021/11/15}{\@@_use:wn}
 %<latexrelease>                 {Standardise~generic~hook~names}
@@ -5733,7 +5712,7 @@
 %    \end{macrocode}
 %
 % \changes{v1.0s}{2021/09/28}
-%                {Correct usage of older \cs{@@_if_file_hook:wTF} (gh/675)}
+%                {修正老版本 \cs{@@_if_file_hook:wTF} 的使用 (gh/675)}
 %    \begin{macrocode}
 %<latexrelease>\cs_new_protected:Npn \@@_try_file_hook:n #1
 %<latexrelease>  {
@@ -5761,19 +5740,13 @@
 % \end{macro}
 %
 % \begin{macro}{\hook_use_once:n,\hook_use_once:nnw}
-%   For hooks that can and should be used only once we have a special
-%   use command that further inhibits the hook from getting more code
-%   added to it.  This has the effect that any
-%   further code added to the hook is executed immediately rather
-%   than stored in the hook.
+%   对于只能且应该仅使用一次的钩子，我们有一个特殊的使用命令，可以进一步禁止向其添加更多代码。
+%   这样做的效果是，任何进一步添加到钩子的代码会立即执行，而不是存储在钩子中。
 %
-%   The code needs some gymnastics to prevent space trimming from the
-%   hook name, since \cs{hook_use:n} and \cs{hook_use_once:n} are
-%   documented to not trim spaces.
+%   代码需要一些技巧来防止钩子名称被空格修剪，因为 \cs{hook_use:n} 和 \cs{hook_use_once:n} 被记录为不修剪空格。
 %
-% \changes{v1.0r}{2021/09/06}{Clean up after \cs{UseOneTimeHook} (gh/606)}
-% \changes{v1.1a}{2023/04/06}
-%         {Add \cs{hook_use_once:nnw} (hook-args).}
+% \changes{v1.0r}{2021/09/06}{清理 \cs{UseOneTimeHook} 后的代码 (gh/606)}
+% \changes{v1.1a}{2023/04/06}{添加 \cs{hook_use_once:nnw} (hook-args)。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_use_once:nnw}
 %<latexrelease>                 {Hooks~with~args}
@@ -5805,8 +5778,7 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_use_once:nn}
-% \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+% \changes{v1.1a}{2023/04/06}{添加钩子参数（hook-args）的更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_use_once:nn}
 %<latexrelease>                 {Hooks~with~args}
@@ -5815,11 +5787,9 @@
     \@@_preamble_hook:n {#1}
     \@@_use_once_set:n {#1}
 %    \end{macrocode}
-%   When a hook has arguments, the call to \cs{@@_use_initialized:n},
-%   should be the very last thing to happen, otherwise the arguments
-%   grabbed will be wrong.  So, to clean up after the hook we need to
-%   cheat a bit and sneak the cleanup code at the end of the hook,
-%   along with the next execution code.
+%   当一个钩子带有参数时，对 \cs{@@_use_initialized:n} 的调用应该是最后发生的事情，
+%   否则抓取的参数会出错。因此，在钩子之后进行清理，我们需要有些技巧，将清理代码偷偷放在钩子的末尾，
+%   同时还要与下一次执行代码放在一起。
 %    \begin{macrocode}
     \@@_replacing_args_false:
     \@@_cs_gput_right:nnn { _next } {#1} { \@@_use_once_clear:n {#1} }
@@ -5849,17 +5819,14 @@
 %
 % \begin{macro}{\@@_use_once_set:n}
 % \begin{macro}{\@@_use_once_clear:n}
-%   \cs{@@_use_once_set:n} is used before the actual hook code is
-%   executed so that any usage of \cs{AddToHook} inside the hook causes
-%   the code to execute immediately.  Setting
-%   \cs[no-index]{g_@@_\meta{hook}_reversed_tl} to |I| prevents further
-%   code from being added to the hook.  \cs{@@_use_once_clear:n} then
-%   clears the hook so that any further call to \cs{hook_use:n} or
-%   \cs{hook_use_once:n} will expand to nothing.
-% \changes{v1.0r}{2021/09/06}{Clean up after \cs{UseOneTimeHook} (gh/606)}
-% \changes{v1.0u}{2022/05/13}{Check if prop exists to avoid l3debug error}
-% \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%   在实际钩子代码执行之前使用 \cs{@@_use_once_set:n}，
+%   这样钩子内部使用 \cs{AddToHook} 会导致代码立即执行。
+%   将 \cs[no-index]{g_@@_\meta{hook}_reversed_tl} 设置为 |I| 阻止进一步向钩子添加代码。
+%   然后 \cs{@@_use_once_clear:n} 清除钩子，以便进一步调用 \cs{hook_use:n} 或 \cs{hook_use_once:n} 时会展开为空。
+%
+% \changes{v1.0r}{2021/09/06}{清理 \cs{UseOneTimeHook} 后的代码 (gh/606)}
+% \changes{v1.0u}{2022/05/13}{检查属性是否存在以避免 l3debug 错误}
+% \changes{v1.1a}{2023/04/06}{为添加钩子参数（hook-args）进行更改。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_use_once_clear:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -5891,14 +5858,12 @@
 % \end{macro}
 %
 % \begin{macro}[pTF]{\@@_if_execute_immediately:n}
-%   To check whether the code being added should be executed immediately
-%   (that is, if the hook is a one-time hook), we check if
-%   \cs[no-index]{g_@@_\meta{hook}_reversed_tl} is |I|.  The gymnastics
-%   around \cs{if:w} is there to allow the |reversed| token list to be
-%   empty.
-% \changes{v1.0r}{2021/09/06}{Macro added (gh/606)}
-% \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
+%   要检查要添加的代码是否应立即执行（即，如果钩子是一次性钩子），
+%   我们检查 \cs[no-index]{g_@@_\meta{hook}_reversed_tl} 是否为 |I|。
+%   \cs{if:w} 的技巧在于允许 |reversed| 令牌列表为空。
+%
+% \changes{v1.0r}{2021/09/06}{添加宏（gh/606）}
+% \changes{v1.1a}{2023/04/06}{为添加钩子参数（hook-args）进行更改。}
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_execute_immediately:n #1 { T, F, TF }
   {
@@ -5916,39 +5881,27 @@
 %    \end{macrocode}
 %  \end{macro}
 %
-% \subsection{Querying a hook}
+% \subsection{查询钩子}
 %
-% Simpler data types, like token lists, have three possible states; they
-% can exist and be empty, exist and be non-empty, and they may not
-% exist, in which case emptiness doesn't apply (though
-% \cs{tl_if_empty:N} returns false in this case).
+% 更简单的数据类型，比如记号列表，有三种可能的状态：它们可以存在且为空，
+% 存在且非空，也可能不存在，在这种情况下就不适用空（尽管在这种情况下 \cs{tl_if_empty:N} 返回假）。
 %
-% Hooks are a bit more complicated: they have several other states as
-%    discussed in \ref{sec:existence}.
-% A hook may exist or not, and either way it may or may not be empty
-% (even a hook that doesn't exist may be non-empty) or may be disabled.
+% 钩子则稍微复杂一些：它们有几个其他状态，如 \ref{sec:existence} 中讨论的那样。
+% 一个钩子可能存在，也可能不存在，无论哪种情况，它可能为空，也可能非空（即使一个不存在的钩子可能也是非空的）或者可能被禁用。
 %
-% A hook is said to be empty when no code was added to it, either to
-% its permanent code pool, or to its ``next'' token list.  The hook
-% doesn't need to be declared to have code added to its code pool
-% (it may happen that a package $A$ defines a hook \hook{foo}, but
-% it's loaded after package $B$, which adds some code to that hook.
-% In this case it is important that the code added by package $B$ is
-% remembered until package $A$ is loaded).
+% 当一个钩子没有添加任何代码时，无论是添加到其永久代码池还是其“下一个”记号列表，它被称为空。
+% 钩子不需要声明为已添加代码到其代码池（可能发生的情况是包 $A$ 定义了一个钩子 \hook{foo}，
+% 但在加载包 $B$ 之后，包 $B$ 向该钩子添加了一些代码。在这种情况下，重要的是记住包 $B$ 添加的代码，
+% 直到加载包 $A$ 为止）。
 %
-%    All other states can only be queried with internal tests as the
-%    different states are irrelevant for package code.
+% 其他所有状态只能通过内部测试进行查询，因为对于包代码来说，不同的状态是无关紧要的。
 %
 % \begin{macro}[pTF]{\hook_if_empty:n}
-%   Test if a hook is empty (that is, no code was added to that hook).
-%   A \meta{hook} being empty means that all three of its
-%   \cs{g_@@_\meta{hook}_code_prop}, its
-%   \cs{@@_toplevel\textvisiblespace\meta{hook}} and its
-%   \cs{@@_next\textvisiblespace\meta{hook}} are empty.
-% \changes{v1.1a}{2023/04/06}
-%         {Changes to add hook arguments (hook-args).}
-% \changes{v1.1c}{2023/04/19}
-%         {Simpler and faster version (gh/1052).}
+%   测试一个钩子是否为空（即，该钩子未添加任何代码）。
+%   一个 \meta{hook} 为空意味着它的三个部分 \cs{g_@@_\meta{hook}_code_prop}，
+%   \cs{@@_toplevel\textvisiblespace\meta{hook}} 和 \cs{@@_next\textvisiblespace\meta{hook}} 都为空。
+% \changes{v1.1a}{2023/04/06}{为添加钩子参数（hook-args）进行更改。}
+% \changes{v1.1c}{2023/04/19}{更简单更快的版本（gh/1052）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\hook_if_empty:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -5994,13 +5947,10 @@
 %
 %
 % \begin{macro}[pTF]{\@@_if_usable:n}
-%   A hook is usable if the
-%   token list that stores the sorted code for that hook,
-%   \cs[no-index]{@@\textvisiblespace\meta{hook}}, exists.  The property
-%   list \cs[no-index]{g_@@_\meta{hook}_code_prop} cannot be used here
-%   because often it is necessary to add code to a hook without knowing
-%   if such hook was already declared, or even if it will ever be
-%   (for example, in case the package that defines it isn't loaded).
+%   如果存储钩子排序代码的记号列表 \cs[no-index]{@@\textvisiblespace\meta{hook}} 存在，
+%   那么该钩子是可用的。不能在这里使用属性列表 \cs[no-index]{g_@@_\meta{hook}_code_prop}，
+%   因为通常需要向钩子添加代码，而不知道是否已经声明了这样的钩子，甚至是否将来会有声明（例如，
+%   如果定义它的包尚未加载）。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_usable:n #1 { p , T , F , TF }
   {
@@ -6013,11 +5963,8 @@
 %
 % \begin{macro}[pTF]{\@@_if_structure_exist:n}
 %
-%    An internal check if the hook has already its basic internal
-%    structure set up with
-%   \cs{@@_init_structure:n}.  This means that the hook was already used somehow
-%   (a code chunk or rule was added to it), but it still wasn't declared
-%   with \cs{hook_new:n}.
+%    内部检查钩子是否已经使用 \cs{@@_init_structure:n} 设置了其基本的内部结构。
+%    这意味着钩子已经以某种方式被使用过（向其添加了代码块或规则），但仍然没有使用 \cs{hook_new:n} 声明。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_structure_exist:n #1 { p , T , F , TF }
   {
@@ -6031,8 +5978,7 @@
 %
 %  \begin{macro}[pTF]{\@@_if_declared:n}
 %
-%    Internal test to check if the hook was officially declared with
-%    \cs{hook_new:n} or a variant.
+%    内部测试，检查钩子是否已经使用 \cs{hook_new:n} 或其变体正式声明。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_declared:n #1 { p, T, F, TF }
   {
@@ -6044,7 +5990,7 @@
 %  \end{macro}
 %
 % \begin{macro}[pTF]{\@@_if_reversed:n}
-%   An internal conditional that checks if a hook is reversed.
+%   一个内部条件，用于检查钩子是否是反转的。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_reversed:n #1 { p , T , F , TF }
   {
@@ -6060,9 +6006,8 @@
 %
 % \begin{macro}[pTF]{\@@_if_generic:n}
 % \begin{macro}[pTF]{\@@_if_deprecated_generic:n}
-%   An internal conditional that checks if a name belongs to a generic
-%   hook.  The deprecated version needs to check if |#3| is empty to
-%   avoid returning true on \hook{file/before}, for example.
+%   一个内部条件，用于检查名称是否属于通用钩子。已弃用版本需要检查 |#3| 是否为空，
+%   以避免在例如 \hook{file/before} 上返回 true。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_generic:n #1 { T, TF }
   { \@@_if_generic:w #1 / / / \s_@@_mark }
@@ -6090,10 +6035,9 @@
 %
 % \begin{macro}[pTF]{\@@_if_cmd_hook:n}
 % \begin{macro}[pTF]{\@@_if_cmd_hook:w}
-%   An internal conditional that checks if a given hook is a valid
-%   generic \hook{cmd} hook.
+%   一个内部条件，用于检查给定的钩子是否是有效的通用 \hook{cmd} 钩子。
 % \changes{v1.1d}{2023/05/21}
-%         {Changes to allow support arguments in cmd hooks (cmd-args).}
+%         {允许 cmd 钩子支持参数（cmd-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\@@_if_cmd_hook:n}
 %<latexrelease>                 {Hooks~with~args}
@@ -6120,8 +6064,7 @@
 %  \end{macro}
 %
 % \begin{macro}[pTF]{\@@_if_generic_reversed:n}
-%   An internal conditional that checks if a name belongs to a generic
-%   reversed hook.
+%   一个内部条件，用于检查名称是否属于通用反转钩子。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_generic_reversed:n #1 { T }
   { \@@_if_generic_reversed:w #1 / / / \scan_stop: }
@@ -6142,10 +6085,9 @@
 % \begin{macro}{\@@_replacing_args_false:}
 % \begin{macro}{\@@_replacing_args_reset:}
 % \begin{macro}{\g_@@_replacing_stack_seq}
-%   An internal conditional that checks if the code being added to the
-%   hook contains arguments.
+%   一个内部条件，用于检查添加到钩子的代码是否包含参数。
 % \changes{v1.1a}{2023/04/06}
-%         {Macro added (hook-args).}
+%         {添加宏（hook-args）。}
 %    \begin{macrocode}
 \seq_new:N \g_@@_replacing_stack_seq
 \cs_new:Npn \@@_misused_if_replacing_args:nn #1 #2
@@ -6180,14 +6122,14 @@
 %  \end{macro}
 %  \end{macro}
 %
-%  \subsection{Messages}
+%  \subsection{消息}
 %
-%    Hook errors are LaTeX kernel errors:
+%    钩子错误是 LaTeX 内核错误：
 %    \begin{macrocode}
 \prop_gput:Nnn \g_msg_module_type_prop { hooks } { LaTeX }
 %    \end{macrocode}
-% \changes{v1.0q}{2021/08/27}{Internal message name changes}
-%    And so are kernel errors (this should move elsewhere eventually).
+% \changes{v1.0q}{2021/08/27}{内部消息名称更改}
+%    内核错误也是如此（这应该最终移动到其他地方）。
 %    \begin{macrocode}
 \prop_gput:Nnn \g_msg_module_type_prop { latex2e } { LaTeX }
 \prop_gput:Nnn \g_msg_module_name_prop { latex2e } { kernel }
@@ -6220,7 +6162,7 @@
 %    \end{macrocode}
 %
 % \changes{v1.1a}{2023/04/06}
-%         {Messages 'too-many-args', 'without-args' and 'one-time-args' added (hook-args).}
+%         {添加消息 'too-many-args'、'without-args' 和 'one-time-args'（hook-args）。}
 %    \begin{macrocode}
 \msg_new:nnnn { hooks } { too-many-args }
   { Too~many~arguments~for~hook~'#1'. }
@@ -6397,12 +6339,12 @@
 %    \end{macrocode}
 %
 %
-%  \subsection{\LaTeXe{} package interface commands}
+%  \subsection{\LaTeXe{} 包接口命令}
 %
 %
 %
 %  \begin{macro}{\NewHook,\NewReversedHook,\NewMirroredHookPair}
-%    Declaring new hooks \ldots
+%    声明新钩子 \ldots
 %    \begin{macrocode}
 \NewDocumentCommand \NewHook             { m }
   { \hook_new:n {#1} }
@@ -6420,9 +6362,9 @@
 %    \NewReversedHookWithArguments,
 %    \NewMirroredHookPairWithArguments
 %  }
-%    Declaring new hooks with arguments\ldots
+%    声明带参数的新钩子\ldots
 % \changes{v1.1a}{2023/04/06}
-%         {Add \cs{NewHookWithArguments} (hook-args).}
+%         {添加 \cs{NewHookWithArguments}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\NewHookWithArguments}
 %<latexrelease>                 {Hooks~with~args}
@@ -6450,9 +6392,9 @@
 %    \end{macrocode}
 %
 %  \begin{macro}{\ActivateGenericHook}
-%    Providing new hooks \ldots
-% \changes{v1.0m}{2021/04/29}{Add \cs{ProvideHook} etc.}
-% \changes{v1.0o}{2021/08/02}{Change name}
+%    提供新的钩子 \ldots
+% \changes{v1.0m}{2021/04/29}{添加 \cs{ProvideHook} 等。}
+% \changes{v1.0o}{2021/08/02}{更改名称}
 %    \begin{macrocode}
 \NewDocumentCommand \ActivateGenericHook { m }
   { \hook_activate_generic:n {#1} }
@@ -6460,8 +6402,8 @@
 %  \end{macro}
 %
 %  \begin{macro}{\DisableGenericHook}
-%    Disabling a generic hook.
-% \changes{v1.0o}{2021/08/02}{Change name}
+%    禁用通用钩子。
+% \changes{v1.0o}{2021/08/02}{更改名称}
 %    \begin{macrocode}
 \NewDocumentCommand \DisableGenericHook { m }
   { \hook_disable_generic:n {#1} }
@@ -6482,8 +6424,7 @@
 %
 %
 %  \begin{macro}{\AddToHook,\AddToHookWithArguments}
-% \changes{v1.1a}{2023/04/06}
-%         {Add \cs{AddToHookWithArguments} (hook-args).}
+% \changes{v1.1a}{2023/04/06}{添加 \cs{AddToHookWithArguments}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\AddToHookWithArguments}
 %<latexrelease>                 {Hooks~with~args}
@@ -6500,8 +6441,7 @@
 %  \end{macro}
 %
 %  \begin{macro}{\AddToHookNext,\AddToHookNextWithArguments}
-% \changes{v1.1a}{2023/04/06}
-%         {Add \cs{AddToHookNextWithArguments} (hook-args).}
+% \changes{v1.1a}{2023/04/06}{添加 \cs{AddToHookNextWithArguments}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\AddToHookNextWithArguments}
 %<latexrelease>                 {Hooks~with~args}
@@ -6518,7 +6458,7 @@
 %  \end{macro}
 %
 %  \begin{macro}{\ClearHookNext}
-% \changes{v1.0o}{2021/07/27}{Macro added}
+% \changes{v1.0o}{2021/07/27}{添加宏}
 %    \begin{macrocode}
 \NewDocumentCommand \ClearHookNext { m }
   { \hook_gclear_next_code:n {#1} }
@@ -6536,20 +6476,16 @@
 % \begin{macro}{\SetDefaultHookLabel}
 % \begin{macro}{\PushDefaultHookLabel}
 % \begin{macro}{\PopDefaultHookLabel}
-%   Now define a wrapper that replaces the top of the stack with the
-%   argument, and updates \cs{g_@@_hook_curr_name_tl} accordingly.
+%   现在定义一个包装器，用传入的参数替换堆栈顶部，并相应更新 \cs{g_@@_hook_curr_name_tl}。
 %    \begin{macrocode}
 \NewDocumentCommand \SetDefaultHookLabel { m }
   { \@@_set_default_hook_label:n {#1} }
+%    \end{macrocode}
 %
-%   The label is only automatically updated with \cs{@onefilewithoptions}
-%   (\cs{usepackage} and \cs{documentclass}), but some packages, like
-%   Ti\emph{k}Z, define package-like interfaces, like
-%   \cs{usetikzlibrary} that are wrappers around \cs{input}, so they
-%   inherit the default label currently in force (usually |top-level|,
-%   but it may change if loaded in another package).  To provide a
-%   package-like behavior also for hooks in these files, we provide
-%   high-level access to the default label stack.
+%   标签只会在 \cs{@onefilewithoptions}（\cs{usepackage} 和 \cs{documentclass}）中自动更新，
+%   但是一些包（例如 Ti\emph{k}Z）定义了类似包的接口，比如 \cs{usetikzlibrary}，它们是 \cs{input} 的包装器，
+%   因此它们继承了当前生效的默认标签（通常是 |top-level|，但如果在另一个包中加载，则可能会更改）。
+%   为了为这些文件中的钩子提供类似包的行为，我们提供对默认标签栈的高级访问。
 %    \begin{macrocode}
 \NewDocumentCommand \PushDefaultHookLabel { m }
   { \@@_curr_name_push:n {#1} }
@@ -6557,14 +6493,11 @@
   { \@@_curr_name_pop: }
 %    \end{macrocode}
 %
-%   The current label stack holds the labels for all files but the
-%   current one (more or less like \cs{@currnamestack}), and the current
-%   label token list, \cs{g_@@_hook_curr_name_tl}, holds the label for
-%   the current file.  However \cs{@pushfilename} happens before
-%   \cs{@currname} is set, so we need to look ahead to get the
-%   \cs{@currname} for the label.  \pkg{expl3} also requires the current
-%   file in \cs{@pushfilename}, so here we abuse
-%   \cs{@expl@push@filename@aux@@@@} to do \cs{@@_curr_name_push:n}.
+%   当前标签栈保存除当前文件之外的所有文件的标签（更或多，类似于 \cs{@currnamestack}），
+%   而当前标签记号列表 \cs{g_@@_hook_curr_name_tl} 保存当前文件的标签。
+%   但是 \cs{@pushfilename} 发生在 \cs{@currname} 设置之前，所以我们需要向前查找以获取标签的 \cs{@currname}。
+%   \pkg{expl3} 还需要 \cs{@pushfilename} 中的当前文件，因此这里我们滥用了 \cs{@expl@push@filename@aux@@@@}，
+%   来执行 \cs{@@_curr_name_push:n}。
 %    \begin{macrocode}
 \cs_gset_protected:Npn \@expl@push@filename@aux@@@@ #1#2#3
   {
@@ -6586,10 +6519,8 @@
 %    \UseHookWithArguments,
 %    \UseOneTimeHookWithArguments,
 %  }
-%    Avoid the overhead of \pkg{xparse} and its protection that we
-%    don't want here (since the hook should vanish without trace if empty)!
-% \changes{v1.1a}{2023/04/06}
-%         {Add \cs{UseHookWithArguments} (hook-args).}
+%    避免使用 \pkg{xparse} 的开销和保护，这里我们不需要（因为如果空，钩子应该毫无痕迹地消失）！
+% \changes{v1.1a}{2023/04/06}{添加 \cs{UseHookWithArguments}（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\IncludeInRelease{2023/06/01}{\UseHookWithArguments}
 %<latexrelease>                 {Hooks~with~args}
@@ -6634,7 +6565,7 @@
 %  \end{macro}
 %
 %  \begin{macro}{\DeclareDefaultHookRule}
-%    This declaration is only supported before \verb=\begin{document}=.
+%    这个声明仅在 \verb=\begin{document}= 之前受支持。
 %    \begin{macrocode}
 \NewDocumentCommand \DeclareDefaultHookRule { m m m }
                     { \hook_gset_rule:nnnn {??}{#1}{#2}{#3} }
@@ -6643,9 +6574,9 @@
 %  \end{macro}
 %
 %  \begin{macro}{\ClearHookRule}
-%    A special setup rule that removes an existing relation.
-%    Basically {@@_rule_gclear:nnn} plus fixing the property list for debugging.
-%    \fmiinline{Needs perhaps an L3 interface, or maybe it should get dropped?}
+%    一个特殊的设置规则，用于移除现有的关系。
+%    基本上是 {@@_rule_gclear:nnn} 加上修复调试用的属性列表。
+%    \fmiinline{也许需要一个 L3 接口，或者也许应该删除？}
 %    \begin{macrocode}
 \NewDocumentCommand \ClearHookRule { m m m }
 { \hook_gset_rule:nnnn {#1}{#2}{unrelated}{#3} }
@@ -6654,22 +6585,19 @@
 %
 %
 % \begin{macro}[EXP]{\IfHookEmptyTF}
-%   Here we avoid the overhead of \pkg{xparse}, since \cs{IfHookEmptyTF}
-%   is used in \cs{end} (that is, every \LaTeX{} environment).  As a
-%   further optimization, use \cs{let} rather than \cs{def} to avoid one
-%   expansion step.
+%   这里我们避免了 \pkg{xparse} 的开销，因为 \cs{IfHookEmptyTF} 被用在 \cs{end} 中
+%   （也就是说，每个 \LaTeX{} 环境中）。作为进一步的优化，使用 \cs{let} 而不是 \cs{def}，
+%   以避免一次展开步骤。
 %    \begin{macrocode}
 \cs_new_eq:NN \IfHookEmptyTF \hook_if_empty:nTF
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}[EXP,int]{\IfHookExistsTF}
-%    Marked for removal and no longer documented in the doc section!
-% \phoinline{\cs{IfHookExistsTF} is used in \texttt{jlreq.cls},
-% \texttt{pxatbegshi.sty}, \texttt{pxeverysel.sty},
-% \texttt{pxeveryshi.sty}, so the public name may be an alias of the
-% internal conditional for a while.  Regardless, those packages' use for
-% \cs{IfHookExistsTF} is not really correct and can be changed.}
+%    标记为待移除，并且不再在文档部分记录！
+% \phoinline{\cs{IfHookExistsTF} 在 \texttt{jlreq.cls}、\texttt{pxatbegshi.sty}、
+% \texttt{pxeverysel.sty}、\texttt{pxeveryshi.sty} 中使用，因此公共名称可能是一段时间内内部条件的别名。
+% 无论如何，这些包对 \cs{IfHookExistsTF} 的使用实际上并不正确，可以进行更改。}
 %    \begin{macrocode}
 \cs_new_eq:NN \IfHookExistsTF \@@_if_usable:nTF
 %    \end{macrocode}
@@ -6680,10 +6608,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% \subsection{Deprecated that needs cleanup at some point}
+% \subsection{需要清理的弃用部分}
 %
-% \changes{v1.0p}{2021/08/20}{Added deprecation warnings for
-%                             old generic hook commands (gh/638)}
+% \changes{v1.0p}{2021/08/20}{为旧的通用钩子命令添加弃用警告（gh/638）}
 %
 % \begin{macro}[int]{
 %     \hook_disable:n,
@@ -6693,7 +6620,7 @@
 %     \@@_activate_generic_reversed:n,
 %     \@@_activate_generic_pair:nn,
 %   }
-%   Deprecated.
+%   弃用。
 %    \begin{macrocode}
 \cs_new_protected:Npn \hook_disable:n
   {
@@ -6736,7 +6663,7 @@
 %     \ProvideReversedHook,
 %     \ProvideMirroredHookPair,
 %   }
-%   Deprecated.
+%   弃用。
 %    \begin{macrocode}
 \cs_new_protected:Npn \DisableHook
   {
@@ -6770,7 +6697,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_deprecated_warn:nn}
-%   Warns about a deprecation, telling what should be used instead.
+%   警告有关弃用的信息，告知应该使用的替代方法。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_deprecated_warn:nn #1 #2
   { \msg_warning:nnnn { hooks } { deprecated } {#1} {#2} }
@@ -6786,12 +6713,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %
-% \subsection{Internal commands needed elsewhere}
+% \subsection{其他地方需要的内部命令}
 %
-% Here we set up a few horrible (but consistent) \LaTeXe{} names to
-% allow for internal commands to be used outside this module. We
-% have to unset the \texttt{@\/@} since we want double ``at'' sign
-% in place of double underscores.
+% 在这里，我们设置了一些可怕的（但是一致的）\LaTeXe{} 名称，以允许在此模块之外使用内部命令。
+% 我们必须取消 \texttt{@\/@}，因为我们想要用双“at”符号代替双下划线。
 %
 %    \begin{macrocode}
 %<@@=>
@@ -6815,12 +6740,9 @@
 % \InternalDetectionOn
 %  \end{macro}
 %
-%    Rolling back here doesn't undefine the interface commands as they
-%    may be used in packages without rollback functionality. So we
-%    just make them do nothing which may or may not work depending on
-%    the code usage.
-% \changes{v1.0d}{2020/10/04}{Definition \cs{AddToHookNext} was supposed
-%                             to be for \cs{AddToHook} vice versa (gh/401)}
+%    这里回滚并不会取消定义接口命令，因为它们可能在没有回滚功能的包中使用。
+%    所以我们只是让它们什么都不做，这取决于代码的使用情况可能会起作用也可能不会。
+% \changes{v1.0d}{2020/10/04}{\cs{AddToHookNext} 的定义应该是为了 \cs{AddToHook}，反之亦然 (gh/401)}
 %    \begin{macrocode}
 %
 %<latexrelease>\IncludeInRelease{0000/00/00}{lthooks}
@@ -6850,10 +6772,8 @@
 %<latexrelease>\def \DeclareDefaultHookRule #1#2#3{}
 %<latexrelease>\def \ClearHookRule #1#2#3{}
 %    \end{macrocode}
-%    If the hook management is not provided we make the test for existence
-%    false and the test for empty true in the hope that this is most
-%    of the time reasonable. If not a package would need to guard
-%    against running in an old kernel.
+%    如果未提供钩子管理，我们将存在性测试设为 false，将空性测试设为 true，
+%    希望这在大多数情况下是合理的。如果不是，那么包需要防范在旧内核中运行。
 %    \begin{macrocode}
 %<latexrelease>\long\def \IfHookExistsTF #1#2#3{#3}
 %<latexrelease>\long\def \IfHookEmptyTF #1#2#3{#2}
@@ -6865,8 +6785,7 @@
 %<@@=hook>
 %    \end{macrocode}
 %
-% \changes{v1.1a}{2023/04/06}
-%         {Add dedicated rollback code to revert data structures (hook-args).}
+% \changes{v1.1a}{2023/04/06}{为恢复数据结构添加专用的回滚代码（hook-args）。}
 %    \begin{macrocode}
 %<latexrelease>\cs:w @@_rollback_tidying: \cs_end:
 %<latexrelease>\bool_lazy_and:nnT
