@@ -283,7 +283,7 @@
 \subsection{通用风格}
 \label{Sec:general}
 
-\LaTeX{} 提供了许多命令，旨在帮助您生成结构良好、健壮且可移植的文档类
+\LaTeX{} 提供了许多命令，旨在帮助您生成结构良好、健壮 (robust) 且可移植的文档类
 和宏包文件。本节概述了一些使用这些命令的智能方式。
 
 \subsubsection{加载其他文件}
@@ -321,7 +321,7 @@
 \end{verbatim}
 您可能希望做相同的事情，或者如果认为安全的话，可以决定移除 |myclass.sty|。
 
-\subsubsection{使它健壮}
+\subsubsection{使它健壮 (robust) }
 
 在编写宏包和文档类时，我们认为尽可能使用 \LaTeX{} 命令是一种良好的做法。
 
@@ -1242,8 +1242,8 @@
    |\DeclareRobustCommand*| \arg{cmd} \oarg{num} \oarg{default}
    \arg{definition}
 \end{decl}
-这个命令与 |\newcommand| 接受相同的参数，但它声明了一个强韧命令，即使 \m{definition} 中的某些代码是脆弱的。
-你可以使用此命令来定义新的强韧命令，或重新定义现有命令并使其强韧。如果重新定义了一个命令，会在转录文件中放入日志。
+这个命令与 |\newcommand| 接受相同的参数，但它声明了一个健壮 (robust) 命令，即使 \m{definition} 中的某些代码是脆弱的。
+你可以使用此命令来定义新的健壮 (robust) 命令，或重新定义现有命令并使其健壮 (robust) 。如果重新定义了一个命令，会在转录文件中放入日志。
 
 例如，如果 |\seq| 定义如下：
 \begin{verbatim}
