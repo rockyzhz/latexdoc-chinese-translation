@@ -1,0 +1,303 @@
+% \iffalse
+%% Source File: shellesc.dtx
+%% Copyright (C) 2015-2023
+%%
+%% The LaTeX Project and any individual authors listed elsewhere
+%% in this file.
+%%
+%% This file may be distributed under the terms of the LPPL.
+%% See README for details.
+%
+%<*dtx>
+          \ProvidesFile{shellesc.dtx}
+%</dtx>
+%<package>\ifx\ProvidesPackage\undefined
+%<package>\def\next#1#2[#3]{\wlog{#2 #3}}
+%<package>\ifx\PackageInfo\undefined\def\PackageInfo#1#2{\wlog{#1: #2}}\fi
+%<package>\ifx\PackageWarning\undefined\def\PackageWarning#1#2{\wlog{#1: #2}}\fi
+%<package>\expandafter\next\fi
+%<package>\ProvidesPackage{shellesc}
+%<driver> \ProvidesFile{shellesc.drv}
+% \fi
+%         \ProvidesFile{shellesc.dtx}
+       [2023/07/08 v1.0d unified shell escape interface for LaTeX]
+%
+% \iffalse
+%<*driver>
+\documentclass{ltxdoc}
+% ^^A =================== 中文版特别设置 =========================
+\usepackage[fontset=source]{ctex}
+\usepackage{xcolor}
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\usepackage{etoolbox}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\makeatother
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}}
+\usepackage{hyperref}
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false}
+% ^^A =================== 中文版设置结束 =========================
+\begin{document}
+\DocInput{shellesc-zh-cn.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \GetFileInfo{shellesc.dtx}
+%
+% \ExplSyntaxOn
+% \def\zhfiledate{\exp_args:No \zhdate {\filedate}}
+% \ExplSyntaxOff
+% \title{{\bfseries\huge\color{spot}\textsf{shellesc} 宏包}\thanks{本文件
+%        版本号为 \fileversion, 最后
+%        修改于 \zhfiledate 。}}
+% \author{
+%   \begin{tabular}{r@{\hspace*{\ccwd}}l}
+%       \LaTeX\ 项目组 & 【著】\\
+%       张泓知 & 【译】
+%   \end{tabular}}
+% \date{\zhfiledate}
+%
+% \maketitle
+%
+% \vspace*{-\baselineskip}
+% \enlargethispage{\baselineskip}
+%
+% \changes{v0.1b}{2016/02/02}{文档错字修正（JB）}
+% \changes{v0.2a}{2016/06/07}{改进与 plain TeX 的使用}
+% \section{引言}
+%
+%
+% 多年来，基于 web2c 的 \TeX\ 实现一直使用 \verb|\write| 命令的语法来访问系统命令，
+% 它使用了特殊的 18 号流（15 号及以上的流不能分配给经典 \TeX\ 中的文件，所以 18 号流
+% 本应只是输出到终端）。
+%
+% 这是一个有用的扩展，没有违反经典 \TeX\ 中关于扩展的严格规则。该宏包提供了一个简单的
+% 宏级接口来隐藏 \verb|write18| 的实现，因此可以使用类似 \verb|\ShellEscape{rm file.txt}|
+% 的命令在类 Unix 系统中指定删除文件（在 Windows 中使用 \verb|del|）。请注意，默认情况下
+% 禁止访问系统，并且通常需要使用命令行选项 \verb|--shell-escape| 调用 \LaTeX。
+%
+% 该包可以与标准的 \texttt{latex}、\texttt{pdflatex} 或 \texttt{xetex} 一起使用，
+% 但它主要是为了 \texttt{lualatex} 而设计的，因为从 Lua\TeX\ 0.87 开始，Lua\TeX\
+% \emph{不再}支持 \verb|\write18| 语法来访问系统命令：它具有 256 个写入流，流 18
+% 可以关联到文件（没有此包时）并且没有特殊意义。这个包在 Lua\LaTeX\ 中定义了相同的
+% \verb|\ShellEscape| 语法，但实现是通过 Lua 和 \verb|os.execute| 函数完成的。
+%
+% 实际上，\verb|\ShellEscape| 对应于 \verb|\immediate\write18|（或 \verb|\directlua|）。
+% 极少数情况下，您可能需要延迟系统命令直到输出当前页面（当页码已知时），对于这种情况，
+% 您可以经典地使用 \verb|\write18|（或 \verb|\latelua|）。此包提供了
+% \verb|\DelayedShellEscape| 作为这种用法的常用语法。
+%
+% 可以通过检查整数（chardef）命令 \verb|\ShellEscapeStatus| 查询 shell escape 状态，
+% 0（禁用）、1（启用）、2（受限）。
+%
+% 为了帮助将现有文档移植到 Lua\TeX\ 0.87，该包重载了 \verb|\write| 命令，以便
+% \verb|\write18{rm file.txt}| 在 Lua\TeX\ 中起作用。请注意，\verb|\write| 的重新定义
+% 无法检测出是否已使用 \verb|\immediate|，当写入文件流或终端时，\verb|\immediate| 会
+% 正常工作，但流 18 的特殊情况，它被定义为始终使用 \verb|os.execute|，始终使用
+% \verb|\directlua|（因此对应于 \verb|\immediate\write18|）。在需要将非即时
+% \verb|\write18| 转换为当前 Lua\TeX\ 的文档中的极少情况下，您需要更改为使用
+% \verb|\DelayedShellEscape| 命令。
+%
+% \section{代码实现}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+% \changes{v1.0b}{2019/10/17}{分类码 (Catcode) 保护}
+%    \begin{macrocode}
+\chardef\shellesc@quotecat\catcode`\"
+\chardef\shellesc@underscorecat\catcode`\_
+\@makeother\"
+\@makeother\_
+%    \end{macrocode}
+%
+% \subsection{状态检查}
+%
+%
+% \subsection{shellesc 宏包接口}
+%
+% \begin{macro}{\ShellEscapeStatus}
+% \changes{v1.0a}{2019/10/13}{引入命令}
+% 整数值的含义分别为 0（禁用 shell escape）、1（允许 shell escape）、2（受限制的 shell escape）。
+%
+%    \begin{macrocode}
+\chardef\ShellEscapeStatus
+  \ifx\pdfshellescape\@undefined
+    \ifx\shellescape\@undefined
+      \ifx\directlua\@undefined
+        \z@
+      \else
+        \directlua{%
+          tex.sprint((status.shell_escape or os.execute()) .. " ")}
+      \fi
+    \else
+      \shellescape
+    \fi
+  \else
+    \pdfshellescape
+  \fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \changes{v0.2a}{2016/06/07}{消息中的拼写错误}
+%    \begin{macrocode}
+\ifcase\ShellEscapeStatus
+  \PackageWarning{shellesc}{Shell escape disabled}
+\or
+  \PackageInfo   {shellesc}{Unrestricted shell escape enabled}
+\else
+  \PackageInfo   {shellesc}{Restricted shell escape enabled}
+\fi
+%    \end{macrocode}
+%
+%
+% \begin{macro}{\ShellEscape}
+% \changes{v1.0a}{2019/10/13}{Lua 日志记录用于 gh/195}
+% 执行提供的记号作为一个系统相关命令，假设允许这样的执行。
+%    \begin{macrocode}
+\ifx\lastsavedimageresourcepages\@undefined
+  \protected\def\ShellEscape{\immediate\write18 }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\else
+  \protected\def\ShellEscape{\directlua\ShellEscape@Lua}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DelayedShellEscape}
+% \changes{v0.1c}{2016/04/29}{定义 \cs{DelayedShellEscape} 而不是 \cs{ShellEscape}（UF）}
+% \changes{v1.0a}{2019/10/13}{Lua 日志记录用于 gh/195}
+% 当此节点随着完成的页面输出时，将提供的记号作为一个系统相关命令执行，假设允许这样的执行。
+%    \begin{macrocode}
+\ifx\lastsavedimageresourcepages\@undefined
+  \protected\def\DelayedShellEscape{\relax\write18 }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\else
+  \protected\def\DelayedShellEscape{\latelua\ShellEscape@Lua}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%
+% \begin{macro}{\ShellEscape@Lua}
+% \changes{v1.0a}{2019/10/13}{gh/195 的日志记录}
+% \changes{v1.0d}{2023/04/15}{在消息 gh/1008 中添加省略号}
+% \verb|\DelayedShellEscape| 和 \verb|\ShellEscape| 的共享 Lua 代码。
+%    \begin{macrocode}
+\ifx\directlua\@undefined\else
+\protected\def\ShellEscape@Lua#1{{%
+local status, msg = os.execute("\luaescapestring{#1}")%
+if status == nil then
+    texio.write_nl("log",%
+      "runsystem(" .. "\luaescapestring{#1}"%
+       .. ")...(" .. msg .. ").\string\n")
+  elseif status == 0 then
+    texio.write_nl("log",%
+      "runsystem(" .. "\luaescapestring{#1}"%
+      .. ")...executed.\string\n")
+  else
+    texio.write_nl("log",%
+      "runsystem(" .. "\luaescapestring{#1}"%
+       .. ")...failed. " .. (msg or "") .. "\string\n")
+  end
+}}
+\fi
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{write18 宏包接口}
+%
+% 在除 Lua\TeX\ 外的基于 web2c 的引擎中，可以直接使用 |\write18|。
+% 在较旧的 Lua\TeX\ 中也是如此，但从版本 0.85 开始，这不再可用。
+%
+% 上述的 |shellesc| 宏包接口推荐用于新代码，然而，为了方便将现有文档和包移植到更新的
+% Lua\TeX\ 版本，这里通过调用 Lua 的 |os.execute| 提供了一个 |\write18| 接口。
+%
+% 请注意，目前的写法总是对系统进行\emph{立即}调用。
+%
+% |\immediate| 是被支持但被忽略的，|\immediate\write18| 和 |\write18| 都会立即执行。
+% 要在下一个输出时延迟执行，请使用上面定义的\hfil\break |\DelayedShellEscape| 命令。
+%
+% 请注意，可以很容易地使此处定义的 |\write18| 使用延迟执行，只需在下面的定义中使用
+% |\DelayedShellEscape| 而不是 |ShellEscape|。然而，检测 |\immediate| 是有技巧性的，
+% 因此这里的选择是始终使用即时形式，这在与 |\write18| 一起使用时是绝大多数情况下使用的形式。
+%
+% 如果不是最近的 Lua\TeX，请在此处停止。
+%    \begin{macrocode}
+\ifx\lastsavedimageresourcepages\@undefined
+ \catcode`\"\shellesc@quotecat
+ \catcode`\_\shellesc@underscorecat
+ \expandafter\endinput
+\fi
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\directlua{%
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+shellesc = shellesc or {}
+%    \end{macrocode}
+%
+% 使用记号扫描器获取下一个 \TeX\ 数字的 Lua 函数，并测试是否正在使用流 18，
+% 然后在每种情况下插入适当的 \TeX\ 命令来处理随后的大括号组。
+%    \begin{macrocode}
+local function write_or_execute()
+  local s = token.scan_int()
+  if (s==18) then
+     tex.sprint(\the\numexpr\catcodetable@atletter\relax,
+                "\string\\ShellEscape ")
+  else
+     tex.sprint(\the\numexpr\catcodetable@atletter\relax,
+                "\string\\shellesc@write " .. s)
+  end
+end
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+shellesc.write_or_execute=write_or_execute
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\let\shellesc@write\write
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\protected\def\write{\directlua{shellesc.write_or_execute()}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\catcode`\"\shellesc@quotecat
+\catcode`\_\shellesc@underscorecat
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \Finale
+%
