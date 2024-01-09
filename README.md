@@ -19,6 +19,7 @@
 * **l3doc.pdf** 的中文文档 **l3doc-zh-cn.pdf** ，本文档是 l3doc.cls 类文件的说明文档。 l3doc 文档类是为了编写 LaTeX3 的一系列文档而编写的，因此它是在 doc 宏包从 v2 升级为 v3 之前就编写了的。因此从稳定性来说，*它的稳定性远不如主要的 expl3 包*，但最终的目的是为了取代 ltxdoc 文档类的。因此在阅读 LaTeX3 （或者采用了 LaTeX3 语法）的宏包说明文档的源代码时，很多是采用了 l3doc 作为文档类的，因此 l3doc 类文件的说明文档还是一份有相当价值的文档。详情请参阅相应的[说明文档][14]。
 * **lthooks-doc.pdf** 的中文文档 **lthooks-doc-zh-cn.pdf** 和 **lthooks-code.pdf** 的中文文档 **lthooks-code-zh-cn.pdf** ，本文档是关于 LaTeX2ε 中钩子的管理和说明。比较典型的应用就是 ctex 宏包中通过对 `\AtBeginDocument` 和 `\AtEndDocument` 这两个钩子的应用，实现了中文文档的无感化的处理。然而钩子的用处其实远不止于此， LaTeX 中其实可以对命令、环境、文件、include、包和类都使用钩子。详情请参阅相应的[说明文档][16]。
 * **ltxdoc.pdf** 的中文文档 **ltxdoc-zh-cn.pdf** ，本文档是 ltxdoc.cls 类文件的说明文档，中文版本由**黄旭华**翻译。 ltxdoc 文档类是 LaTeX2ε 用于写作含代码说明的宏包文档的基础文档类，许多的宏包文档都是基于 ltxdoc 或者基于 ltxdoc 扩展而来的文档类。因此有意阅读以 ltxdoc 为基础文档类写作而成的 .dtx 文件源代码的朋友，或者有打算以 ltxdoc 为基础文档类来书写宏包文档的 .dtx 文件的朋友，可以参阅本文档。详情请参阅相应的[说明文档][13]。
+* **shellesc.pdf** 的中文文档 **shellesc-zh-cn.pdf** ，shellesc是一个关于 `--shell-escape` 命令行选项的宏包，目前由LaTeX项目组维护。由于 LuaTeX 自 v0.87 之后不再支持 \write18 语法来访问系统命令，因此为了统一接口起见，该宏包提供了一个简单的宏级接口来隐藏 write18 的实现。详情请参阅相应的[说明文档][17]。
 * **usrguide.pdf** 的中文文档 **usrguide-zh-cn.pdf** 以及 **usrguide-historic.pdf** 的中文文档 **usrguide-historic-zh-cn.pdf**，与 clsguide 类似的是，在 TeXLive 2023 中, usrguide 也同样分化出了两个版本：usrguide-current（即当前版本，简称 usrguide ） 和 usrguide-historic （历史版本），前者更加集中地体现了最近这十几年中，由于 LaTeX 特别是 LaTeX3 的迅猛发展而带来的新的用法用途；而后者则与之前的版本相差不大，重点介绍了 LaTeX2e 的用法以及与 LaTeX2.09 的用法区别。详情请查看相应的[说明文档][10]。
 * **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。详情请参阅相应的[说明文档][9]。
 
@@ -58,3 +59,4 @@ latexmk -xelatex <source-filename-with-ext>
 [14]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/l3doc-zh-cn/l3doc-zh-cn.md
 [15]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/hyperref-zh-cn/hyperref-zh-cn.md
 [16]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/lthooks-zh-cn/lthooks-zh-cn.md
+[17]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/shellesc-zh-cn/shellesc-zh-cn.md
