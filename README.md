@@ -21,6 +21,7 @@
 * **ltxdoc.pdf** 的中文文档 **ltxdoc-zh-cn.pdf** ，本文档是 ltxdoc.cls 类文件的说明文档，中文版本由**黄旭华**翻译。 ltxdoc 文档类是 LaTeX2ε 用于写作含代码说明的宏包文档的基础文档类，许多的宏包文档都是基于 ltxdoc 或者基于 ltxdoc 扩展而来的文档类。因此有意阅读以 ltxdoc 为基础文档类写作而成的 .dtx 文件源代码的朋友，或者有打算以 ltxdoc 为基础文档类来书写宏包文档的 .dtx 文件的朋友，可以参阅本文档。详情请参阅相应的[说明文档][13]。
 * **shellesc.pdf** 的中文文档 **shellesc-zh-cn.pdf** ，shellesc是一个关于 `--shell-escape` 命令行选项的宏包，目前由LaTeX项目组维护。由于 LuaTeX 自 v0.87 之后不再支持 \write18 语法来访问系统命令，因此为了统一接口起见，该宏包提供了一个简单的宏级接口来隐藏 write18 的实现。详情请参阅相应的[说明文档][17]。
 * **usrguide.pdf** 的中文文档 **usrguide-zh-cn.pdf** 以及 **usrguide-historic.pdf** 的中文文档 **usrguide-historic-zh-cn.pdf**，与 clsguide 类似的是，在 TeXLive 2023 中, usrguide 也同样分化出了两个版本：usrguide-current（即当前版本，简称 usrguide ） 和 usrguide-historic （历史版本），前者更加集中地体现了最近这十几年中，由于 LaTeX 特别是 LaTeX3 的迅猛发展而带来的新的用法用途；而后者则与之前的版本相差不大，重点介绍了 LaTeX2e 的用法以及与 LaTeX2.09 的用法区别。详情请查看相应的[说明文档][10]。
+* **xcoffins.pdf** 的中文文档 **xcoffins-zh-cn.pdf**， xcoffins 是 l3experimental 系列宏包其中之一，暂时还未并入到 l3kernel 之中。作为 l3coffins 模块的一个强大补充， xcoffins 是一个设计级别的排版宏包。 coffins 作为 TeX 之中盒子 (box) 概念的拓展，极大地丰富了 TeX/LaTeX 在版面设计方面的手段，非常推荐！本文由**黄旭华**翻译，暂时由本人来做后续增量更新的维护。详情请查看相应的[说明文档][18]。
 * **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。详情请参阅相应的[说明文档][9]。
 
 ## 中文文档编译方法
@@ -60,3 +61,4 @@ latexmk -xelatex <source-filename-with-ext>
 [15]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/hyperref-zh-cn/hyperref-zh-cn.md
 [16]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/lthooks-zh-cn/lthooks-zh-cn.md
 [17]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/shellesc-zh-cn/shellesc-zh-cn.md
+[18]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/xcoffins-zh-cn/xcoffins-zh-cn.md
