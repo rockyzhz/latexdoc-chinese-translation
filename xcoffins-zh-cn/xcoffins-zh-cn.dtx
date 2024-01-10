@@ -37,27 +37,27 @@
 
 \usepackage{float} %%%% 防止表格等浮动
 %%%%%%%%%%%%% 以下设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{xeCJK}  %%
+\usepackage[fontset=source]{ctex}
 
-\setCJKfamilyfont{Heiti}{Source Han Sans SC Normal} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
-\newcommand{\Heiti}{\CJKfamily{Heiti}} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
+% ^^A \setCJKfamilyfont{Heiti}{Source Han Sans SC Normal} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
+% ^^A \newcommand{\Heiti}{\CJKfamily{Heiti}} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
 
-\setCJKfamilyfont{heiti}{Source Han Sans SC Light} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
-\newcommand{\heiti}{\CJKfamily{heiti}} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
+% ^^A \setCJKfamilyfont{heiti}{Source Han Sans SC Light} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
+% ^^A \newcommand{\heiti}{\CJKfamily{heiti}} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
 
-\setCJKfamilyfont{songti}{Source Han Serif SC Light}  %%%% 自定义\songti命令，显示思源宋体，用于正文
-\newcommand{\songti}{\CJKfamily{songti}} %%%% 自定义\songti命令，显示思源宋体，用于正文
+% ^^A \setCJKfamilyfont{songti}{Source Han Serif SC Light}  %%%% 自定义\songti命令，显示思源宋体，用于正文
+% ^^A \newcommand{\songti}{\CJKfamily{songti}} %%%% 自定义\songti命令，显示思源宋体，用于正文
 
-\setCJKfamilyfont{heitixt}{思源黑体_CN_LightItalic.otf}  %%%% 自定义\heitixt命令，显示思源黑体斜体
-\newcommand{\heitixt}{\CJKfamily{heitixt}} %%%% 自定义\heitixt命令，显示思源黑体斜体
+% ^^A \setCJKfamilyfont{heitixt}{思源黑体_CN_LightItalic.otf}  %%%% 自定义\heitixt命令，显示思源黑体斜体
+% ^^A \newcommand{\heitixt}{\CJKfamily{heitixt}} %%%% 自定义\heitixt命令，显示思源黑体斜体
 
-\setCJKmainfont{Source Han Serif SC Light} %%%% 设置中文的主字体为思源宋体 CN Light
-\setmainfont{SourceSerifPro-Regular.otf} %%%% 设置英文的主字体为Source Serif Pro，最好看
-%%%%\setmainfont{Source Han Serif SC} %%%% 设置英文的主字体为Source Han Serif SC
-%%%%%%\setmainfont{Times New Roman} %%%% 设置英文的主字体为Times New Roman
+% ^^A \setCJKmainfont{Source Han Serif SC Light} %%%% 设置中文的主字体为思源宋体 CN Light
+% ^^A \setmainfont{SourceSerifPro-Regular.otf} %%%% 设置英文的主字体为Source Serif Pro，最好看
+% ^^A \setmainfont{Source Han Serif SC} %%%% 设置英文的主字体为Source Han Serif SC
+% ^^A \setmainfont{Times New Roman} %%%% 设置英文的主字体为Times New Roman
 
-\setCJKfamilyfont{kaiti}{KaiTi} %%设置中文字体楷体，用于强调
-\newcommand{\kaiti}{\CJKfamily{kaiti}} %%设置中文字体楷体，用于强调
+% ^^A \setCJKfamilyfont{kaiti}{KaiTi} %%设置中文字体楷体，用于强调
+% ^^A \newcommand{\kaiti}{\CJKfamily{kaiti}} %%设置中文字体楷体，用于强调
 %%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{fontspec}
 
@@ -78,9 +78,9 @@
 %%%%%%%%%%%%% 以下设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{indentfirst} %%% 首行缩进
 \setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
-\linespread{1.5} %%% 设置行间距
+% ^^A \linespread{1.5} %%% 设置行间距
 %%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{changepage} %%%用于整体缩进,\begin{adjustwidth}{2cm}{1cm}
+% ^^A \usepackage{changepage} %%%用于整体缩进,\begin{adjustwidth}{2cm}{1cm}
 
 %%%%%%% 以下在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
 \makeatletter
@@ -100,47 +100,115 @@
      \kern 2pt} %%%
 %%%%%%% 以上自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\renewcommand{\contentsname}{\centerline {\heiti {\Large 目\ \ \ 录}}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
-%%%\renewcommand{\thepart}{第{\Roman{part}}部分}
-\renewcommand{\refname}{\heiti 参考文献}
-\renewcommand{\figurename}{\Heiti 图}
-\renewcommand{\tablename}{\Heiti 表}
-\renewcommand{\abstractname}{\heiti {\Large 摘\ 要}}
-\renewcommand{\listfigurename}{\centerline{\heiti {\large 图形目录}}}
-\renewcommand{\listtablename}{\centerline{\heiti {\large 表格目录}}}
-\renewcommand{\indexname}{\heiti 索引} %%%%让最后生成的PDF文件的书签的索引显示“索引”而不是“Index”
-
-%%%%%%%%%% 以下将正文中的“Part Ⅰ ”中文化成“第Ⅰ部分” %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%\usepackage[center]{titlesec}  %%标题居中
-\usepackage{titlesec}
-\titleformat{\part}{\centering\Large\bfseries}{{\heiti 第} \thepart {\heiti 部分}}{1.2em}{}
-%%%%%%%%%% 以上将正文中的“Part Ⅰ ”中文化成“第Ⅰ部分” %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%% 以下调整目录条目之间的间距 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{tocloft}
-\setlength{\cftbeforetoctitleskip}{20pt} %%% “目录”二字的段前间距为20pt
-\setlength{\cftaftertoctitleskip}{20pt}  %%% “目录”二字的段后间距为50pt
-\setlength{\cftbeforepartskip}{25pt} %%% 部分(part)之前的空白为25pt
-\renewcommand{\cftpartafterpnum}{\vspace{6pt}} %%% 部分(part)之后的空白为6pt
-\setlength{\cftbeforesecskip}{7pt} %%% 节(sec)之前的空白为14pt
-\renewcommand{\cftsecafterpnum}{\vspace{3pt}} %%% 节(sec)之后的空白为3pt
-\renewcommand{\cftsubsecafterpnum}{\vspace{3pt}} %%% 小节(subsec)之后的空白为3pt
-%%%%%%% 以上调整目录条目之间的间距 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%% 目录设置 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\contentsname}{\hfil 目\quad 录\hfil}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+\AtBeginDocument{\addtocontents{toc}{\protect\begin{multicols}{2}}}
+\AtEndDocument{\addtocontents{toc}{\protect\end{multicols}}}
+\addtolength{\columnsep}{2em}
 
 %%%%%%%%%%%% 以下设置书签和目录的颜色、链接%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[svgnames]{xcolor}
-\definecolor{myurlcolor}{rgb}{0,0,0.7}
+% ^^A \definecolor{myurlcolor}{rgb}{0,0,0.7}
 %%%%\definecolor{mylinkcolor}{rgb}{0.7,0,0}
-\definecolor{mylinkcolor}{RGB}{178,0,0}
-\definecolor{codecolor}{rgb}{0,0.4,0.2}
-\definecolor{overviewcolor}{rgb}{0,0.2,0.4}
-\definecolor{Mylightgreen}{RGB}{216,233,236} %定义名为Mylightgreen的颜色(RGB分别为216,233,236)
-\usepackage{hyperref}
-\hypersetup{xetex,bookmarks=true,hidelinks,%
-colorlinks,linkcolor=mylinkcolor,urlcolor=myurlcolor,%
-pageanchor=true,hyperindex=true,
-}
+% ^^A \definecolor{mylinkcolor}{RGB}{178,0,0}
+% ^^A \definecolor{codecolor}{rgb}{0,0.4,0.2}
+% ^^A \definecolor{overviewcolor}{rgb}{0,0.2,0.4}
+% ^^A \definecolor{Mylightgreen}{RGB}{216,233,236} %定义名为Mylightgreen的颜色(RGB分别为216,233,236)
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\usepackage{etoolbox}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\patchcmd{\l@section}
+  {\hfil}
+  {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+  {}{}
+\ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
+\patchcmd{\__codedoc_typeset_aux:n}{\color[gray]{0.5}}{\color{spot}}{}{}
+\cs_set_protected:Npn \__codedoc_print_end_definition:
+  {
+    \seq_set_map:NNn \l__codedoc_tmpa_seq
+      \g__codedoc_nested_names_seq
+      { \__codedoc_macro_end_wrap_item:n {##1} }
+      %%
+    \int_compare:nTF { \seq_count:N \l__codedoc_tmpa_seq <= 3 }
+      {
+        \seq_use:Nnnn \l__codedoc_tmpa_seq
+          { \,~和~ } { \,,~ } { \,,~和~ }
+      }
+      { \seq_item:Nn \l__codedoc_tmpa_seq {1}\,~以及其它的 }
+    \@ 定义结束。
+    \__codedoc_print_documented:
+  }
+\cs_set_protected:Npn \__codedoc_print_documented:
+  {
+    \seq_gset_filter:NNn \g__codedoc_nested_names_seq
+      \g__codedoc_nested_names_seq
+      {
+        ! \bool_lazy_any_p:n
+          {
+            { \__codedoc_if_macro_internal_p:n {##1} }
+            { \l__codedoc_macro_deprecated_bool }
+            { \l__codedoc_macro_nodoc_bool }
+          }
+      }
+    \seq_if_empty:NF \g__codedoc_nested_names_seq
+      {
+        \int_set:Nn \l__codedoc_tmpa_int
+          { \seq_count:N \g__codedoc_nested_names_seq }
+        \int_compare:nNnTF \l__codedoc_tmpa_int = 1 {这个} {这些}
+        \bool_if:NTF \l__codedoc_macro_var_bool {变量} {函数}
+        \int_compare:nNnTF \l__codedoc_tmpa_int = 1 {} {}
+        被记录在第
+        \__codedoc_get_hyper_target:eN
+          { \seq_item:Nn \g__codedoc_nested_names_seq { 1 } }
+          \l__codedoc_tmpa_tl
+        \exp_args:Ne \pageref { \l__codedoc_tmpa_tl } 页。
+      }
+    \seq_gclear:N \g__codedoc_nested_names_seq
+  }
+\cs_set_protected:Npn \__codedoc_special_index_module:nnnnN #1#2#3#4#5
+  {
+    \use:e
+      {
+        \exp_not:n { \__codedoc_special_index_aux:nnnnnn {#1} {#2} }
+          \tl_if_empty:nTF {#3}
+            { { } { } { } }
+            {
+              \str_if_eq:nnTF {#3} { TeX }
+                {
+                  { TeX~和~LaTeX2e }
+                  { \string\TeX{}~和~\string\LaTeXe{} }
+                }
+                {
+                  {#3}
+                  { \string\pkg{#3} }
+                }
+              { \bool_if:NT #5 { ~内部 } ~命令： }
+            }
+      }
+          {#4}
+  }
+\ExplSyntaxOff
+\makeatother
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+% ^^A   linktoc=all,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false}
 %%%%%%%%%%%% 以上设置书签和目录的颜色、链接%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%% 以下设置网址太长自动换行 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{url}
@@ -156,6 +224,15 @@ pageanchor=true,hyperindex=true,
 %%%%%%%%%%%%%%%%%%%% 其它设置 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \EnableCrossrefs
 \CodelineIndex
+\IndexPrologue
+  {
+    \section*{索引}
+    \markboth{索引}{索引}
+    \addcontentsline{toc}{section}{索引}
+    斜体数字指向相应条目描述的页面，
+    下划线数字指向定义的代码行，
+    其它的都指向使用条目的页面。
+  }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
@@ -164,9 +241,9 @@ pageanchor=true,hyperindex=true,
 %</driver>
 % \fi
 %
-% \title{^^A
-% {\Huge \pkg{xcoffins}}\ {\huge \Heiti 宏包}\\[4pt] {\huge \Heiti 设计级别的排版盒子}^^A
-% }
+% \title{\huge\bfseries\color{spot}^^A
+%  \pkg{xcoffins}\ 宏包\\[4pt]\Large 设计级别的排版盒子}
+% 
 %
 % \author{^^A
 %  \LaTeX{}\ 项目\thanks
@@ -182,14 +259,14 @@ pageanchor=true,hyperindex=true,
 %
 % \maketitle
 %
-% \newpage
+% \vfill
 % \tableofcontents
 %
 % \newpage
-
+%
 % \begin{documentation}
 %
-% \section{{\heiti 介绍}：coffin {\heiti 的概念}}
+% \section{介绍：coffin 的概念}
 %
 % 在 \LaTeX3\ 术语(terminology)中，“coffin (排版盒子)”是一个装有排版材料
 % (typeset material)的盒子(box)。除了盒子本身，coffin 的结构(structure)还包括盒子
@@ -201,17 +278,14 @@ pageanchor=true,hyperindex=true,
 % 通过描述一个 coffin 上的手柄与另一个 coffin 的手柄之间的关系，就可以将两个 coffin 对齐。
 % 用文字表达(in words)，一个例子可能是这样的：
 % \begin{quote}
-%   Align the top-left handle of coffin A with the bottom-right
-%   handle of coffin B.
-%
-%  {\kaiti 即：将 coffin A 的左上手柄(top-left handle)与 coffin B 的右下手柄(bottom-right handle)对齐。}
+%  \emph{将 coffin A 的左上手柄(top-left handle)与 coffin B 的右下手柄(bottom-right handle)对齐。}
 % \end{quote}
 %
 % coffin 手柄的位置从视觉上很容易理解。图~\ref{fgr:handles}~显示了
 % 水平模式(horizontal mode)(左)和垂直模式(vertical mode)(右)中 coffin 排版的
 % 标准手柄位置(standard handle positions)。请注意，后一种情况会有更多的手柄可用。
 % 如图所示，每个手柄都是两个杆(pole)相交的结果。例如，coffin 的中心标记为|(hc,vc)|，
-% {\kaiti 即}水平中心杆(horizontal centre pole)与垂直中心杆(vertical centre pole)的交点。
+% \emph{即}水平中心杆(horizontal centre pole)与垂直中心杆(vertical centre pole)的交点。
 % 当杆添加到 coffin 中时，会自动生成新的手柄：手柄是“动态的(dynamic)”实体(entities)。
 %
 % \vspace{4em}
@@ -235,7 +309,7 @@ pageanchor=true,hyperindex=true,
 %
 % \newpage
 %
-%\section{{\heiti 创建和设置} coffins}
+%\section{创建和设置 coffins}
 %
 % 在进行任何对齐(alignment)之前，必须创建 coffins 并创建其内容。除了 coffins 制作以外，
 % 所有的 coffins 操作(operations)都是当前 \TeX{}\ 组(group)的局部操作。
@@ -271,15 +345,15 @@ pageanchor=true,hyperindex=true,
 % \end{function}
 %
 %
-% \section{{\heiti 控制} coffin {\heiti 的杆}}
+% \section{控制 coffin 的杆}
 %
 % 设置或对齐 coffin 时，会自动生成多个标准杆(standard poles)。coffins 的所有标准杆如下：
 % \begin{itemize}[font = \ttfamily]
 %   \item[l] 沿着 coffin 边框左侧边缘(left-hand edge)延伸的杆；
-%   \item[hc] 垂直穿过 coffin 中心的杆，位于边框的左右边缘之间，{\kaiti 即}“水平中心”；
+%   \item[hc] 垂直穿过 coffin 中心的杆，位于边框的左右边缘之间，\emph{即}“水平中心”；
 %   \item[r] 沿着 coffin 边框右侧边缘(right-hand edge)延伸的杆；
 %   \item[b] 沿着 coffin 边框底部边缘(bottom edge)延伸的杆；
-%   \item[vc] 水平穿过 coffin 中心的杆，位于边框的顶底边缘之间，{\kaiti 即}“垂直中心”；
+%   \item[vc] 水平穿过 coffin 中心的杆，位于边框的顶底边缘之间，\emph{即}“垂直中心”；
 %   \item[t] 沿着 coffin 边框顶部边缘(bottom edge)延伸的杆；
 %   \item[H] 沿着 coffin 中排版材料的基线(baseline)延伸的杆。
 % \end{itemize}
@@ -301,8 +375,8 @@ pageanchor=true,hyperindex=true,
 %   \begin{verbatim}
 %     \SetHorizontalPole \MyCoffin {height/3} {\TotalHeight/3}
 %   \end{verbatim}
-%   注意，{\kaiti 水平}(\emph{horizontally})延伸的杆是根据其在 coffin 中的
-%   {\kaiti 垂直}(\emph{vertical})位置来描述的。还请注意，coffin 的总高度(total height)
+%   注意，\emph{水平}(\emph{horizontally})延伸的杆是根据其在 coffin 中的
+%   \emph{垂直}(\emph{vertical})位置来描述的。还请注意，coffin 的总高度(total height)
 %   由 \cs{Height}\ 和 \cs{Depth}\ 之和表示：这两个值都是从 coffin 中材料的
 %   水平基线(horizontal baseline)来测量的。
 % \end{function}
@@ -319,8 +393,8 @@ pageanchor=true,hyperindex=true,
 %   \begin{verbatim}
 %     \SetVerticalPole \MyCoffin {width/3} {\Width/3}
 %   \end{verbatim}
-%   注意，{\kaiti 垂直}(\emph{vertically})延伸的杆是根据其在 coffin 中的
-%   {\kaiti 水平}(\emph{horizontal})位置来描述的。
+%   注意，\emph{垂直}(\emph{vertically})延伸的杆是根据其在 coffin 中的
+%   \emph{水平}(\emph{horizontal})位置来描述的。
 % \end{function}
 %
 % \begin{function}{\TotalHeight}
@@ -358,7 +432,7 @@ pageanchor=true,hyperindex=true,
 % \end{function}
 %
 %
-% \section{{\heiti 旋转} coffins}
+% \section{旋转 coffins}
 %
 % \begin{function}{\RotateCoffin}
 %   \begin{syntax}
@@ -395,7 +469,7 @@ pageanchor=true,hyperindex=true,
 %
 % \newpage
 %
-% \section{{\heiti 调整} coffins {\heiti 的尺寸}}
+% \section{调整 coffins 的尺寸}
 %
 % \begin{function}{\ResizeCoffin}
 %   \begin{syntax}
@@ -440,7 +514,7 @@ pageanchor=true,hyperindex=true,
 % \end{figure}
 %
 %
-% \section{{\heiti 连接} coffins}
+% \section{连接 coffins}
 %
 % coffins 的关键操作(key operation)是将 coffins 相互连接。执行此操作时，
 % 第一个 coffin 始终是“父 coffin”，并通过对齐(alignment)进行更新。
@@ -462,7 +536,7 @@ pageanchor=true,hyperindex=true,
 %   使得过程结束后的 \meta{coffin1}\ 的边界框(bounding box)扩大。
 %   新的边界框将是覆盖两个输入 coffins 的边界框的最小矩形(rectangle)。
 %   当使用 \cs{JoinCoffins}\ 的星号变体(starred variant)时，\meta{coffin1}\ 的
-%   边界框不会改变，{\kaiti 即}~\meta{coffin2}\ 可能会突出于更新
+%   边界框不会改变，\emph{即}~\meta{coffin2}\ 可能会突出于更新
 %   的 \meta{coffin1}\ 的边界框之外。这两种对齐形式之间的区别最好用一个
 %   可视化示例(visual example)来说明。在图~\ref{fgr:alignment}~中，
 %   对两个过程(processes)进行了对比。在这两种情况下，红色的小 coffin 都与
@@ -497,7 +571,7 @@ pageanchor=true,hyperindex=true,
 %   通过首先计算 \meta{handle1}，即 \meta{coffin1-pole1}\ 和 \meta{coffin1-pole2}\ 的交叉点，
 %   以及 \meta{handle2}，即 \meta{coffin2-pole1}\ 和 \meta{coffin2-pole2}\ 的交叉点，
 %   来执行对齐(alignment)。如果这两个 \meta{poles}\ 未指定，\cs{JoinCoffins}\ 将
-%   使用默认值 |(H,l)|，{\kaiti 即} \TeX\ 用于底层框(underlying box)的参考点(reference point)。
+%   使用默认值 |(H,l)|，\emph{即} \TeX\ 用于底层框(underlying box)的参考点(reference point)。
 %   一旦找到了两个 \meta{handles}，\meta{coffin2}\ 就会附着到 \meta{coffin1}，
 %   使得 \meta{handle1}\ 和 \meta{handle2}\ 之间的关系
 %   由 \meta{x-offset}\ 和 \meta{y-offset}\ 来描述。这个 \meta{offset}\ 是可选参数，
@@ -507,7 +581,7 @@ pageanchor=true,hyperindex=true,
 % 输入 coffins 的边界框的最小矩形。因此，它将包括额外的空白(additional white space)，
 % 除非一个 coffin 完全重叠其他(图~\ref{fgr:bounding}，左图)。在重新计算边界框时，
 % coffins 的旋转将考虑旋转后材料的范围(extent)。这意味着在旋转时不会添加
-% {\kaiti 不必要}(\emph{unnecessary})的空白(图~\ref{fgr:bounding}，右图)。
+% \emph{不必要}(\emph{unnecessary})的空白(图~\ref{fgr:bounding}，右图)。
 %
 % \vspace{1em}
 % \begin{figure}[H]
@@ -537,11 +611,11 @@ pageanchor=true,hyperindex=true,
 % 更新 coffin 的结构(structure)内。这样就有可能执行复杂的对齐程序(alignment procedures)。
 % 因此，对齐后的 coffin 的杆可分为三组(groups)：
 % \begin{enumerate}
-%   \item 更新 coffin 的“原始(native)”杆，如 \texttt{l}、\texttt{r}、\texttt{hc}\ {\kaiti 等}。
+%   \item 更新 coffin 的“原始(native)”杆，如 \texttt{l}、\texttt{r}、\texttt{hc}\ \emph{等}。
 %   \item 源自 \meta{coffin1}\ 的杆，如 \texttt{\meta{coffin1}-l}、\texttt{\meta{coffin1}-r}、
-%   \texttt{\meta{coffin1}-hc}\ {\kaiti 等}。
+%   \texttt{\meta{coffin1}-hc}\ \emph{等}。
 %   \item 源自 \meta{coffin2}\ 的杆，如 \texttt{\meta{coffin2}-l}、\texttt{\meta{coffin2}-r}、
-%   \texttt{\meta{coffin2}-hc}\ {\kaiti 等}。
+%   \texttt{\meta{coffin2}-hc}\ \emph{等}。
 % \end{enumerate}
 %
 % 应用此功能可以进行一系列连接操作(joining operations)，如图~\ref{fgr:nested}~所示。
@@ -605,7 +679,7 @@ pageanchor=true,hyperindex=true,
 % \end{figure}
 %
 %
-% \section{{\heiti 排版} coffins}
+% \section{排版 coffins}
 %
 % \begin{function}{\TypesetCoffin}
 %   \begin{syntax}
@@ -623,7 +697,7 @@ pageanchor=true,hyperindex=true,
 % \end{function}
 %
 %
-% \section{{\heiti 测量} coffins}
+% \section{测量 coffins}
 %
 % 在设计过程(design process)中，有些地方可以在杆设置程序(pole-setting procedures)
 % 之外测量 coffins。
@@ -661,7 +735,7 @@ pageanchor=true,hyperindex=true,
 % \end{function}
 %
 %
-% \section{\heiti 诊断函数}
+% \section{诊断函数}
 %
 % 用于跟踪(following) coffin 建造过程(coffin-building process)的诊断数据(diagnostic data)
 % 可通过图形(graphically)和终端(terminal)获得。这反映了 coffins 是视觉构造(visual constructs)的事实。
@@ -724,7 +798,7 @@ pageanchor=true,hyperindex=true,
 %
 % \newpage
 %
-% \section{\heiti 实现}
+% \section{代码实现}
 %
 %    \begin{macrocode}
 %<*package>
@@ -944,7 +1018,7 @@ pageanchor=true,hyperindex=true,
 %
 % \begin{macro}{\CoffinDepth, \CoffinHeight, \CoffinTotalHeigth, \CoffinWidth}
 %   没有什么太复杂的，除了将总高度(total height)设置为表达式(expression)，
-%   以便在前缀(prefixed)为负号(negative sign){\kaiti 等}时能正确操作。
+%   以便在前缀(prefixed)为负号(negative sign)\emph{等}时能正确操作。
 %    \begin{macrocode}
 \NewDocumentCommand \CoffinDepth { m }
 { \dim_eval:n { \coffin_dp:N #1 } }
@@ -988,6 +1062,6 @@ pageanchor=true,hyperindex=true,
 %    \end{macrocode}
 %
 % \end{implementation}
+%
 % \newpage
 % \PrintIndex
-\endinput
