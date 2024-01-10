@@ -58,9 +58,7 @@
 %
 % \GetFileInfo{shellesc.dtx}
 %
-% \ExplSyntaxOn
-% \def\zhfiledate{\exp_args:No \zhdate {\filedate}}
-% \ExplSyntaxOff
+% \edef\zhfiledate{\expandafter\zhdate\expandafter{\filedate}}
 % \title{{\bfseries\huge\color{spot}\textsf{shellesc} 宏包}\thanks{本文件
 %        版本号为 \fileversion, 最后
 %        修改于 \zhfiledate 。}}
