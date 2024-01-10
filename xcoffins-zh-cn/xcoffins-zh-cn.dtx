@@ -1,0 +1,993 @@
+% \iffalse meta-comment
+%
+%% File: xcoffins.dtx
+%
+% Copyright (C) 2010-2024 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "l3experimental bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/latex3
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full]{l3doc}
+\usepackage{xcoffins} % Not yet part of expl3, so not in l3doc
+\NewCoffin \ExampleCoffin
+\NewCoffin \SmallCoffin
+\NewCoffin \OutputCoffin
+\NewCoffin \RedCoffin
+\NewCoffin \BlueCoffin
+\NewCoffin \GreenCoffin
+\NewCoffin \YellowCoffin
+\NewCoffin \OrangeCoffin
+
+
+\usepackage{float} %%%% 防止表格等浮动
+%%%%%%%%%%%%% 以下设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xeCJK}  %%
+
+\setCJKfamilyfont{Heiti}{Source Han Sans SC Normal} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
+\newcommand{\Heiti}{\CJKfamily{Heiti}} %%%% 自定义\Heiti命令，显示思源黑体，用于标题页标题的中文部分
+
+\setCJKfamilyfont{heiti}{Source Han Sans SC Light} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
+\newcommand{\heiti}{\CJKfamily{heiti}} %%自定义\heiti命令，显示思源黑体，用于正文的章节标题
+
+\setCJKfamilyfont{songti}{Source Han Serif SC Light}  %%%% 自定义\songti命令，显示思源宋体，用于正文
+\newcommand{\songti}{\CJKfamily{songti}} %%%% 自定义\songti命令，显示思源宋体，用于正文
+
+\setCJKfamilyfont{heitixt}{思源黑体_CN_LightItalic.otf}  %%%% 自定义\heitixt命令，显示思源黑体斜体
+\newcommand{\heitixt}{\CJKfamily{heitixt}} %%%% 自定义\heitixt命令，显示思源黑体斜体
+
+\setCJKmainfont{Source Han Serif SC Light} %%%% 设置中文的主字体为思源宋体 CN Light
+\setmainfont{SourceSerifPro-Regular.otf} %%%% 设置英文的主字体为Source Serif Pro，最好看
+%%%%\setmainfont{Source Han Serif SC} %%%% 设置英文的主字体为Source Han Serif SC
+%%%%%%\setmainfont{Times New Roman} %%%% 设置英文的主字体为Times New Roman
+
+\setCJKfamilyfont{kaiti}{KaiTi} %%设置中文字体楷体，用于强调
+\newcommand{\kaiti}{\CJKfamily{kaiti}} %%设置中文字体楷体，用于强调
+%%%%%%%%%%%%% 以上设置中文字体 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fontspec}
+
+
+
+%%% 以下输入带圈的数字，调用时的命令：如 \char"2469 生成 ⑩ %%%%
+%%详参目录中的“latex 如何添加圆圈数字？ - Tsingke - 博客园.mhtml”%%%%
+\xeCJKDeclareCharClass{CJK}{%
+  "24EA,        % ⓪
+  "2460->"2473, % ①–⑳
+  "3251->"32BF, % ㉑–㊿
+  "24FF,        % ⓿
+  "2776->"277F, % ❶–❿
+  "24EB->"24F4  % ⓫–⓴
+}
+%%% 以上输入带圈的数字，调用时的命令：如 \char"2469 生成 ⑩ %%%%
+
+%%%%%%%%%%%%% 以下设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{indentfirst} %%% 首行缩进
+\setlength{\parindent}{2em} %%% 缩进2个字符（中文为2个字）
+\linespread{1.5} %%% 设置行间距
+%%%%%%%%%%%%% 以上设置中文版式 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{changepage} %%%用于整体缩进,\begin{adjustwidth}{2cm}{1cm}
+
+%%%%%%% 以下在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
+\makeatletter
+\def\hlinew#1{%
+\noalign{\ifnum0=`}\fi\hrule \@height #1 \futurelet
+\reserved@a\@xhline}
+\makeatother%
+%%%%%%% 以上在 tabular 表格中定制 横线如\hlinew{1.2pt} %%%%%%
+
+%%%%%%% 以下自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\footnotesep}{0.5cm} %%%设置几第脚注之间的距离
+\setlength{\skip\footins}{2.0em} %%%设置脚注与正文之间的距离
+%%\renewcommand\footnoterule{} %%%定义脚注线为空
+\renewcommand\footnoterule{
+     \kern -3pt                         % This -3 is negative
+     \hrule width 0.6\textwidth height 0.6pt % of the sum of this 1
+     \kern 2pt} %%%
+%%%%%%% 以上自定义脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\contentsname}{\centerline {\heiti {\Large 目\ \ \ 录}}}   %%% 在{document}后面加入该命令，将"contents"变成“目  录”
+%%%\renewcommand{\thepart}{第{\Roman{part}}部分}
+\renewcommand{\refname}{\heiti 参考文献}
+\renewcommand{\figurename}{\Heiti 图}
+\renewcommand{\tablename}{\Heiti 表}
+\renewcommand{\abstractname}{\heiti {\Large 摘\ 要}}
+\renewcommand{\listfigurename}{\centerline{\heiti {\large 图形目录}}}
+\renewcommand{\listtablename}{\centerline{\heiti {\large 表格目录}}}
+\renewcommand{\indexname}{\heiti 索引} %%%%让最后生成的PDF文件的书签的索引显示“索引”而不是“Index”
+
+%%%%%%%%%% 以下将正文中的“Part Ⅰ ”中文化成“第Ⅰ部分” %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%\usepackage[center]{titlesec}  %%标题居中
+\usepackage{titlesec}
+\titleformat{\part}{\centering\Large\bfseries}{{\heiti 第} \thepart {\heiti 部分}}{1.2em}{}
+%%%%%%%%%% 以上将正文中的“Part Ⅰ ”中文化成“第Ⅰ部分” %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%% 以下调整目录条目之间的间距 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tocloft}
+\setlength{\cftbeforetoctitleskip}{20pt} %%% “目录”二字的段前间距为20pt
+\setlength{\cftaftertoctitleskip}{20pt}  %%% “目录”二字的段后间距为50pt
+\setlength{\cftbeforepartskip}{25pt} %%% 部分(part)之前的空白为25pt
+\renewcommand{\cftpartafterpnum}{\vspace{6pt}} %%% 部分(part)之后的空白为6pt
+\setlength{\cftbeforesecskip}{7pt} %%% 节(sec)之前的空白为14pt
+\renewcommand{\cftsecafterpnum}{\vspace{3pt}} %%% 节(sec)之后的空白为3pt
+\renewcommand{\cftsubsecafterpnum}{\vspace{3pt}} %%% 小节(subsec)之后的空白为3pt
+%%%%%%% 以上调整目录条目之间的间距 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%% 以下设置书签和目录的颜色、链接%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[svgnames]{xcolor}
+\definecolor{myurlcolor}{rgb}{0,0,0.7}
+%%%%\definecolor{mylinkcolor}{rgb}{0.7,0,0}
+\definecolor{mylinkcolor}{RGB}{178,0,0}
+\definecolor{codecolor}{rgb}{0,0.4,0.2}
+\definecolor{overviewcolor}{rgb}{0,0.2,0.4}
+\definecolor{Mylightgreen}{RGB}{216,233,236} %定义名为Mylightgreen的颜色(RGB分别为216,233,236)
+\usepackage{hyperref}
+\hypersetup{xetex,bookmarks=true,hidelinks,%
+colorlinks,linkcolor=mylinkcolor,urlcolor=myurlcolor,%
+pageanchor=true,hyperindex=true,
+}
+%%%%%%%%%%%% 以上设置书签和目录的颜色、链接%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%% 以下设置网址太长自动换行 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{url}
+\def\UrlBreaks{\do\A\do\B\do\C\do\D\do\E\do\F\do\G\do\H\do\I\do\J
+\do\K\do\L\do\M\do\N\do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V
+\do\W\do\X\do\Y\do\Z\do\[\do\\\do\]\do\^\do\_\do\`\do\a\do\b
+\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j\do\k\do\l\do\m\do\n
+\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y\do\z
+\do\.\do\@\do\\\do\/\do\!\do\_\do\|\do\;\do\>\do\]\do\)\do\,
+\do\?\do\'\do+\do\=\do\#\do\&}
+%%%%%%%%%%%% 以上设置网址太长自动换行 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% 其它设置 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\EnableCrossrefs
+\CodelineIndex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\DocInput{xcoffins-zh-cn.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+% {\Huge \pkg{xcoffins}}\ {\huge \Heiti 宏包}\\[4pt] {\huge \Heiti 设计级别的排版盒子}^^A
+% }
+%
+% \author{^^A
+%  \LaTeX{}\ 项目\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }\ \ \ 【著】^^A
+%    \\[4pt]黄\ 旭\ 华\ \thanks{一名业余 \LaTeX\ 爱好者。}\ \ \ \ \ \ 【译】
+% }
+%
+% \date{分发于\ 2024-01-04}
+%
+% \maketitle
+%
+% \newpage
+% \tableofcontents
+%
+% \newpage
+
+% \begin{documentation}
+%
+% \section{{\heiti 介绍}：coffin {\heiti 的概念}}
+%
+% 在 \LaTeX3\ 术语(terminology)中，“coffin (排版盒子)”是一个装有排版材料
+% (typeset material)的盒子(box)。除了盒子本身，coffin 的结构(structure)还包括盒子
+% 尺寸(size)和形状(shape)的信息，这使得可以轻松地对齐两个或多个 coffins。
+% 这是通过为每个 coffin 提供一系列“杆(pole)”来实现的。这些杆(pole)是在
+% 确定的位置(defined positions)如顶部或水平中心(horizontal centre)穿过 coffin 的
+% 水平线(horizontal lines)和垂直线(vertical lines)，
+% 这些杆(pole)相交(intersect)的点称为“handles (手柄)”。然后，
+% 通过描述一个 coffin 上的手柄与另一个 coffin 的手柄之间的关系，就可以将两个 coffin 对齐。
+% 用文字表达(in words)，一个例子可能是这样的：
+% \begin{quote}
+%   Align the top-left handle of coffin A with the bottom-right
+%   handle of coffin B.
+%
+%  {\kaiti 即：将 coffin A 的左上手柄(top-left handle)与 coffin B 的右下手柄(bottom-right handle)对齐。}
+% \end{quote}
+%
+% coffin 手柄的位置从视觉上很容易理解。图~\ref{fgr:handles}~显示了
+% 水平模式(horizontal mode)(左)和垂直模式(vertical mode)(右)中 coffin 排版的
+% 标准手柄位置(standard handle positions)。请注意，后一种情况会有更多的手柄可用。
+% 如图所示，每个手柄都是两个杆(pole)相交的结果。例如，coffin 的中心标记为|(hc,vc)|，
+% {\kaiti 即}水平中心杆(horizontal centre pole)与垂直中心杆(vertical centre pole)的交点。
+% 当杆添加到 coffin 中时，会自动生成新的手柄：手柄是“动态的(dynamic)”实体(entities)。
+%
+% \vspace{4em}
+% \begin{figure}[H]
+%   \hfil
+%   \begin{minipage}{0.4\textwidth}
+%     \SetHorizontalCoffin\ExampleCoffin
+%       {\color{black!10!white}\rule{1 in}{1 in}}
+%     \DisplayCoffinHandles\ExampleCoffin{blue}
+%   \end{minipage}
+%   \hfil
+%   \begin{minipage}{0.4\textwidth}
+%     \SetVerticalCoffin\ExampleCoffin{1 in}
+%       {\color{black!10!white}\rule{1 in}{1 in}}
+%     \DisplayCoffinHandles\ExampleCoffin{blue}
+%   \end{minipage}
+%   \vspace{4em}
+%   \caption{标准的 coffin 手柄。左图，水平 coffin；右图，垂直 coffin。}
+%   \label{fgr:handles}
+% \end{figure}
+%
+% \newpage
+%
+%\section{{\heiti 创建和设置} coffins}
+%
+% 在进行任何对齐(alignment)之前，必须创建 coffins 并创建其内容。除了 coffins 制作以外，
+% 所有的 coffins 操作(operations)都是当前 \TeX{}\ 组(group)的局部操作。
+% \begin{function}{\NewCoffin}
+%   \begin{syntax}
+%     \cs{NewCoffin} \meta{coffin}
+%   \end{syntax}
+%   在使用 \meta{coffin}\ 之前，它必须使用 \cs{NewCoffin}\ 进行分配(allocated)。
+%   \meta{coffin}\ 的名称应该是一个控制序列(control sequence)
+%   (通常以转义字符 |\| 开始)，例如：
+%   \begin{verbatim}
+%     \NewCoffin\MyCoffin
+%   \end{verbatim}
+%   coffins 是全局分配的(allocated globally)，如果 \meta{coffin}\ 的名称不是
+%   全局唯一的(globally-unique)，就会引起错误。
+% \end{function}
+%
+% \begin{function}{\SetHorizontalCoffin}
+%   \begin{syntax}
+%     \cs{SetHorizontalCoffin} \meta{coffin} \Arg{material}
+%   \end{syntax}
+%   在水平模式(horizontal mode)中排版 \meta{material}，将结果存储在 \meta{coffin}\ 中。
+%   然后根据排版材料(typeset material)的尺寸(size)建立 \meta{coffin}\ 的标准杆(standard poles)。
+% \end{function}
+%
+% \begin{function}{\SetVerticalCoffin}
+%   \begin{syntax}
+%     \cs{SetVerticalCoffin} \meta{coffin} \Arg{width} \Arg{material}
+%   \end{syntax}
+%   在给定 \meta{width}\ 的垂直模式(vertical mode)中排版 \meta{material}，并将结果
+%   存储在 \meta{coffin}\ 中。然后根据排版材料(typeset material)的尺寸(size)建
+%   立 \meta{coffin}\ 的标准杆(standard poles)。
+% \end{function}
+%
+%
+% \section{{\heiti 控制} coffin {\heiti 的杆}}
+%
+% 设置或对齐 coffin 时，会自动生成多个标准杆(standard poles)。coffins 的所有标准杆如下：
+% \begin{itemize}[font = \ttfamily]
+%   \item[l] 沿着 coffin 边框左侧边缘(left-hand edge)延伸的杆；
+%   \item[hc] 垂直穿过 coffin 中心的杆，位于边框的左右边缘之间，{\kaiti 即}“水平中心”；
+%   \item[r] 沿着 coffin 边框右侧边缘(right-hand edge)延伸的杆；
+%   \item[b] 沿着 coffin 边框底部边缘(bottom edge)延伸的杆；
+%   \item[vc] 水平穿过 coffin 中心的杆，位于边框的顶底边缘之间，{\kaiti 即}“垂直中心”；
+%   \item[t] 沿着 coffin 边框顶部边缘(bottom edge)延伸的杆；
+%   \item[H] 沿着 coffin 中排版材料的基线(baseline)延伸的杆。
+% \end{itemize}
+% 此外，装有垂直模式材料(vertical-mode material)的 coffins 还具有反映这些系统更丰富性质(nature)的杆：
+% \begin{itemize}
+%   \item[B] 沿着 coffin 底部材料的基线延伸的杆。
+%   \item[T] 沿着 coffin 顶部材料的基线延伸的杆。
+% \end{itemize}
+%
+% \begin{function}{\SetHorizontalPole}
+%   \begin{syntax}
+%     \cs{SetHorizontalPole} \meta{coffin} \Arg{pole} \Arg{offset}
+%   \end{syntax}
+%   设置横向穿过 \meta{coffin}\ 的 \meta{pole}。\meta{pole}\ 位于 \meta{coffin}\ 基
+%   线的 \meta{offset}\ 上。这个 \meta{offset}\ 应作为尺寸表达式(dimension expression)给出，
+%   这可能包括术语 \cs{TotalHeight}、\cs{Height}、\cs{Depth}\ 和 \cs{Width}，它们
+%   将计算 \meta{coffin}\ 的适当尺寸(appropriate dimensions)。例如，要在 coffin 底部
+%   到顶部距离的三分之一处创建一根横穿 coffin 的杆，适当的指令(instruction)应该是：
+%   \begin{verbatim}
+%     \SetHorizontalPole \MyCoffin {height/3} {\TotalHeight/3}
+%   \end{verbatim}
+%   注意，{\kaiti 水平}(\emph{horizontally})延伸的杆是根据其在 coffin 中的
+%   {\kaiti 垂直}(\emph{vertical})位置来描述的。还请注意，coffin 的总高度(total height)
+%   由 \cs{Height}\ 和 \cs{Depth}\ 之和表示：这两个值都是从 coffin 中材料的
+%   水平基线(horizontal baseline)来测量的。
+% \end{function}
+%
+% \begin{function}{\SetVerticalPole}
+%   \begin{syntax}
+%     \cs{SetVerticalPole} \meta{coffin} \Arg{pole} \Arg{offset}
+%   \end{syntax}
+%   设置垂直穿过 \meta{coffin}\ 的 \meta{pole}。\meta{pole}\ 位于 \meta{coffin}\ 盒子
+%   边框左侧边缘(left-hand edge)的 \meta{offset}\ 上。这个 \meta{offset}\ 应作为
+%   尺寸表达式(dimension expression)给出，这可能包括术语 \cs{TotalHeight}、\cs{Height}、
+%   \cs{Depth}\ 和 \cs{Width}，它们将计算 \meta{coffin}\ 的适当尺寸(appropriate dimensions)。
+%   例如，要在 coffin 的左侧边缘三分之一处创建一根垂直穿过 coffin 的杆，适当的指令(instruction)应该是：
+%   \begin{verbatim}
+%     \SetVerticalPole \MyCoffin {width/3} {\Width/3}
+%   \end{verbatim}
+%   注意，{\kaiti 垂直}(\emph{vertically})延伸的杆是根据其在 coffin 中的
+%   {\kaiti 水平}(\emph{horizontal})位置来描述的。
+% \end{function}
+%
+% \begin{function}{\TotalHeight}
+%   \begin{syntax}
+%     \cs{TotalHeight}
+%   \end{syntax}
+%   在 \cs{SetHorizontalPole}\ 和 \cs{SetVerticalPole}\ 的 \meta{offset}\ 参数中，
+%   \cs{TotalHeight}\ 将给出从底部(base)到相关 coffin 的边界框(bounding box)顶部(top)的距离。
+%
+% \end{function}
+%
+% \begin{function}{\Height}
+%   \begin{syntax}
+%     \cs{Height}
+%   \end{syntax}
+%   在 \cs{SetHorizontalPole}\ 和 \cs{SetVerticalPole}\ 的 \meta{offset}\ 参数中，
+%   \cs{Height}\ 将给出从基线(baseline)到相关 coffin 的边界框(bounding box)顶部(top)的距离。
+% \end{function}
+%
+% \begin{function}{\Depth}
+%   \begin{syntax}
+%     \cs{Depth}
+%   \end{syntax}
+%   在 \cs{SetHorizontalPole}\ 和 \cs{SetVerticalPole}\ 的 \meta{offset}\ 参数中，
+%   \cs{Depth}\ 将给出从基线(baseline)到相关 coffin 的边界框(bounding box)底部(bottom)的距离。
+% \end{function}
+%
+% \begin{function}{\Width}
+%   \begin{syntax}
+%     \cs{Width}
+%   \end{syntax}
+%   在 \cs{SetHorizontalPole}\ 和 \cs{SetVerticalPole}\ 的 \meta{offset}\ 参数中，
+%   \cs{Width}\ 将给出相关 coffin 的边界框(bounding box)从右边缘(right edge)到
+%   左边缘(left edge)的距离。
+% \end{function}
+%
+%
+% \section{{\heiti 旋转} coffins}
+%
+% \begin{function}{\RotateCoffin}
+%   \begin{syntax}
+%     \cs{RotateCoffin} \meta{coffin} \Arg{angle}
+%   \end{syntax}
+%   用给定的关于其参考点的 \meta{angle}\ (逆时针方向给定的角度)旋转 \meta{coffin}。
+%   这个过程将旋转 coffin 的内容(content)和杆(poles)。多次旋转不会导致 coffin 的
+%   边界框(bounding box)不必要地增长(growing)。
+%
+%   旋转对 coffin 的影响如图~\ref{fgr:rotation}~所示。如图所示，coffin 的手柄(handles)将
+%   保持相对于 coffin 内容物的正确位置。旋转后 coffin 的“顶(top)”当然可能
+%   不再是最接近物理页面顶部(top of the physical page)的边缘。
+% \end{function}
+% \vspace{4em}
+%   \begin{figure}[H]
+%     \hfil
+%     \SetHorizontalCoffin\ExampleCoffin
+%       {^^A
+%         \color{black!10!white}\rule{0.5 in}{1 in}^^A
+%         \color{black!20!white}\rule{0.5 in}{1 in}^^A
+%       }
+%     \begin{minipage}{0.4\textwidth}
+%       \DisplayCoffinHandles\ExampleCoffin{blue}
+%     \end{minipage}
+%     \hfil
+%     \begin{minipage}{0.4\textwidth}
+%       \RotateCoffin\ExampleCoffin{45}
+%       \DisplayCoffinHandles\ExampleCoffin{blue}
+%     \end{minipage}
+%     \vspace{3em}
+%     \caption{旋转 Coffin：左图，未旋转；右图，已旋转$45$\textdegree。}
+%     \label{fgr:rotation}
+%   \end{figure}
+%
+% \newpage
+%
+% \section{{\heiti 调整} coffins {\heiti 的尺寸}}
+%
+% \begin{function}{\ResizeCoffin}
+%   \begin{syntax}
+%     \cs{ResizeCoffin} \meta{coffin} \Arg{width} \Arg{total-height}
+%   \end{syntax}
+%   将 \meta{coffin}\ 重新调整(resized)到 \meta{width} 和 \meta{total-height}，
+%   这两者都应作为尺寸表达式(dimension expressions)给出。
+% \end{function}
+%
+% \begin{function}{\ScaleCoffin}
+%   \begin{syntax}
+%     \cs{ScaleCoffin} \meta{coffin} \Arg{x-scale} \Arg{y-scale}
+%   \end{syntax}
+%   在水平方向(horizontal directions)和垂直方向(vertical directions)分别
+%   按 \meta{x-scale}\ 和 \meta{y-scale}\ 因子(factors)缩放(scale) \meta{coffin}。
+%   这两个缩放因子(scale factors)应该作为实数(real numbers)给出。
+% \end{function}
+%
+% \cs{ResizeCoffin}\ 和 \cs{ScaleCoffin}\ 可以互换使用：调整尺寸的最佳形式是
+% 比例因子(scale factors)还是绝对值(absolute values)将取决于上下文(context)(图~\ref{fgr:resizing})。
+% \vspace{1em}
+% \begin{figure}[H]
+%   \hfil
+%   \SetHorizontalCoffin\ExampleCoffin
+%     {^^A
+%       \color{black!10!white}\rule{0.5 in}{1 in}^^A
+%       \color{black!20!white}\rule{0.5 in}{1 in}^^A
+%     }
+%   \begin{minipage}{0.4\textwidth}
+%     \ResizeCoffin \ExampleCoffin {4 cm} {3 cm}
+%     \DisplayCoffinHandles \ExampleCoffin {blue}
+%   \end{minipage}
+%   \hfil
+%   \begin{minipage}{0.4\textwidth}
+%     \ScaleCoffin \ExampleCoffin {2.0} {0.5}
+%     \DisplayCoffinHandles \ExampleCoffin {blue}
+%   \end{minipage}
+%   \vspace{2em}
+%   \caption{调整 coffin 的尺寸：左图，调整尺寸为$4$\,cm乘以$6$\,cm；
+%   右图，$x$ 和 $y$的比例因子分别为 $2$ 和 $0.5$(如图~\ref{fgr:rotation}~所示的 coffin 示例)。}
+%   \label{fgr:resizing}
+% \end{figure}
+%
+%
+% \section{{\heiti 连接} coffins}
+%
+% coffins 的关键操作(key operation)是将 coffins 相互连接。执行此操作时，
+% 第一个 coffin 始终是“父 coffin”，并通过对齐(alignment)进行更新。
+% 第二个“子 coffin”不会因对齐过程(alignment process)而改变。
+%
+% \begin{function}{\JoinCoffins}
+%   \begin{syntax}
+%     \cs{JoinCoffins} *
+%     ~~\meta{coffin1} [ \meta{coffin1-pole1} , \meta{coffin1-pole2} ]
+%     ~~\meta{coffin2} [ \meta{coffin2-pole1} , \meta{coffin2-pole2} ]
+%     ~~( \meta{x-offset} , \meta{y-offset} )
+%   \end{syntax}
+%
+%   两个 coffins 的连接由 \cs{JoinCoffins}\ 函数执行，该函数接受两个强制(mandatory)参数：
+%   “父”\meta{coffin1}\ 和“子”\meta{coffin2}。显示的所有其他参数都是可选的(optional)。
+% \end{function}
+%
+%   标准的 \cs{JoinCoffins}\ 函数将 \meta{coffin2}\ 连接到 \meta{coffin1}，
+%   使得过程结束后的 \meta{coffin1}\ 的边界框(bounding box)扩大。
+%   新的边界框将是覆盖两个输入 coffins 的边界框的最小矩形(rectangle)。
+%   当使用 \cs{JoinCoffins}\ 的星号变体(starred variant)时，\meta{coffin1}\ 的
+%   边界框不会改变，{\kaiti 即}~\meta{coffin2}\ 可能会突出于更新
+%   的 \meta{coffin1}\ 的边界框之外。这两种对齐形式之间的区别最好用一个
+%   可视化示例(visual example)来说明。在图~\ref{fgr:alignment}~中，
+%   对两个过程(processes)进行了对比。在这两种情况下，红色的小 coffin 都与
+%   灰色的大 coffin 对齐。在左边的插图中，使用了 \cs{JoinCoffins}\ 函数，
+%   从而产生了一个扩展的边界框(expanded bounding box)。相比之下，
+%   右边的插图使用了 \cs{AttachCoffin}，这意味着边界框不包括较小 coffin 的区域。
+% \vspace{1em}
+%   \begin{figure}[H]
+%     \fboxsep 0 pt\relax
+%     \SetHorizontalCoffin\ExampleCoffin
+%       {\color{black!20!white}\rule{1 in}{1 in}}
+%     \SetHorizontalCoffin \SmallCoffin
+%       {\color{red!20!white}\rule{0.1 in}{0.1 in}}
+%     \hfil
+%     \begin{minipage}{0.4\textwidth}
+%       \centering
+%       \JoinCoffins\ExampleCoffin[vc,r]\SmallCoffin[vc,l]
+%       \fbox{\TypesetCoffin\ExampleCoffin}
+%     \end{minipage}
+%     \hfil
+%     \begin{minipage}{0.4\textwidth}
+%       \centering
+%        \JoinCoffins*\ExampleCoffin[vc,r]\SmallCoffin[vc,l]
+%       \fbox{\TypesetCoffin\ExampleCoffin}%
+%     \end{minipage}
+%     \vspace{2em}
+%     \caption{\cs{JoinCoffins} (左图)和 \cs{JoinCoffins*} (右图)之间的对比；
+%     coffin 的边界框(bounding box)以黑色显示。}
+%     \label{fgr:alignment}
+%   \end{figure}
+%
+%   通过首先计算 \meta{handle1}，即 \meta{coffin1-pole1}\ 和 \meta{coffin1-pole2}\ 的交叉点，
+%   以及 \meta{handle2}，即 \meta{coffin2-pole1}\ 和 \meta{coffin2-pole2}\ 的交叉点，
+%   来执行对齐(alignment)。如果这两个 \meta{poles}\ 未指定，\cs{JoinCoffins}\ 将
+%   使用默认值 |(H,l)|，{\kaiti 即} \TeX\ 用于底层框(underlying box)的参考点(reference point)。
+%   一旦找到了两个 \meta{handles}，\meta{coffin2}\ 就会附着到 \meta{coffin1}，
+%   使得 \meta{handle1}\ 和 \meta{handle2}\ 之间的关系
+%   由 \meta{x-offset}\ 和 \meta{y-offset}\ 来描述。这个 \meta{offset}\ 是可选参数，
+%   如果未给出 \meta{offset}，则使用 |(0 pt, 0 pt)|。
+%
+% 注意，当使用 \cs{JoinCoffins}\ 时，新的边界框(bounding box)是包含两个
+% 输入 coffins 的边界框的最小矩形。因此，它将包括额外的空白(additional white space)，
+% 除非一个 coffin 完全重叠其他(图~\ref{fgr:bounding}，左图)。在重新计算边界框时，
+% coffins 的旋转将考虑旋转后材料的范围(extent)。这意味着在旋转时不会添加
+% {\kaiti 不必要}(\emph{unnecessary})的空白(图~\ref{fgr:bounding}，右图)。
+%
+% \vspace{1em}
+% \begin{figure}[H]
+%   \fboxsep 0 pt\relax
+%   \SetHorizontalCoffin\ExampleCoffin
+%     {\color{black!20!white}\rule{1 in}{1 in}}
+%   \SetHorizontalCoffin\SmallCoffin
+%     {\color{red!20!white}\rule{0.1 in}{0.1 in}}
+%   \JoinCoffins\ExampleCoffin[vc,r]\SmallCoffin[vc,l]
+%   \hfil
+%   \begin{minipage}{0.4\textwidth}
+%     \centering
+%     \fbox{\copy\ExampleCoffin}
+%   \end{minipage}
+%   \hfil
+%   \begin{minipage}{0.4\textwidth}
+%     \centering
+%     \RotateCoffin\ExampleCoffin{135}
+%     \fbox{\copy\ExampleCoffin}
+%   \end{minipage}
+%   \vspace{2em}
+%   \caption{已连接的 coffin 的旋转效果：黑线显示 coffin 的边界框。}
+%   \label{fgr:bounding}
+% \end{figure}
+%
+% 作为连接过程(joining procedure)的一部分，两个输入 coffins 的杆(poles)被保存在
+% 更新 coffin 的结构(structure)内。这样就有可能执行复杂的对齐程序(alignment procedures)。
+% 因此，对齐后的 coffin 的杆可分为三组(groups)：
+% \begin{enumerate}
+%   \item 更新 coffin 的“原始(native)”杆，如 \texttt{l}、\texttt{r}、\texttt{hc}\ {\kaiti 等}。
+%   \item 源自 \meta{coffin1}\ 的杆，如 \texttt{\meta{coffin1}-l}、\texttt{\meta{coffin1}-r}、
+%   \texttt{\meta{coffin1}-hc}\ {\kaiti 等}。
+%   \item 源自 \meta{coffin2}\ 的杆，如 \texttt{\meta{coffin2}-l}、\texttt{\meta{coffin2}-r}、
+%   \texttt{\meta{coffin2}-hc}\ {\kaiti 等}。
+% \end{enumerate}
+%
+% 应用此功能可以进行一系列连接操作(joining operations)，如图~\ref{fgr:nested}~所示。
+% 在本例中，用于对齐的方案(scheme)如下：
+% \begin{verbatim}
+%   \SetHorizontalCoffin\OutputCoffin{}
+%   \SetHorizontalCoffin\RedCoffin
+%     {\color{red!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[vc,hc]\RedCoffin[vc,hc]
+%   \SetHorizontalCoffin\BlueCoffin
+%     {\color{blue!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\RedCoffin-vc,\RedCoffin-hc]
+%     \BlueCoffin[b,l]
+%   \SetHorizontalCoffin\GreenCoffin
+%     {\color{green!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\BlueCoffin-vc,\BlueCoffin-hc]
+%     \GreenCoffin[b,l]
+%   \SetHorizontalCoffin\YellowCoffin
+%     {\color{yellow!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\GreenCoffin-vc,\GreenCoffin-hc]
+%     \YellowCoffin[b,l]
+%   \SetHorizontalCoffin \OrangeCoffin
+%     {\color{orange!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\BlueCoffin-t,\BlueCoffin-l]
+%     \OrangeCoffin[b,r]
+%   \TypesetCoffin\OutputCoffin
+% \end{verbatim}
+% 此过程首先设置 \cs{OutputCoffin}\ 以保存连接的输出(joined output)。然后，
+% 每个连接都会发生相对于前一个连接放置新添加项(new addition)的过程。
+% 由于每个连接的 coffin 都有一个唯一的名称，因此可以相对于组件(assembly)的
+% 每一个组成部分(component parts)进行对齐。这可以通过基于 \cs{BlueCoffin}\ 的
+% 早期位置(earlier placement)添加最终的 \cs{OrangeCoffin}\ 来说明。
+%
+% \vspace{1em}
+% \begin{figure}[H]
+%   \centering
+%   \SetHorizontalCoffin\OutputCoffin{}
+%   \SetHorizontalCoffin\RedCoffin
+%     {\color{red!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[vc,hc]\RedCoffin[vc,hc]
+%   \SetHorizontalCoffin\BlueCoffin
+%     {\color{blue!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\RedCoffin-vc,\RedCoffin-hc]
+%     \BlueCoffin[b,l]
+%   \SetHorizontalCoffin\GreenCoffin
+%     {\color{green!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\BlueCoffin-vc,\BlueCoffin-hc]
+%     \GreenCoffin[b,l]
+%   \SetHorizontalCoffin\YellowCoffin
+%     {\color{yellow!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\GreenCoffin-vc,\GreenCoffin-hc]
+%     \YellowCoffin[b,l]
+%   \SetHorizontalCoffin \OrangeCoffin
+%     {\color{orange!20!white}\rule{0.2 in}{0.2 in}}
+%   \JoinCoffins\OutputCoffin[\BlueCoffin-t,\BlueCoffin-l]
+%     \OrangeCoffin[b,r]
+%   \TypesetCoffin\OutputCoffin
+%   \vspace{1em}
+%   \caption{使用以前操作中的杆(poles)对齐 coffins。}
+%   \label{fgr:nested}
+% \end{figure}
+%
+%
+% \section{{\heiti 排版} coffins}
+%
+% \begin{function}{\TypesetCoffin}
+%   \begin{syntax}
+%     \cs{TypesetCoffin}
+%     ~~\meta{coffin} [ \meta{pole1} , \meta{pole2} ]
+%     ~~( \meta{x-offset} , \meta{y-offset} )
+%   \end{syntax}
+%   通过首先计算 \meta{handle}，即 \meta{pole1}\ 和 \meta{pole2}\ 的交叉点来排版。
+%   这是一个可选参数，如果未给出，则使用 |(H,l)|，即
+%   底层框(underlying box)的 \TeX{}\ 参考点(reference point)。然后对 coffin 进行排版，
+%   以使文档中的当前参考点与 \meta{handle}\ 由 \meta{x-offset}\ 和 \meta{y-offset}\ 描述。
+%   这 \meta{offset}\ 是可选的，如果未给出 \meta{offset}，则使用 |(0pt, 0pt)|。
+%   因此，排版 coffin 类似于执行一个对齐(alignment)，
+%   其中“父(parent)” coffin 是当前的插入点(insertion point)。
+% \end{function}
+%
+%
+% \section{{\heiti 测量} coffins}
+%
+% 在设计过程(design process)中，有些地方可以在杆设置程序(pole-setting procedures)
+% 之外测量 coffins。
+%
+% \begin{function}{\CoffinDepth}
+%   \begin{syntax}
+%     \cs{CoffinDepth} \meta{coffin}
+%   \end{syntax}
+%   以适合在 \meta{dimension expression}\ 中使用的形式计算 \meta{coffin}\ 的深度(depth，低于基线)，
+%   例如，|\setlength{\mylength}{\CoffinDepth\ExampleCoffin}|。
+% \end{function}
+%
+% \begin{function}{\CoffinHeight}
+%   \begin{syntax}
+%     \cs{CoffinHeight} \meta{coffin}
+%   \end{syntax}
+%   以适合在 \meta{dimension expression}\ 中使用的形式计算 \meta{coffin}\ 的高度(height，高于基线)，
+%   例如，|\setlength{\mylength}{\CoffinHeight\ExampleCoffin}|。
+% \end{function}
+%
+% \begin{function}{\CoffinTotalHeight}
+%   \begin{syntax}
+%     \cs{CoffinTotalHeight} \meta{coffin}
+%   \end{syntax}
+%   以适合在 \meta{dimension expression}\ 中使用的形式计算 \meta{coffin}\ 的总高度(total height)，
+%   例如，|\setlength{\mylength}{\CoffinTotalHeight\ExampleCoffin}|。
+% \end{function}
+%
+% \begin{function}{\CoffinWidth}
+%   \begin{syntax}
+%     \cs{CoffinWidth} \meta{coffin}
+%   \end{syntax}
+%   以适合在 \meta{dimension expression}\ 中使用的形式计算 \meta{coffin}\ 的宽度(width)，
+%   例如，|\setlength{\mylength}{\CoffinWidth\ExampleCoffin}|。
+% \end{function}
+%
+%
+% \section{\heiti 诊断函数}
+%
+% 用于跟踪(following) coffin 建造过程(coffin-building process)的诊断数据(diagnostic data)
+% 可通过图形(graphically)和终端(terminal)获得。这反映了 coffins 是视觉构造(visual constructs)的事实。
+%
+% \begin{function}{\DisplayCoffinHandles}
+%   \begin{syntax}
+%     \cs{DisplayCoffinHandles} \meta{coffin} \Arg{color}
+%   \end{syntax}
+%   这个函数首先计算 \meta{coffin}\ 的所有 \meta{poles}\ 之间的交点，给出一组 \meta{handles}。
+%   然后，在源的当前位置(current location in the source)打印 \meta{coffin}，
+%   并将 \meta{handles}\ 的位置(position) 标记在 coffin 上。
+%   \meta{handles}\ 将被标记为这个过程(process)的一部分: \meta{handles}\ 的
+%   位置(locations)和标签(labels)都以指定的 \meta{color}\ 被打印。
+% \end{function}
+%
+% \begin{function}{\MarkCoffinHandle}
+%   \begin{syntax}
+%     \cs{MarkCoffinHandle} \meta{coffin}
+%     ~~[ \meta{pole1} , \meta{pole2} ] \Arg{color}
+%   \end{syntax}
+%   这个函数首先计算由 \meta{pole1}\ 和 \meta{pole2}\ 的交点所定义的 \meta{coffin}\ 的 \meta{handle}。
+%   然后标记出 \meta{handle}\ 在 \meta{coffin}\ 上的位置。\meta{handle}\ 将被标记为此过程的一部分：
+%   \meta{handle}\ 的位置(location)和标签(label)都以指定的 \meta{color}\ 被打印。
+%   如果没有给出 \meta{poles}，则使用缺省值 |(H,l)|。
+% \end{function}
+%
+% \begin{function}{\ShowCoffinStructure}
+%   \begin{syntax}
+%     \cs{ShowCoffinStructure} \meta{coffin}
+%   \end{syntax}
+%   这个函数在终端(terminal)显示了 \meta{coffin}\ 的结构信息(structural information)。
+%   给出了排版材料(typeset material)的宽度(width)、高度(height)和深度(depth)，
+%   以及 coffin 所有杆(location)的位置。例如，对于图~\ref{fgr:rotation}~中的
+%   已旋转的(rotated) coffin，\cs{ShowCoffinStructure}\ 的输出是：
+%   \begin{verbatim}
+%     Size of coffin \ExampleCoffin:
+%     > ht = 72.26999pt
+%     > dp = 0.0pt
+%     > wd = 72.26999pt
+%     Poles of coffin \ExampleCoffin:
+%     >  l  =>  {0pt}{0pt}{0pt}{1000pt}
+%     >  B  =>  {0pt}{0pt}{1000pt}{0pt}
+%     >  H  =>  {0pt}{0pt}{1000pt}{0pt}
+%     >  T  =>  {0pt}{0pt}{1000pt}{0pt}
+%     >  hc  =>  {36.135pt}{0pt}{0pt}{1000pt}
+%     >  r  =>  {72.26999pt}{0pt}{0pt}{1000pt}
+%     >  vc  =>  {0pt}{36.135pt}{1000pt}{0pt}
+%     >  t  =>  {0pt}{72.26999pt}{1000pt}{0pt}
+%     >  b  =>  {0pt}{0.0pt}{1000pt}{0pt}.
+%     <recently read> }
+%   \end{verbatim}
+%   请注意 coffin 的杆(poles)由四个值定义：杆通过的点的 $x$ 和 $y$ 坐标(co-ordinates)
+%   以及表示杆方向的向量(vector)的 $x$-分量和$y$-分量。决定杆方向的是后者之间的比值(ratio)，
+%   而不是绝对值(absolute values)。
+% \end{function}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \newpage
+%
+% \section{\heiti 实现}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=coffin>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProvidesExplPackage{xcoffins}{2024-01-04}{}
+  {L3 Experimental design level coffins}
+%    \end{macrocode}
+%
+% \begin{variable}
+%   {
+%     \l_@@_A_hpole_tl          ,
+%     \l_@@_A_vpole_tl          ,
+%     \l_@@_B_hpole_tl          ,
+%     \l_@@_B_vpole_tl          ,
+%     \l_@@_bound_box_grow_bool ,
+%     \l_@@_hoffset_dim         ,
+%     \l_@@_voffset_dim
+%   }
+%   对齐系统(alignment system)的键值定义(Key--value definitions)。除了 \texttt{grow-bounding-box}\ 之外，
+%   所有这些都必须给定一个值。
+%    \begin{macrocode}
+\keys_define:nn { coffin }
+{
+    coffin1-hpole     .tl_set:N         = \l_@@_A_hpole_tl          ,
+    coffin1-hpole     .value_required:n = true                      ,
+    coffin1-vpole     .tl_set:N         = \l_@@_A_vpole_tl          ,
+    coffin1-vpole     .value_required:n = true                      ,
+    coffin2-hpole     .tl_set:N         = \l_@@_B_hpole_tl          ,
+    coffin2-hpole     .value_required:n = true                      ,
+    coffin2-vpole     .tl_set:N         = \l_@@_B_vpole_tl          ,
+    coffin2-vpole     .value_required:n = true                      ,
+    grow-bounding-box .bool_set:N       = \l_@@_bound_box_grow_bool ,
+    grow-bounding-box .default:n        = true                      ,
+    hoffset           .dim_set:N        = \l_@@_hoffset_dim         ,
+    hoffset           .value_required:n = true                      ,
+    voffset           .dim_set:N        = \l_@@_voffset_dim         ,
+    voffset           .value_required:n = true
+}
+\keys_set:nn { coffin }
+{
+    coffin1-hpole     = H    ,
+    coffin1-vpole     = l    ,
+    coffin2-hpole     = H    ,
+    coffin2-vpole     = l    ,
+    grow-bounding-box = true ,
+    hoffset           = 0 pt ,
+    voffset           = 0 pt
+}
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_design_names:N}
+% \begin{variable}{\Height, \Depth, \Width, \TotalHeight}
+% \begin{variable}
+%   {\l_@@_height_dim, \l_@@_depth_dim, \l_@@_width_dim, \l_@@_totalheight_dim}
+%   为各种 coffin 尺寸(dimensions)设置设计级别的名称(design-level names)。
+%   它们不是在这个范围(scope)之外定义的，而是尺寸，
+%   以便它们在例如 \cs{fp_eval:n}\ 这样的内部能正确工作(work correctly)。
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_design_names:N #1
+{
+    \dim_set:Nn \l_@@_height_dim { \coffin_ht:N #1 }
+    \dim_set:Nn \l_@@_depth_dim  { \coffin_dp:N #1 }
+    \dim_set:Nn \l_@@_width_dim  { \coffin_wd:N #1 }
+    \dim_set:Nn \l_@@_totalheight_dim
+    { \l_@@_height_dim + \l_@@_depth_dim }
+    \cs_set_eq:NN \Height \l_@@_height_dim
+    \cs_set_eq:NN \Depth \l_@@_depth_dim
+    \cs_set_eq:NN \Width \l_@@_width_dim
+    \cs_set_eq:NN \TotalHeight \l_@@_totalheight_dim
+}
+\dim_new:N \l_@@_height_dim
+\dim_new:N \l_@@_depth_dim
+\dim_new:N \l_@@_width_dim
+\dim_new:N \l_@@_totalheight_dim
+%    \end{macrocode}
+% \end{variable}
+% \end{variable}
+% \end{macro}
+%
+% 其中大部分或多或少只是直接传递数据(passing data straight through)。
+%
+% \begin{macro}{\NewCoffin}
+% 这是一个非常简单的转换(conversion)。
+%    \begin{macrocode}
+\NewDocumentCommand \NewCoffin { m }
+{ \coffin_new:N #1 }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\SetHorizontalCoffin}
+% \begin{macro}{\SetVerticalCoffin}
+%   这些都是直接的翻译(straight-forward translations)。
+%    \begin{macrocode}
+\NewDocumentCommand \SetHorizontalCoffin { m +m }
+{ \hcoffin_set:Nn #1 {#2} }
+\NewDocumentCommand \SetVerticalCoffin { m m +m }
+{ \vcoffin_set:Nnn #1 {#2} {#3} }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\SetHorizontalPole}
+% \begin{macro}{\SetVerticalPole}
+%   这里，需要为 coffin 尺寸设置设计级别名称(design-level names)。这需要分组(grouping)，
+%   但 coffin 工作(work)必须在组之外(outside of the group)进行。因此，
+%   这里有一点展开技巧(expansion trickery)。
+%    \begin{macrocode}
+\NewDocumentCommand \SetHorizontalPole { m m m }
+  {
+    \group_begin:
+      \@@_design_names:N #1
+    \use:e
+      {
+        \group_end:
+        \coffin_set_horizontal_pole:Nnn #1
+          { \exp_not:n {#2} } { \dim_eval:n {#3} }
+      }
+  }
+\NewDocumentCommand \SetVerticalPole { m m m }
+  {
+    \group_begin:
+      \@@_design_names:N #1
+    \use:e
+      {
+        \group_end:
+        \coffin_set_vertical_pole:Nnn #1
+          { \exp_not:n {#2} } { \dim_eval:n {#3} }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\JoinCoffins}
+%   \cs{JoinCoffins}\ 函数需要对输入语法(input syntax)做一些工作，
+%   因为有许多可选参数(optional arguments)需要考虑。这里的想法是 \cs{JoinCoffins}\ 既
+%   可以用来扩展 \meta{coffin1}\ 的边界框，也可以在不扩展边界框的情况下添加 \meta{coffin2}。
+%   还有两个手柄位置(handle positions)和偏移量(offset)要排序。
+%    \begin{macrocode}
+\NewDocumentCommand \JoinCoffins
+  {
+    o
+    s
+    m
+    > { \SplitArgument { 1 } { , } } O { H , l }
+    m
+    > { \SplitArgument { 1 } { , } } O { H , l }
+    > { \SplitArgument { 1 } { , } } D ( ) { 0 pt , 0 pt }
+  }
+  {
+    \IfNoValueTF {#1}
+      {
+        \IfBooleanTF #2
+          { \coffin_attach:NnnNnnnn #3 #4 #5 #6 #7 }
+          { \coffin_join:NnnNnnnn #3 #4 #5 #6 #7 }
+      }
+      {
+        \group_begin:
+          \keys_set:nn { coffin } {#1}
+          \tl_set:Ne \l_@@_tmp_tl
+            {
+              \group_end:
+              \bool_if:NTF \l_@@_bound_box_grow_bool
+                { \coffin_join:NnnNnnnn }
+                { \coffin_attach:NnnNnnnn }
+              \exp_not:N #3
+              { \exp_not:o { \l_@@_A_hpole_tl } }
+              { \exp_not:o { \l_@@_A_vpole_tl } }
+              \exp_not:N #5
+              { \exp_not:o { \l_@@_B_hpole_tl } }
+              { \exp_not:o { \l_@@_B_vpole_tl } }
+              { \dim_use:N \l_@@_hoffset_dim }
+              { \dim_use:N \l_@@_voffset_dim }
+            }
+        \l_@@_tmp_tl
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\TypesetCoffin}
+%   对于 coffins 的排版，有两个可选参数，这两个参数都需要拆分(split)。
+%   这是 \cs{JoinCoffins}\ 所需代码的一个更简单的例子。
+%    \begin{macrocode}
+\NewDocumentCommand \TypesetCoffin
+{
+    m
+    > { \SplitArgument { 1 } { , } } O { H , l }
+    > { \SplitArgument { 1 } { , } } D ( ) { 0 pt , 0 pt }
+}
+{ \coffin_typeset:Nnnnn #1 #2 #3 }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\RotateCoffin}
+% \begin{macro}{\ResizeCoffin}
+% \begin{macro}{\ScaleCoffin}
+%   更多直接拷贝(straight-forward copies)。
+%    \begin{macrocode}
+\NewDocumentCommand \RotateCoffin  { m m }
+{ \coffin_rotate:Nn #1 {#2} }
+\NewDocumentCommand \ResizeCoffin  { m m m }
+{ \coffin_resize:Nnn #1 {#2} {#3} }
+\NewDocumentCommand \ScaleCoffin  { m m m }
+{ \coffin_scale:Nnn #1 {#2} {#3} }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\CoffinDepth, \CoffinHeight, \CoffinTotalHeigth, \CoffinWidth}
+%   没有什么太复杂的，除了将总高度(total height)设置为表达式(expression)，
+%   以便在前缀(prefixed)为负号(negative sign){\kaiti 等}时能正确操作。
+%    \begin{macrocode}
+\NewDocumentCommand \CoffinDepth { m }
+{ \dim_eval:n { \coffin_dp:N #1 } }
+\NewDocumentCommand \CoffinHeight { m }
+{ \dim_eval:n { \coffin_ht:N #1 } }
+\NewDocumentCommand \CoffinTotalHeight { m }
+{ \dim_eval:n { \coffin_ht:N #1 + \coffin_dp:N #1 } }
+\NewDocumentCommand \CoffinWidth { m }
+{ \dim_eval:n { \coffin_wd:N #1 } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DisplayCoffinHandles}
+%   显示所有手柄(handles)稍微容易一点，因为不必担心手柄。
+%    \begin{macrocode}
+\NewDocumentCommand \DisplayCoffinHandles { m m }
+{ \coffin_if_exist:NT #1 { \coffin_display_handles:Nn #1 {#2} } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\MarkCoffinHandle}
+%   标记手柄(marking a handle)需要对输入(input)进行一些处理，
+%   这样设计级别的接口(design-level interface)就“漂亮(nice)”了。
+%    \begin{macrocode}
+\NewDocumentCommand \MarkCoffinHandle
+{ m > { \SplitArgument { 1 } { , } } O { H , l } m }
+{  \coffin_if_exist:NT #1 { \coffin_mark_handle:Nnnn #1 #2 {#3} } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ShowCoffinStructure}
+%   再次回到易于实现的函数(easy-to-implement functions)。
+%    \begin{macrocode}
+\NewDocumentCommand \ShowCoffinStructure { m }
+{ \coffin_show_structure:N #1 }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+% \newpage
+% \PrintIndex
+\endinput
