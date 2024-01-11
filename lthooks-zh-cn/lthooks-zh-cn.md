@@ -1,6 +1,6 @@
 # LATEX’s hook management
 ## LATEX 的钩子管理
-**lthooks-doc.pdf** 的中文文档 **lthooks-doc-zh-cn.pdf** 和 **lthooks-code.pdf** 的中文文档 **lthooks-code-zh-cn.pdf** ，本文档是关于 LaTeX2ε 中钩子的管理和说明。比较典型的应用就是 ctex 宏包中通过对 `\AtBeginDocument` 和 `\AtEndDocument` 这两个钩子的应用，实现了中文文档的无感化的处理。然而钩子的用处其实远不止于此， LaTeX 中其实可以对命令、环境、文件、include、包和类都使用钩子。
+**lthooks-doc.pdf** 的中文文档 **lthooks-doc-zh-cn.pdf** 和 **lthooks-code.pdf** 的中文文档 **lthooks-code-zh-cn.pdf** ，本文档是关于 LaTeX2ε 中钩子的管理和说明，英文版既包含在source2e （命令行运行： `texdoc source2e`）中作为其中关于钩子管理部分的内容，也作为单独的 lthooks.pdf （命令行运行： `texdoc lthooks`）发布。钩子（Hook）比较典型的应用就是 ctex 宏包中通过对 `\AtBeginDocument` 和 `\AtEndDocument` 这两个钩子的应用，实现了中文文档的无感化的处理。然而钩子的用处其实远不止于此， LaTeX 中其实可以对命令、环境、文件、include、包和类都使用钩子。
 
 为方便阅读，中文版的翻译文档在部分内容颜色上做了一定的区分，宏命令和标题以及其它带链接的部分（比如目录和引用等）用蓝色，抄录（verbatim）环境和类似的环境用的是绿色，latex 源代码用的是褐色。
 
