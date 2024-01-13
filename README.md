@@ -59,6 +59,6 @@ latexmk -xelatex <source-filename-with-ext>
 [13]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/ltxdoc-zh-cn/ltxdoc-zh-cn.md
 [14]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/l3doc-zh-cn/l3doc-zh-cn.md
 [15]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/hyperref-zh-cn/hyperref-zh-cn.md
-[16]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/lthooks-zh-cn/lthooks-zh-cn.md
+[16]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/source2e-zh-cn/lthooks-zh-cn/lthooks-zh-cn.md
 [17]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/shellesc-zh-cn/shellesc-zh-cn.md
 [18]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/xcoffins-zh-cn/xcoffins-zh-cn.md
