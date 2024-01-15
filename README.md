@@ -45,7 +45,7 @@ latexmk -xelatex <source-filename-with-ext>
 ---
 ***Happy TeXing!***
 
-[1]:https://github.com/rockyzhz/latexdoc-chinese-translation/raw/main/etoolbox-zh-cn/ctex-fontset-source.def
+[1]:https://github.com/rockyzhz/latexdoc-chinese-translation/raw/main/ctex-fontset-source.def
 [2]:https://texer.cn/wp-content/uploads/Source.rar
 [3]:https://source.typekit.com/
 [4]:https://github.com/rockyzhz/DocStrip-zh-cn
