@@ -163,7 +163,7 @@
 % |\w| 序列表示任何\enquote{word}字符，而 |+|
 % 表示 |\w| 序列应重复尽可能多次（至少一次），因此匹配输入记号列表中的一个单词。
 % 在替换文本中，|\0| 表示完全匹配（这里是一个单词）。
-% 通过 |\c{emph}| 插入 |\emph| 命令，并将其参数 |\0| 放在大括号 |\cB\{| 和 |\cE\}| 之间。
+% 通过 |\c{emph}| 插入 |\emph| 命令，并将其参数 |\0| 放在括号 |\cB\{| 和 |\cE\}| 之间。
 %
 % 如果要多次使用正则表达式，
 % 可以编译一次，并使用 \cs{regex_set:Nn} 将其存储在正则表达式变量中。
@@ -893,8 +893,8 @@
 % \begin{itemize}
 %   \item （编译）分析正则表达式，找到无效输入，并将其转换为内部表示。
 %   \item （构建）将已编译的正则表达式转换为具有$O(n)$状态的非确定有限自动机（\textsc{nfa}），
-%     该自动机精确接受与该正则表达式匹配的标记列表。
-%   \item （匹配）循环遍历查询标记列表的每个标记（每个\enquote{位置}），并在\textsc{nfa}中
+%     该自动机精确接受与该正则表达式匹配的记号列表。
+%   \item （匹配）循环遍历查询记号列表的每个标记（每个\enquote{位置}），并在\textsc{nfa}中
 %     探索每个可能的路径（\enquote{活动线程}），按照量词的贪婪性确定的顺序考虑活动线程。
 % \end{itemize}
 %
@@ -905,10 +905,10 @@
 %     其中$\texttt{min_pos} - 1 \leq \meta{position} \leq \texttt{max_pos}$。
 %     $\texttt{min_pos} - 1$和$\texttt{max_pos}$对应于虚构的开始和结束标记
 %     （带有不存在的类别码和字符码）。$\texttt{max_pos}$只在处理过程中相当晚地设置。
-%   \item \emph{查询}：我们应用正则表达式的标记列表。
+%   \item \emph{查询}：我们应用正则表达式的记号列表。
 %   \item \emph{状态}：\textsc{nfa}的每个状态由整数\meta{state}标记，
 %     满足$\texttt{min_state} \leq \meta{state} < \texttt{max_state}$。
-%   \item \emph{活动线程}：在匹配过程中，通过读取查询标记列表达到\textsc{nfa}的状态。
+%   \item \emph{活动线程}：在匹配过程中，通过读取查询记号列表达到\textsc{nfa}的状态。
 %     这些线程按照量词的贪婪性从最好到最不受欢迎的顺序排列。
 %   \item \emph{步骤}：在匹配时使用，从$0$开始，每次读取一个字符时递增，
 %     在搜索重复匹配时不重置。整数\cs{l_@@_step_int}是匹配算法所有步骤的唯一标识符。
@@ -936,7 +936,7 @@
 % 在实际构建结果时，
 % \begin{itemize}
 %   \item \tn{toks}\meta{position}保存\meta{tokens}，\texttt{o}-和\texttt{e}-展开为查询中的第\meta{position}个标记。
-%   \item \cs{g_@@_balance_intarray}保存在标记列表中该点之前出现的开始组和结束组字符标记的平衡。
+%   \item \cs{g_@@_balance_intarray}保存在记号列表中该点之前出现的开始组和结束组字符标记的平衡。
 % \end{itemize}
 %
 % 代码结构如下。变量在相关部分引入。首先介绍一些通用的辅助函数。然后是用于编译正则表达式和显示编译结果的代码。
@@ -1019,7 +1019,7 @@
 % \end{macro}
 %
 % \begin{macro}[rEXP]{\@@_curr_cs_to_str:}
-%   展开为当前位置\cs{l_@@_curr_pos_int}处的令牌（已知是控制序列）的字符串表示。
+%   展开为当前位置\cs{l_@@_curr_pos_int}处的记号（已知是控制序列）的字符串表示。
 %   它应该仅在\texttt{e}/\texttt{x}-扩展中使用，以避免丢失前导空格。
 %    \begin{macrocode}
 \cs_new:Npn \@@_curr_cs_to_str:
@@ -1057,7 +1057,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_tl_odd_items:n, \@@_tl_even_items:n, \@@_tl_even_items_loop:nn}
-%   一次处理一个令牌列表中的一对项目，留下奇数编号或偶数编号的项目（第一个项目编号为$1$）。
+%   一次处理一个记号列表中的一对项目，留下奇数编号或偶数编号的项目（第一个项目编号为$1$）。
 %    \begin{macrocode}
 \cs_new:Npn \@@_tl_odd_items:n #1 { \@@_tl_even_items:n { ? #1 } }
 \cs_new:Npn \@@_tl_even_items:n #1
@@ -1123,7 +1123,7 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_balance_int}
-%   在此阶段，\cs{l_@@_balance_int}计算在标记列表中给定点之前出现的开始组和结束组字符标记的平衡。
+%   在此阶段，\cs{l_@@_balance_int}计算在记号列表中给定点之前出现的开始组和结束组字符标记的平衡。
 %   此变量也用于跟踪替换文本中的平衡。
 %    \begin{macrocode}
 \int_new:N \l_@@_balance_int
@@ -1186,7 +1186,7 @@
 %
 % \begin{macro}{\@@_break_point:TF}
 % \begin{macro}{\@@_break_true:w}
-%   在测试查询标记列表中的字符是否与正则表达式中给定字符类匹配时，
+%   在测试查询记号列表中的字符是否与正则表达式中给定字符类匹配时，
 %   我们经常必须将其与几个字符范围进行比较，检查其中任何一个是否匹配。
 %   这通过以下结构完成：
 %   \begin{quote}
@@ -1364,7 +1364,7 @@
 %
 % \begin{macro}{\@@_item_cs:n}
 %   匹配一个控制序列（参数是已编译的正则表达式）。
-%   首先测试当前令牌的类别码是否为零。
+%   首先测试当前记号的类别码是否为零。
 %   然后执行匹配测试，并在 csname 确实匹配时中断。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_item_cs:n #1
@@ -1499,20 +1499,20 @@
 % 在实际解析正则表达式或替换文本之前，我们首先通过它们一次，将 |\n| 转换为字符 
 % $10$，等等。在此过程中，我们还将任何特殊字符（\texttt{*}、\texttt{?}、
 % \texttt{\{} 等）或转义的字母数字字符转换为指示这是一个特殊序列的标记，并用指
-% 示这些字符为“原始”字符的标记替换转义的特殊字符和未转义的字母数字字符。然后，
+% 示这些字符为“原始”（ \enquote{raw} ）字符的标记替换转义的特殊字符和未转义的字母数字字符。然后，
 % 代码的其余部分可以避免关心转义问题（在与字符类范围结合使用时，这些问题可能变得
 % 相当复杂）。
 %
 % 用法：\cs{@@_escape_use:nnnn} \meta{inline~1} \meta{inline~2} 
 % \meta{inline~3} \Arg{token list} 将 \meta{token list} 转换为字符串，
 % 然后从左到右阅读，将反斜杠解释为转义下一个字符。未转义的字符被传递给函数 
-% \meta{inline~1}，而转义的字符则在 \texttt{e}-expansion 上下文中传递给函数 
+% \meta{inline~1}，而转义的字符则在 \texttt{e}-展开 上下文中传递给函数 
 % \meta{inline~2}（通常这些函数对其参数执行一些测试，以决定如何输出它们）。
 % 识别 |\a|、|\e|、|\f|、|\n|、|\r|、|\t| 和 |\x| 转义序列，并将它们替换为
 % 相应的字符，然后传递给 \meta{inline~3}。结果然后留在输入流中。空格除非转义，
 % 否则会被忽略。
 %
-% 转换是在 \texttt{e}-expanding 赋值中完成的。
+% 转换是在 \texttt{e}-展开 赋值中完成的。
 %
 % \begin{macro}{\@@_escape_use:nnnn}
 %   结果是在 \cs{l_@@_internal_a_tl} 中构建的，然后保留在输入流中。在此标记
@@ -1636,7 +1636,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_escape_x_test:N, \@@_escape_x_testii:N}
-%   查找第一个字符是否是左花括号（允许任意数量的十六进制数字），或者不是
+%   查找第一个字符是否是左括号（允许任意数量的十六进制数字），或者不是
 %   （允许最多两个十六进制数字）。我们需要检查字符串的结束标记。最终，调用 
 %   \cs{@@_escape_x_loop:N} 或 \cs{@@_escape_x:N}。
 %    \begin{macrocode}
@@ -1687,7 +1687,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_escape_x_loop:N, \@@_escape_x_loop_error:}
-%   抓取十六进制数字，跳过空格，最后检查是否有右花括号，否则在赋值外部引发错误。
+%   抓取十六进制数字，跳过空格，最后检查是否有右括号，否则在赋值外部引发错误。
 %    \begin{macrocode}
 \cs_new:Npn \@@_escape_x_loop:N #1
   {
@@ -1835,7 +1835,7 @@
 %   \item \cs{@@_item_exact:nn} \Arg{catcode} \Arg{char code}
 %   \item \cs{@@_item_exact_cs:n} \Arg{csnames}，更精确地给出为
 %     \meta{csname} \cs{scan_stop:} \meta{csname} \cs{scan_stop:}
-%     \meta{csname} 等等，放在大括号组中。
+%     \meta{csname} 等等，放在括号组中。
 %   \item \cs{@@_item_cs:n} \Arg{compiled regex}
 % \end{itemize}
 %
@@ -1926,7 +1926,7 @@
 %
 % \begin{variable}{\l_@@_show_prefix_seq}
 %   这个序列保存构成显示给用户的行的前缀。各种项目必须从右边移除，
-%   对于标记列表来说这是有技巧的，因此我们使用序列。
+%   对于记号列表来说这是有技巧的，因此我们使用序列。
 %    \begin{macrocode}
 \seq_new:N \l_@@_show_prefix_seq
 %    \end{macrocode}
@@ -2029,8 +2029,8 @@
 %   \item 在偶数模式中，左括号是特殊的，将 $3$ 附加到模式中；
 %     在这些模式中，识别量词和点，并且右括号是正常的。在奇数模式中（在类中），
 %     左括号是正常的，但右括号结束类，将模式从 $m$ 更改为 $(m-15)/13$，截断；此外，识别范围。
-%   \item 在非负模式中，左右花括号是正常的。但是，在负模式中，左花括号触发警告；
-%     右花括号结束控制序列，从 $-2$ 到 $0$ 或 $-6$ 到 $3$，对于奇数模式进行错误恢复。
+%   \item 在非负模式中，左右括号是正常的。但是，在负模式中，左括号触发警告；
+%     右括号结束控制序列，从 $-2$ 到 $0$ 或 $-6$ 到 $3$，对于奇数模式进行错误恢复。
 %   \item 属性（例如 |\d| 字符类）可以在任何模式中出现。
 % \end{itemize}
 %
@@ -2140,7 +2140,7 @@
 %
 % \begin{macro}{\@@_compile:w, \@@_compile_end:}
 %   用于编译用户正则表达式或在另一个正则表达式中的|\c{...}|转义序列中的正则表达式。
-%   开始在组内构建一个记号列表（在开始时进行\texttt{e}-expansion），设置一些变量（组级别、类别码），
+%   开始在组内构建一个记号列表（在开始时进行\texttt{e}-展开），设置一些变量（组级别、类别码），
 %   然后开始第一个分支。在结束时，确保没有悬空的类别码或组，关闭最后一个分支：
 %   我们完成了构建\cs{l_@@_internal_regex}。
 %    \begin{macrocode}
@@ -2196,7 +2196,7 @@
 % \begin{macro}{\@@_compile:n}
 %   编译在\cs{@@_compile:w}和\cs{@@_compile_end:}之间进行，从模式$0$开始。
 %   然后\cs{@@_escape_use:nnnn}区分特殊字符、转义的字母数字字符和原始字符，解释|\a|、|\x|
-%   和其他序列。最后的$4$个\cs{prg_do_nothing:}是必需的，因为后面定义的一些函数会查找$4$个令牌。
+%   和其他序列。最后的$4$个\cs{prg_do_nothing:}是必需的，因为后面定义的一些函数会查找$4$个记号。
 %   在结束之前，确保任何|\c{...}|都正确关闭。不需要检查括号是否正确关闭，
 %   因为\cs{@@_compile_end:}会处理。然而，捕获尾随的|\cL|构造的情况。
 %    \begin{macrocode}
@@ -2349,7 +2349,7 @@
 %
 % \begin{macro}{\@@_compile_quantifier_none:}
 % \begin{macro}{\@@_compile_quantifier_abort:eNN}
-%   当没有限定符，或者大括号构造无效（等效于没有限定符，抓取的任何字符都保留为原始字符）时，
+%   当没有限定符，或者括号构造无效（等效于没有限定符，抓取的任何字符都保留为原始字符）时，
 %   调用这些函数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_compile_quantifier_none:
@@ -3165,7 +3165,7 @@
 % \end{macro}
 %
 % \begin{macro}+\@@_compile_c_{:+
-%   对于左花括号的情况，基于我们迄今为止所做的工作，很容易处理：
+%   对于左括号的情况，基于我们迄今为止所做的工作，很容易处理：
 %   在一个组内，编译正则表达式，同时将模式更改为禁止嵌套 |\c|。
 %   此外，禁用子匹配跟踪，因为组不会逃离 |\c{...}| 的作用域。
 %    \begin{macrocode}
@@ -3184,9 +3184,9 @@
 % \end{macro}
 %
 % \begin{macro}+\@@_compile_{:+
-%   我们禁止在 |\c{...}| 转义内部出现未转义的左花括号，
-%   因为它们可能导致混淆的问题，即 |\c{{}x}| 中的第一个右花括号应该结束 |\c|，
-%   还是应该匹配花括号。
+%   我们禁止在 |\c{...}| 转义内部出现未转义的左括号，
+%   因为它们可能导致混淆的问题，即 |\c{{}x}| 中的第一个右括号应该结束 |\c|，
+%   还是应该匹配括号。
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_compile_ \c_left_brace_str : }
   {
@@ -3201,7 +3201,7 @@
 % \begin{macro}+\@@_compile_}:+
 % \begin{macro}{\@@_compile_end_cs:}
 % \begin{macro}[EXP]{\@@_compile_cs_aux:Nn, \@@_compile_cs_aux:NNnnnN}
-%   未转义的右花括号只在编译 csname 的正则表达式时才是特殊的，但不在字符类内：
+%   未转义的右括号只在编译 csname 的正则表达式时才是特殊的，但不在字符类内：
 %   |\c{[{}]}| 匹配控制序列 |\{| 和 |\}|。因此，结束编译内部正则表达式
 %   （这会关闭任何悬空的字符类或组）。然后在外部正则表达式中插入相应的测试。
 %   作为优化，如果控制序列测试仅由多个显式可能性（分支）组成，
@@ -3279,7 +3279,7 @@
 % \end{macro}
 % \end{variable}
 %
-% \subsubsection{原始标记列表与 \cs[no-index]{u}}
+% \subsubsection{原始记号列表与 \cs[no-index]{u}}
 %
 % \begin{macro}{\@@_compile_/u:}
 %   在字符类和直接跟在类别代码测试后面时，|\u| 转义无效。否则检查后面是否有 |r|
@@ -3321,10 +3321,10 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\@@_compile_u_loop:NN}
-%   我们使用 \texttt{e}-expanding 赋值来收集 |\u| 的参数中的字符。
-%   原则上，我们可以等待遇到右花括号，但这是不安全的：如果右花括号丢失，
+%   我们使用 \texttt{e}-展开 赋值来收集 |\u| 的参数中的字符。
+%   原则上，我们可以等待遇到右括号，但这是不安全的：如果右括号丢失，
 %   那么我们将达到正则表达式的结束标记，并继续，导致晦涩的致命错误。
-%   相反，我们只允许原始和特殊字符，并在遇到特殊右花括号、任何转义字符
+%   相反，我们只允许原始和特殊字符，并在遇到特殊右括号、任何转义字符
 %   或结束标记时停止。
 %    \begin{macrocode}
 \cs_new:Npn \@@_compile_u_loop:NN #1#2
@@ -4604,14 +4604,14 @@
 %
 % \subsection{匹配}
 %
-% 我们通过并行运行所有执行线程在\textsc{nfa}中搜索匹配，每步读取查询的一个令牌。
-% \textsc{nfa} 包含到其他状态的\enquote{free}转换和\enquote{consume}当前令牌的转换。
+% 我们通过并行运行所有执行线程在\textsc{nfa}中搜索匹配，每步读取查询的一个记号。
+% \textsc{nfa} 包含到其他状态的\enquote{free}转换和\enquote{consume}当前记号的转换。
 % 对于自由转换， \textsc{nfa} 的新状态上的指令立即执行。
 % 当一个转换消耗一个字符时，新状态被附加到\cs{g_@@_thread_info_intarray}中的\enquote{active states}列表（连同子匹配信息）：
-% 当下一个令牌从查询中读取时，此线程再次变为活动状态。
-% 在每一步（对于查询中的每个令牌），我们展开该活动状态列表和相应的子匹配属性，并清空它们。
+% 当下一个记号从查询中读取时，此线程再次变为活动状态。
+% 在每一步（对于查询中的每个记号），我们展开该活动状态列表和相应的子匹配属性，并清空它们。
 %
-% 如果 \textsc{nfa} 中的两个路径在读取给定令牌后到达相同状态，则它们只在它们先前匹配的方式上有所不同，
+% 如果 \textsc{nfa} 中的两个路径在读取给定记号后到达相同状态，则它们只在它们先前匹配的方式上有所不同，
 % 任何未来的执行对于两者都是相同的（注意，在存在反向引用时，这将是错误的）。
 % 因此，我们只需要保留两个线程中的一个：具有最高优先级的线程。
 % 我们的 \textsc{nfa} 是以这样一种方式构建的，以便较高优先级的动作总是在较低优先级的动作之前执行，这使得事情能够正常工作。
@@ -4638,7 +4638,7 @@
 %     \l_@@_start_pos_int,
 %     \l_@@_success_pos_int,
 %   }
-%   查询中的令牌从第一个\texttt{min_pos}到最后一个$\texttt{max_pos}-1$进行索引，
+%   查询中的记号从第一个\texttt{min_pos}到最后一个$\texttt{max_pos}-1$进行索引，
 %   并且它们的信息存储在几个带有这些数字的数组和\tn{toks}寄存器中。
 %   我们在没有回溯的情况下进行匹配，在查询的\texttt{curr_pos}位置保持所有线程同步。
 %   当前匹配尝试的起始点是\texttt{start_pos}，并且在线程成功时，\texttt{success_pos}用作下一个起始位置。
@@ -4660,10 +4660,10 @@
 %     \l_@@_last_char_success_int,
 %     \l_@@_case_changed_char_int
 %   }
-%   当前位置的令牌的字符和类别码以及扩展到该令牌的令牌列表；
-%   上一个位置令牌的字符码；
-%   成功匹配之前令牌的字符码；
-%   更改当前令牌大小写（|A-Z|$\leftrightarrow$|a-z|）的结果的字符码。
+%   当前位置的记号的字符和类别码以及扩展到该记号的记号列表；
+%   上一个位置记号的字符码；
+%   成功匹配之前记号的字符码；
+%   更改当前记号大小写（|A-Z|$\leftrightarrow$|a-z|）的结果的字符码。
 %   该整数仅在必要时计算，否则为\cs{c_max_int}。
 %   \texttt{curr_char}变量在各个阶段也用于保存字符码。
 %    \begin{macrocode}
@@ -4677,7 +4677,7 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_curr_state_int}
-% 对于令牌列表中的每个字符，依次考虑每个活动状态。
+% 对于记号列表中的每个字符，依次考虑每个活动状态。
 % 变量\cs{l_@@_curr_state_int}保存当前考虑的 \textsc{nfa} 状态：
 % 转换随后以相对于当前状态的偏移给出。
 %    \begin{macrocode}
@@ -4731,10 +4731,10 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_matched_analysis_tl, \l_@@_curr_analysis_tl}
-%   \cs{l_@@_curr_analysis_tl}列表由一个大括号组成，其中包含三个与当前令牌相对应的大括号组，
+%   \cs{l_@@_curr_analysis_tl}列表由一个括号组成，其中包含三个与当前记号相对应的括号组，
 %   其语法与\cs{tl_analysis_map_inline:nn}相同。
-%   \cs{l_@@_matched_analysis_tl}（在\texttt{tl\_build}机制下构建）为给定匹配尝试中到目前为止已处理的每个令牌都有一个项：
-%   每个项都包含三个与\cs{tl_analysis_map_inline:nn}相同语法的大括号组。
+%   \cs{l_@@_matched_analysis_tl}（在\texttt{tl\_build}机制下构建）为给定匹配尝试中到目前为止已处理的每个记号都有一个项：
+%   每个项都包含三个与\cs{tl_analysis_map_inline:nn}相同语法的括号组。
 %    \begin{macrocode}
 \tl_new:N \l_@@_matched_analysis_tl
 \tl_new:N \l_@@_curr_analysis_tl
@@ -4742,8 +4742,8 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_every_match_tl}
-%   每次找到匹配时都使用这个令牌列表。
-%   对于单一匹配，令牌列表为空。对于多次匹配，令牌列表设置为重复匹配，
+%   每次找到匹配时都使用这个记号列表。
+%   对于单一匹配，记号列表为空。对于多次匹配，记号列表设置为重复匹配，
 %   在执行依赖于用户函数的某些操作后。参见\cs{@@_single_match:}和\cs{@@_multi_match:n}。
 %    \begin{macrocode}
 \tl_new:N \l_@@_every_match_tl
@@ -4752,8 +4752,8 @@
 %
 % \begin{variable}{\l_@@_fresh_thread_bool, \l_@@_empty_success_bool}
 % \begin{macro}{\@@_if_two_empty_matches:F}
-%   在进行多次匹配时，我们需要避免无限循环，其中每次迭代都匹配相同的空令牌列表。
-%   当匹配空令牌列表时，抑制同一空令牌列表的下一个成功匹配。我们通过将\cs{l_@@_fresh_thread_bool}设置为\texttt{true}来检测空匹配的方式：
+%   在进行多次匹配时，我们需要避免无限循环，其中每次迭代都匹配相同的空记号列表。
+%   当匹配空记号列表时，抑制同一空记号列表的下一个成功匹配。我们通过将\cs{l_@@_fresh_thread_bool}设置为\texttt{true}来检测空匹配的方式：
 %   对于直接来自正则表达式开头或|\K|命令的线程，每当线程成功时测试该布尔值。
 %   函数\cs{@@_if_two_empty_matches:F}在每个匹配尝试时重新定义，具体取决于先前的匹配是否为空：
 %   如果是，则该函数必须在匹配为空并且与先前匹配的位置相同时取消所谓的成功；
@@ -4787,14 +4787,10 @@
 %
 % \begin{macro}{\@@_match:n, \@@_match_cs:n}
 % \begin{macro}{\@@_match_init:}
-%   Initialize the variables that should
-%   be set once for each user function (even for multiple
-%   matches). Namely, the overall matching is not yet successful; none of
-%   the states should be marked as visited (\cs{g_@@_state_active_intarray}), and
-%   we start at step $0$; we pretend that there was a previous match
-%   ending at the start of the query, which was not empty (to avoid
-%   smothering an empty match at the start). Once all this is set up, we
-%   are ready for the ride. Find the first match.
+% 初始化应该为每个用户函数设置一次的变量（即使对于多次匹配）。
+% 即总体匹配尚未成功；不应标记任何状态为已访问（\cs{g_@@_state_active_intarray}）；
+% 我们从步骤$0$开始；我们假装在查询的开头有一个先前的匹配，该匹配不是空的（以避免在开头扼杀一个空匹配）。
+% 一旦所有这些设置完成，我们准备好启动。找到第一个匹配。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_match:n #1
   {
@@ -4843,21 +4839,14 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_match_once_init:}
-%   This function resets various variables used when finding one match.
-%   It is called before the loop through characters, and every time we
-%   find a match, before searching for another match (this is controlled
-%   by the \texttt{every_match} token list).
+% 此函数重置在找到一个匹配时使用的各种变量。
+% 在遍历字符之前调用，并且每次找到一个匹配之前调用（这由\texttt{every_match}记号列表控制）。
 %
-%   First initialize some variables: set the
-%   conditional which detects identical empty matches; this match
-%   attempt starts at the previous \texttt{success_pos}, is not yet
-%   successful, and has no submatches yet; clear the array of active
-%   threads, and put the starting state $0$ in it. We are then almost
-%   ready to read our first token in the query, but we actually start
-%   one position earlier than the start because
-%   \cs{@@_match_one_token:nnN} increments \cs{l_@@_curr_pos_int} and
-%   saves \cs{l_@@_curr_char_int} as the \texttt{last_char} so that word
-%   boundaries can be correctly identified.
+% 首先初始化一些变量：设置用于检测相同空匹配的条件；
+% 此匹配尝试从先前的\texttt{success_pos}开始，尚未成功，尚无子匹配；
+% 清除活动线程数组，并将起始状态$0$放入其中。然后，我们几乎准备好在查询中读取我们的第一个记号，
+% 但实际上我们从开始的位置开始一步，因为\cs{@@_match_one_token:nnN}会增加\cs{l_@@_curr_pos_int}，
+% 并将\cs{l_@@_curr_char_int}保存为\texttt{last_char}，以便正确识别单词边界。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_match_once_init:
   {
@@ -4895,10 +4884,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_single_match:, \@@_multi_match:n}
-%   For a single match, the overall success is determined by whether the
-%   only match attempt is a success. When doing multiple matches, the
-%   overall matching is successful as soon as any match
-%   succeeds. Perform the action |#1|, then find the next match.
+% 对于单次匹配，整体成功由唯一的匹配尝试是否成功来确定。
+% 在进行多次匹配时，只要有任何匹配成功，整体匹配就成功。
+% 执行操作|#1|，然后找到下一个匹配。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_single_match:
   {
@@ -4927,17 +4915,12 @@
 %
 % \begin{macro}{\@@_match_one_token:nnN}
 % \begin{macro}[rEXP]{\@@_match_one_active:n}
-%   At each new position, set some variables and get the new character
-%   and category from the query. Then unpack the array of active
-%   threads, and clear it by resetting its length
-%   (\texttt{max_thread}). This results in a sequence of
-%   \cs{@@_use_state_and_submatches:w} \meta{state}|,|\meta{submatch-clist}|;| and
-%   we consider those states one by one in order. As soon as a thread
-%   succeeds, exit the step, and, if there are threads to consider at the
-%   next position, and we have not reached the end of the string,
-%   repeat the loop. Otherwise, the last thread that succeeded is the
-%   match.  We explain the \texttt{fresh_thread} business when
-%   describing \cs{@@_action_wildcard:}.
+%   在每个新位置，设置一些变量并从查询中获取新字符和类别。
+%   然后解包活动线程的数组，并通过重置其长度（\texttt{max_thread}）清除它。
+%   这将导致一系列\cs{@@_use_state_and_submatches:w}\meta{state}|,|\meta{submatch-clist}|;|，
+%   然后我们按顺序考虑这些状态。只要一个线程成功，就退出该步骤，
+%   如果下一个位置有要考虑的线程，并且我们尚未达到字符串的末尾，则重复循环。
+%   否则，最后一个成功的线程即为匹配。我们在描述\cs{@@_action_wildcard:}时解释了\texttt{fresh_thread}的业务。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_match_one_token:nnN #1#2#3
   {
@@ -4981,15 +4964,13 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsubsection{Using states of the \textsc{nfa}}
+% \subsubsection{使用 \textsc{nfa} 的状态}
 %
 % \begin{macro}{\@@_use_state:}
-%   Use the current \textsc{nfa} instruction. The state is initially
-%   marked as belonging to the current \texttt{step}: this allows normal
-%   free transition to repeat, but group-repeating transitions
-%   won't. Once we are done exploring all the branches it spawned, the
-%   state is marked as $\texttt{step}+1$: any thread hitting it at that
-%   point will be terminated.
+%   使用当前的 \textsc{nfa} 指令。状态最初被标记为属于当前的\texttt{step}：
+%   这允许正常的自由过渡重复，但是组重复过渡则不会。
+%   一旦我们完成了所有生成的分支的探索，该状态将被标记为$\texttt{step}+1$：
+%   在该点击中它的任何线程都将被终止。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_use_state:
   {
@@ -5004,10 +4985,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_use_state_and_submatches:w}
-%   This function is called as one item in the array of active threads
-%   after that array has been unpacked for a new step. Update the
-%   \texttt{curr_state} and \texttt{curr_submatches} and use the
-%   state if it has not yet been encountered at this step.
+%   此函数在数组的活动线程被解包后的新步骤中作为一个项目调用。
+%   更新\texttt{curr_state}和\texttt{curr_submatches}，并在此步骤尚未遇到该状态时使用该状态。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_use_state_and_submatches:w #1 , #2 ;
   {
@@ -5024,15 +5003,12 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Actions when matching}
+% \subsubsection{匹配时的动作}
 %
 % \begin{macro}{\@@_action_start_wildcard:N}
-%   For an unanchored match, state $0$ has a free transition to the next
-%   and a costly one to itself, to repeat at the next position. To catch
-%   repeated identical empty matches, we need to know if a successful
-%   thread corresponds to an empty match. The instruction resetting
-%   \cs{l_@@_fresh_thread_bool} may be skipped by a successful
-%   thread, hence we had to add it to \cs{@@_match_one_token:nnN} too.
+%   对于未锚定的匹配，状态$0$具有自由过渡到下一个状态和昂贵过渡到自身的过渡，以在下一个位置重复。
+%   为了捕捉重复的相同空匹配，我们需要知道成功的线程是否对应于空匹配。
+%   重置\cs{l_@@_fresh_thread_bool}的指令可能会被成功的线程跳过，因此我们也必须将其添加到\cs{@@_match_one_token:nnN}中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_start_wildcard:N #1
   {
@@ -5046,17 +5022,12 @@
 %
 % \begin{macro}{\@@_action_free:n, \@@_action_free_group:n}
 % \begin{macro}{\@@_action_free_aux:nn}
-%   These functions copy a thread after checking that the \textsc{nfa}
-%   state has not already been used at this position. If not, store
-%   submatches in the new state, and insert the instructions for that
-%   state in the input stream.  Then restore the old value of
-%   \cs{l_@@_curr_state_int} and of the current submatches.  The
-%   two types of free transitions differ by how they test that the state
-%   has not been encountered yet: the \texttt{group} version is
-%   stricter, and will not use a state if it was used earlier in the
-%   current thread, hence forcefully breaking the loop, while the
-%   \enquote{normal} version will revisit a state even within the thread
-%   itself.
+%   在检查 \textsc{nfa} 状态在此位置是否已被使用之后，这些函数复制一个线程。
+%   如果尚未使用，则在新状态中存储子匹配，并将该状态的指令插入输入流中。
+%   然后恢复\cs{l_@@_curr_state_int}和当前子匹配的旧值。
+%   两种类型的自由过渡的不同之处在于它们如何测试该状态是否已经在当前线程中的较早位置被使用：
+%   \texttt{group}版本更严格，如果在当前线程中先前已经使用了该状态，则不会使用该状态，从而强制中断循环，
+%   而\enquote{normal}版本甚至会在线程内重新访问状态。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_free:n
   { \@@_action_free_aux:nn { > \l_@@_step_int \else: } }
@@ -5087,10 +5058,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_action_cost:n}
-%   A transition which consumes the current character and shifts the
-%   state by |#1|.  The resulting state is stored in the appropriate array
-%   for use at the next position, and we also store the current
-%   submatches.
+%   消耗当前字符并将状态按 |#1| 移动的过渡。将结果状态存储在适当的数组中，
+%   以供在下一个位置使用，并存储当前子匹配。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_cost:n #1
   {
@@ -5102,9 +5071,8 @@
 %
 % \begin{macro}{\@@_store_state:n}
 % \begin{macro}{\@@_store_submatches:}
-%   Put the given state and current submatch information in
-%   \cs{g_@@_thread_info_intarray}, and increment the length of the
-%   array.
+%   将给定的状态和当前子匹配信息放入 \cs{g_@@_thread_info_intarray}，并增加
+%   数组的长度。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_store_state:n #1
   {
@@ -5128,10 +5096,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_disable_submatches:}
-%   Some user functions don't require tracking submatches.
-%   We get a performance improvement by simply defining the
-%   relevant functions to remove their argument and do nothing
-%   with it.
+%   一些用户函数不需要跟踪子匹配。通过简单地定义相关函数来删除它们的参数
+%   并对其不进行任何操作，我们可以获得性能提升。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_disable_submatches:
   {
@@ -5142,8 +5108,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_action_submatch:nN, \@@_action_submatch_aux:w, \@@_action_submatch_auxii:w, \@@_action_submatch_auxiii:w, \@@_action_submatch_auxiv:w}
-%   Update the current submatches with the information from the current
-%   position. Maybe a bottleneck.
+%   使用当前位置的信息更新当前子匹配。可能是瓶颈。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_submatch:nN #1#2
   {
@@ -5170,14 +5135,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_action_success:}
-%   There is a successful match when an execution path reaches the last
-%   state in the \textsc{nfa}, unless this marks a second identical
-%   empty match. Then mark that there was a successful match; it is
-%   empty if it is \enquote{fresh}; and we store the current position
-%   and submatches. The current step is then interrupted with
-%   \cs{prg_break:}, and only paths with higher precedence are
-%   pursued further. The values stored here may be overwritten by a
-%   later success of a path with higher precedence.
+%   当执行路径到达 \textsc{nfa} 的最后状态时，表示有成功匹配，除非这标志着第二个相同的空匹配。
+%   如果成功匹配为空，我们标记它为“fresh”；并存储当前位置和子匹配。然后，通过 \cs{prg_break:} 中断当前步骤，
+%   只有具有更高优先级的路径才会进一步追求。这里存储的值可能会被后续具有更高优先级的路径的成功覆盖。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_success:
   {
@@ -5197,24 +5157,21 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Replacement}
+% \subsection{替换}
 %
-% \subsubsection{Variables and helpers used in replacement}
+% \subsubsection{用于替换的变量和辅助工具}
 %
 % \begin{variable}{\l_@@_replacement_csnames_int}
-%   The behaviour of closing braces inside a replacement text depends on
-%   whether a sequences |\c{| or |\u{| has been encountered. The number
-%       of \enquote{open} such sequences that should be closed by |}| is
-%     stored in \cs{l_@@_replacement_csnames_int}, and decreased by
-%     $1$ by each |}|.
+%   替换文本中的闭合括号行为取决于是否遇到 |\c{| 或 |\u{| 序列。
+%   存储应该由 |}| 关闭的\enquote{打开}这类序列的数量，由 \cs{l_@@_replacement_csnames_int} 表示，
+%   并在每个 |}| 减少 $1$。
 %    \begin{macrocode}
 \int_new:N \l_@@_replacement_csnames_int
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_replacement_category_tl, \l_@@_replacement_category_seq}
-%   This sequence of letters is used to correctly restore categories in
-%   nested constructions such as |\cL(abc\cD(_)d)|.
+%   这个字母序列用于正确还原嵌套结构中的类别，比如 |\cL(abc\cD(_)d)|。
 %    \begin{macrocode}
 \tl_new:N \l_@@_replacement_category_tl
 \seq_new:N \l_@@_replacement_category_seq
@@ -5222,27 +5179,18 @@
 % \end{variable}
 %
 % \begin{variable}{\g_@@_balance_tl}
-%   This token list holds the replacement text for
-%   \cs{@@_replacement_balance_one_match:n} while it is being built
-%   incrementally.
+%   这个记号列表保存了 \cs{@@_replacement_balance_one_match:n} 构建时的替换文本。
 %    \begin{macrocode}
 \tl_new:N \g_@@_balance_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{macro}[rEXP]{\@@_replacement_balance_one_match:n}
-%   This expects as an argument the first index of a set of entries in
-%   \cs{g_@@_submatch_begin_intarray} (and related arrays) which hold the
-%   submatch information for a given match. It
-%   can be used within an integer expression to obtain the brace balance
-%   incurred by performing the replacement on that match. This combines
-%   the braces lost by removing the match, braces added by all the
-%   submatches appearing in the replacement, and braces appearing
-%   explicitly in the replacement. Even though it is always redefined
-%   before use, we initialize it as for an empty replacement. An
-%   important property is that concatenating several calls to that
-%   function must result in a valid integer expression (hence a leading
-%   |+| in the actual definition).
+%   期望作为参数给出一组在 \cs{g_@@_submatch_begin_intarray}（以及相关数组）中保存给定匹配的子匹配信息的索引的第一个索引。
+%   它可以在整数表达式内使用，以获取执行该匹配替换所带来的括号平衡。
+%   这包括通过删除匹配丢失的括号，由替换中出现的所有子匹配添加的括号，以及替换中明确出现的括号。
+%   尽管在使用之前总是被重新定义，但我们将其初始化为一个空替换的情况。
+%   一个重要的特性是将该函数的多个调用连接起来必须得到一个有效的整数表达式（因此在实际定义中有一个前导的 |+|）。
 %    \begin{macrocode}
 \cs_new:Npn \@@_replacement_balance_one_match:n #1
   { - \@@_submatch_balance:n {#1} }
@@ -5250,14 +5198,10 @@
 % \end{macro}
 %
 % \begin{macro}[rEXP]{\@@_replacement_do_one_match:n}
-%   The input is the same as \cs{@@_replacement_balance_one_match:n}.
-%   This function is redefined to expand to the part of the token list
-%   from the end of the previous match to a given match, followed by the
-%   replacement text. Hence concatenating the result of this function
-%   with all possible arguments (one call for each match), as well as
-%   the range from the end of the last match to the end of the string,
-%   produces the fully replaced token list. The initialization does
-%   not matter, but (as an example) we set it as for an empty replacement.
+%   输入与 \cs{@@_replacement_balance_one_match:n} 相同。
+%   此函数被重新定义为展开前一匹配的末尾到给定匹配的部分的记号列表，
+%   然后是替换文本。因此，将该函数的结果与所有可能的参数（每个匹配一个调用）以及从最后一个匹配的末尾到字符串末尾的范围连接起来，
+%   就产生了完全替换的记号列表。初始化不重要，但（作为示例）我们将其设置为空替换的情况。
 %    \begin{macrocode}
 \cs_new:Npn \@@_replacement_do_one_match:n #1
   {
@@ -5269,40 +5213,30 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_exp_not:N}
-%   This function lets us navigate around the fact that the primitive
-%   \cs{exp_not:n} requires a braced argument. As far as I can tell, it
-%   is only needed if the user tries to include in the replacement text
-%   a control sequence set equal to a macro parameter character, such as
-%   \cs{c_parameter_token}. Indeed, within an \texttt{e}/\texttt{x}-expanding
-%   assignment, \cs{exp_not:N}~|#| behaves as a single |#|, whereas
-%   \cs{exp_not:n}~|{#}| behaves as a doubled |##|.
+%   这个函数让我们绕过原始的 \cs{exp_not:n} 需要带括号参数的事实。
+%   据我了解，只有当用户尝试在替换文本中包含设置为宏参数字符的控制序列时才需要，
+%   例如 \cs{c_parameter_token}。实际上，在 \texttt{e}/\texttt{x}-展开 分配中，
+%   \cs{exp_not:N}~|#| 的行为就像单个 |#|，而 \cs{exp_not:n}~|{#}| 的行为就像双倍的 |##|。
 %    \begin{macrocode}
 \cs_new:Npn \@@_replacement_exp_not:N #1 { \exp_not:n {#1} }
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_exp_not:V}
-%   This is used for the implementation of~|\u|, and it gets redefined
-%   for \cs{peek_regex_replace_once:nnTF}.
+%   用于实现~|\u|，并且为 \cs{peek_regex_replace_once:nnTF} 重新定义。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_replacement_exp_not:V \exp_not:V
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Query and brace balance}
+% \subsubsection{查询和括号平衡}
 %
 % \begin{macro}[rEXP]{\@@_query_range:nn}
 % \begin{macro}[rEXP]{\@@_query_range_loop:ww}
-%   When it is time to extract submatches from the token list, the
-%   various tokens are stored in \tn{toks} registers numbered from
-%   \cs{l_@@_min_pos_int} inclusive to \cs{l_@@_max_pos_int}
-%   exclusive. The function \cs{@@_query_range:nn} \Arg{min}
-%   \Arg{max} unpacks registers from the position \meta{min} to the
-%   position $\meta{max}-1$ included. Once this is expanded, a second
-%   \texttt{e}-expansion results in the actual tokens from the
-%   query. That second expansion is only done by user functions at the
-%   very end of their operation, after checking (and correcting) the
-%   brace balance first.
+%   当从记号列表中提取子匹配时，各种记号存储在从 \cs{l_@@_min_pos_int} 到 \cs{l_@@_max_pos_int}（不包括）的编号的 \tn{toks} 寄存器中。
+%   函数 \cs{@@_query_range:nn} \Arg{min} \Arg{max} 从位置 \meta{min} 到位置 $\meta{max}-1$（包括）解包寄存器。
+%   一旦这被展开，第二个 \texttt{e}-展开 会产生查询的实际记号。
+%   这第二次展开仅在用户函数在其操作的最后，首先检查（并纠正）括号平衡之后才执行。
 %    \begin{macrocode}
 \cs_new:Npn \@@_query_range:nn #1#2
   {
@@ -5326,7 +5260,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_query_submatch:n}
-%   Find the start and end positions for a given submatch (of a given match).
+%   寻找给定子匹配（属于给定匹配）的起始和结束位置。
 %    \begin{macrocode}
 \cs_new:Npn \@@_query_submatch:n #1
   {
@@ -5338,12 +5272,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_submatch_balance:n}
-%   Every user function must result in a balanced token list (unbalanced
-%   token lists cannot be stored by TeX). When we unpacked the query, we
-%   kept track of the brace balance, hence the contribution from a given
-%   range is the difference between the brace balances at the
-%   \meta{max~pos} and \meta{min~pos}.  These two positions are found in
-%   the corresponding \enquote{submatch} arrays.
+%   每个用户函数必须生成一个平衡的记号列表（\TeX{} 不能存储不平衡的记号列表）。
+%   当我们解包查询时，我们跟踪括号平衡，因此给定范围的贡献是在 \meta{max~pos} 和 \meta{min~pos} 的括号平衡之间的差异。
+%   这两个位置可以在相应的\enquote{子匹配}（ \enquote{submatch} ）数组中找到。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_submatch_balance:n #1
   {
@@ -5367,19 +5298,15 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Framework}
+% \subsubsection{框架}
 %
 % \begin{macro}{\@@_replacement:n, \@@_replacement:e}
 % \begin{macro}{\@@_replacement_apply:Nn, \@@_replacement_set:n}
-%   The replacement text is built incrementally. We keep track in
-%   \cs{l_@@_balance_int} of the balance of explicit begin- and
-%   end-group tokens and we store in \cs{g_@@_balance_tl} some
-%   code to compute the brace balance from submatches (see its
-%   description). Detect unescaped right braces, and escaped characters,
-%   with trailing \cs{prg_do_nothing:} because some of the later
-%   function look-ahead. Once the whole replacement text has been
-%   parsed, make sure that there is no open csname. Finally, define the
-%   \texttt{balance_one_match} and \texttt{do_one_match} functions.
+%   替换文本是逐步构建的。我们在 \cs{l_@@_balance_int} 中跟踪显式起始和结束组记号的平衡，
+%   并在 \cs{g_@@_balance_tl} 中存储一些代码以从子匹配计算括号平衡（见其描述）。
+%   检测未转义的右括号和转义字符，尾随 \cs{prg_do_nothing:}，因为后面的一些函数需要预先查看。
+%   一旦整个替换文本被解析，确保没有打开的控制序列名称。最后，定义 
+%   \texttt{balance_one_match} 和 \texttt{do_one_match} 函数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement:n
   { \@@_replacement_apply:Nn \@@_replacement_set:n }
@@ -5483,7 +5410,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_put:n}
-%   This gets redefined for \cs{peek_regex_replace_once:nnTF}.
+%   为 \cs{peek_regex_replace_once:nnTF} 重新定义。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_put:n
   { \tl_build_put_right:Nn \l_@@_build_tl }
@@ -5491,19 +5418,13 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_normal:n, \@@_replacement_normal_aux:N}
-%   Most characters are simply sent to the output by
-%   \cs{tl_build_put_right:Nn}, unless a particular category code has been
-%   requested: then \cs{@@_replacement_c_A:w} or a similar auxiliary is
-%   called.  One exception is right parentheses, which restore the
-%   category code in place before the group started.  Note that the
-%   sequence is non-empty there: it contains an empty entry
-%   corresponding to the initial value of
-%   \cs{l_@@_replacement_category_tl}.
-%   The argument |#1| is a single character (including the case of a catcode-other space).
-%   In case no specific catcode is requested, we taked into account the
-%   current catcode regime (at the time the replacement is performed)
-%   as much as reasonable, with all impossible catcodes (escape,
-%   newline, etc.) being mapped to \enquote{other}.
+%   大多数字符只是通过 \cs{tl_build_put_right:Nn} 发送到输出，除非请求了特定的类别码：
+%   然后调用 \cs{@@_replacement_c_A:w} 或类似的辅助函数。
+%   一个例外是右括号，在组开始之前恢复类别码。
+%   请注意，这里的序列是非空的：它包含一个对应于 \cs{l_@@_replacement_category_tl} 初始值的空条目。
+%   参数 |#1| 是一个单个字符（包括类别码为其他的空格的情况）。
+%   如果没有请求特定的类别码，我们尽可能地考虑替换执行时的当前类别码制度，
+%   所有不可能的类别码（转义、换行等）都映射到\enquote{other}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_normal:n #1
   {
@@ -5555,9 +5476,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_escaped:N}
-%   As in parsing a regular expression, we use an auxiliary built from
-%   |#1| if defined. Otherwise, check for escaped digits (standing from
-%   submatches from $0$ to $9$): anything else is a raw character.
+%   类似于解析正则表达式，如果定义了从 |#1| 构建的辅助函数，我们将使用它。
+%   否则，检查转义的数字（从 $0$ 到 $9$ 的子匹配）：其他任何字符都是原始字符。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_escaped:N #1
   {
@@ -5573,15 +5493,12 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Submatches}
+% \subsubsection{子匹配}
 %
 % \begin{macro}{\@@_replacement_put_submatch:n, \@@_replacement_put_submatch_aux:n}
-%   Insert a submatch in the replacement text. This is dropped if the
-%   submatch number is larger than the number of capturing groups.
-%   Unless the submatch appears inside a |\c{...}| or |\u{...}|
-%   construction, it must be taken into account in the brace balance.
-%   Later on, |##1| will be replaced by a pointer to the $0$-th submatch for a
-%   given match.
+%   在替换文本中插入一个子匹配。如果子匹配编号大于捕获组的数量，则丢弃它。
+%   除非子匹配出现在 |\c{...}| 或 |\u{...}| 结构内，否则必须考虑到它在括号平衡中的影响。
+%   后来，|##1| 将被替换为给定匹配的第 $0$ 个子匹配的指针。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_put_submatch:n #1
   {
@@ -5606,9 +5523,8 @@
 %
 % \begin{macro}{\@@_replacement_g:w}
 % \begin{macro}[rEXP]{\@@_replacement_g_digits:NN}
-%   Grab digits for the |\g| escape sequence in a primitive assignment
-%   to the integer \cs{l_@@_internal_a_int}.  At the end of the run of
-%   digits, check that it ends with a right brace.
+%   为 |\g| 转义序列获取数字，使用原始赋值给整数 \cs{l_@@_internal_a_int}。
+%   在数字运行结束时，检查它是否以右括号结尾。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_g:w #1#2
   {
@@ -5647,13 +5563,11 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsubsection{Csnames in replacement}
+% \subsubsection{替换中的 csname}
 %
 % \begin{macro}{\@@_replacement_c:w}
-%   |\c| may only be followed by an unescaped character.  If followed by
-%   a left brace, start a control sequence by calling an auxiliary
-%   common with |\u|.  Otherwise test whether the category is known; if
-%   it is not, complain.
+%   |\c| 后只能跟着一个未转义的字符。如果后面是左括号，则通过调用与 |\u| 共用的一个辅助函数开始控制序列。
+%   否则测试类别码是否已知；如果不是，则发出警告。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_c:w #1#2
   {
@@ -5673,12 +5587,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_cu_aux:Nw}
-%   Start a control sequence with \cs{cs:w}, protected
-%   from expansion by |#1| (either \cs{@@_replacement_exp_not:N} or
-%   \cs{exp_not:V}), or turned to a string by \cs{tl_to_str:V} if inside
-%   another csname construction |\c| or |\u|.  We use \cs{tl_to_str:V}
-%   rather than \cs{tl_to_str:N} to deal with integers and other
-%   registers.
+%   使用 \cs{cs:w} 启动一个控制序列，由 |#1|（\cs{@@_replacement_exp_not:N} 
+%   或 \cs{exp_not:V}）保护不受展开，或者在另一个控制序列构造 |\c| 或 |\u| 
+%   中转换为字符串。我们使用 \cs{tl_to_str:V} 而不是 \cs{tl_to_str:N} 
+%   处理整数和其他寄存器。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_cu_aux:Nw #1
   {
@@ -5695,9 +5607,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_u:w}
-%   Check that |\u| is followed by a left brace. If so, start a control
-%   sequence with \cs{cs:w}, which is then unpacked either with
-%   \cs{exp_not:V} or \cs{tl_to_str:V} depending on the current context.
+%   检查 |\u| 后是否跟着左括号。如果是，则使用 \cs{cs:w} 开始控制序列，
+%   然后根据当前上下文使用 \cs{exp_not:V} 或 \cs{tl_to_str:V} 展开。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_u:w #1#2
   {
@@ -5709,9 +5620,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_rbrace:N}
-%   Within a |\c{...}| or |\u{...}| construction, end the control
-%   sequence, and decrease the brace count. Otherwise, this is a raw
-%   right brace.
+%   在 |\c{...}| 或 |\u{...}| 结构中，结束控制序列，并减少括号计数。
+%   否则，这是一个原始的右括号。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_rbrace:N #1
   {
@@ -5726,8 +5636,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_lbrace:N}
-%   Within a |\c{...}| or |\u{...}| construction, this is
-%   forbidden. Otherwise, this is a raw left brace.
+%   在 |\c{...}| 或 |\u{...}| 结构中，这是被禁止的。否则，这是一个原始的左括号。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_lbrace:N #1
   {
@@ -5740,15 +5649,13 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Characters in replacement}
+% \subsubsection{替换中的字符}
 %
 % \begin{macro}{\@@_replacement_cat:NNN}
-%   Here, |#1| is a letter among |BEMTPUDSLOA| and |#2#3| denote the
-%   next character.  Complain if we reach the end of the replacement or
-%   if the construction appears inside |\c{|\ldots{}|}| or
-%   |\u{|\ldots{}|}|, and detect the case of a parenthesis.  In that
-%   case, store the current category in a sequence and switch to a new
-%   one.
+%   在这里，|#1| 是 |BEMTPUDSLOA| 中的一个字母，而 |#2#3| 表示下一个字符。
+%   如果到达替换的末尾或者在 |\c{|\ldots{}|}| 或 |\u{|\ldots{}|}| 结构内
+%   部出现，则发出警告，并检测到括号的情况。在这种情况下，将当前类别存储在一
+%   个序列中，并切换到新的类别。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_cat:NNN #1#2#3
   {
@@ -5787,23 +5694,18 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% We now need to change the category code of the null character many
-% times, hence work in a group. The catcode-specific macros below are
-% defined in alphabetical order; if you are trying to understand the
-% code, start from the end of the alphabet as those categories are
-% simpler than active or begin-group.
+% 现在我们需要多次更改空字符的类别码，因此在一个组中工作。以下是按字母顺序定义的
+% 特定类别码的宏；如果您试图理解代码，请从字母表的末尾开始，因为那些类别
+% 码比活动字符或起始组简单。
 %    \begin{macrocode}
 \group_begin:
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_replacement_char:nNN}
-%   The only way to produce an arbitrary character--catcode pair is to
-%   use the \tn{lowercase} or \tn{uppercase} primitives. This is a
-%   wrapper for our purposes. The first argument is the null character
-%   with various catcodes. The second and third arguments are grabbed
-%   from the input stream: |#3| is the character whose character code to
-%   reproduce.  We could use \cs{char_generate:nn} but only for some
-%   catcodes (active characters and spaces are not supported).
+%   产生任意字符-类别码对的唯一方法是使用\tn{lowercase}或\tn{uppercase}原语。
+%   这是为我们目的而包装的。第一个参数是带有各种类别码的空字符。第二个和
+%   第三个参数从输入流中抓取：|#3| 是要复制的字符的字符代码。我们可以使用
+%   \cs{char_generate:nn}，但仅适用于某些类别码（不支持活动字符和空格）。
 %    \begin{macrocode}
   \cs_new_protected:Npn \@@_replacement_char:nNN #1#2#3
     {
@@ -5814,9 +5716,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_A:w}
-%   For an active character, expansion must be avoided, twice because we
-%   later do two \texttt{e}-expansions, to unpack \tn{toks} for the
-%   query, and to expand their contents to tokens of the query.
+%   对于活动字符，必须避免扩展两次，因为我们稍后进行两次\texttt{e}-展开，
+%   以拆开\tn{toks}以进行查询，并将其内容扩展为查询的标记。
 %    \begin{macrocode}
   \char_set_catcode_active:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_A:w
@@ -5825,13 +5726,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_B:w}
-%   An explicit begin-group token increases the balance, unless within a
-%   |\c{...}| or |\u{...}| construction. Add the desired begin-group
-%   character, using the standard \cs{if_false:} trick. We eventually
-%   \texttt{e}-expand twice. The first time must yield a balanced token
-%   list, and the second one gives the bare begin-group token. The
-%   \cs{exp_after:wN} is not strictly needed, but is more consistent
-%   with \pkg{l3tl-analysis}.
+%   明确的开始组记号增加了平衡，除非在|\c{...}|或|\u{...}|构造内。使用标
+%   准的\cs{if_false:}技巧添加所需的开始组字符。最终我们进行两次
+%   \texttt{e}-展开 。第一次必须产生一个平衡的记号列表，第二次产生裸的开始组记号。严
+%   格来说，\cs{exp_after:wN} 是不绝对需要的，但与 \pkg{l3tl-analysis} 更一致。
 %    \begin{macrocode}
   \char_set_catcode_group_begin:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_B:w
@@ -5846,10 +5744,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_C:w}
-%   This is not quite catcode-related: when the user requests a
-%   character with category \enquote{control sequence}, the
-%   one-character control symbol is returned. As for the active
-%   character, we prepare for two \texttt{e}-expansions.
+%   这与类别码相关程度不太高：当用户请求类别为“控制序列”（ \enquote{control sequence} ）的字符时，返回单字
+%   符控制符。与活动字符一样，我们准备进行两次\texttt{e}-展开 。
 %    \begin{macrocode}
   \cs_new_protected:Npn \@@_replacement_c_C:w #1#2
     {
@@ -5860,8 +5756,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_D:w}
-%   Subscripts fit the mould: \tn{lowercase} the null byte with the
-%   correct category.
+%   下标符合模式：\tn{lowercase}空字节与正确的类别码。
 %    \begin{macrocode}
   \char_set_catcode_math_subscript:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_D:w
@@ -5870,8 +5765,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_E:w}
-%   Similar to the begin-group case, the second \texttt{e}-expansion
-%   produces the bare end-group token.
+%   与开始组情况类似，第二次\texttt{e}-展开 产生裸的结束组记号。
 %    \begin{macrocode}
   \char_set_catcode_group_end:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_E:w
@@ -5886,7 +5780,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_L:w}
-%   Simply \tn{lowercase} a letter null byte to produce an arbitrary letter.
+%   简单地 \tn{lowercase} 一个字母的空字节以生成任意字母。
 %    \begin{macrocode}
   \char_set_catcode_letter:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_L:w
@@ -5895,7 +5789,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_M:w}
-%   No surprise here, we lowercase the null math toggle.
+%   这里没有什么新鲜的，我们小写空数学切换（ lowercase the null math toggle ）。
 %    \begin{macrocode}
   \char_set_catcode_math_toggle:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_M:w
@@ -5904,7 +5798,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_O:w}
-%   Lowercase an other null byte.
+%   小写（ Lowercase ）一个其他的空字节。
 %    \begin{macrocode}
   \char_set_catcode_other:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_O:w
@@ -5913,12 +5807,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_P:w}
-%   For macro parameters, expansion is a tricky issue. We need to
-%   prepare for two \texttt{e}-expansions and passing through various
-%   macro definitions. Note that we cannot replace one \cs{exp_not:n} by
-%   doubling the macro parameter characters because this would misbehave
-%   if a mischievous user asks for |\c{\cP\#}|, since that macro
-%   parameter character would be doubled.
+%   对于宏参数，扩展是一个棘手的问题。我们需要准备两次 \texttt{e}-展开 并穿过
+%   各种宏定义。请注意，我们不能通过将宏参数字符翻倍来替换一个\cs{exp_not:n}，
+%   因为如果恶作剧的用户要求|\c{\cP\#}|，那么该宏参数字符将被翻倍。
 %    \begin{macrocode}
   \char_set_catcode_parameter:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_P:w
@@ -5930,10 +5821,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_S:w}
-%   Spaces are normalized on input by \TeX{} to have character code
-%   $32$. It is in fact impossible to get a token with character code
-%   $0$ and category code $10$. Hence we use $32$ instead of $0$ as our
-%   base character.
+%   空格在输入时被\TeX{}标准化为字符代码$32$。事实上，不可能获得字符代码为
+%   $0$且类别码为$10$的标记。因此，我们使用$32$而不是$0$作为我们的基础字符。
 %    \begin{macrocode}
   \cs_new_protected:Npn \@@_replacement_c_S:w #1#2
     {
@@ -5947,9 +5836,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_T:w}
-%   No surprise for alignment tabs here. Those are surrounded by the
-%   appropriate braces whenever necessary, hence they don't cause
-%   trouble in alignment settings.
+%   对齐制表符在这里没有什么新鲜的。只要需要，这些制表符就会被适当的括号
+%   包围，因此它们不会在对齐设置中引起麻烦。
 %    \begin{macrocode}
   \char_set_catcode_alignment:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_T:w
@@ -5958,8 +5846,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replacement_c_U:w}
-%   Simple call to \cs{@@_replacement_char:nNN} which lowercases the
-%   math superscript |^^@|.
+%   对\cs{@@_replacement_char:nNN}的简单调用，它将数学上标|^^@|小写。
 %    \begin{macrocode}
   \char_set_catcode_math_superscript:N \^^@
   \cs_new_protected:Npn \@@_replacement_c_U:w
@@ -5967,17 +5854,16 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% Restore the catcode of the null byte.
+%   恢复空字节的类别码。
 %    \begin{macrocode}
 \group_end:
 %    \end{macrocode}
 %
-% \subsubsection{An error}
+% \subsubsection{一个错误}
 %
 % \begin{macro}{\@@_replacement_error:NNN}
-%   Simple error reporting by calling one of the messages
-%   \texttt{replacement-c}, \texttt{replacement-g}, or
-%   \texttt{replacement-u}.
+%   通过调用\texttt{replacement-c}、\texttt{replacement-g}或
+%   \texttt{replacement-u}中的一个消息来进行简单的错误报告。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_error:NNN #1#2#3
   {
@@ -5987,11 +5873,10 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{User functions}
+% \subsection{用户函数}
 %
 % \begin{macro}{\regex_new:N}
-%   Before being assigned a sensible value, a regex variable matches
-%   nothing.
+%   在分配合理值之前，正则表达式变量匹配空。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_new:N #1
   { \cs_new_eq:NN #1 \c_@@_no_match_regex }
@@ -5999,7 +5884,7 @@
 % \end{macro}
 %
 % \begin{variable}{\l_tmpa_regex, \l_tmpb_regex, \g_tmpa_regex, \g_tmpb_regex}
-%   The usual scratch space.
+%   常规的临时空间。
 %    \begin{macrocode}
 \regex_new:N \l_tmpa_regex
 \regex_new:N \l_tmpb_regex
@@ -6009,8 +5894,7 @@
 % \end{variable}
 %
 % \begin{macro}{\regex_set:Nn, \regex_gset:Nn, \regex_const:Nn}
-%   Compile, then store the result in the user variable with the
-%   appropriate assignment function.
+%   编译，然后使用适当的赋值函数将结果存储在用户变量中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_set:Nn #1#2
   {
@@ -6035,9 +5919,8 @@
 %     \regex_show:n, \regex_log:n, \@@_show:Nn,
 %     \regex_show:N, \regex_log:N, \@@_show:NN
 %   }
-%   User functions: the \texttt{n} variant requires compilation first.
-%   Then show the variable with some appropriate text. The auxiliary
-%   \cs{@@_show:N} is defined in a different section.
+%   用户函数：\texttt{n} 变体需要先进行编译。然后使用一些适当的文本显示变量。
+%   辅助的 \cs{@@_show:N} 在不同的部分中定义。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_show:n { \@@_show:Nn \msg_show:nneeee }
 \cs_new_protected:Npn \regex_log:n { \@@_show:Nn \msg_log:nneeee }
@@ -6070,11 +5953,9 @@
 %     \regex_match:nn, \regex_match:nV,
 %     \regex_match:Nn, \regex_match:NV
 %   }
-%   Those conditionals are based on a common auxiliary defined
-%   later. Its first argument builds the \textsc{nfa} corresponding to
-%   the regex, and the second argument is the query token list. Once we
-%   have performed the match, convert the resulting boolean to
-%   \cs{prg_return_true:} or \texttt{false}.
+%   这些条件基于稍后定义的一个常见辅助工具。它的第一个参数构建与正则表达式对应的
+%   \textsc{nfa} ，第二个参数是查询记号列表。一旦完成匹配，将结果布尔值转换为
+%   \cs{prg_return_true:}或\texttt{false}。
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn \regex_match:nn #1#2 { T , F , TF }
   {
@@ -6093,7 +5974,7 @@
 %
 % \begin{macro}
 %   {\regex_count:nnN, \regex_count:nVN, \regex_count:NnN, \regex_count:NVN}
-%   Again, use an auxiliary whose first argument builds the \textsc{nfa}.
+%   再次使用一个辅助工具，其第一个参数构建 \textsc{nfa} 。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_count:nnN #1
   { \@@_count:nnN { \@@_build:n {#1} } }
@@ -6105,10 +5986,9 @@
 % \end{macro}
 %
 % \begin{macro}[noTF]{\regex_match_case:nn}
-%   The auxiliary errors if |#1| has an odd number of items, and
-%   otherwise it sets \cs{g_@@_case_int} according to which case was
-%   found (zero if not found).  The \texttt{true} branch leaves the
-%   corresponding code in the input stream.
+%   辅助工具如果 |#1| 具有奇数个项目，则会发生错误，否则根据找到的情况
+%   设置\cs{g_@@_case_int}（如果未找到，则为零）。 \texttt{true} 分支将相应的代码
+%   留在输入流中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_match_case:nnTF #1#2#3
   {
@@ -6140,13 +6020,11 @@
 %     \regex_split:NnN,        \regex_split:NVN,
 %     \regex_split:nnN,        \regex_split:nVN
 %   }
-%   We define here $40$ user functions, following a common pattern in
-%   terms of \texttt{:nnN} auxiliaries, defined in the coming
-%   subsections.  The auxiliary is handed \cs{@@_build:n} or
-%   \cs{@@_build:N} with the appropriate regex argument, then all
-%   other necessary arguments (replacement text, token list, \emph{etc.}
-%   The conditionals call \cs{@@_return:} to return either
-%   \texttt{true} or \texttt{false} once matching has been performed.
+%   我们在这里定义了40个用户函数，遵循在\texttt{:nnN}辅助工具中的一个常见模式，
+%   这些辅助工具在接下来的子部分中定义。该辅助工具使用\cs{@@_build:n}或
+%   \cs{@@_build:N}作为适当的正则表达式参数，然后使用所有其他必要的参数
+%   （替换文本、记号列表\emph{等}）。条件调用\cs{@@_return:}以在执行匹配后返回
+%   \texttt{true}或\texttt{false}。
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmp:w #1#2#3
   {
@@ -6175,12 +6053,10 @@
 % \end{macro}
 %
 % \begin{macro}[noTF]{\regex_replace_case_once:nN}
-%   If the input is bad (odd number of items) then take the false
-%   branch.  Otherwise, use the same auxiliary as
-%   \cs{regex_replace_once:nnN}, but with more complicated code to build
-%   the automaton, and to find what replacement text to use.  The
-%   \cs{tl_item:nn} is only expanded once we know the value of
-%   \cs{g_@@_case_int}, namely which case matched.
+%   如果输入不正确（项目数为奇数），则执行false分支。否则，使用与
+%   \cs{regex_replace_once:nnN}相同的辅助函数，但代码更复杂，用于构建
+%   自动机，并找到要使用的替换文本。\cs{tl_item:nn}仅在我们知道\cs{g_@@_case_int}
+%   的值时才会展开，即匹配的是哪个case。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_replace_case_once:nNTF #1#2
   {
@@ -6209,10 +6085,9 @@
 % \end{macro}
 %
 % \begin{macro}[noTF]{\regex_replace_case_all:nN}
-%   If the input is bad (odd number of items) then take the false
-%   branch.  Otherwise, use the same auxiliary as
-%   \cs{regex_replace_all:nnN}, but with more complicated code to build
-%   the automaton, and to find what replacement text to use.
+% 如果输入不正确（项目数为奇数），则执行false分支。否则，使用与
+% \cs{regex_replace_all:nnN}相同的辅助函数，但代码更复杂，用于构建
+% 自动机，并找到要使用的替换文本。
 %    \begin{macrocode}
 \cs_new_protected:Npn \regex_replace_case_all:nNTF #1#2
   {
@@ -6240,20 +6115,18 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Variables and helpers for user functions}
+% \subsubsection{用户函数的变量和辅助工具}
 %
 % \begin{variable}{\l_@@_match_count_int}
-%   The number of matches found so far is stored
-%   in \cs{l_@@_match_count_int}. This is only used
-%   in the \cs{regex_count:nnN} functions.
+%   到目前为止找到的匹配数量存储在\cs{l_@@_match_count_int}中。这仅在
+%   \cs{regex_count:nnN}函数中使用。
 %    \begin{macrocode}
 \int_new:N \l_@@_match_count_int
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{@@_begin, @@_end}
-%   Those flags are raised to indicate begin-group or end-group tokens
-%   that had to be added when extracting submatches.
+%   这些标志被设置为指示需要在提取子匹配时添加的开始组或结束组记号。
 %    \begin{macrocode}
 \flag_new:n { @@_begin }
 \flag_new:n { @@_end }
@@ -6261,15 +6134,12 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_min_submatch_int, \l_@@_submatch_int, \l_@@_zeroth_submatch_int}
-%   The end-points of each submatch are stored in two arrays whose index \meta{submatch} ranges
-%   from \cs{l_@@_min_submatch_int} (inclusive) to
-%   \cs{l_@@_submatch_int} (exclusive). Each successful match comes
-%   with a $0$-th submatch (the full match), and one match for each
-%   capturing group: submatches corresponding to the last successful
-%   match are labelled starting at \texttt{zeroth_submatch}. The entry
-%   \cs{l_@@_zeroth_submatch_int} in \cs{g_@@_submatch_prev_intarray} holds
-%   the position at which that match attempt started: this is used for
-%   splitting and replacements.
+%   每个子匹配的端点存储在两个数组中，其索引\meta{submatch}的范围从
+%   \cs{l_@@_min_submatch_int}（包括）到\cs{l_@@_submatch_int}（不包括）。
+%   每次成功匹配都带有一个$0$-th子匹配（完全匹配），以及每个捕获组的一个匹配：
+%   与上一次成功匹配对应的子匹配以\texttt{zeroth_submatch}开始标记。
+%   在\cs{g_@@_submatch_prev_intarray}中的条目\cs{l_@@_zeroth_submatch_int}中
+%   存储了该匹配尝试开始的位置：这用于拆分和替换。
 %    \begin{macrocode}
 \int_new:N \l_@@_min_submatch_int
 \int_new:N \l_@@_submatch_int
@@ -6278,8 +6148,8 @@
 % \end{variable}
 %
 % \begin{variable}{\g_@@_submatch_prev_intarray, \g_@@_submatch_begin_intarray, \g_@@_submatch_end_intarray, \g_@@_submatch_case_intarray}
-%   Hold the place where the match attempt begun, the end-points of each
-%   submatch, and which regex case the match corresponds to, respectively.
+%   分别保存匹配尝试开始的位置、每个子匹配的端点以及匹配对应的正则表达式
+%   案例。
 %    \begin{macrocode}
 \intarray_new:Nn \g_@@_submatch_prev_intarray { 65536 }
 \intarray_new:Nn \g_@@_submatch_begin_intarray { 65536 }
@@ -6289,16 +6159,14 @@
 % \end{variable}
 %
 % \begin{variable}{\g_@@_balance_intarray}
-%   The first thing we do when matching is to store the balance of
-%   begin-group/end-group characters into \cs{g_@@_balance_intarray}.
+%   匹配时的第一步是将开始组/结束组字符的平衡存储在\cs{g_@@_balance_intarray}中。
 %    \begin{macrocode}
 \intarray_new:Nn \g_@@_balance_intarray { 65536 }
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_added_begin_int, \l_@@_added_end_int}
-%   Keep track of the number of left/right braces to add when performing
-%   a regex operation such as a replacement.
+%   在执行正则表达式操作（如替换）时跟踪要添加的左/右括号的数量。
 %    \begin{macrocode}
 \int_new:N \l_@@_added_begin_int
 \int_new:N \l_@@_added_end_int
@@ -6306,9 +6174,8 @@
 % \end{variable}
 %
 % \begin{macro}{\@@_return:}
-%   This function triggers either \cs{prg_return_false:} or
-%   \cs{prg_return_true:} as appropriate to whether a match was found or
-%   not. It is used by all user conditionals.
+%   该函数根据是否找到匹配触发\cs{prg_return_false:}或\cs{prg_return_true:}。
+%   它被所有用户条件使用。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_return:
   {
@@ -6322,10 +6189,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_query_set:n, \@@_query_set_aux:nN}
-%   To easily extract subsets of the input once we found the positions
-%   at which to cut, store the input tokens one by one into successive
-%   \tn{toks} registers.  Also store the brace balance (used to check
-%   for overall brace balance) in an array.
+%   一旦找到要切割的位置，为了轻松提取输入的子集，将输入标记一个接一个地存储
+%   到连续的\tn{toks}寄存器中。还在一个数组中存储括号平衡（用于检查总体括号平衡）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_query_set:n #1
   {
@@ -6351,11 +6216,11 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Matching}
+% \subsubsection{匹配}
 %
 % \begin{macro}{\@@_if_match:nn}
-%   We don't track submatches, and stop after a single match. Build the
-%   \textsc{nfa} with |#1|, and perform the match on the query |#2|.
+%   我们不跟踪子匹配，并在找到单个匹配后停止。使用 |#1| 构建 \textsc{nfa} ，
+%   并在查询 |#2| 上执行匹配。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_if_match:nn #1#2
   {
@@ -6371,10 +6236,9 @@
 %
 % \begin{macro}{\@@_match_case:nnTF}
 % \begin{macro}[EXP]{\@@_match_case_aux:nn}
-%   The code would get badly messed up if the number of items in |#1|
-%   were not even, so we catch this case, then follow the same code as
-%   \cs{regex_match:nnTF} but using \cs{@@_case_build:n} and without
-%   returning a result.
+%   如果 |#1| 中的项目数不是偶数，代码将被严重破坏，因此我们捕捉此情况，
+%   然后执行与 \cs{regex_match:nnTF} 相同的代码，但使用 \cs{@@_case_build:n}，
+%   并且不返回结果。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_match_case:nnTF #1#2
   {
@@ -6398,11 +6262,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_count:nnN}
-%   Again, we don't care about submatches. Instead of aborting after the
-%   first \enquote{longest match} is found, we search for multiple
-%   matches, incrementing \cs{l_@@_match_count_int} every time to
-%   record the number of matches. Build the \textsc{nfa} and match. At
-%   the end, store the result in the user's variable.
+%   再次，我们不关心子匹配。与其在找到第一个“最长匹配”（ \enquote{longest match} ）后中止，我们搜索多个匹配，
+%   在每次匹配后增加 \cs{l_@@_match_count_int} 以记录匹配的数量。构建 \textsc{nfa} 并进行匹配。
+%   最后，将结果存储在用户变量中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_count:nnN #1#2#3
   {
@@ -6419,13 +6281,11 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Extracting submatches}
+% \subsubsection{提取子匹配}
 %
 % \begin{macro}{\@@_extract_once:nnN, \@@_extract_all:nnN}
-%   Match once or multiple times. After each match (or after the only
-%   match), extract the submatches using \cs{@@_extract:}. At the
-%   end, store the sequence containing all the submatches into the user
-%   variable |#3| after closing the group.
+%   匹配一次或多次。在每次匹配（或仅在匹配后）之后，使用 \cs{@@_extract:} 提取子匹配。
+%   最后，在关闭组之后将包含所有子匹配的序列存储到用户变量 |#3| 中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_extract_once:nnN #1#2#3
   {
@@ -6450,15 +6310,11 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_split:nnN}
-%   Splitting at submatches is a bit more tricky. For each match,
-%   extract all submatches, and replace the zeroth submatch by the part
-%   of the query between the start of the match attempt and the start of
-%   the zeroth submatch. This is inhibited if the delimiter matched an
-%   empty token list at the start of this match attempt.  After the last
-%   match, store the last part of the token list, which ranges from the
-%   start of the match attempt to the end of the query. This step is
-%   inhibited if the last match was empty and at the very end: decrement
-%   \cs{l_@@_submatch_int}, which controls which matches will be used.
+%   在子匹配处进行拆分有些棘手。对于每个匹配，提取所有子匹配，
+%   并将零子匹配的部分替换为匹配尝试开始和零子匹配开始之间的查询部分。
+%   如果定界符在此匹配尝试的开头匹配了一个空的记号列表，则会阻止此操作。
+%   在最后的匹配后，存储记号列表的最后部分，该部分范围从匹配尝试的开始到查询的结尾。
+%   如果最后的匹配为空且在最后，则会阻止此操作：减少的量 \cs{l_@@_submatch_int}——它控制将使用哪些匹配。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_split:nnN #1#2#3
   {
@@ -6507,17 +6363,12 @@
 % \begin{macro}{\@@_extract_seq:N}
 % \begin{macro}{\@@_extract_seq:NNn}
 % \begin{macro}{\@@_extract_seq_loop:Nw}
-%   The end-points of submatches are stored as entries of two arrays
-%   from \cs{l_@@_min_submatch_int} to \cs{l_@@_submatch_int}
-%   (exclusive). Extract the relevant ranges into \cs{g_@@_internal_tl},
-%   separated by \cs{@@_tmp:w} |{}|. We keep track in the two flags
-%   \texttt{__regex_begin} and \texttt{__regex_end} of the number of
-%   begin-group or end-group tokens added to make each of these items
-%   overall balanced.  At this step, |}{| is counted as being balanced
-%   (same number of begin-group and end-group tokens).  This problem is
-%   caught by \cs{@@_extract_check:w}, explained later.  After
-%   complaining about any begin-group or end-group tokens we had to add,
-%   we are ready to construct the user's sequence outside the group.
+%   子匹配的端点存储为两个数组的条目，从 \cs{l_@@_min_submatch_int} 到 \cs{l_@@_submatch_int}
+%   （不包括 \cs{l_@@_submatch_int}）。将相关范围提取到 \cs{g_@@_internal_tl} 中，
+%   用 \cs{@@_tmp:w} |{}| 分隔。我们在两个标志 \texttt{__regex_begin} 和 \texttt{__regex_end}
+%   中跟踪添加到每个项目中的总体平衡的开始组或结束组记号数。在此步骤中，|}{| 被视为平衡的
+%   （具有相同数量的开始组和结束组记号）。这个问题会被稍后解释的 \cs{@@_extract_check:w} 捕捉到。
+%   在抱怨了我们必须添加的任何开始组或结束组记号之后，我们准备在组外构造用户的序列。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_group_end_extract_seq:N #1
   {
@@ -6570,10 +6421,8 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\@@_extract_seq_aux:n, \@@_extract_seq_aux:ww}
-%   The \texttt{:n} auxiliary builds one item of the sequence of
-%   submatches. First compute the brace balance of the submatch, then
-%   extract the submatch from the query, adding the appropriate braces
-%   and raising a flag if the submatch is not balanced.
+%   \texttt{:n} 辅助函数构建子匹配序列的一项。首先计算子匹配的括号平衡，
+%   然后从查询中提取子匹配，添加适当的括号，并在子匹配不平衡时引发一个标志。
 %    \begin{macrocode}
 \cs_new:Npn \@@_extract_seq_aux:n #1
   {
@@ -6607,22 +6456,13 @@
 %     \@@_extract_check:w, \@@_extract_check:n,
 %     \@@_extract_check_loop:w, \@@_extract_check_end:w
 %   }
-%   In \cs{@@_group_end_extract_seq:N} we had to expand
-%   \cs{g_@@_internal_tl} to turn \cs{if_false:} constructions into
-%   actual begin-group and end-group tokens.  This is done with a
-%   \cs{__kernel_tl_gset:Ne} assignment, and \cs{@@_extract_check:w} is
-%   run immediately after this assignment ends, thanks to the
-%   \tn{afterassignment} primitive.  If all of the items were properly
-%   balanced (enough begin-group tokens before end-group tokens, so |}{|
-%   is not) then \cs{@@_extract_check:w} is called just before the
-%   closing brace of the \cs{__kernel_tl_gset:Ne} (thanks to our sneaky
-%   \cs{if_false:} |{| \cs{fi:} |}| construction), and finds that there
-%   is nothing left to expand.  If any of the items is unbalanced, the
-%   assignment gets ended early by an extra end-group token, and our
-%   check finds more tokens needing to be expanded in a new
-%   \cs{__kernel_tl_gset:Ne} assignment.  We need to add a begin-group
-%   and an end-group tokens to the unbalanced item, namely to the last
-%   item found so far, which we reach through a loop.
+%   在 \cs{@@_group_end_extract_seq:N} 中，我们必须展开 \cs{g_@@_internal_tl}，
+%   将 \cs{if_false:} 结构转换为实际的开始和结束组标记。这是通过 \cs{__kernel_tl_gset:Ne} 赋值完成的，
+%   并且由于 \tn{afterassignment} 原语，在此赋值结束后立即运行 \cs{@@_extract_check:w}。
+%   如果所有项目都平衡（足够的开始组标记在结束组标记之前，所以 |}{| 不是），
+%   那么在 \cs{__kernel_tl_gset:Ne} 的右括号之前（由于我们巧妙的 \cs{if_false:} |{| \cs{fi:} |}| 结构）调用 \cs{@@_extract_check:w}，
+%   并发现没有剩余的要展开的内容。如果任何项目不平衡，赋值会提前结束，由额外的结束组标记，而我们的检查会发现需要在新的 \cs{__kernel_tl_gset:Ne} 赋值中展开更多标记。
+%   我们需要为不平衡的项目添加开始组和结束组标记，即为到目前为止找到的最后一个项目，我们通过循环到达该项目。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_extract_check:w
   {
@@ -6653,16 +6493,11 @@
     \@@_extract_check_loop:w \prg_do_nothing:
   }
 %    \end{macrocode}
-%   Arguments of \cs{@@_extract_check_end:w} are: |#1| is the part of
-%   the item before the extra end-group token; |#2| is junk; |#3| is
-%   \cs{prg_do_nothing:} followed by the not-yet-expanded part of the
-%   item after the extra end-group token.  In the replacement text, the
-%   first brace and the \cs{if_false:} |{| \cs{fi:} |}| construction are
-%   the added begin-group and end-group tokens (the latter being not-yet
-%   expanded, just like~|#3|), while the closing brace after
-%   \cs{exp_not:o} |{#1}| replaces the extra end-group token that had
-%   ended the assignment early.  In particular this means that the
-%   character code of that end-group token is lost.
+%   \cs{@@_extract_check_end:w} 的参数是：|#1| 是额外的结束组标记之前项目的一部分；
+%   |#2| 是废料；|#3| 是 \cs{prg_do_nothing:} 后跟尚未展开的项目的部分，它是额外的结束组标记之后。
+%   在替换文本中，第一个括号和 \cs{if_false:} |{| \cs{fi:} |}| 结构是添加的开始组和结束组标记（后者尚未展开，就像 ~|#3| 一样），
+%   而在 \cs{exp_not:o} |{#1}| 之后的关闭括号替换了提前结束赋值的额外结束组标记。
+%   特别是这意味着该结束组标记的字符代码丢失了。
 %    \begin{macrocode}
 \cs_new:Npn \@@_extract_check_end:w
     \exp_not:o #1#2 \@@_extract_check_loop:w #3 \@@_tmp:w
@@ -6676,14 +6511,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_extract:, \@@_extract_aux:w}
-%   Our task here is to store the list of end-points of submatches, and
-%   store them in appropriate array entries, from
-%   \cs{l_@@_zeroth_submatch_int} upwards.  First, we store in
-%   \cs{g_@@_submatch_prev_intarray} the position at which the match
-%   attempt started.  We extract the rest from the comma list
-%   \cs{l_@@_success_submatches_tl}, which starts with entries to be
-%   stored in \cs{g_@@_submatch_begin_intarray} and continues with
-%   entries for \cs{g_@@_submatch_end_intarray}.
+%   我们的任务是存储子匹配的端点列表，并将它们存储在适当的数组条目中，从 \cs{l_@@_zeroth_submatch_int} 开始。
+%   首先，我们在 \cs{g_@@_submatch_prev_intarray} 中存储了匹配尝试开始的位置。
+%   我们从逗号列表 \cs{l_@@_success_submatches_tl} 中提取其余部分，
+%   该列表从存储在 \cs{g_@@_submatch_begin_intarray} 中的条目开始，然后是 \cs{g_@@_submatch_end_intarray} 的条目。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_extract:
   {
@@ -6723,21 +6554,15 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Replacement}
+% \subsubsection{替换}
 %
 % \begin{macro}{\@@_replace_once:nnN, \@@_replace_once_aux:nnN}
-%   Build the \textsc{nfa} and the replacement functions, then find a
-%   single match.  If the match failed, simply exit the
-%   group. Otherwise, we do the replacement. Extract submatches. Compute
-%   the brace balance corresponding to replacing this match by the
-%   replacement (this depends on submatches). Prepare the replaced token
-%   list: the replacement function produces the tokens from the start of
-%   the query to the start of the match and the replacement text for
-%   this match; we need to add the tokens from the end of the match to
-%   the end of the query. Finally, store the result in the user's
-%   variable after closing the group: this step involves an additional
-%   \texttt{e}-expansion, and checks that braces are balanced in the
-%   final result.
+%   构建 \textsc{nfa} 和替换函数，然后找到单个匹配。
+%   如果匹配失败，就简单地退出组。否则，我们进行替换。
+%   提取子匹配。计算替换此匹配的替换的括号平衡（这取决于子匹配）。
+%   准备替换的记号列表：替换函数生成从查询的开始到匹配的开始和此匹配的替换文本的标记；
+%   我们需要添加从匹配的末尾到查询的末尾的标记。最后，在关闭组之后将结果存储在用户变量中：
+%   这一步涉及额外的 \texttt{e}-展开 ，并检查最终结果中的括号是否平衡。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replace_once:nnN #1#2
   { \@@_replace_once_aux:nnN {#1} { \@@_replacement:n {#2} } }
@@ -6776,16 +6601,11 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_replace_all:nnN}
-%   Match multiple times, and for every match, extract submatches and
-%   additionally store the position at which the match attempt started.
-%   The entries from \cs{l_@@_min_submatch_int} to
-%   \cs{l_@@_submatch_int} hold information about submatches of every
-%   match in order; each match corresponds to
-%   \cs{l_@@_capturing_group_int} consecutive entries.
-%   Compute the brace balance corresponding to doing all the
-%   replacements: this is the sum of brace balances for replacing each
-%   match. Join together the replacement texts for each match (including
-%   the part of the query before the match), and the end of the query.
+%   多次匹配，对于每次匹配，提取子匹配并额外存储匹配尝试开始的位置。
+%   从 \cs{l_@@_min_submatch_int} 到 \cs{l_@@_submatch_int} 的条目按顺序保存有关每次匹配的子匹配的信息；
+%   每次匹配对应于 \cs{l_@@_capturing_group_int} 个连续条目。
+%   计算执行所有替换所对应的括号平衡：这是替换每个匹配的括号平衡的总和。
+%   将每个匹配的替换文本（包括匹配之前的查询部分）和查询的末尾连接在一起。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replace_all:nnN #1#2
   { \@@_replace_all_aux:nnN {#1} { \@@_replacement:n {#2} } }
@@ -6826,20 +6646,13 @@
 %     \@@_group_end_replace:N, \@@_group_end_replace_try:,
 %     \@@_group_end_replace_check:w, \@@_group_end_replace_check:n
 %   }
-%   At this stage \cs{l_@@_internal_a_tl} (|e|-expands to the desired
-%   result).  Guess from \cs{l_@@_balance_int} the number of braces to
-%   add before or after the result then try expanding.  The simplest
-%   case is when \cs{l_@@_internal_a_tl} together with the braces we
-%   insert via \cs{prg_replicate:nn} give a balanced result, and the
-%   assignment ends at the \cs{if_false:} |{| \cs{fi:} |}| construction:
-%   then \cs{@@_group_end_replace_check:w} sees that there is no
-%   material left and we successfully found the result.  The harder case
-%   is that expanding \cs{l_@@_internal_a_tl} may produce extra closing
-%   braces and end the assignment early.  Then we grab the remaining code
-%   using; importantly, what follows has not yet been expanded so that
-%   \cs{@@_group_end_replace_check:n} grabs everything until the last
-%   brace in \cs{@@_group_end_replace_try:}, letting us try again with
-%   an extra surrounding pair of braces.
+%   在这个阶段，\cs{l_@@_internal_a_tl}（通过 |e|-展开 为期望的结果）。
+%   根据 \cs{l_@@_balance_int} 猜测在结果之前或之后添加括号的数量，然后尝试展开。
+%   最简单的情况是，\cs{l_@@_internal_a_tl} 与通过 \cs{prg_replicate:nn} 插入的括号一起产生平衡的结果，
+%   并且赋值在 \cs{if_false:} |{| \cs{fi:} |}| 结构结束：然后 \cs{@@_group_end_replace_check:w} 看到没有剩余材料，
+%   我们成功地找到了结果。较难的情况是展开 \cs{l_@@_internal_a_tl} 可能会产生额外的闭合括号并提前结束赋值。
+%   然后，我们使用; 重要的是，后面的内容尚未展开，因此 \cs{@@_group_end_replace_check:n} 抓取直到 \cs{@@_group_end_replace_try:} 中的最后一个括号的所有内容，
+%   这样我们可以尝试再次使用额外的括号对结果进行环绕。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_group_end_replace:N #1
   {
@@ -6885,10 +6698,10 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Peeking ahead}
+% \subsubsection{预览}
 %
 % \begin{variable}{\l_@@_peek_true_tl, \l_@@_peek_false_tl}
-%   True/false code arguments of \cs{peek_regex:nTF} or similar.
+%   \cs{peek_regex:nTF} 或类似命令的真/假代码参数。
 %    \begin{macrocode}
 \tl_new:N \l_@@_peek_true_tl
 \tl_new:N \l_@@_peek_false_tl
@@ -6896,8 +6709,7 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_replacement_tl}
-%   When peeking in \cs{peek_regex_replace_once:nnTF} we need to store
-%   the replacement text.
+%   在 \cs{peek_regex_replace_once:nnTF} 中预览时，我们需要存储替换文本。
 %    \begin{macrocode}
 \tl_new:N \l_@@_replacement_tl
 %    \end{macrocode}
@@ -6905,9 +6717,8 @@
 %
 % \begin{variable}{\l_@@_input_tl}
 % \begin{macro}{\@@_input_item:n}
-%   Stores each token found as \cs{@@_input_item:n} \Arg{tokens}, where
-%   the \meta{tokens} \texttt{o}-expand to the token found, as for
-%   \cs{tl_analysis_map_inline:nn}.
+%   将每个作为 \cs{@@_input_item:n} \Arg{tokens} 找到的记号存储在其中，
+%   其中 \meta{tokens} \texttt{o}-展开 为找到的记号，与 \cs{tl_analysis_map_inline:nn} 类似。
 %    \begin{macrocode}
 \tl_new:N \l_@@_input_tl
 \cs_new_eq:NN \@@_input_item:n ?
@@ -6917,17 +6728,12 @@
 %
 % \begin{macro}[TF]
 %   {\peek_regex:n, \peek_regex:N, \peek_regex_remove_once:n, \peek_regex_remove_once:N}
-%   The |T| and |F| functions just call the corresponding |TF| function.
-%   The four |TF| functions differ along two axes: whether to remove the
-%   token or not, distinguished by using \cs{@@_peek_end:} or
-%   \cs{@@_peek_remove_end:n} (the latter case needs an argument, as we
-%   will see), and whether the regex has to be compiled or is already in
-%   an |N|-type variable, distinguished by calling \cs{@@_build_aux:Nn}
-%   or \cs{@@_build_aux:NN}.  The first argument of these functions is
-%   \cs{c_false_bool} to indicate that there should be no implicit
-%   insertion of a wildcard at the start of the pattern: otherwise the
-%   code would keep looking further into the input stream until matching
-%   the regex.
+%   |T| 和 |F| 函数只是调用相应的 |TF| 函数。
+%   四个 |TF| 函数在两个方面有所不同：是否删除记号，通过使用 \cs{@@_peek_end:} 或
+%   \cs{@@_peek_remove_end:n}（后者需要一个参数，正如我们将看到的）来区分，
+%   以及正则表达式是否必须编译或已经在 |N|-type 变量中，通过调用 \cs{@@_build_aux:Nn}
+%   或 \cs{@@_build_aux:NN} 来区分。这些函数的第一个参数是 \cs{c_false_bool}，
+%   以指示不应在模式的开头隐式插入通配符：否则代码将继续查找输入流，直到匹配正则表达式。
 %    \begin{macrocode}
 \cs_new_protected:Npn \peek_regex:nTF #1
   {
@@ -6971,17 +6777,14 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek:nnTF, \@@_peek_aux:nnTF}
-%   Store the user's true/false codes (plus \cs{group_end:}) into two
-%   token lists.  Then build the automaton with |#1|, without submatch
-%   tracking, and aiming for a single match.  Then start matching by
-%   setting up a few variables like for any regex matching like
-%   \cs{regex_match:nnTF}, with the addition of \cs{l_@@_input_tl}
-%   that keeps track of the tokens seen, to reinsert them at the
-%   end.  Instead of \cs{tl_analysis_map_inline:nn} on the input, we
-%   call \cs{peek_analysis_map_inline:n} to go through tokens in the
-%   input stream.  Since \cs{@@_match_one_token:nnN} calls
-%   \cs{@@_maplike_break:} we need to catch that and break the
-%   \cs{peek_analysis_map_inline:n} loop instead.
+%   将用户的真/假代码（加上 \cs{group_end:}）存储到两个记号列表中。
+%   然后使用 |#1| 构建自动机，不进行子匹配跟踪，目标是单次匹配。
+%   然后开始匹配，设置一些变量，就像任何正则表达式匹配一样，比如
+%   \cs{regex_match:nnTF}，另外加上 \cs{l_@@_input_tl}，用于跟踪所见记号，
+%   以在最后重新插入它们。我们不使用 \cs{tl_analysis_map_inline:nn} 处理输入，
+%   而是调用 \cs{peek_analysis_map_inline:n} 遍历输入流中的记号。
+%   由于 \cs{@@_match_one_token:nnN} 调用了 \cs{@@_maplike_break:}，
+%   我们需要捕捉它并中断 \cs{peek_analysis_map_inline:n} 循环。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek:nnTF #1
   {
@@ -7015,18 +6818,15 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_end:, \@@_peek_remove_end:n}
-%   Once the regex matches (or permanently fails to match) we call
-%   \cs{@@_peek_end:}, or \cs{@@_peek_remove_end:n} with argument the
-%   last token seen.  For \cs{peek_regex:nTF} we reinsert tokens seen by
-%   calling \cs{@@_peek_reinsert:N} regardless of the result of the
-%   match.  For \cs{peek_regex_remove_once:nTF} we reinsert the tokens
-%   seen only if the match failed; otherwise we just reinsert the
-%   tokens~|#1|, with one expansion.  To be more precise, |#1| consists
-%   of tokens that \texttt{o}-expand and \texttt{e}-expand to the last
-%   token seen, for example it is \cs{exp_not:N} \meta{cs} for a control
-%   sequence.  This means that just doing \cs{exp_after:wN}
-%   \cs{l_@@_peek_true_tl} |#1| would be unsafe because the expansion of
-%   \meta{cs} would be suppressed.
+%   一旦正则表达式匹配（或永久无法匹配），我们调用 \cs{@@_peek_end:} 或
+%   带有最后看到的记号作为参数的 \cs{@@_peek_remove_end:n}。
+%   对于 \cs{peek_regex:nTF}，我们通过调用 \cs{@@_peek_reinsert:N} 重新插入看到的记号，
+%   无论匹配的结果如何。对于 \cs{peek_regex_remove_once:nTF}，仅当匹配失败时，
+%   我们才重新插入看到的记号；否则，我们只需用一个展开重新插入记号~|#1|。
+%   更确切地说，|#1| 包含那些 \texttt{o}-展开 和 \texttt{e}-展开 为最后看到的记号的记号，
+%   例如对于控制序列，它是 \cs{exp_not:N} \meta{cs}。这意味着仅执行
+%   \cs{exp_after:wN} \cs{l_@@_peek_true_tl} |#1| 可能是不安全的，
+%   因为会抑制 \meta{cs} 的展开。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_end:
   {
@@ -7044,14 +6844,11 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_reinsert:N, \@@_reinsert_item:n}
-%   Insert the true/false code |#1|, followed by the tokens found, which
-%   were stored in \cs{l_@@_input_tl}.  For this, loop through that
-%   token list using \cs{@@_reinsert_item:n}, which expands |#1| once to
-%   get a single token, and jumps over it to expand what follows, with
-%   suitable \cs{exp:w} and \cs{exp_end:}.  We cannot just use
-%   \cs{use:e} on the whole token list because the result may be
-%   unbalanced, which would stop the primitive prematurely, or let it
-%   continue beyond where we would like.
+%   插入真/假代码 |#1|，然后是找到的记号，它们存储在 \cs{l_@@_input_tl} 中。
+%   为此，通过 \cs{@@_reinsert_item:n} 循环遍历该记号列表，该循环展开 |#1|
+%   一次以获取单个记号，并跳过它以展开后面的内容，使用适当的 \cs{exp:w} 和 \cs{exp_end:}。
+%   我们不能只在整个记号列表上使用 \cs{use:e}，因为结果可能不平衡，这将导致原语提前停止，
+%   或者让它继续超过我们想要的位置。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_reinsert:N #1
   {
@@ -7072,7 +6869,7 @@
 %
 % \begin{macro}[noTF]
 %   {\peek_regex_replace_once:nn, \peek_regex_replace_once:Nn}
-%   Similar to \cs{peek_regex:nTF} above.
+%   与上述的 \cs{peek_regex:nTF} 类似。
 %    \begin{macrocode}
 \cs_new_protected:Npn \peek_regex_replace_once:nnTF #1
   { \@@_peek_replace:nnTF { \@@_build_aux:Nn \c_false_bool {#1} } }
@@ -7094,9 +6891,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_replace:nnTF}
-%   Same as \cs{@@_peek:nnTF} (used for \cs{peek_regex:nTF} above), but
-%   without disabling submatches, and with a different end.  The
-%   replacement text |#2| is stored, to be analyzed later.
+%   与上述的 \cs{@@_peek:nnTF} 相同（用于上面的 \cs{peek_regex:nTF}），
+%   但没有禁用子匹配，并带有不同的结束。替换文本 |#2| 被存储，以便以后分析。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_replace:nnTF #1#2
   {
@@ -7107,23 +6903,16 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_replace_end:}
-%   If the match failed \cs{@@_peek_reinsert:N} reinserts the tokens
-%   found.  Otherwise, finish storing the submatch information using
-%   \cs{@@_extract:}, and store the input into \tn{toks}.  Redefine a
-%   few auxiliaries to change slightly their expansion behaviour as
-%   explained below.  Analyse the replacement text with
-%   \cs{@@_replacement:n}, which as usual defines
-%   \cs{@@_replacement_do_one_match:n} to insert the tokens from the
-%   start of the match attempt to the beginning of the match, followed
-%   by the replacement text.  The \cs{use:e} expands for instance the
-%   trailing \cs{@@_query_range:nn} down to a sequence of
-%   \cs{@@_reinsert_item:n} \Arg{tokens} where \meta{tokens}
-%   \texttt{o}-expand to a single token that we want to insert.  After
-%   \texttt{e}-expansion, \cs{use:e} does \cs{use:n}, so we have
-%   \cs{exp_after:wN} \cs{l_@@_peek_true_tl} \cs{exp:w} \ldots{}
-%   \cs{exp_end:}.  This is set up such as to obtain
-%   \cs{l_@@_peek_true_tl} followed by the replaced tokens (possibly
-%   unbalanced) in the input stream.
+%   如果匹配失败，\cs{@@_peek_reinsert:N} 将重新插入找到的记号。
+%   否则，完成使用 \cs{@@_extract:} 子匹配信息的存储，并将输入存储到 \tn{toks}。
+%   重新定义一些辅助命令，稍微更改其展开行为，如下面所述。使用 \cs{@@_replacement:n}
+%   分析替换文本，该命令通常定义 \cs{@@_replacement_do_one_match:n}，
+%   以插入匹配尝试开始到匹配开始之间的记号，然后是替换文本。
+%   例如，\cs{use:e} 展开到尾随的 \cs{@@_query_range:nn}，成为一系列
+%   \cs{@@_reinsert_item:n} \Arg{tokens}，其中 \meta{tokens} \texttt{o}-展开 为我们要插入的单个记号。
+%   在 \texttt{e}-展开 后，\cs{use:e} 执行 \cs{use:n}，因此我们有
+%   \cs{exp_after:wN} \cs{l_@@_peek_true_tl} \cs{exp:w} \ldots{} \cs{exp_end:}。
+%   这被设置为获取 \cs{l_@@_peek_true_tl}，后跟替换的记号（可能不平衡）在输入流中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_replace_end:
   {
@@ -7158,10 +6947,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_query_set_from_input_tl:, \@@_query_set_item:n}
-%   The input was stored into \cs{l_@@_input_tl} as successive items
-%   \cs{@@_input_item:n} \Arg{tokens}.  Store that in successive
-%   \tn{toks}.  It's not clear whether the empty entries before and
-%   after are both useful.
+%   输入被存储到 \cs{l_@@_input_tl} 中，作为连续的项 \cs{@@_input_item:n} \Arg{tokens}。
+%   将其存储到连续的 \tn{toks} 中。在两者之前和之后的空条目是否都有用，目前不太清楚。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_query_set_from_input_tl:
   {
@@ -7182,19 +6969,13 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_replacement_put:n}
-%   While building the replacement function
-%   \cs{@@_replacement_do_one_match:n}, we often want to put simple
-%   material, given as |#1|, whose \texttt{e}-expansion
-%   \texttt{o}-expands to a single token.  Normally we can just add the
-%   token to \cs{l_@@_build_tl}, but for
-%   \cs{peek_regex_replace_once:nnTF} we eventually want to do some
-%   strange expansion that is basically using \cs{exp_after:wN} to jump
-%   through numerous tokens (we cannot use \texttt{e}-expansion like for
-%   \cs{regex_replace_once:nnNTF} because it is ok for the result to be
-%   unbalanced since we insert it in the input stream rather than
-%   storing it.  When within a csname we don't do any such shenanigan
-%   because \cs{cs:w} \ldots{} \cs{cs_end:} does all the expansion we
-%   need.
+%   在构建替换函数 \cs{@@_replacement_do_one_match:n} 时，我们经常想要放入简单的材料，
+%   给定为 |#1|，它的 \texttt{e}-展开 被 \texttt{o}-展开为单个记号。
+%   通常我们可以将记号添加到 \cs{l_@@_build_tl} 中，但对于 \cs{peek_regex_replace_once:nnTF}，
+%   我们最终想要执行一些奇怪的展开，基本上是使用 \cs{exp_after:wN} 跳过众多记号
+%   （我们不能像对于 \cs{regex_replace_once:nnNTF} 那样使用 \texttt{e}-展开，
+%   因为结果可以是不平衡的，因为我们插入它而不是存储它）。在 csname 中时，我们不进行任何这样的花招，
+%   因为 \cs{cs:w} \ldots{} \cs{cs_end:} 执行我们需要的所有展开。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_replacement_put:n #1
   {
@@ -7209,9 +6990,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_replacement_token:n}
-%   When hit with \cs{exp:w}, \cs{@@_peek_replacement_token:n}
-%   \Arg{token} stops \cs{exp_end:} and does \cs{exp_after:wN}
-%   \meta{token} \cs{exp:w} to continue expansion after it.
+%   当遇到 \cs{exp:w} 时，\cs{@@_peek_replacement_token:n}
+%   \Arg{token} 停止 \cs{exp_end:} 并执行 \cs{exp_after:wN}
+%   \meta{token} \cs{exp:w} 以继续展开。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_replacement_token:n #1
   { \exp_after:wN \exp_end: \exp_after:wN #1 \exp:w }
@@ -7219,13 +7000,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_replacement_put_submatch_aux:n}
-%   While analyzing the replacement we also have to insert submatches
-%   found in the query.  Since query items \cs{@@_input_item:n}
-%   \Arg{tokens} expand correctly only when surrounded by \cs{exp:w}
-%   \ldots{} \cs{exp_end:}, and since these expansion controls are not
-%   there within csnames (because \cs{cs:w} \ldots{} \cs{cs_end:} make
-%   them unnecessary in most cases), we have to put \cs{exp:w} and
-%   \cs{exp_end:} by hand here.
+%   在分析替换时，我们还必须插入查询中找到的子匹配。由于查询项 \cs{@@_input_item:n}
+%   \Arg{tokens} 仅在由 \cs{exp:w} \ldots{} \cs{exp_end:} 包围时正确展开，
+%   且由于在 csname 中不存在这些展开控制（因为 \cs{cs:w} \ldots{} \cs{cs_end:}
+%   使它们在大多数情况下变得不必要），因此我们必须在这里手动放入 \cs{exp:w} 和 \cs{exp_end:}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_replacement_put_submatch_aux:n #1
   {
@@ -7241,9 +7019,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_peek_replacement_var:N}
-%   This is used for |\u| outside csnames.  It makes sure to continue
-%   expansion with \cs{exp:w} before expanding the variable~|#1| and
-%   stopping the \cs{exp:w} that precedes.
+%   这用于在 csname 外部的 |\u|。它确保在展开变量~|#1| 并停止
+%   先前的 \cs{exp:w} 之前，使用 \cs{exp:w} 继续展开。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_peek_replacement_var:N #1
   {
@@ -7255,9 +7032,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Messages}
+% \subsection{消息}
 %
-% Messages for the preparsing phase.
+% 预解析阶段的消息。
 %    \begin{macrocode}
 \use:e
   {
@@ -7276,7 +7053,7 @@
   }
 %    \end{macrocode}
 %
-% Invalid quantifier.
+% 无效的量词。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { invalid-quantifier }
   { Braced~quantifier~'#1'~may~not~be~followed~by~'#2'. }
@@ -7287,8 +7064,7 @@
   }
 %    \end{macrocode}
 %
-% Messages for missing or extra closing brackets and parentheses, with
-% some fancy singular/plural handling for the case of parentheses.
+% 缺少或多余的闭括号和括号对的消息，对于括号对的情况，进行了一些繁琐的单数/复数处理。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { missing-rbrack }
   { Missing~right~bracket~inserted~in~regular~expression. }
@@ -7314,7 +7090,7 @@
   }
 %    \end{macrocode}
 %
-% Some escaped alphanumerics are not allowed everywhere.
+% 一些转义的字母数字不能在所有地方使用。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { bad-escape }
   {
@@ -7342,7 +7118,7 @@
   }
 %    \end{macrocode}
 %
-% Range errors.
+% 范围错误。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { range-missing-end }
   { Invalid~end-point~for~range~'#1-#2'~in~character~class. }
@@ -7361,7 +7137,7 @@
   }
 %    \end{macrocode}
 %
-% Errors related to |\c| and |\u|.
+% 与 |\c| 和 |\u| 有关的错误。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { c-bad-mode }
   { Invalid~nested~'\iow_char:N\\c'~escape~in~regular~expression. }
@@ -7436,7 +7212,7 @@
   }
 %    \end{macrocode}
 %
-% Errors when encountering the \textsc{posix} syntax |[:...:]|.
+% 当遇到 \textsc{posix} 语法 |[:...:]| 的错误。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { posix-unsupported }
   { POSIX~collating~element~'[#1 ~ #1]'~not~supported. }
@@ -7459,9 +7235,8 @@
   { The~POSIX~syntax~'#1'~must~be~followed~by~':]',~not~'#2'. }
 %    \end{macrocode}
 %
-% In various cases, the result of a \pkg{l3regex} operation can leave us
-% with an unbalanced token list, which we must re-balance by adding
-% begin-group or end-group character tokens.
+% 在各种情况下，\pkg{l3regex} 操作的结果可能会导致我们得到一个不平衡的记号列表，
+% 我们必须通过添加开始组或结束组字符记号来重新平衡。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { result-unbalanced }
   { Missing~brace~inserted~when~#1. }
@@ -7473,7 +7248,7 @@
   }
 %    \end{macrocode}
 %
-% Error message for unknown options.
+% 未知选项的错误信息。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { unknown-option }
   { Unknown~option~'#1'~for~regular~expressions. }
@@ -7489,7 +7264,7 @@
   }
 %    \end{macrocode}
 %
-% Errors in the replacement text.
+% 替换文本中的错误。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { replacement-c }
   { Misused~'\iow_char:N\\c'~command~in~a~replacement~text. }
@@ -7572,14 +7347,14 @@
   { Submatch~#1~used~but~regex~only~has~#2~group(s) }
 %    \end{macrocode}
 %
-% Some escaped alphanumerics are not allowed everywhere.
+% 一些转义的字母数字不能在所有地方使用。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { backwards-quantifier }
   { Quantifer~"{#1,#2}"~is~backwards. }
   { The~values~given~in~a~quantifier~must~be~in~order. }
 %    \end{macrocode}
 %
-% Used in user commands, and when showing a regex.
+% 用于用户命令，并在显示正则表达式时使用。
 %    \begin{macrocode}
 \msg_new:nnnn { regex } { case-odd }
   { #1~with~odd~number~of~items }
@@ -7599,10 +7374,8 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_msg_repeated:nnN}
-%   This is not technically a message, but seems related enough to go
-%   there. The arguments are: |#1| is the minimum number of repetitions;
-%   |#2| is the number of allowed extra repetitions ($-1$ for infinite
-%   number), and |#3| tells us about lazyness.
+% 这在技术上不是一条消息，但似乎与此相关。参数是：|#1| 是最小重复次数；
+% |#2| 是允许的额外重复次数（$-1$ 表示无限次），而 |#3| 则告诉我们关于惰性的信息。
 %    \begin{macrocode}
 \cs_new:Npn \@@_msg_repeated:nnN #1#2#3
   {
@@ -7623,17 +7396,15 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Code for tracing}
+% \subsection{用于追踪的代码}
 %
-% There is a more extensive implementation of tracing in the l3trial
-% package \pkg{l3trace}.  Function names are a bit different but could
-% be merged.
+% 在 l3trial 宏包 \pkg{l3trace} 中有一个更完整的追踪实现。函数名
+% 有点不同，但可以合并。
 %
 % \begin{macro}
 %   {\@@_trace_push:nnN, \@@_trace_pop:nnN, \@@_trace:nne}
-%   Here |#1| is the module name (\texttt{regex}) and |#2| is
-%   typically~1.  If the module's current tracing level is less than
-%   |#2| show nothing, otherwise write |#3| to the terminal.
+%   这里 |#1| 是模块名 (\texttt{regex})，|#2| 通常是~1。如果模块的
+%   当前追踪级别小于 |#2|，则不显示任何内容，否则将 |#3| 写入终端。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_trace_push:nnN #1#2#3
   { \@@_trace:nne {#1} {#2} { entering~ \token_to_str:N #3 } }
@@ -7649,16 +7420,15 @@
 % \end{macro}
 %
 % \begin{variable}{\g_@@_trace_regex_int}
-%   No tracing when that is zero.
+%   当此变量为零时，不进行追踪。
 %    \begin{macrocode}
 \int_new:N \g_@@_trace_regex_int
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{macro}{\@@_trace_states:n}
-%   This function lists the contents of all states of the \textsc{nfa},
-%   stored in \tn{toks} from $0$ to \cs{l_@@_max_state_int}
-%   (excluded).
+%   此函数列出 \textsc{nfa} 的所有状态的内容，存储在从 $0$ 到
+%   \cs{l_@@_max_state_int} (不包括) 的 \tn{toks} 中。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_trace_states:n #1
   {
