@@ -80,6 +80,28 @@
       }
     \seq_gclear:N \g__codedoc_nested_names_seq
   }
+\cs_set_protected:Npn \__codedoc_special_index_module:nnnnN #1#2#3#4#5
+  {
+    \use:e
+      {
+        \exp_not:n { \__codedoc_special_index_aux:nnnnnn {#1} {#2} }
+          \tl_if_empty:nTF {#3}
+            { { } { } { } }
+            {
+              \str_if_eq:nnTF {#3} { TeX }
+                {
+                  { TeX~和~LaTeX2e }
+                  { \string\TeX{}~和~\string\LaTeXe{} }
+                }
+                {
+                  {#3}
+                  { \string\pkg{#3} }
+                }
+              { \bool_if:NT #5 { ~内部 } ~命令： }
+            }
+      }
+          {#4}
+  }
 \ExplSyntaxOff
 \makeatother
 % ^^A =================== 设置颜色 ===============================
