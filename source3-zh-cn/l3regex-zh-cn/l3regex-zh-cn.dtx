@@ -27,6 +27,10 @@
 % ^^A ================ 中文版特别设置 ============================
 \usepackage[fontset=source]{ctex}
 \ctexset{contentsname={\hfil 目\quad 录\hfil}}
+% ^^A \addtolength{\columnseprule}{.4pt}
+% ^^A \addtolength{\columnsep}{.5\ccwd}
+% ^^A \AtBeginDocument{\addtocontents{toc}{\protect\begin{multicols}{2}}}
+% ^^A \AtEndDocument{\addtocontents{toc}{\protect\end{multicols}}}
 \IndexPrologue
   {
     \section*{索引}
@@ -37,6 +41,10 @@
     其它的都指向使用条目的页面。
   }
 \makeatletter
+\patchcmd{\l@section}
+  {\hfil}
+  {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+  {}{}
 \ExplSyntaxOn
 \cs_set_protected:Npn \__codedoc_print_end_definition:
   {
@@ -165,17 +173,18 @@
 %   {\end{itemize}}
 %
 % \pkg{l3regex}模块提供正则表达式测试、子匹配提取、分割和替换，
-% 全部作用于记号列表。正则表达式的语法主要是\textsc{pcre}语法
+% 全部作用于记号列表（ token list ， 简写为 tl ，后同不再注释）。正则表达式的语法主要是\textsc{pcre}语法
+% （ Perl Compatible Regular Expressions ，即 Perl 兼容正则表达式）
 % 的子集（并且非常接近\textsc{posix}），但由于\TeX{}操作的是
-% 记号而不是字符，因此有一些附加的功能。
+% 记号（ token ，后同）而不是字符（character，后同），因此有一些附加的功能。
 % 由于性能原因，仅实现了有限的功能集。特别地，不支持反向引用。
 %
-% 让我们给出一些示例。在
+% 下面我们给出一些示例：
 % \begin{verbatim}
 %   \tl_set:Nn \l_my_tl { That~cat. }
 %   \regex_replace_once:nnN { at } { is } \l_my_tl
 % \end{verbatim}
-% 记号列表变量 \cs[no-index]{l_my_tl} 存储文本
+% 在记号列表变量 \cs[no-index]{l_my_tl} 中存储文本
 % \enquote{\texttt{This cat.}}，其中第一个
 % \enquote{\texttt{at}} 被替换为 \enquote{\texttt{is}}。一个更复杂的例子是
 % 用于强调每个单词并在其后添加逗号的模式：
@@ -196,22 +205,22 @@
 % \end{verbatim}
 % 在 \cs[no-index]{l_foo_regex} 中存储一个正则表达式，该表达式匹配环境的起始标记：
 % \cs[no-index]{begin}，后跟一个起始组记号（|\cB.|），
-% 然后是任意数量的既不是起始组记号也不是结束组记号字符记号的记号（|\c[^BE].*|），
-% 最后是结束组记号（|\cE.|）。如下一节所述，括号 \enquote{捕获} 了 |\c[^BE].*| 的结果，
-% 从而在进行替换时让我们能够访问环境的名称。
+% 然后是任意数量的既不是起始组记号也不是结束组记号的字符记号（|\c[^BE].*|），
+% 最后是结束组记号（|\cE.|）。如下一节所述，圆括号 \enquote{捕获}（ \enquote{capture} ）
+% 了 |\c[^BE].*| 的结果，从而在进行替换时让我们能够访问环境的名称。
 %
 % \section{正则表达式的语法}
 %
 % \subsection{正则表达式示例}
 %
-% 我们从一些示例开始，并鼓励读者对这些正则表达式应用 \cs{regex_show:n}。
+% 我们从一些示例开始，并鼓励读者对这些正则表达式应用 \cs{regex_show:n} 。
 % \begin{itemize}
 % \item |Cat| 匹配以此方式大写的单词 \enquote{Cat}，但也匹配单词 \enquote{Cattle} 的开头：
 %   使用 |\bCat\b| 仅匹配完整的单词。
 % \item |[abc]| 匹配字母 \enquote{a}、\enquote{b}、\enquote{c} 中的一个；
 %   模式 \verb"(a|b|c)" 匹配相同的三个可能的字母（但请参阅下面的子匹配的讨论）。
 % \item |[A-Za-z]*| 匹配任意数量（由于量词 \verb"*"）的拉丁字母（没有重音）。
-% \item |\c{[A-Za-z]*}| 匹配由拉丁字母组成的控制序列。
+% \item |\c{[A-Za-z]*}| 匹配由拉丁字母组成的控制序列（ control sequence ，简写 cs ，后同不再注释）。
 % \item |\_[^\_]*\_| 匹配下划线，除下划线外的任意数量字符，和另一个下划线；
 %   这等效于 |\_.*?\_|，其中 |.| 匹配任意字符，懒惰量词 |*?| 表示尽可能匹配少的字符，
 %   从而避免匹配下划线。
@@ -227,17 +236,16 @@
 %   匹配显式浮点数或特殊值 \verb*"nan" 和 \verb*"inf"（允许符号和空格）。
 % \item \verb*"[\+\-\ ]*(\d+|\cC.)\ *" 匹配显式整数或控制序列
 %   （不检查是否是整数变量）。
-% \item |\G.*?\K| 在正则表达式开头匹配并丢弃（由于 |\K|）前一个匹配的结尾
-%   （|\G|），以及由正则表达式的其余部分匹配的内容；在 \cs{regex_replace_all:nnN} 中很有用，
+% \item |\G.*?\K| 在正则表达式开头则匹配并丢弃（由于 |\K|）所有的在前一个匹配的结尾
+%   （|\G|）和由正则表达式的其余部分匹配的部分之间的内容；在 \cs{regex_replace_all:nnN} 中很有用，
 %   当目标是以比 \cs{regex_extract_all:nnN} 更精细的方式提取匹配项或子匹配项时。
 % \end{itemize}
-% 尽管不可能让正则表达式仅匹配整数表达式，
-% 但是
+% 尽管不可能让正则表达式仅匹配整数表达式，但是
 % \begin{verbatim}
 %   [\+\-\(]*\d+\)*([\+\-*/][\+\-\(]*\d+\)*)*
 % \end{verbatim}
 % 匹配所有有效的整数表达式
-% （仅由显式整数制成）。应该跟随进一步的测试。
+% （仅由显式整数制成）。应该有进一步的测试。
 %
 % \subsection{正则表达式中的字符}
 %
@@ -430,9 +438,11 @@
 %   \item[\\B] 非单词边界：在两个 |\w| 记号或两个 |\W| 记号之间（包括边界）。
 %   \item[\char`^ 或 \\A] 主题记号列表的开始。
 %   \item[\char`$，\\Z 或 \\z] 主题记号列表的结尾。 %^^A$
-%   \item[\\G] 当前匹配的开始。仅在多次匹配的情况下与 |^| 不同：
-%     例如，|\regex_count:nnN { \G a } { aaba } \l_tmpa_int| 得到 $2$，
-%     但将 |\G| 替换为 |^| 将导致 \cs{l_tmpa_int} 包含值 $1$。
+%   \item[\\G] 当前匹配的开始。仅在多次匹配的情况下与 |^| 不同。例如：
+% \begin{verbatim}
+% \regex_count:nnN { \G a } { aaba } \l_tmpa_int
+% \end{verbatim}
+% 得到 $2$，但将 |\G| 替换为 |^| 将导致 \cs{l_tmpa_int} 包含值 $1$。
 % \end{l3regex-syntax}
 %
 % 选项 |(?i)| 使匹配不区分大小写（将 \texttt{A}--\texttt{Z} 和 \texttt{a}--\texttt{z} 视为等效，
@@ -894,7 +904,7 @@
 % \end{documentation}
 %
 % \begin{implementation}
-%
+% \addtocontents{toc}{\newpage}
 % \section{\pkg{l3regex} 代码实现}
 %
 %    \begin{macrocode}
@@ -904,7 +914,7 @@
 %    \begin{macrocode}
 %<@@=regex>
 %    \end{macrocode}
-%
+% \addtocontents{toc}{\protect\begin{multicols}{2}}
 % \subsection{攻略计划}
 %
 % 大多数正则表达式引擎使用回溯。这允许提供非常强大的功能（首先想到的是反向引用），但这是昂贵的，
@@ -7468,7 +7478,7 @@
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
-%
+% \addtocontents{toc}{\protect\end{multicols}}
 % \end{implementation}
 %
 % \PrintIndex
