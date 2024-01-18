@@ -602,7 +602,7 @@
 %   \meta{regular expression} 在 \meta{token list} 中出现的次数。
 %   搜索从找到最左边最长的匹配开始，尊重贪婪和懒惰（非贪婪）运算符。
 %   然后，搜索从前一匹配的最后一个字符之后的字符开始，直到达到
-%   token list 的末尾。在正则表达式可以匹配空 token list 的情况下，
+%  记号列表的末尾。在正则表达式可以匹配空记号列表的情况下，
 %   防止无限循环：在每对字符之间计数一次匹配。
 %   例如，
 %   \begin{verbatim}
@@ -704,7 +704,7 @@
 %   将 \meta{token list} 拆分为一系列的子列表，由 \meta{regular expression} 的匹配项分隔。
 %   如果 \meta{regular expression} 具有捕获组，则它们匹配的记号列表也存储为序列的项。
 %   局部赋值给 \meta{seq~var}。如果找不到匹配项，生成的 \meta{seq~var} 以
-%   \meta{token list} 为其唯一项。如果 \meta{regular expression} 匹配空 token list，
+%   \meta{token list} 为其唯一项。如果 \meta{regular expression} 匹配空记号列表，
 %   则将 \meta{token list} 拆分为单个 token。
 %   测试版本如果找到匹配项，则将 \meta{true code} 插入输入流，否则插入 \meta{false code}。
 %   例如，在
@@ -836,68 +836,68 @@
 %
 % 即将做的代码改进：
 % \begin{itemize}
-%   \item 将数组移动，使有用信息从位置$1$开始。
-%   \item 仅构建一次|\c{...}|。
-%   \item 在编译正则表达式时，使用左右状态堆栈的数组。
-%   \item \cs[no-index]{__regex_action_free_group:n}是否仅用于贪婪的|{n,}|量词？（我认为不是。）
-%   \item 对于|\u|和断言的量词。
-%   \item 在匹配时，跟踪\texttt{curr_state}和\texttt{curr_submatches}的显式堆栈。
-%   \item 如果可能的话，在同一线程中重复使用状态时，终止其他子线程。
-%   \item 使用数组而不是\cs[no-index]{g__regex_balance_tl}来构建函数\cs[no-index]{__regex_replacement_balance_one_match:n}。
-%   \item 减少替代中的 $\varepsilon$-转换数量。
-%   \item 优化简单的字符串：使用较少的状态（ |abcade| 应该给出两个状态，用于 |abc| 和 |ade| ）。
+%   \item 将数组移动，使有用信息从位置$1$开始；
+%   \item 仅构建一次 |\c{...}| ；
+%   \item 在编译正则表达式时，使用数组来记录左、右状态的堆栈；
+%   \item \cs[no-index]{__regex_action_free_group:n} 是否应仅用于贪婪的 |{n,}| 量词？（我不这么认为）
+%   \item |\u| 和断言的量词；
+%   \item 在匹配时，追踪 \texttt{curr_state} 和 \texttt{curr_submatches} 的显式堆栈；
+%   \item 如果可能的话，在同一线程中重复使用状态时，终止其他子线程；
+%   \item 使用数组而不是 \cs[no-index]{g__regex_balance_tl} 来构建函数 \cs[no-index]{__regex_replacement_balance_one_match:n} ；
+%   \item 减少替代中 $\varepsilon$-转换的数量；
+%   \item 优化简单的字符串：使用较少的状态（ |abcade| 应该给出两个状态，用于 |abc| 和 |ade| ）；
 %     【这真的有意义吗？】
-%   \item 优化没有替代的组。
-%   \item 优化只有一个\cs[no-index]{__regex_action_free:n}的状态。
-%   \item 通过直接在状态$2$中插入\cs[no-index]{__regex_action_success:}来优化其使用，而不是有额外的转换。
-%   \item 通过插入\cs[no-index]{int_step_...}函数的使用来优化。
-%   \item 组在csnames的正则表达式中不捕获；优化并记录。
-%   \item 更好的锚定、属性和类别码测试的\enquote{show}。
-%   \item |\K|是否真的需要一个新的状态？
-%   \item 在编译时，使用布尔变量\texttt{in_cs}和较少的魔术数字。
-%   \item 与其使用字符代码检查字符是否为特殊字符或字母数字，不如在正则表达式中使用\cs[no-index]{cs_if_exist}测试检查它是否为特殊字符。
+%   \item 优化无替代的组；
+%   \item 优化只有一个 \cs[no-index]{__regex_action_free:n} 的状态；
+%   \item 通过直接在状态$2$中插入\cs[no-index]{__regex_action_success:}来优化其使用，而不是有额外的转换；
+%   \item 优化 \cs[no-index]{int_step_...} 函数的使用；
+%   \item 组在 csname 的正则表达式中不捕获，优化并写作文档；
+%   \item 更好的\enquote{show} 锚定、属性和类别码测试；
+%   \item |\K| 自身是否真的需要一个新的状态？
+%   \item 在编译时，使用布尔变量 \texttt{in_cs} 和更少的魔法数字（ magic number ，后同）；
+%   \item 与其使用字符码检查字符是否为特殊字符或字母数字，不如在正则表达式中使用 \cs[no-index]{cs_if_exist} 测试检查它是否为特殊字符。
 % \end{itemize}
 %
-% 以下功能可能在将来的某个时候实现。
+% 以下功能可能在将来的某个时候实现：
 % \begin{itemize}
-%   \item 一般的先行/后行断言。
-%   \item 在外部文件上进行正则表达式匹配。
-%   \item 具有先行/后行条件的条件子模式：\enquote{如果之后是[\ldots{}]，则[\ldots{}]}。
-%   \item |(*..)| 和 |(?..)| 序列以设置一些选项。
-%   \item \pdfTeX{} 的UTF-8模式。
+%   \item 通用的先行/后行断言（ look-ahead/behind assertions ）；
+%   \item 在外部文件上进行正则表达式匹配；
+%   \item 先行/后行的条件子模式：\enquote{如果之后是【\ldots{}】，则【\ldots{}】}；
+%   \item |(*..)| 和 |(?..)| 序列以设置一些选项；
+%   \item \pdfTeX{} 的 UTF-8 模式。
 %   \item 换行约定尚未完成。
 %     特别是，应该有一个选项使 |.| 不匹配换行符。
-%     此外，|\A| 应该与 |^| 不同，而 |\Z|、|\z| 和 |$| 应该不同。
+%     此外，|\A| 应该与 |^| 不同，而 |\Z|、|\z| 和 |$| 应该不同；
 %   \item Unicode 属性：|\p{..}| 和 |\P{..}|；
-%     |\X| 应该匹配任何\enquote{扩展}的Unicode序列。
+%     |\X| 应该匹配任何\enquote{扩展}的 Unicode 序列。
 %     这需要操作大量数据，可能使用树状盒子。
 % \end{itemize}
 %
-% 下面的\textsc{pcre}或Perl的功能可能会或可能不会被实现。
+% 下面的\textsc{pcre}或Perl的功能可能会或可能不会被实现：
 % \begin{itemize}
-%   \item 使用 |(?C...)| 或其他语法的调用：一些内部代码更改使这成为可能，
-%     在替换代码中找到标记时停止正则表达式替换可能很有用；
-%     这引发了潜在的 |\regex_break:| 问题，以及在正则表达式代码中从
+%   \item |(?C...)| 或其他语法的调用：一些内部代码更改使这成为可能，
+%     在替换代码中找到某个标记时停止正则表达式替换可能很有用；
+%     这引发了潜在的 |\regex_break:| 问题，以及从正则表达式代码中
 %     \cs{tl_map_break:} 调用的良好处理问题。 还提出了正则表达式机制内
 %     嵌套调用的问题，这是一个问题，因为\tn{fontdimen}是全局的。
 %   \item 条件子模式（不是先行或后行条件的）：这是非正则的，对吧？
 %   \item 命名子模式：\TeX{}程序员迄今为止无需命名宏参数。
 % \end{itemize}
 %
-% 下面的\textsc{pcre}或Perl的功能肯定不会被实现。
+% 下面的\textsc{pcre}或Perl的功能肯定不会被实现：
 % \begin{itemize}
-%   \item 反向引用：非正则特性，需要回溯，速度极慢。
-%   \item 递归：这是非正则特性。
+%   \item 反向引用：非正则特性，需要回溯，速度极慢；
+%   \item 递归：这是非正则特性；
 %   \item 原子分组、贪婪量词：这些工具主要用于修复灾难性回溯，在非回溯算法中是不必要的，
-%     并且难以实现。
-%   \item 子例程调用：这种语法糖难以包含在非回溯算法中，特别是因为相应的组应该被视为原子的。
-%   \item 回溯控制动词：与回溯密切相关。
+%     并且难以实现；
+%   \item 子例程调用：这种语法糖难以包含在非回溯算法中，特别是因为相应的组应该被视为原子的；
+%   \item 回溯控制动词：与回溯密切相关；
 %   \item |\ddd|，匹配八进制代码为 \texttt{ddd} 的字符：
 %     我们已经有了 |\x{...}|，并且语法与我们可以用于反向引用（|\1|，|\2|，等）的语法相似，
-%     这使得产生有用的错误消息变得更加困难。
-%   \item |\cx|，类似于 \TeX{} 的 |\^^x|。
-%   \item 注释：\TeX{} 已经有了自己的注释系统。
-%   \item |\Q...\E| 转义：这需要逐字读取参数，不在此模块的范围内。
+%     这使得产生有用的错误消息变得更加困难；
+%   \item |\cx| ，类似于 \TeX{} 的 |\^^x| ；
+%   \item 注释：\TeX{} 已经有了自己的注释系统；
+%   \item |\Q...\E| 转义：这需要逐字读取参数，不在此模块的范围内；
 %   \item 在UTF-8模式下的单字节 |\C|：\XeTeX{} 和 \LuaTeX{} 直接为我们提供字符，
 %     将其拆分为字节是棘手的，依赖编码，而且很可能并不实用。
 % \end{itemize}
