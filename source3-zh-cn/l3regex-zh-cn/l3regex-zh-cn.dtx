@@ -249,7 +249,7 @@
 %
 % \subsection{正则表达式中的字符}
 %
-% 大多数字符与它们自己完全匹配，具有任意类别码。
+% 大多数字符与它们自己完全匹配，具有任意类别码（ category code ，后同不再注释）。
 % 一些字符是特殊的，必须用反斜杠转义（例如，|\*| 匹配星号字符）。
 % 一些反斜杠-字母形式的转义序列也具有特殊含义
 % （例如 |\d| 匹配任何数字）。一般规则是，
@@ -261,7 +261,7 @@
 % \item 空格应始终转义（即使在字符类中）；
 % \item 其他任何字符可以转义，也可以不转义，都没有任何效果：两个版本都完全匹配该字符。
 % \end{itemize}
-% 请注意，这些规则与许多非字母数字字符在正常类别码（ category code ，后同不再注释）下很难输入到 \TeX{} 中的事实相吻合。
+% 请注意，这些规则与许多非字母数字字符在正常类别码下很难输入到 \TeX{} 中的事实相吻合。
 % 例如，|\\abc\%| 匹配字符 |\abc%|（具有任意类别码），
 % 但不匹配控制序列 |\abc| 后跟一个百分号字符。
 % 可以使用 |\c|\Arg{regex} 语法（见下文）来匹配控制序列。
@@ -413,7 +413,7 @@
 %
 % |\u| 转义序列允许将记号列表的内容直接插入正则表达式或替换中，无需转义特殊字符。即，
 % |\u|\Arg{var~name} 精确匹配变量 \cs[no-index]{\meta{var~name}} 的内容
-% （包括字符码和类别码），这是通过在编译正则表达式时应用 \cs{exp_not:v} \Arg{var~name} 获得的。
+% （包括字符码\footnote{译者注：字符码即 character code ，也就是通常所说的 ASCII 码，后同，不再注释。}和类别码），这是通过在编译正则表达式时应用 \cs{exp_not:v} \Arg{var~name} 获得的。
 % 在 |\c{...}| 控制序列匹配中，|\u| 转义序列仅展开其参数一次，实际上执行 \cs{tl_to_str:v}。
 % 支持量词。
 %
@@ -481,9 +481,9 @@
 % 如果捕获组在匹配期间多次匹配（由于量词），则在替换文本中仅使用最后一次匹配。
 % 子匹配始终保持与原始记号列表相同的类别码。
 %
-% 默认情况下，替换插入的字符的类别码由替换时的主要类别码制度确定，有两个例外：
+% 默认情况下，替换插入的字符的类别码由替换时的类别码状态确定，有两个例外：
 % \begin{itemize}
-%   \item 通过 \verb*|\ |、|\x20| 或 |\x{20}| 插入的空格字符（字符码为 $32$）无论当前的类别码制度如何，其类别码始终为 $10$；
+%   \item 通过 \verb*|\ |、|\x20| 或 |\x{20}| 插入的空格字符（字符码为 $32$）无论当前的类别码状态如何，其类别码始终为 $10$；
 %   \item 如果类别码为 $0$（转义）、$5$（换行符）、$9$（忽略）、$14$（注释）或 $15$（无效），
 %   则替换时将其替换为 $12$（其他）。
 % \end{itemize}
@@ -513,7 +513,7 @@
 % \tl_clear:N \l_tmpa_tl
 % \regex_replace_all:nnN { } { \cU\% \cA\~ } \l_tmpa_tl
 % \end{verbatim}
-% 导致 \cs[no-index]{l_tmpa_tl} 包含类别码为 $7$（上标）的百分号字符和活动中划线字符。
+% 导致 \cs[no-index]{l_tmpa_tl} 包含类别码为 $7$（上标）的百分号字符和活动的波浪线字符。
 %
 % \section{预编译正则表达式}
 %
@@ -663,7 +663,7 @@
 %       { true } { false }
 %   \end{verbatim}
 %   那么正则表达式（在开始处用 |\A| 锚定，在结束处用 |\Z| 锚定）
-%   必须匹配整个 token list。第一个捕获组，|(La)?|，匹配 |La|，
+%   必须匹配整个记号列表。第一个捕获组，|(La)?|，匹配 |La|，
 %   第二个捕获组，|(!*)|，匹配 |!!!|。因此，\cs[no-index]{l_foo_seq} 的结果包含
 %   项 |{LaTeX!!!}|，|{La}| 和 |{!!!}|，并在输入流中留下 \texttt{true} 分支。
 %   注意，\cs[no-index]{l_foo_seq} 的第 $n$ 项，使用 \cs{seq_item:Nn} 获取，
@@ -680,7 +680,7 @@
 %     \cs{regex_extract_all:nnNTF} \Arg{regex} \Arg{token list} \meta{seq~var} \Arg{true code} \Arg{false code}
 %   \end{syntax}
 %   在 \meta{token list} 中找到 \meta{regular expression} 的所有匹配项，
-%   并将所有子匹配信息存储在一个序列中（连接多个 \cs{regex_extract_once:nnN} 调用的结果）。
+%   并将所有子匹配信息存储在一个序列中（合并多个 \cs{regex_extract_once:nnN} 调用的结果）。
 %   局部赋值给 \meta{seq~var}。如果没有匹配项，则清除 \meta{seq~var}。
 %   测试版本如果找到匹配项，则将 \meta{true code} 插入输入流，否则插入 \meta{false code}。
 %   例如，假设您键入
@@ -701,8 +701,8 @@
 %     \cs{regex_split:nnN} \Arg{regular expression} \Arg{token list} \meta{seq~var}
 %     \cs{regex_split:nnNTF} \Arg{regular expression} \Arg{token list} \meta{seq~var} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   将 \meta{token list} 拆分为一系列部分，由 \meta{regular expression} 的匹配项分隔。
-%   如果 \meta{regular expression} 具有捕获组，则它们匹配的 token lists 也存储为序列的项。
+%   将 \meta{token list} 拆分为一系列的子列表，由 \meta{regular expression} 的匹配项分隔。
+%   如果 \meta{regular expression} 具有捕获组，则它们匹配的记号列表也存储为序列的项。
 %   局部赋值给 \meta{seq~var}。如果找不到匹配项，生成的 \meta{seq~var} 以
 %   \meta{token list} 为其唯一项。如果 \meta{regular expression} 匹配空 token list，
 %   则将 \meta{token list} 拆分为单个 token。
@@ -798,43 +798,43 @@
 %   } \l_tmpa_tl
 % \end{verbatim}
 %   结果是 \cs{l_tmpa_tl} 包含内容 \verb*|``Hello''---[,][ ]``world''---[!]|。
-%   请特别注意，单词边界断言 |\b| 在单词开头没有匹配，因为情况 |[A-Za-z]+| 在这些位置匹配。
-%   要更改这一点，可以简单地交换 \cs{regex_replace_case_all:nN} 参数中两个案例的顺序。
+%   请特别注意，单词边界断言 |\b| 在单词开头没有匹配，因为第一种情况 |[A-Za-z]+| 在这些位置匹配。
+%   要更改这一点，可以简单地交换 \cs{regex_replace_case_all:nN} 参数中两种情况的顺序。
 % \end{function}
 %
-% \section{临时用的正则表达式}
+% \section{临时正则表达式}
 %
 % \begin{variable}[added = 2017-12-11]{\l_tmpa_regex, \l_tmpb_regex}
-%   本地赋值的Scratch正则表达式。这些从未被内核代码使用，
+%   局部赋值的临时正则表达式。这些从未被内核代码使用，
 %   因此可安全用于任何\LaTeX3定义的函数。但可能被其他非内核代码覆盖，
 %   因此仅用于短期存储。
 % \end{variable}
 %
 % \begin{variable}[added = 2017-12-11]{\g_tmpa_regex, \g_tmpb_regex}
-%   全局赋值的Scratch正则表达式。这些从未被内核代码使用，
+%   全局赋值的临时正则表达式。这些从未被内核代码使用，
 %   因此可安全用于任何\LaTeX3定义的函数。但可能被其他非内核代码覆盖，
 %   因此仅用于短期存储。
 % \end{variable}
 %
 % \section{错误、缺陷、未来工作和其他可能性}
 %
-% 现在需要完成以下任务。
+% 现在需要完成以下任务：
 % \begin{itemize}
 %   \item 以更有序的方式重写文档，或许添加一个\textsc{bnf}？
 % \end{itemize}
 %
-% 更多的错误检查即将到来。
+% 将做更多的校对：
 % \begin{itemize}
-%   \item 整理消息的使用。
-%   \item 在替换阶段进行更清晰的错误报告。
-%   \item 添加跟踪信息。
-%   \item 检测尝试使用反向引用和其他未实现语法的情况。
-%   \item 测试最大寄存器\cs[no-index]{c_max_register_int}的情况。
-%   \item 弄清楚|\W|和类似的匹配是否导致错误。可能更新\cs[no-index]{__regex_item_reverse:n}。
-%   \item 空cs应该由|\c{}|匹配，而不是由|\c{csname.?endcsname\s?}|匹配。
+%   \item 清理对消息的使用；
+%   \item 替换阶段更加清晰的错误报告；
+%   \item 增加追踪的信息；
+%   \item 检测尝试使用反向引用和其他未实现的语法；
+%   \item 测试最大值寄存器\cs[no-index]{c_max_register_int}；
+%   \item 弄清楚 |\W| 和类似的匹配结尾标记的情况是否导致了错误。可能会更新\cs[no-index]{__regex_item_reverse:n} ；
+%   \item 空控制序列应该由 |\c{}| 匹配，而不是由 |\c{csname.?endcsname\s?}| 匹配。
 % \end{itemize}
 %
-% 代码改进即将到来。
+% 即将做的代码改进：
 % \begin{itemize}
 %   \item 将数组移动，使有用信息从位置$1$开始。
 %   \item 仅构建一次|\c{...}|。
@@ -844,9 +844,9 @@
 %   \item 在匹配时，跟踪\texttt{curr_state}和\texttt{curr_submatches}的显式堆栈。
 %   \item 如果可能的话，在同一线程中重复使用状态时，终止其他子线程。
 %   \item 使用数组而不是\cs[no-index]{g__regex_balance_tl}来构建函数\cs[no-index]{__regex_replacement_balance_one_match:n}。
-%   \item 减少替代中的ε转换数量。
-%   \item 优化简单的字符串：使用较少的状态（|abcade|应该给出两个状态，用于|abc|和|ade|）。
-%     [这真的有意义吗？]
+%   \item 减少替代中的 $\varepsilon$-转换数量。
+%   \item 优化简单的字符串：使用较少的状态（ |abcade| 应该给出两个状态，用于 |abc| 和 |ade| ）。
+%     【这真的有意义吗？】
 %   \item 优化没有替代的组。
 %   \item 优化只有一个\cs[no-index]{__regex_action_free:n}的状态。
 %   \item 通过直接在状态$2$中插入\cs[no-index]{__regex_action_success:}来优化其使用，而不是有额外的转换。
@@ -5456,7 +5456,7 @@
 %   一个例外是右括号，在组开始之前恢复类别码。
 %   请注意，这里的序列是非空的：它包含一个对应于 \cs{l_@@_replacement_category_tl} 初始值的空条目。
 %   参数 |#1| 是一个单个字符（包括类别码为其他的空格的情况）。
-%   如果没有请求特定的类别码，我们尽可能地考虑替换执行时的当前类别码制度，
+%   如果没有请求特定的类别码，我们尽可能地考虑替换执行时的当前类别码状态，
 %   所有不可能的类别码（转义、换行等）都映射到\enquote{other}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_replacement_normal:n #1
