@@ -126,6 +126,7 @@
 \AtBeginEnvironment{flushleft}{\tt\color{verb}}
 \AtBeginEnvironment{verbatim}{\color{verb}\def\MacroFont{\color{verb}\OriginalMF}}
 \ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
 \patchcmd{\__codedoc_macro_typeset_one:nN}{\llap}{\color{spot}\llap}{}{}
 \patchcmd{\__codedoc_typeset_aux:n}{\color[gray]{0.5}}{\color{spot}}{}{}
 \ExplSyntaxOff
