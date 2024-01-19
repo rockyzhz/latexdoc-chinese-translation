@@ -20,7 +20,9 @@
 * **ltxdoc.pdf** 的中文文档 **ltxdoc-zh-cn.pdf** ，本文档是 ltxdoc.cls 类文件的说明文档，中文版本由**黄旭华**翻译。 ltxdoc 文档类是 LaTeX2ε 用于写作含代码说明的宏包文档的基础文档类，许多的宏包文档都是基于 ltxdoc 或者基于 ltxdoc 扩展而来的文档类。因此有意阅读以 ltxdoc 为基础文档类写作而成的 .dtx 文件源代码的朋友，或者有打算以 ltxdoc 为基础文档类来书写宏包文档的 .dtx 文件的朋友，可以参阅本文档。详情请参阅相应的[说明文档][13]。
 * **shellesc.pdf** 的中文文档 **shellesc-zh-cn.pdf** ，shellesc是一个关于 `--shell-escape` 命令行选项的宏包，目前由LaTeX项目组维护。由于 LuaTeX 自 v0.87 之后不再支持 \write18 语法来访问系统命令，因此为了统一接口起见，该宏包提供了一个简单的宏级接口来隐藏 write18 的实现。详情请参阅相应的[说明文档][17]。
 * **lthooks-doc.pdf** 的中文文档 **lthooks-doc-zh-cn.pdf** 和 **lthooks-code.pdf** 的中文文档 **lthooks-code-zh-cn.pdf** ，本文档是关于 LaTeX2ε 中钩子的管理和说明。比较典型的应用就是 ctex 宏包中通过对 `\AtBeginDocument` 和 `\AtEndDocument` 这两个钩子的应用，实现了中文文档的无感化的处理。然而钩子的用处其实远不止于此， LaTeX 中其实可以对命令、环境、文件、include、包和类都使用钩子。详情请参阅相应的[说明文档][16]。
-* **l3regex.pdf** 的中文文档 **l3regex-zh-cn.pdf** ，l3regex 是LaTeX3核心包中的关于正则表达式部分的内容，包括l3regex文档、函数接口说明以及代码实现等内容。英文版的 l3regex.pdf 并未作为单独的文本发布，而是集成进了 interface3.pdf （命令行输入：`texdoc interface3` ） 和 source3.pdf （命令行输入：`texdoc source3` ）之中，作为其中的一部分统一发布。详情请参阅相应的[说明文档][19]。
+* **source3.pdf** 的中文文档 **source3-zh-cn.pdf** ，source3 是LaTeX3核心包的文档接口说明（也单独以 interface3.pdf 的文件发布，命令行输入：`texdoc interface3` ）以及全部源代码的代码实现部分（命令行输入：`texdoc source3`）。全部核心包的文档包含近40个模块，由这近40个模块的文档合并组成的，目前已经翻译完成的模块有：l3file、l3regex 。介绍如下：
+  * **l3file.pdf** 的中文文档 **l3file-zh-cn.pdf** ，l3file 是LaTeX3核心包中的关于文件与输入输出操作的内容，包括l3file文档、函数接口说明以及代码实现等内容。英文版的 l3file.pdf 并未作为单独的文本发布，而是集成进了 interface3.pdf （命令行输入：`texdoc interface3` ） 和 source3.pdf （命令行输入：`texdoc source3` ）之中，作为其中的一部分统一发布。详情请参阅相应的[说明文档][20]。
+  * **l3regex.pdf** 的中文文档 **l3regex-zh-cn.pdf** ，l3regex 是LaTeX3核心包中的关于正则表达式部分的内容，包括l3regex文档、函数接口说明以及代码实现等内容。英文版的 l3regex.pdf 并未作为单独的文本发布，而是集成进了 interface3.pdf （命令行输入：`texdoc interface3` ） 和 source3.pdf （命令行输入：`texdoc source3` ）之中，作为其中的一部分统一发布。详情请参阅相应的[说明文档][19]。
 * **usrguide.pdf** 的中文文档 **usrguide-zh-cn.pdf** 以及 **usrguide-historic.pdf** 的中文文档 **usrguide-historic-zh-cn.pdf**，与 clsguide 类似的是，在 TeXLive 2023 中, usrguide 也同样分化出了两个版本：usrguide-current（即当前版本，简称 usrguide ） 和 usrguide-historic （历史版本），前者更加集中地体现了最近这十几年中，由于 LaTeX 特别是 LaTeX3 的迅猛发展而带来的新的用法用途；而后者则与之前的版本相差不大，重点介绍了 LaTeX2e 的用法以及与 LaTeX2.09 的用法区别。详情请查看相应的[说明文档][10]。
 * **xcoffins.pdf** 的中文文档 **xcoffins-zh-cn.pdf**， xcoffins 是 l3experimental 系列宏包其中之一，暂时还未并入到 l3kernel 之中。作为 l3coffins 模块的一个强大补充， xcoffins 是一个设计级别的排版宏包。 coffins 作为 TeX 之中盒子 (box) 概念的拓展，极大地丰富了 TeX/LaTeX 在版面设计方面的手段，非常推荐！本文由**黄旭华**翻译，暂时由本人来做后续增量更新的维护。详情请查看相应的[说明文档][18]。
 * **xparse.pdf** 的中文文档 **xparse-zh-cn.pdf** ，xparse 宏包是 LaTeX 项目组为 LaTeX2e&LaTeX3 宏包及文档类编写者向使用者提供的高级命令定义工具，极大地简化了宏包及文档类编写者定义新命令的实现过程。详情请参阅相应的[说明文档][9]。
@@ -64,3 +66,4 @@ latexmk -xelatex <source-filename-with-ext>
 [17]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/shellesc-zh-cn/shellesc-zh-cn.md
 [18]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/xcoffins-zh-cn/xcoffins-zh-cn.md
 [19]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/source3-zh-cn/l3regex-zh-cn/l3regex-zh-cn.md
+[20]:https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/source3-zh-cn/l3file-zh-cn/l3file-zh-cn.md
