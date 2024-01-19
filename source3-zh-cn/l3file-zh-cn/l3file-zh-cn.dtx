@@ -170,41 +170,31 @@
 % \newpage
 % \begin{documentation}
 %
-% This module provides functions for working with external files. Some of these
-% functions apply to an entire file, and have prefix \cs[no-index]{file_\ldots}, while
-% others are used to work with files on a line by line basis and have prefix
-% \cs[no-index]{ior_\ldots} (reading) or \cs[no-index]{iow_\ldots} (writing).
+% 该模块提供用于处理外部文件的函数。其中一些函数适用于整个文件，
+% 具有前缀 \cs[no-index]{file_\ldots}，而其他一些用于逐行处理文件，
+% 具有前缀 \cs[no-index]{ior_\ldots}（读取）或 \cs[no-index]{iow_\ldots}（写入）。
 %
-% It is important to remember that when reading external files \TeX{}
-% attempts to locate them using both the operating system path and entries in the
-% \TeX{} file database (most \TeX{} systems use such a database). Thus the
-% \enquote{current path} for \TeX{} is somewhat broader than that for other
-% programs.
+% 需要记住的是，在读取外部文件时，\TeX{} 尝试使用操作系统路径和
+% \TeX{} 文件数据库中的条目来定位它们（大多数 \TeX{} 系统使用此类数据库）。
+% 因此，\TeX{} 的“当前路径”比其他程序的要宽泛一些。
 %
-% For functions which expect a \meta{file name} argument, this argument
-% may contain both literal items and expandable content, which should on
-% full expansion be the desired file name.  Active characters (as
-% declared in \cs{l_char_active_seq}) are \emph{not} expanded,
-% allowing the direct use of these in file names. Quote tokens (|"|) are
-% not permitted in file names as they are reserved for internal use by some
-% \TeX{} primitives.
+% 对于期望一个 \meta{file name} 参数的函数，此参数可以包含字面项和可展开内容，
+% 在完全展开时应为所需的文件名。活动字符（如 \cs{l_char_active_seq} 中声明的）
+% 不会被展开，允许直接在文件名中使用它们。引号标记（|"|）在文件名中不允许，
+% 因为它们被一些 \TeX{} 原语内部保留使用。
 %
-% Spaces are trimmed at the beginning and end of the file name:
-% this reflects the fact that some file systems do not allow or interact
-% unpredictably with spaces in these positions. When no extension is given,
-% this will trim spaces from the start of the name only.
+% 文件名的开头和结尾会被修剪空格：
+% 这反映了一些文件系统不允许或在这些位置与空格不可预测地交互的事实。
+% 当没有给出扩展名时，这将仅从名称开头修剪空格。
 %
-% \section{Input--output stream management}
+% \section{输入输出流管理}
 %
-% As \TeX{} engines have a limited number of input and output streams, direct
-% use of the streams by the programmer is not supported in \LaTeX3. Instead, an
-% internal pool of streams is maintained, and these are allocated and
-% deallocated as needed by other modules. As a result, the programmer should
-% close streams when they are no longer needed, to release them for other
-% processes.
+% 由于 \TeX{} 引擎的输入和输出流数量有限，在 \LaTeX3 中不支持程序员直接
+% 使用这些流。相反，维护一个内部的流池，这些流会根据需要被分配和释放给
+% 其他模块使用。因此，程序员应该在不再需要流时关闭它们，以释放它们供其他
+% 进程使用。
 %
-% Note that I/O operations are global: streams should all be declared
-% with global names and treated accordingly.
+% 注意，I/O 操作是全局的：流都应该以全局名称声明并相应地处理。
 %
 % \begin{function}[added = 2011-09-26, updated = 2011-12-27]
 %   {\ior_new:N, \ior_new:c, \iow_new:N, \iow_new:c}
@@ -212,38 +202,31 @@
 %     \cs{ior_new:N} \meta{stream}
 %     \cs{iow_new:N} \meta{stream}
 %   \end{syntax}
-%   Globally reserves the name of the \meta{stream}, either for reading
-%   or for writing as appropriate. The \meta{stream} is not opened until
-%   the appropriate \cs[no-index]{\ldots_open:Nn} function is used. Attempting to
-%   use a \meta{stream} which has not been opened is an error, and the
-%   \meta{stream} will behave as the corresponding \cs[no-index]{c_term_\ldots}.
+%   全局保留 \meta{stream} 的名称，根据需要用于读取或写入。直到使用相应
+%   的 \cs[no-index]{\ldots_open:Nn} 函数打开 \meta{stream} 之前，它不会被打开。
+%   尝试使用未打开的 \meta{stream} 是一个错误，并且 \meta{stream} 将表现
+%   得像相应的 \cs[no-index]{c_term_\ldots}。
 % \end{function}
 %
 % \begin{function}[updated = 2012-02-10]{\ior_open:Nn, \ior_open:cn}
 %   \begin{syntax}
 %     \cs{ior_open:Nn} \meta{stream} \Arg{file name}
 %   \end{syntax}
-%   Opens \meta{file name} for reading using \meta{stream} as the
-%   control sequence for file access. If the \meta{stream} was already
-%   open it is closed before the new operation begins. The
-%   \meta{stream} is available for access immediately and will remain
-%   allocated to \meta{file name} until a \cs{ior_close:N} instruction
-%   is given or the \TeX{} run ends.
-%   If the file is not found, an error is raised.
+%   使用 \meta{stream} 作为文件访问的控制序列，打开 \meta{file name} 以供读取。
+%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。立即可以访问
+%   \meta{stream}，并将保留给 \meta{file name} 直到给出 \cs{ior_close:N} 指令
+%   或 \TeX{} 运行结束。如果找不到文件，将引发错误。
 % \end{function}
 %
 % \begin{function}[added = 2013-01-12, TF]{\ior_open:Nn, \ior_open:cn}
 %   \begin{syntax}
 %     \cs{ior_open:NnTF} \meta{stream} \Arg{file name} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Opens \meta{file name} for reading using \meta{stream} as the
-%   control sequence for file access. If the \meta{stream} was already
-%   open it is closed before the new operation begins. The
-%   \meta{stream} is available for access immediately and will remain
-%   allocated to \meta{file name} until a \cs{ior_close:N} instruction
-%   is given or the \TeX{} run ends. The \meta{true code} is then inserted
-%   into the input stream. If the file is not found, no error is raised and
-%   the \meta{false code} is inserted into the input stream.
+%   使用 \meta{stream} 作为文件访问的控制序列，打开 \meta{file name} 以供读取。
+%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。立即可以访问
+%   \meta{stream}，并将保留给 \meta{file name} 直到给出 \cs{ior_close:N} 指令
+%   或 \TeX{} 运行结束。然后将 \meta{true code} 插入到输入流中。如果找不到文件，
+%   不会引发错误，而是将 \meta{false code} 插入到输入流中。
 % \end{function}
 %
 % \begin{function}[updated = 2012-02-09]
@@ -251,48 +234,34 @@
 %   \begin{syntax}
 %     \cs{iow_open:Nn} \meta{stream} \Arg{file name}
 %   \end{syntax}
-%   Opens \meta{file name} for writing using \meta{stream} as the
-%   control sequence for file access. If the \meta{stream} was already
-%   open it is closed before the new operation begins. The
-%   \meta{stream} is available for access immediately and will remain
-%   allocated to \meta{file name} until a \cs{iow_close:N} instruction
-%   is given or the \TeX{} run ends. Opening a file for writing clears
-%   any existing content in the file (\emph{i.e.}~writing is \emph{not}
-%   additive).
+%   使用 \meta{stream} 作为文件访问的控制序列，打开 \meta{file name} 以供写入。
+%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。立即可以访问
+%   \meta{stream}，并将保留给 \meta{file name} 直到给出 \cs{iow_close:N} 指令
+%   或 \TeX{} 运行结束。打开文件以写入会清除文件中的任何现有内容（即写入不是追加的）。
 % \end{function}
 %
 % \begin{function}[added = 2019-05-08]{\ior_shell_open:Nn}
 %   \begin{syntax}
 %     \cs{ior_shell_open:Nn} \meta{stream} \Arg{shell~command}
 %   \end{syntax}
-%   Opens the \emph{pseudo}-file created by the output of the
-%   \meta{shell command} for reading using \meta{stream} as the
-%   control sequence for access. If the \meta{stream} was already
-%   open it is closed before the new operation begins. The
-%   \meta{stream} is available for access immediately and will remain
-%   allocated to \meta{shell command} until a \cs{ior_close:N} instruction
-%   is given or the \TeX{} run ends.
-%   If piped system calls are disabled an error is raised.
+%   使用 \meta{stream} 作为访问控制序列，打开由 \meta{shell command} 输出
+%   创建的伪文件以供读取。如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。
+%   立即可以访问 \meta{stream}，并将保留给 \meta{shell command} 直到给出
+%   \cs{ior_close:N} 指令或 \TeX{} 运行结束。如果禁用了管道系统调用，将引发错误。
 %
-%   For details of handling of the \meta{shell command}, see
-%   \cs{sys_get_shell:nnNTF}.
+%   有关处理 \meta{shell command} 的详细信息，请参见 \cs{sys_get_shell:nnNTF}。
 % \end{function}
 %
 % \begin{function}[added = 2023-05-25]{\iow_shell_open:Nn}
 %   \begin{syntax}
 %     \cs{iow_shell_open:Nn} \meta{stream} \Arg{shell~command}
 %   \end{syntax}
-%   Opens the \emph{pseudo}-file created by the output of the
-%   \meta{shell command} for writing using \meta{stream} as the
-%   control sequence for access. If the \meta{stream} was already
-%   open it is closed before the new operation begins. The
-%   \meta{stream} is available for access immediately and will remain
-%   allocated to \meta{shell command} until a \cs{iow_close:N} instruction
-%   is given or the \TeX{} run ends.
-%   If piped system calls are disabled an error is raised.
+%   使用 \meta{stream} 作为访问控制序列，打开由 \meta{shell command} 输出
+%   创建的伪文件以供写入。如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。
+%   立即可以访问 \meta{stream}，并将保留给 \meta{shell command} 直到给出
+%   \cs{iow_close:N} 指令或 \TeX{} 运行结束。如果禁用了管道系统调用，将引发错误。
 %
-%   For details of handling of the \meta{shell command}, see
-%   \cs{sys_get_shell:nnNTF}.
+%   有关处理 \meta{shell command} 的详细信息，请参见 \cs{sys_get_shell:nnNTF}。
 % \end{function}
 %
 % \begin{function}[updated = 2012-07-31]
@@ -301,9 +270,8 @@
 %     \cs{ior_close:N} \meta{stream}
 %     \cs{iow_close:N} \meta{stream}
 %   \end{syntax}
-%   Closes the \meta{stream}. Streams should always be closed when
-%   they are finished with as this ensures that they remain available
-%   to other programmers.
+%   关闭 \meta{stream}。在完成对流的使用时，应始终关闭它们，以确保它们
+%   保持可用于其他程序员。
 % \end{function}
 %
 % \begin{function}[added = 2021-05-11]
@@ -317,8 +285,7 @@
 %     \cs{iow_show:N} \meta{stream}
 %     \cs{iow_log:N} \meta{stream}
 %   \end{syntax}
-%   Display (to the terminal or log file) the file name associated to
-%   the (read or write) \meta{stream}.
+%   显示（在终端或日志文件中）与（读取或写入）\meta{stream} 关联的文件名。
 % \end{function}
 %
 % \begin{function}[added = 2017-06-27]
@@ -332,55 +299,43 @@
 %     \cs{iow_show_list:}
 %     \cs{iow_log_list:}
 %   \end{syntax}
-%   Display (to the terminal or log file) a list of the file names
-%   associated with each open (read or write) stream.  This is intended
-%   for tracking down problems.
+%   显示（在终端或日志文件中）与每个已打开（读取或写入）流关联的文件名列表。
+%   这用于跟踪问题。
 % \end{function}
 %
-% \subsection{Reading from files}
+% \subsection{从文件读取}
 %
-% Reading from files and reading from the terminal are separate processes in
-% \pkg{expl3}. The functions \cs{ior_get:NN} and \cs{ior_str_get:NN}, and their
-% branching equivalents, are designed to work with \emph{files}.
+% 在 \pkg{expl3} 中，从文件读取和从终端读取是分开的过程。函数
+% \cs{ior_get:NN} 和 \cs{ior_str_get:NN} 及其相应的分支版本设计用于
+% 处理\emph{文件}。
 %
 % \begin{function}[noTF, added = 2012-06-24, updated = 2019-03-23]{\ior_get:NN}
 %   \begin{syntax}
 %     \cs{ior_get:NN} \meta{stream} \meta{token list variable}
 %     \cs{ior_get:NNTF} \meta{stream} \meta{token list variable} \meta{true code} \meta{false code}
 %   \end{syntax}
-%   Function that reads one or more lines (until an equal number of left
-%   and right braces are found) from the file input \meta{stream} and stores
-%   the result locally in the \meta{token list} variable.
-%   The material read from the \meta{stream} is tokenized by \TeX{}
-%   according to the category codes and \tn{endlinechar} in force when
-%   the function is used.  Assuming normal settings, any lines which do
-%   not end in a comment character~|%| have the line ending
-%   converted to a space, so for example input
+%   该函数从文件输入 \meta{stream} 读取一行或多行（直到找到相等数量的左右大括号），
+%   并将结果存储在局部的 \meta{token list} 变量中。从 \meta{stream} 读取的内容由
+%   \TeX{} 根据函数使用时的类别码和 \tn{endlinechar} 进行记号化。在正常设置下，
+%   不以注释字符~|%| 结尾的任何行都将换行符转换为空格，因此例如输入
 %   \begin{verbatim}
 %      a b  c
 %   \end{verbatim}
-%   results in a token list \verb*|a b c |.  Any blank line is
-%   converted to the token \cs{par}. Therefore, blank lines can be
-%   skipped by using a test such as
+%   将得到一个记号列表 \verb*|a b c |。任何空白行都会被转换为记号 \cs{par}。
+%   因此，可以使用类似以下的测试跳过空白行：
 %   \begin{verbatim}
 %      \ior_get:NN \l_my_stream \l_tmpa_tl
 %      \tl_set:Nn \l_tmpb_tl { \par }
 %      \tl_if_eq:NNF \l_tmpa_tl \l_tmpb_tl
 %      ...
 %   \end{verbatim}
-%   Also notice that if multiple lines are read to match braces
-%   then the resulting token list can contain \cs{par} tokens.
-%   In the non-branching version, where the \meta{stream} is not open
-%   the \meta{tl var} is set to \cs{q_no_value}.
+%   还要注意，如果读取多行以匹配大括号，那么结果的记号列表可能包含 \cs{par} 记号。
+%   在非分支版本中，如果 \meta{stream} 未打开，则将 \meta{tl var} 设置为 \cs{q_no_value}。
 %   \begin{texnote}
-%     This protected macro is a wrapper around the \TeX{} primitive
-%     \tn{read}.  Regardless of settings, \TeX{} replaces trailing space
-%     and tab characters (character codes 32 and~9) in each line by an
-%     end-of-line character (character code \tn{endlinechar}, omitted if
-%     \tn{endlinechar} is negative or too large) before turning
-%     characters into tokens according to current category codes.  With
-%     default settings, spaces appearing at the beginning of lines are
-%     also ignored.
+%     该受保护的宏是对 \TeX{} 原始命令 \tn{read} 的换行。无论设置如何，\TeX{} 都会在
+%     将字符按照当前类别码转换为记号之前将每行中的尾随空格和制表符（字符代码为 32 和 9）
+%     替换为换行符（字符代码为 \tn{endlinechar}，如果 \tn{endlinechar} 为负或太大则被省略）。
+%     使用默认设置，行首的空格也会被忽略。
 %   \end{texnote}
 % \end{function}
 %
@@ -390,103 +345,75 @@
 %     \cs{ior_str_get:NN} \meta{stream} \meta{token list variable}
 %     \cs{ior_str_get:NNTF} \meta{stream} \meta{token list variable} \meta{true code} \meta{false code}
 %   \end{syntax}
-%   Function that reads one line from the file input \meta{stream} and stores
-%   the result locally in the \meta{token list} variable.
-%   The material is read from the \meta{stream} as a series of tokens with
-%   category code $12$ (other), with the exception of space
-%   characters which are given category code $10$ (space).
-%   Multiple whitespace characters are retained by this process.  It
-%   always only reads one line and any blank lines in the input
-%   result in the \meta{token list variable} being empty. Unlike
-%   \cs{ior_get:NN}, line ends do not receive any special treatment. Thus
-%   input
+%   该函数从文件输入 \meta{stream} 读取一行并将结果存储在局部的 \meta{token list} 变量中。
+%   材料从 \meta{stream} 中作为带有类别码 $12$（其他）的一系列记号读取，空格字符除外，
+%   空格字符的类别码为 $10$（空格）。此过程会保留多个空格字符。它总是只读取一行，
+%   输入中的任何空白行都导致 \meta{token list variable} 为空。与 \cs{ior_get:NN} 不同，
+%   行尾不接受任何特殊处理。因此，输入
 %   \begin{verbatim}
 %      a b  c
 %   \end{verbatim}
-%   results in a token list |a b  c| with the letters |a|, |b|, and |c|
-%   having category code~12.
-%   In the non-branching version, where the\meta{stream} is not open
-%   the \meta{tl var} is set to \cs{q_no_value}.
+%   将得到一个记号列表 |a b  c|，其中字母 |a|、|b| 和 |c| 的类别码为 12。
+%   在非分支版本中，如果 \meta{stream} 未打开，则将 \meta{tl var} 设置为 \cs{q_no_value}。
 %   \begin{texnote}
-%     This protected macro is a wrapper around the \eTeX{} primitive
-%     \tn{readline}.  Regardless of settings, \TeX{} removes trailing
-%     space and tab characters (character codes 32 and~9).  However, the
-%     end-line character normally added by this primitive is not
-%     included in the result of \cs{ior_str_get:NN}.
+%     该受保护的宏是对 \eTeX{} 原始命令 \tn{readline} 的换行。无论设置如何，
+%     \TeX{} 都会删除每行中的尾随空格和制表符（字符代码为 32 和 9）。
+%     但是，该原始命令通常添加的行尾字符不包括在 \cs{ior_str_get:NN} 的结果中。
 %   \end{texnote}
 % \end{function}
 %
-% All mappings are done at the current group level, \emph{i.e.}~any
-% local assignments made by the \meta{function} or \meta{code} discussed
-% below remain in effect after the loop.
+% 所有映射都在当前组级别完成，\emph{即}下面讨论的 \meta{function} 或 \meta{code} 中
+% 进行的任何局部赋值在循环后仍然有效。
 %
 % \begin{function}[added = 2012-02-11]{\ior_map_inline:Nn}
 %   \begin{syntax}
 %     \cs{ior_map_inline:Nn} \meta{stream} \Arg{inline function}
 %   \end{syntax}
-%   Applies the \meta{inline function} to each set of \meta{lines}
-%   obtained by calling \cs{ior_get:NN} until reaching the end of the
-%   file.  \TeX{} ignores any trailing new-line marker from the file it
-%   reads.  The \meta{inline function} should consist of code which
-%   receives the \meta{line} as |#1|.
+%   对通过调用 \cs{ior_get:NN} 获得的每组 \meta{lines} 应用 \meta{inline function}，
+%   直到达到文件结尾。 \TeX{} 忽略从读取的文件中的任何尾随换行标记。 \meta{inline function}
+%   应包含接收 \meta{line} 为 |#1| 的代码。
 % \end{function}
 %
 % \begin{function}[added = 2012-02-11]{\ior_str_map_inline:Nn}
 %   \begin{syntax}
 %     \cs{ior_str_map_inline:Nn} \meta{stream} \Arg{inline function}
 %   \end{syntax}
-%   Applies the \meta{inline function} to every \meta{line}
-%   in the \meta{stream}. The material is read from the \meta{stream}
-%   as a series of tokens with category code $12$ (other), with the
-%   exception of space characters which are given category code $10$
-%   (space). The \meta{inline function} should consist of code which
-%   receives the \meta{line} as |#1|.
-%   Note that \TeX{} removes trailing space and tab characters
-%   (character codes 32 and 9) from every line upon input.  \TeX{} also
-%   ignores any trailing new-line marker from the file it reads.
+%   将 \meta{inline function} 应用于 \meta{stream} 中的每个 \meta{line}。从 \meta{stream}
+%   读取的材料作为一系列类别码为 $12$（其他）的记号进行，空格字符除外，它们的类别码为 $10$
+%   （空格）。 \meta{inline function} 应包含接收 \meta{line} 为 |#1| 的代码。请注意，
+%   \TeX{} 会从每行输入中删除尾随的空格和制表符（字符代码为 32 和 9）。
+%   \TeX{} 还会忽略从读取的文件中的任何尾随换行标记。
 % \end{function}
 %
 % \begin{function}[added = 2019-01-13]{\ior_map_variable:NNn}
 %   \begin{syntax}
 %     \cs{ior_map_variable:NNn} \meta{stream} \meta{tl~var} \Arg{code}
 %   \end{syntax}
-%   For each set of \meta{lines} obtained by calling \cs{ior_get:NN}
-%   until reaching the end of the file, stores the \meta{lines} in the
-%   \meta{tl~var} then applies the \meta{code}.  The \meta{code} will
-%   usually make use of the \meta{variable}, but this is not enforced.
-%   The assignments to the \meta{variable} are local.
-%   Its value after the loop is the last set of \meta{lines}, or its
-%   original value if the \meta{stream} is empty.  \TeX{} ignores
-%   any trailing new-line marker from the file it reads.
-%   This function is typically faster than \cs{ior_map_inline:Nn}.
+%   对通过调用 \cs{ior_get:NN} 获得的每组 \meta{lines}，将 \meta{lines} 存储在 \meta{tl~var} 中，
+%   然后应用 \meta{code}。 \meta{code} 通常会使用 \meta{variable}，但不强制要求。
+%   对 \meta{variable} 的赋值是局部的。循环后，它的值为最后一组 \meta{lines}，如果 \meta{stream} 为空，
+%   则为其原始值。 \TeX{} 忽略从读取的文件中的任何尾随换行标记。这个函数通常比 \cs{ior_map_inline:Nn} 更快。
 % \end{function}
 %
 % \begin{function}[added = 2019-01-13]{\ior_str_map_variable:NNn}
 %   \begin{syntax}
 %     \cs{ior_str_map_variable:NNn} \meta{stream} \meta{variable} \Arg{code}
 %   \end{syntax}
-%   For each \meta{line} in the \meta{stream}, stores the \meta{line} in
-%   the \meta{variable} then applies the \meta{code}.  The material is
-%   read from the \meta{stream} as a series of tokens with category code
-%   $12$ (other), with the exception of space characters which are given
-%   category code $10$ (space).  The \meta{code} will usually make use
-%   of the \meta{variable}, but this is not enforced.  The assignments
-%   to the \meta{variable} are local.  Its value after the loop is the
-%   last \meta{line}, or its original value if the \meta{stream} is
-%   empty.  Note that \TeX{} removes trailing
-%   space and tab characters (character codes 32 and 9) from every line
-%   upon input.  \TeX{} also ignores any trailing new-line marker from
-%   the file it reads.
-%   This function is typically faster than \cs{ior_str_map_inline:Nn}.
+%   对 \meta{stream} 中的每个 \meta{line}，将 \meta{line} 存储在 \meta{variable} 中，
+%   然后应用 \meta{code}。从 \meta{stream} 中读取的材料作为一系列类别码为 $12$（其他）的
+%   记号进行，空格字符除外，它们的类别码为 $10$（空格）。 \meta{code} 通常会使用
+%   \meta{variable}，但不强制要求。对 \meta{variable} 的赋值是局部的。循环后，
+%   它的值为最后一个 \meta{line}，如果 \meta{stream} 为空，则为其原始值。
+%   请注意，\TeX{} 会从每行输入中删除尾随的空格和制表符（字符代码为 32 和 9）。
+%   \TeX{} 还会忽略从读取的文件中的任何尾随换行标记。这个函数通常比 \cs{ior_str_map_inline:Nn} 更快。
 % \end{function}
 %
 % \begin{function}[added = 2012-06-29]{\ior_map_break:}
 %   \begin{syntax}
 %     \cs{ior_map_break:}
 %   \end{syntax}
-%   Used to terminate a \cs[no-index]{ior_map_\ldots} function before all
-%   lines from the \meta{stream} have been processed. This
-%   normally takes place within a conditional statement, for example
+%   用于在处理完 \meta{stream} 的所有行之前终止 \cs[no-index]{ior_map_\ldots} 函数。
+%   这通常发生在条件语句内部，例如
 %   \begin{verbatim}
 %     \ior_map_inline:Nn \l_my_ior
 %       {
@@ -497,13 +424,9 @@
 %           }
 %       }
 %   \end{verbatim}
-%   Use outside of a \cs[no-index]{ior_map_\ldots} scenario leads to low
-%   level \TeX{} errors.
+%   在 \cs[no-index]{ior_map_\ldots} 场景之外使用会导致低级别的 \TeX{} 错误。
 %   \begin{texnote}
-%     When the mapping is broken, additional tokens may be inserted
-%     before further items are taken
-%     from the input stream. This depends on the design of the mapping
-%     function.
+%     当映射被中断时，可能会在从输入流中取出更多项目之前插入额外的记号。这取决于映射函数的设计。
 %   \end{texnote}
 % \end{function}
 %
@@ -511,10 +434,8 @@
 %   \begin{syntax}
 %     \cs{ior_map_break:n} \Arg{code}
 %   \end{syntax}
-%   Used to terminate a \cs[no-index]{ior_map_\ldots} function before all
-%   lines in the \meta{stream} have been processed, inserting
-%   the \meta{code} after the mapping has ended. This
-%   normally takes place within a conditional statement, for example
+%   用于在处理完 \meta{stream} 的所有行之前终止 \cs[no-index]{ior_map_\ldots} 函数，
+%   在映射结束后插入 \meta{code}。这通常发生在条件语句内部，例如
 %   \begin{verbatim}
 %     \ior_map_inline:Nn \l_my_ior
 %       {
@@ -525,13 +446,10 @@
 %           }
 %       }
 %   \end{verbatim}
-%   Use outside of a \cs[no-index]{ior_map_\ldots} scenario leads to low
-%   level \TeX{} errors.
+%   在 \cs[no-index]{ior_map_\ldots} 场景之外使用会导致低级别的 \TeX{} 错误。
 %   \begin{texnote}
-%     When the mapping is broken, additional tokens may be inserted
-%     before the \meta{code} is
-%     inserted into the input stream.
-%     This depends on the design of the mapping function.
+%     当映射被中断时，可能会在插入 \meta{code} 之前插入额外的记号。
+%     这取决于映射函数的设计。
 %   \end{texnote}
 % \end{function}
 %
@@ -540,32 +458,27 @@
 %     \cs{ior_if_eof_p:N} \meta{stream} \\
 %     \cs{ior_if_eof:NTF} \meta{stream} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Tests if the end of a file \meta{stream} has been reached during a reading
-%   operation. The test also returns a \texttt{true} value if
-%   the \meta{stream} is not open.
+%   测试在读取操作期间是否已经到达文件 \meta{stream} 的末尾。如果 \meta{stream} 未打开，
+%   测试还将返回 \texttt{true} 值。
 % \end{function}
 %
-% \subsection{Reading from the terminal}
+% \subsection{从终端读取}
 %
 % \begin{function}[added = 2019-03-23]{\ior_get_term:nN, \ior_str_get_term:nN}
 %   \begin{syntax}
 %     \cs{ior_get_term:nN} \meta{prompt} \meta{token list variable}
 %   \end{syntax}
-%   Function that reads one or more lines (until an equal number of left
-%   and right braces are found) from the terminal and stores
-%   the result locally in the \meta{token list} variable. Tokenization
-%   occurs as described for \cs{ior_get:NN} or \cs{ior_str_get:NN}, respectively.
-%   When the \meta{prompt}
-%   is empty, \TeX{} will wait for input without any other indication:
-%   typically the programmer will have provided a suitable text using
-%   e.g.~\cs{iow_term:n}. Where the \meta{prompt} is given, it will appear
-%   in the terminal followed by an |=|, e.g.
+%   该函数从终端读取一行或多行（直到找到相等数量的左右大括号），并将结果存储在
+%   \meta{token list} 变量中。记号化过程与 \cs{ior_get:NN} 或 \cs{ior_str_get:NN}
+%   中描述的相同。当 \meta{prompt} 为空时，\TeX{} 将等待输入，不提供任何其他指示：
+%   通常，程序员将使用 \cs{iow_term:n} 等提供适当文本。如果给定了 \meta{prompt}，
+%   它将出现在终端上，后面跟着一个 |=|，例如
 %   \begin{verbatim}
 %     prompt=
 %   \end{verbatim}
 % \end{function}
 %
-% \subsection{Writing to files}
+% \subsection{写入文件}
 %
 % \begin{function}[updated = 2012-06-05]
 %   {
@@ -575,25 +488,24 @@
 %   \begin{syntax}
 %     \cs{iow_now:Nn} \meta{stream} \Arg{tokens}
 %   \end{syntax}
-%   This function writes \meta{tokens} to the specified
-%   \meta{stream} immediately (\emph{i.e.}~the write operation is called
-%   on expansion of \cs{iow_now:Nn}).
+%   此函数立即将 \meta{tokens} 写入指定的 \meta{stream}
+%   （即在 \cs{iow_now:Nn} 扩展时调用写操作）。
 % \end{function}
 %
 % \begin{function}{\iow_log:n, \iow_log:e}
 %   \begin{syntax}
 %     \cs{iow_log:n} \Arg{tokens}
 %   \end{syntax}
-%   This function writes the given \meta{tokens} to the log (transcript)
-%   file immediately: it is a dedicated version of \cs{iow_now:Nn}.
+%   该函数将给定的 \meta{tokens} 立即写入日志（transcript）文件：
+%   这是 \cs{iow_now:Nn} 的专用版本。
 % \end{function}
 %
 % \begin{function}{\iow_term:n, \iow_term:e}
 %   \begin{syntax}
 %     \cs{iow_term:n} \Arg{tokens}
 %   \end{syntax}
-%   This function writes the given \meta{tokens} to the terminal
-%   file immediately: it is a dedicated version of \cs{iow_now:Nn}.
+%   该函数将给定的 \meta{tokens} 立即写入终端文件：
+%   这是 \cs{iow_now:Nn} 的专用版本。
 % \end{function}
 %
 % \begin{function}
@@ -604,18 +516,14 @@
 %   \begin{syntax}
 %     \cs{iow_shipout:Nn} \meta{stream} \Arg{tokens}
 %   \end{syntax}
-%   This function writes \meta{tokens} to the specified
-%   \meta{stream} when the current page is finalised (\emph{i.e.}~at
-%   shipout). The \texttt{e}-type variants expand the \meta{tokens}
-%   at the point where the function is used but \emph{not} when the
-%   resulting tokens are written to the \meta{stream}
-%   (\emph{cf.}~\cs{iow_shipout_e:Nn}).
+%   此函数在当前页面最终确定时（即在排版输出时）将 \meta{tokens} 写入指定的
+%   \meta{stream}。 \texttt{e}-type 变体在使用函数时扩展 \meta{tokens}，
+%   但在将生成的记号写入 \meta{stream} 时\emph{不}扩展
+%   （\emph{cf.}~\cs{iow_shipout_e:Nn}）。
 %   \begin{texnote}
-%     When using \pkg{expl3} with a format other than \LaTeX{}, new line
-%     characters inserted using \cs{iow_newline:} or using the
-%     line-wrapping code \cs{iow_wrap:nnnN} are not recognized in
-%     the argument of \cs{iow_shipout:Nn}.  This may lead to the
-%     insertion of additional unwanted line-breaks.
+%     使用 \pkg{expl3} 与除 \LaTeX{} 之外的格式时，使用 \cs{iow_newline:} 插入的
+%     换行符或使用 \cs{iow_wrap:nnnN} 插入的换行代码在 \cs{iow_shipout:Nn} 的
+%     参数中不会被 \TeX{} 识别。这可能导致插入额外的不需要的换行。
 %   \end{texnote}
 % \end{function}
 %
@@ -627,19 +535,14 @@
 %   \begin{syntax}
 %     \cs{iow_shipout_e:Nn} \meta{stream} \Arg{tokens}
 %   \end{syntax}
-%   This function writes \meta{tokens} to the specified
-%   \meta{stream} when the current page is finalised (\emph{i.e.}~at
-%   shipout). The \meta{tokens} are expanded at the time of writing
-%   in addition to any expansion when the function is used. This makes
-%   these functions suitable for including material finalised during
-%   the page building process (such as the page number integer).
+%   此函数在当前页面最终确定时（即在排版输出时）将 \meta{tokens} 写入指定的
+%   \meta{stream}。 \meta{tokens} 在写入时扩展，以及在使用函数时的任何扩展。这使
+%   这些函数适用于包含在页面构建过程中最终确定的材料（例如页码整数）。
 %   \begin{texnote}
-%     This is a wrapper around the \TeX{} primitive \tn{write}.
-%     When using \pkg{expl3} with a format other than \LaTeX{}, new line
-%     characters inserted using \cs{iow_newline:} or using the
-%     line-wrapping code \cs{iow_wrap:nnnN} are not recognized in
-%     the argument of \cs{iow_shipout:Nn}.  This may lead to the
-%     insertion of additional unwanted line-breaks.
+%     这是对 \TeX{} 原始命令 \tn{write} 的换行。
+%     使用 \pkg{expl3} 与除 \LaTeX{} 之外的格式时，使用 \cs{iow_newline:} 插入的
+%     换行符或使用 \cs{iow_wrap:nnnN} 插入的换行代码在 \cs{iow_shipout:Nn} 的
+%     参数中不会被 \TeX{} 识别。这可能导致插入额外的不需要的换行。
 %   \end{texnote}
 % \end{function}
 %
@@ -647,82 +550,67 @@
 %   \begin{syntax}
 %     \cs{iow_char:N} |\|\meta{char}
 %   \end{syntax}
-%   Inserts \meta{char} into the output stream. Useful when trying to
-%   write difficult characters such as |%|, |{|, |}|,
-%   \emph{etc.}~in messages, for example:
+%   将 \meta{char} 插入输出流中。在消息中尝试写入难以处理的字符
+%   （例如 |%|，|{|，|}| 等）时非常有用，例如：
 %   \begin{verbatim}
 %     \iow_now:Ne \g_my_iow { \iow_char:N \{ text \iow_char:N \} }
 %   \end{verbatim}
-%   The function has no effect if writing is taking place without
-%   expansion (\emph{e.g.}~in the second argument of \cs{iow_now:Nn}).
+%   如果在不扩展的情况下进行写入（例如在 \cs{iow_now:Nn} 的第二个参数中），
+%   该函数将不起作用。
 % \end{function}
 %
 % \begin{function}[EXP]{\iow_newline:}
 %   \begin{syntax}
 %     \cs{iow_newline:}
 %   \end{syntax}
-%   Function to add a new line within the \meta{tokens} written to a
-%   file. The function has no effect if writing is taking place without
-%   expansion (\emph{e.g.}~in the second argument of \cs{iow_now:Nn}).
+%   用于在写入文件时在 \meta{tokens} 中添加新行的函数。如果在不扩展的情况下进行
+%   写入（例如在 \cs{iow_now:Nn} 的第二个参数中），该函数将不起作用。
 %   \begin{texnote}
-%     When using \pkg{expl3} with a format other than \LaTeX{}, the
-%     character inserted by \cs{iow_newline:} is not recognized by
-%     \TeX{}, which may lead to the insertion of additional unwanted
-%     line-breaks.  This issue only affects \cs{iow_shipout:Nn},
-%     \cs{iow_shipout_e:Nn} and direct uses of primitive operations.
+%     使用 \pkg{expl3} 与除 \LaTeX{} 之外的格式时，由 \cs{iow_newline:}
+%     插入的字符在 \TeX{} 中不被识别，这可能导致插入额外的不需要的换行。
+%     这个问题只影响 \cs{iow_shipout:Nn}、\cs{iow_shipout_e:Nn}
+%     和原始操作的直接使用。
 %   \end{texnote}
 % \end{function}
 %
-% \subsection{Wrapping lines in output}
+% \subsection{让输出的文字换行}
 %
 % \begin{function}[added = 2012-06-28, updated = 2017-12-04]
 %   {\iow_wrap:nnnN, \iow_wrap:nenN}
 %   \begin{syntax}
 %     \cs{iow_wrap:nnnN} \Arg{text} \Arg{run-on text} \Arg{set up} \meta{function}
 %   \end{syntax}
-%   This function wraps the \meta{text} to a fixed number of
-%   characters per line. At the start of each line which is wrapped,
-%   the \meta{run-on text} is inserted.  The line character count
-%   targeted is the value of \cs{l_iow_line_count_int} minus the
-%   number of characters in the \meta{run-on text} for all lines except
-%   the first, for which the target number of characters is simply
-%   \cs{l_iow_line_count_int} since there is no run-on text.  The
-%   \meta{text} and \meta{run-on text} are exhaustively expanded by the
-%   function, with the following substitutions:
+%   该函数将 \meta{text} 换行到每行固定的字符数中。在每行开始换行的地方，
+%   插入 \meta{run-on text}。所针对的行字符计数是 \cs{l_iow_line_count_int} 的
+%   值减去除第一行外所有行的 \meta{run-on text} 字符数，对于第一行，目标字符
+%   数只是 \cs{l_iow_line_count_int}，因为没有 \meta{run-on text}。函数会详尽
+%   扩展 \meta{text} 和 \meta{run-on text}，进行以下替换：
 %   \begin{itemize}
-%     \item |\\| or \cs{iow_newline:} may be used to force a new line,
-%     \item \verb*|\ | may be used to represent a forced space
-%       (for example after a control sequence),
-%     \item |\#|, |\%|, |\{|, |\}|, |\~| may be used to represent
-%       the corresponding character,
-%     \item \cs{iow_wrap_allow_break:} may be used to allow a line-break
-%       without inserting a space,
-%     \item \cs{iow_indent:n} may be used to indent a part of the
-%       \meta{text} (not the \meta{run-on text}).
+%     \item |\\| 或 \cs{iow_newline:} 可以用于强制换行，
+%     \item \verb*|\ | 可以用于表示强制空格
+%       （例如在控制序列之后），
+%     \item |\#|、|\%|、|\{|、|\}|、|\~| 可以用于表示相应的字符，
+%     \item \cs{iow_wrap_allow_break:} 可以用于允许换行而不插入空格，
+%     \item \cs{iow_indent:n} 可以用于缩进 \meta{text} 的一部分
+%       （而不是 \meta{run-on text}）。
 %   \end{itemize}
-%   Additional functions may be added to the wrapping by using the
-%   \meta{set up}, which is executed before the wrapping takes place: this
-%   may include overriding the substitutions listed.
+%   通过使用 \meta{set up}，可以向换行添加其他功能，该函数在换行发生之前执行：
+%   这可能包括覆盖列出的替换。
 %
-%   Any expandable material in the \meta{text} which is not to be expanded
-%   on wrapping should be converted to a string using \cs{token_to_str:N},
-%   \cs{tl_to_str:n}, \cs{tl_to_str:N}, \emph{etc.}
+%   \meta{text} 中不希望在换行时扩展的可扩展材料应使用 \cs{token_to_str:N}、
+%   \cs{tl_to_str:n}、\cs{tl_to_str:N} 等转换为字符串。
 %
-%   The result of the wrapping operation is passed as a braced argument to the
-%   \meta{function}, which is typically a wrapper around a write
-%   operation. The output of \cs{iow_wrap:nnnN} (\emph{i.e.}~the argument
-%   passed to the \meta{function}) consists of characters of category
-%   \enquote{other} (category code~12), with the exception of spaces which
-%   have category \enquote{space} (category code~10). This means that the
-%   output does \emph{not} expand further when written to a file.
+%   换行操作的结果作为带大括号的参数传递给 \meta{function}，通常是换行
+%   写操作的换行器。 \cs{iow_wrap:nnnN} 的输出
+%   （即传递给 \meta{function} 的参数）由类别代码为 \enquote{other}
+%   （类别代码为~12）的字符组成，空格除外，其类别代码为 \enquote{space}
+%   （类别代码为~10）。这意味着输出在写入文件时不会进一步扩展。
 %
 %   \begin{texnote}
-%     Internally, \cs{iow_wrap:nnnN} carries out an \texttt{e}-type expansion
-%     on the \meta{text} to expand it. This is done in such a way that
-%     \cs{exp_not:N} or \cs{exp_not:n} \emph{could} be used to prevent
-%     expansion of material. However, this is less conceptually clear than
-%     conversion to a string, which is therefore the supported method for
-%     handling expandable material in the \meta{text}.
+%     在内部，\cs{iow_wrap:nnnN} 对 \meta{text} 执行 \texttt{e}-type 扩展以扩展它。
+%     这是以 \cs{exp_not:N} 或 \cs{exp_not:n} 可以用于防止材料扩展的方式完成的。
+%     但是，与转换为字符串相比，这在概念上不够清晰，因此转换为字符串是处理
+%     \meta{text} 中可扩展材料的受支持方法。
 %   \end{texnote}
 % \end{function}
 %
@@ -730,53 +618,42 @@
 %   \begin{syntax}
 %     \cs{iow_wrap_allow_break:}
 %   \end{syntax}
-%   In the first argument of \cs{iow_wrap:nnnN} (for instance in
-%   messages), inserts a break-point that allows a line break. If
-%   no break occurs, this function adds nothing to the output.
+%   在 \cs{iow_wrap:nnnN} 的第一个参数中（例如在消息中）插入一个允许换行的断点。
+%   如果没有发生换行，此函数对输出不添加任何内容。
 % \end{function}
 %
 % \begin{function}[added = 2011-09-21]{\iow_indent:n}
 %   \begin{syntax}
 %     \cs{iow_indent:n} \Arg{text}
 %   \end{syntax}
-%   In the first argument of \cs{iow_wrap:nnnN} (for instance in messages),
-%   indents \meta{text} by four spaces. This function does not cause
-%   a line break, and only affects lines which start within the scope
-%   of the \meta{text}. In case the indented \meta{text} should appear
-%   on separate lines from the surrounding text, use |\\| to force
-%   line breaks.
+%   在 \cs{iow_wrap:nnnN} 的第一个参数中（例如在消息中），通过四个空格缩进
+%   \meta{text}。此函数不会导致换行，并且仅影响从 \meta{text} 范围内开始的行。
+%   如果希望缩进的 \meta{text} 应出现在与周围文本不同的行上，请使用 |\\| 强制换行。
 % \end{function}
 %
 % \begin{variable}[added = 2012-06-24]{\l_iow_line_count_int}
-%   The maximum number of characters in a line to be written
-%   by the \cs{iow_wrap:nnnN}
-%   function. This value depends on the \TeX{} system in use: the standard
-%   value is $78$, which is typically correct for unmodified \TeX{} Live
-%   and \hologo{MiKTeX} systems.
+%   由 \cs{iow_wrap:nnnN} 函数写入的行中的最大字符数。
+%   此值取决于正在使用的 \TeX{} 系统：标准值为 $78$，通常适用于未修改的
+%   \TeX{} Live 和 \hologo{MiKTeX} 系统。
 % \end{variable}
 %
-% \subsection{Constant input--output streams, and variables}
+% \subsection{输入输出流常量和变量}
 %
 % \begin{variable}[added = 2017-12-11]{\g_tmpa_ior, \g_tmpb_ior}
-%   Scratch input stream for global use. These are never used by
-%   the kernel code, and so are safe for use with any \LaTeX3-defined
-%   function. However, they may be overwritten by other non-kernel
-%   code and so should only be used for short-term storage.
+%   全局使用的临时输入流。这些从不被内核代码使用，因此对于任何由 \LaTeX3 定义的函数都是安全的。
+%   但是，它们可能会被其他非内核代码覆盖，因此只应用于短期存储。
 % \end{variable}
 %
 % \begin{variable}{\c_log_iow, \c_term_iow}
-%   Constant output streams for writing to the log and to the terminal
-%   (plus the log), respectively.
+%   常量输出流，用于写入日志和终端（以及日志）。
 % \end{variable}
 %
 % \begin{variable}[added = 2017-12-11]{\g_tmpa_iow, \g_tmpb_iow}
-%   Scratch output stream for global use. These are never used by
-%   the kernel code, and so are safe for use with any \LaTeX3-defined
-%   function. However, they may be overwritten by other non-kernel
-%   code and so should only be used for short-term storage.
+%   全局使用的临时输出流。这些从不被内核代码使用，因此对于任何由 \LaTeX3 定义的函数都是安全的。
+%   但是，它们可能会被其他非内核代码覆盖，因此只应用于短期存储。
 % \end{variable}
 %
-% \subsection{Primitive conditionals}
+% \subsection{原始条件语句}
 %
 % \begin{function}[EXP]{\if_eof:w}
 %   \begin{syntax}
@@ -786,16 +663,15 @@
 %     ~~\meta{false code}
 %     \cs{fi:}
 %   \end{syntax}
-%   Tests if the \meta{stream} returns \enquote{end of file}, which is true
-%   for non-existent files. The \cs{else:} branch is optional.
+%   检查 \meta{stream} 是否返回 \enquote{end of file}，对于不存在的文件为真。 \cs{else:} 分支是可选的。
 %   \begin{texnote}
-%     This is the \TeX{} primitive \tn{ifeof}.
+%     这是 \TeX{} 原语 \tn{ifeof}。
 %   \end{texnote}
 % \end{function}
 %
-% \section{File opertions}
+% \section{文件操作}
 %
-% \subsection{Basic file operations}
+% \subsection{基本文件操作}
 %
 % \begin{variable}[added = 2017-06-21]
 %   {
@@ -803,32 +679,24 @@
 %     \g_file_curr_name_str,
 %     \g_file_curr_ext_str
 %   }
-%   Contain the directory, name and extension of the current file. The
-%   directory is empty if the file was loaded without an explicit
-%   path (\emph{i.e.}~if it is in the \TeX{} search path), and does
-%   \emph{not} end in |/| other than the case that it is exactly equal
-%   to the root directory. The \meta{name} and \meta{ext} parts together
-%   make up the file name, thus the \meta{name} part may be thought of
-%   as the \enquote{job name} for the current file.
+%   包含当前文件的目录、名称和扩展名。如果文件是在没有显式路径的情况下加载的
+%   （即它在 \TeX{} 搜索路径中），则目录为空，并且除了它与根目录完全相等的情况外，
+%   不以 |/| 结尾。 \meta{name} 和 \meta{ext} 部分共同组成文件名，因此 \meta{name}
+%   部分可以被视为当前文件的“作业名称”。
 %
-%   Note that \TeX{} does not provide information on the \meta{dir} and
-%   \meta{ext} part for the main (top level) file and that this file
-%   always has empty \meta{dir} and \meta{ext} components.
-%   Also, the \meta{name} here will be equal to \cs{c_sys_jobname_str},
-%   which may be different from the real file name (if set using
-%   |--jobname|, for example).
+%   请注意，\TeX{} 不提供有关主文件（顶层文件）的 \meta{dir} 和 \meta{ext} 部分的信息，
+%   并且此文件的 \meta{dir} 和 \meta{ext} 组件始终为空。此外，这里的 \meta{name}
+%   将等于 \cs{c_sys_jobname_str}，这可能与实际文件名不同（如果使用 |--jobname| 设置）。
 % \end{variable}
 %
 % \begin{variable}[added = 2017-06-18, updated = 2023-06-15]
 %   {\l_file_search_path_seq}
-%   Each entry is the path to a directory which should be searched when
-%   seeking a file. Each path can be relative or absolute, and need
-%   not include the trailing slash. Spaces need not be quoted.
+%   每个条目都是在寻找文件时应搜索的目录的路径。每个路径可以是相对的或绝对的，而且无需包括尾随的斜杠。
+%   空格无需引用。
 %
 %   \begin{texnote}
-%     When working as a package in \LaTeXe{}, \pkg{expl3} will
-%     automatically append the current \tn{input@path} to the
-%     set of values from \cs{l_file_search_path_seq}.
+%     在 \LaTeXe{} 中作为包工作时，\pkg{expl3} 将自动将当前 \tn{input@path} 添加到
+%     \cs{l_file_search_path_seq} 的值集中。
 %   \end{texnote}
 % \end{variable}
 %
@@ -838,19 +706,15 @@
 %     \cs{file_if_exist_p:n} \Arg{file name}
 %     \cs{file_if_exist:nTF} \Arg{file name} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Expands the argument of the \cs{file name} to give a string, then
-%   searches for this string using the current \TeX{} search
-%   path and the additional paths controlled by
-%   \cs{l_file_search_path_seq}.
+%   展开 \cs{file name} 的参数以得到字符串，然后使用当前 \TeX{} 搜索路径和由
+%   \cs{l_file_search_path_seq} 控制的其他路径搜索此字符串。
 % \end{function}
 %
-% \subsection{Information about files and file contents}
+% \subsection{关于文件和文件内容的信息}
 %
-% Functions in this section return information about files as \pkg{expl3}
-% \texttt{str} data, \emph{except} that the non-expandable functions set their
-% return \emph{token list} to \cs{q_no_value} if the file requested is not
-% found. As such, comparison of file names, hashes, sizes, etc., should use
-% \cs{str_if_eq:nnTF} rather than \cs{tl_if_eq:nnTF} and so on.
+% 本节中的函数返回关于文件的信息，作为 \pkg{expl3} 的 \texttt{str} 数据，\emph{但是}，
+% 非可展开的函数如果请求的文件未找到，则将其返回值设置为 \cs{q_no_value}。
+% 因此，对文件名、哈希值、大小等的比较应使用 \cs{str_if_eq:nnTF} 而不是 \cs{tl_if_eq:nnTF} 等。
 %
 % \begin{function}[rEXP, added = 2019-11-19]
 %   {
@@ -861,16 +725,11 @@
 %     \cs{file_hex_dump:n} \Arg{file name}
 %     \cs{file_hex_dump:nnn} \Arg{file name} \Arg{start index} \Arg{end index}
 %   \end{syntax}
-%   Searches for \meta{file name} using the current \TeX{} search
-%   path and the additional paths controlled by \cs{l_file_search_path_seq}.
-%   It then expands to leave the hexadecimal dump of the file content in the
-%   input stream. The file is read as bytes, which means that in
-%   contrast to most \TeX{} behaviour there will be a difference in result
-%   depending on the line endings used in text files. The same file will
-%   produce the same result between different engines: the algorithm used
-%   is the same in all cases. When the file is not found, the result of
-%   expansion is empty. The \Arg{start index} and \Arg{end index} values
-%   work as described for \cs{str_range:nnn}.
+%   使用当前 \TeX{} 搜索路径和由 \cs{l_file_search_path_seq} 控制的其他路径搜索
+%   \meta{file name}，然后扩展为输入流中文件内容的十六进制转储。文件以字节形式读取，
+%   这意味着与文本文件中使用的行结束符相比，将有不同的结果。同一文件将在不同引擎之间产生相同的结果：
+%   使用的算法在所有情况下都是相同的。当未找到文件时，扩展的结果为空。对于 \Arg{start index}
+%   和 \Arg{end index} 的工作原理与 \cs{str_range:nnn} 中描述的相同。
 % \end{function}
 %
 % \begin{function}[noTF, added = 2019-11-19]
@@ -882,9 +741,8 @@
 %     \cs{file_get_hex_dump:nN} \Arg{file name} \meta{tl var}
 %     \cs{file_get_hex_dump:nnnN} \Arg{file name} \Arg{start index} \Arg{end index} \meta{tl var}
 %   \end{syntax}
-%   Sets the \meta{tl var} to the result of applying
-%   \cs{file_hex_dump:n}/\cs{file_hex_dump:nnn} to the \meta{file}.
-%   If the file is not found, the \meta{tl var} will be set to \cs{q_no_value}.
+%   将 \meta{tl var} 设置为应用于 \meta{file} 的 \cs{file_hex_dump:n}/\cs{file_hex_dump:nnn} 的结果。
+%   如果未找到文件，\meta{tl var} 将设置为 \cs{q_no_value}。
 % \end{function}
 %
 % \begin{function}[rEXP, added = 2019-09-03]
@@ -892,15 +750,11 @@
 %   \begin{syntax}
 %     \cs{file_mdfive_hash:n} \Arg{file name}
 %   \end{syntax}
-%   Searches for \meta{file name} using the current \TeX{} search
-%   path and the additional paths controlled by \cs{l_file_search_path_seq}.
-%   It then expands to leave the MD5 sum generated from the contents of
-%   the file in the input stream. The file is read as bytes, which means that in
-%   contrast to most \TeX{} behaviour there will be a difference in result
-%   depending on the line endings used in text files. The same file will
-%   produce the same result between different engines: the algorithm used
-%   is the same in all cases. When the file is not found, the result of
-%   expansion is empty.
+%   使用当前 \TeX{} 搜索路径和由 \cs{l_file_search_path_seq} 控制的其他路径搜索
+%   \meta{file name}，然后扩展为输入流中从文件内容生成的 MD5 摘要。
+%   文件以字节形式读取，这意味着与文本文件中使用的行结束符相比，将有不同的结果。
+%   同一文件将在不同引擎之间产生相同的结果：使用的算法在所有情况下都是相同的。
+%   当未找到文件时，扩展的结果为空。
 % \end{function}
 %
 % \begin{function}[noTF, added = 2017-07-11, updated = 2019-02-16]
@@ -908,19 +762,17 @@
 %   \begin{syntax}
 %     \cs{file_get_mdfive_hash:nN} \Arg{file name} \meta{tl var}
 %   \end{syntax}
-%   Sets the \meta{tl var} to the result of applying
-%   \cs{file_mdfive_hash:n} to the \meta{file}. If the file is not found,
-%   the \meta{tl var} will be set to \cs{q_no_value}.
+%   将 \meta{tl var} 设置为应用于 \meta{file} 的 \cs{file_mdfive_hash:n} 的结果。
+%   如果未找到文件，\meta{tl var} 将设置为 \cs{q_no_value}。
 % \end{function}
 %
 % \begin{function}[rEXP, added = 2019-09-03]{\file_size:n, \file_size:V}
 %   \begin{syntax}
 %     \cs{file_size:n} \Arg{file name}
 %   \end{syntax}
-%   Searches for \meta{file name} using the current \TeX{} search
-%   path and the additional paths controlled by \cs{l_file_search_path_seq}.
-%   It then expands to leave the size of the file in bytes in the input stream.
-%   When the file is not found, the result of expansion is empty.
+%   使用当前 \TeX{} 搜索路径和由 \cs{l_file_search_path_seq} 控制的其他路径搜索
+%   \meta{file name}，然后扩展为输入流中文件的大小（以字节为单位）。
+%   当未找到文件时，扩展的结果为空。
 % \end{function}
 %
 % \begin{function}[noTF, added = 2017-07-09, updated = 2019-02-16]
@@ -928,10 +780,9 @@
 %   \begin{syntax}
 %     \cs{file_get_size:nN} \Arg{file name} \meta{tl var}
 %   \end{syntax}
-%   Sets the \meta{tl var} to the result of applying
-%   \cs{file_size:n} to the \meta{file}. If the file is not found,
-%   the \meta{tl var} will be set to \cs{q_no_value}.
-%   This is not available in older versions of \XeTeX{}.
+%   将 \meta{tl var} 设置为应用于 \meta{file} 的 \cs{file_size:n} 的结果。
+%   如果未找到文件，\meta{tl var} 将设置为 \cs{q_no_value}。
+%   在较旧版本的 \XeTeX{} 中不可用。
 % \end{function}
 %
 % \begin{function}[rEXP, added = 2019-09-03]
@@ -939,15 +790,13 @@
 %   \begin{syntax}
 %     \cs{file_timestamp:n} \Arg{file name}
 %   \end{syntax}
-%   Searches for \meta{file name} using the current \TeX{} search
-%   path and the additional paths controlled by \cs{l_file_search_path_seq}.
-%   It then expands to leave the modification timestamp of
-%   the file in the input stream. The timestamp is of the form
-%   |D:|\meta{year}\meta{month}\meta{day}\meta{hour}^^A
-%   \meta{minute}\meta{second}\meta{offset}, where the latter may be |Z|
-%   (UTC) or \meta{plus-minus}\meta{hours}|'|\meta{minutes}|'|.
-%   When the file is not found, the result of expansion is empty.
-%   This is not available in older versions of \XeTeX{}.
+%   使用当前 \TeX{} 搜索路径和由 \cs{l_file_search_path_seq} 控制的其他路径搜索
+%   \meta{file name}，然后扩展为输入流中文件的修改时间戳。
+%   时间戳的格式为 |D:|\meta{year}\meta{month}\meta{day}\meta{hour}^^A
+%   \meta{minute}\meta{second}\meta{offset}，后者可以是 |Z|（UTC）或
+%   \meta{plus-minus}\meta{hours}|'|\meta{minutes}|'|。
+%   当未找到文件时，扩展的结果为空。
+%   在较旧版本的 \XeTeX{} 中不可用。
 % \end{function}
 %
 % \begin{function}[noTF, added = 2017-07-09, updated = 2019-02-16]
@@ -955,10 +804,9 @@
 %   \begin{syntax}
 %     \cs{file_get_timestamp:nN} \Arg{file name} \meta{tl var}
 %   \end{syntax}
-%   Sets the \meta{tl var} to the result of applying
-%   \cs{file_timestamp:n} to the \meta{file}. If the file is not found,
-%   the \meta{tl var} will be set to \cs{q_no_value}.
-%   This is not available in older versions of \XeTeX{}.
+%   将 \meta{tl var} 设置为应用于 \meta{file} 的 \cs{file_timestamp:n} 的结果。
+%   如果未找到文件，\meta{tl var} 将设置为 \cs{q_no_value}。
+%   在较旧版本的 \XeTeX{} 中不可用。
 % \end{function}
 %
 % \begin{function}[added = 2019-05-13, updated = 2019-09-20, pTF, EXP]
@@ -972,20 +820,16 @@
 %     \cs{file_compare_timestamp_p:nNn} \Arg{file-1} \meta{comparator} \Arg{file-2}
 %     \cs{file_compare_timestamp:nNnTF} \Arg{file-1} \meta{comparator} \Arg{file-2} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Compares the file stamps on the two \meta{files} as indicated by
-%   the \meta{comparator}, and inserts either the \meta{true code}
-%   or \meta{false case} as required. A file which is not found
-%   is treated as older than any file which is found. This allows for
-%   example the construct
+%   比较两个 \meta{文件} 的时间戳，如 \meta{comparator} 所示，并根据需要插入 \meta{true code} 或 \meta{false code}。
+%   未找到的文件将被视为任何找到的文件都更旧。这允许例如下面的构造：
 %   \begin{verbatim}
 %     \file_compare_timestamp:nNnT { source-file } > { derived-file }
 %       {
 %         % Code to regenerate derived file
 %       }
 %   \end{verbatim}
-%   to work when the derived file is entirely absent. The timestamp
-%   of two absent files is regarded as different.
-%   This is not available in older versions of \XeTeX{}.
+%   在派生文件完全不存在时工作。两个不存在文件的时间戳被视为不同。
+%   在较旧版本的 \XeTeX{} 中不可用。
 % \end{function}
 %
 % \begin{function}[noTF, updated = 2019-02-16]
@@ -994,26 +838,19 @@
 %     \cs{file_get_full_name:nN} \Arg{file name} \meta{tl}
 %     \cs{file_get_full_name:nNTF} \Arg{file name} \meta{tl} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Searches for \meta{file name} in the path as detailed for
-%   \cs{file_if_exist:nTF}, and if found sets the \meta{tl var} the
-%   fully-qualified name of the file, \emph{i.e.}~the path and file name.
-%   This includes an extension |.tex| when the given \meta{file name}
-%   has no extension but the file found has that extension.
-%   In the non-branching version, the \meta{tl var} will be set to
-%   \cs{q_no_value} in the case that the file does not exist.
+%   在详细说明了 \cs{file_if_exist:nTF} 的路径中搜索 \meta{file name}，如果找到，
+%   将 \meta{tl var} 设置为文件的完全限定名，即路径和文件名。
+%   当给定的 \meta{file name} 没有扩展名但找到的文件有扩展名 |.tex| 时，这包括扩展名 |.tex|。
+%   在非分支版本中，如果文件不存在，\meta{tl var} 将设置为 \cs{q_no_value}。
 % \end{function}
 %
 % \begin{function}[added = 2019-09-03, rEXP]{\file_full_name:n, \file_full_name:V}
 %   \begin{syntax}
 %     \cs{file_full_name:n} \Arg{file name}
 %   \end{syntax}
-%   Searches for \meta{file name} in the path as detailed for
-%   \cs{file_if_exist:nTF}, and if found leaves the
-%   fully-qualified name of the file, \emph{i.e.}~the path and file name,
-%   in the input stream.
-%   This includes an extension |.tex| when the given \meta{file name}
-%   has no extension but the file found has that extension.
-%   If the file is not found on the path, the expansion is empty.
+%   在详细说明了 \cs{file_if_exist:nTF} 的路径中搜索 \meta{file name}，
+%   如果找到，将文件的完全限定名，即路径和文件名，留在输入流中。
+%   当在路径上未找到文件时，扩展为空。
 % \end{function}
 %
 % \begin{function}[added = 2017-06-23, updated = 2020-06-24]
@@ -1021,25 +858,19 @@
 %   \begin{syntax}
 %     \cs{file_parse_full_name:nNNN} \Arg{full name} \meta{dir} \meta{name} \meta{ext}
 %   \end{syntax}
-%   Parses the \meta{full name} and splits it into three parts, each of
-%   which is returned by setting the appropriate local string variable:
+%   解析 \meta{full name} 并将其拆分为三个部分，通过设置相应的本地字符串变量返回每个部分：
 %   \begin{itemize}
-%     \item The \meta{dir}: everything up to the last |/| (path separator)
-%       in the \meta{file path}. As with system \texttt{PATH} variables
-%       and related functions, the \meta{dir} does \emph{not} include the
-%       trailing |/| unless it points to the root directory. If there is no path (only
-%       a file name), \meta{dir} is empty.
-%     \item The \meta{name}: everything after the last |/| up to the last |.|,
-%       where both of those characters are optional. The \meta{name} may
-%       contain multiple |.| characters. It is empty if \meta{full name}
-%       consists only of a directory name.
-%     \item The \meta{ext}: everything after the last |.| (including the dot).
-%       The \meta{ext} is empty if there is no |.| after the last |/|.
+%     \item \meta{dir}：\meta{file path} 中到最后一个 |/|（路径分隔符）的所有内容。
+%       与系统的 \texttt{PATH} 变量和相关函数一样，\meta{dir} \emph{不}包括末尾的 |/|，
+%       除非它指向根目录。如果没有路径（只有文件名），\meta{dir} 为空。
+%     \item \meta{name}：从最后一个 |/| 后的内容到最后一个 |.|，其中这两个字符都是可选的。
+%       如果 \meta{full name} 仅包含目录名，则 \meta{name} 为空。
+%     \item \meta{ext}：最后一个 |.| 后的所有内容（包括点）。如果在最后一个 |/| 后没有 |.|，
+%       \meta{ext} 为空。
 %   \end{itemize}
 %
-%   Before parsing, the \meta{full name} is expanded until only non-expandable
-%   tokens remain, except that active characters are also not expanded.
-%   Quotes (|"|) are invalid in file names and are discarded from the input.
+%   在解析之前，\meta{full name} 会扩展，直到只剩下不可展开的记号，但活动字符也不会扩展。
+%   引号（|"|）在文件名中无效，并从输入中丢弃。
 % \end{function}
 %
 % \begin{function}[EXP, added = 2020-06-24]
@@ -1047,9 +878,8 @@
 %   \begin{syntax}
 %     \cs{file_parse_full_name:n} \Arg{full name}
 %   \end{syntax}
-%   Parses the \meta{full name} as described for \cs{file_parse_full_name:nNNN},
-%   and leaves \meta{dir}, \meta{name}, and \meta{ext} in the input stream,
-%   each inside a pair of braces.
+%   解析 \meta{full name}，如 \cs{file_parse_full_name:nNNN} 中所述，
+%   并在输入流中留下 \meta{dir}、\meta{name} 和 \meta{ext}，每个都在一对大括号中。
 % \end{function}
 %
 % \begin{function}[EXP, added = 2020-06-24]
@@ -1057,12 +887,12 @@
 %   \begin{syntax}
 %     \cs{file_parse_full_name_apply:nN} \Arg{full name} \meta{function}
 %   \end{syntax}
-%   Parses the \meta{full name} as described for \cs{file_parse_full_name:nNNN},
-%   and passes \meta{dir}, \meta{name}, and \meta{ext} as arguments to \meta{function},
-%   as an \texttt{n}-type argument each, in this order.
+%   解析 \meta{full name}，如 \cs{file_parse_full_name:nNNN} 中所述，
+%   并将 \meta{dir}、\meta{name} 和 \meta{ext} 作为参数传递给 \meta{function}，
+%   每个作为一个 \texttt{n}-类型的参数，按此顺序。
 % \end{function}
 % 
-% \subsection{Accessing file contents}
+% \subsection{访问文件内容}
 %
 % \begin{function}[noTF, added = 2019-01-16, updated = 2019-02-16]
 %   {\file_get:nnN, \file_get:VnN}
@@ -1070,25 +900,20 @@
 %     \cs{file_get:nnN} \Arg{file name} \Arg{setup} \meta{tl}
 %     \cs{file_get:nnNTF} \Arg{file name} \Arg{setup} \meta{tl} \Arg{true code} \Arg{false code}
 %   \end{syntax}
-%   Defines \meta{tl} to the contents of \meta{file name}.
-%   Category codes may need to be set appropriately via the \meta{setup}
-%   argument.
-%   The non-branching version sets the \meta{tl} to \cs{q_no_value} if the file is
-%   not found. The branching version runs the \meta{true code} after the
-%   assignment to \meta{tl} if the file is found, and \meta{false code}
-%   otherwise. The file content will be tokenized using the current
-%   category code régime,
+%   将 \meta{tl} 定义为 \meta{file name} 的内容。
+%   可以通过 \meta{setup} 参数设置适当的类别码。
+%   如果找不到文件，非分支版本将 \meta{tl} 设置为 \cs{q_no_value}。
+%   分支版本在分配给 \meta{tl} 后，如果找到文件，运行 \meta{true code}，否则运行 \meta{false code}。
+%   文件内容将使用当前类别码制度进行记号化。
 % \end{function}
 %
 % \begin{function}[updated = 2017-06-26]{\file_input:n, \file_input:V}
 %   \begin{syntax}
 %     \cs{file_input:n} \Arg{file name}
 %   \end{syntax}
-%   Searches for \meta{file name} in the path as detailed for
-%   \cs{file_if_exist:nTF}, and if found reads in the file as
-%   additional \LaTeX{} source. All files read are recorded
-%   for information and the file name stack is updated by this
-%   function. An error is raised if the file is not found.
+%   在详细说明了 \cs{file_if_exist:nTF} 的路径中搜索 \meta{file name}，如果找到，
+%   将文件作为附加的 \LaTeX{} 源读入。此函数记录所有已读取的文件用于信息，
+%   并更新文件名堆栈。如果找不到文件，将引发错误。
 % \end{function}
 %
 % \begin{function}[added = 2023-05-18, EXP]
@@ -1096,14 +921,11 @@
 %   \begin{syntax}
 %     \cs{file_input_raw:n} \Arg{file name}
 %   \end{syntax}
-%   Searches for \meta{file name} in the path as detailed for
-%   \cs{file_if_exist:nTF}, and if found reads in the file as
-%   additional \TeX{} source. No data concerning the file is
-%   tracked. If the file is not found, no action is taken.
+%   在详细说明了 \cs{file_if_exist:nTF} 的路径中搜索 \meta{file name}，如果找到，
+%   将文件作为附加的 \TeX{} 源读入。不跟踪有关文件的任何数据。
+%   如果找不到文件，不采取任何措施。
 %   \begin{texnote}
-%     This function is intended only for contexts where files must
-%     be read purely by expansion, for example at the start of a
-%     table cell in an \tn{halign}.
+%     此函数仅用于必须纯展开读取文件的上下文，例如在 \tn{halign} 中的表格单元格的开头。
 %   \end{texnote}
 % \end{function}
 %
@@ -1118,33 +940,22 @@
 %     \cs{file_if_exist_input:n} \Arg{file name}
 %     \cs{file_if_exist_input:nF} \Arg{file name} \Arg{false code}
 %   \end{syntax}
-%   Searches for \meta{file name} using the current \TeX{} search
-%   path and the additional paths included in \cs{l_file_search_path_seq}.
-%   If found then
-%   reads in the file as additional \LaTeX{} source as described for
-%   \cs{file_input:n}, otherwise inserts the \meta{false code}.
-%   Note that these functions do not raise
-%   an error if the file is not found, in contrast to \cs{file_input:n}.
+%   在详细说明了当前 \TeX{} 搜索路径和 \cs{l_file_search_path_seq} 中包含的其他路径中搜索 \meta{file name}。
+%   如果找到，则如 \cs{file_input:n} 中所述将文件作为附加的 \LaTeX{} 源读入，否则插入 \meta{false code}。
+%   请注意，与 \cs{file_input:n} 不同，这些函数如果找不到文件不会引发错误。
 % \end{function}
 %
 % \begin{function}[added = 2017-07-07]{\file_input_stop:}
 %   \begin{syntax}
 %     \cs{file_input_stop:}
 %   \end{syntax}
-%   Ends the reading of a file started by \cs{file_input:n} or similar before
-%   the end of the file is reached. Where the file reading is being terminated
-%   due to an error, \cs[index = msg_critical:nn]{msg_critical:nn(nn)}
-%   should be preferred.
+%   结束由 \cs{file_input:n} 或类似函数开始的文件读取，直到达到文件末尾为止。
+%   如果由于错误而终止文件读取，应优先使用 \cs[index = msg_critical:nn]{msg_critical:nn(nn)}。
 %   \begin{texnote}
-%     This function must be used on a line on its own: \TeX{} reads files
-%     line-by-line and so any additional tokens in the \enquote{current} line
-%     will still be read.
+%     此函数必须单独使用在一行上：\TeX{} 逐行读取文件，因此仍将读取当前行中的任何其他记号。
 %
-%     This is also true if the function is hidden inside another function
-%     (which will be the normal case), i.e., all tokens on the same line
-%     in the source file are still processed. Putting it on a line by itself
-%     in the definition doesn't help as it is the line where it is used that
-%     counts!
+%     如果该函数隐藏在另一个函数中（这将是正常情况），这也是真的，即在源文件中
+%     同一行上的所有记号仍将被处理。将其定义放在一个行上并不起作用，因为它是在使用它的行上计算的！
 %   \end{texnote}
 % \end{function}
 %
@@ -1153,17 +964,16 @@
 %     \cs{file_show_list:}
 %     \cs{file_log_list:}
 %   \end{syntax}
-%   These functions list all files loaded by \LaTeXe{} commands that
-%   populate \tn{@filelist} or by \cs{file_input:n}.  While
-%   \cs{file_show_list:} displays the list in the terminal,
-%   \cs{file_log_list:} outputs it to the log file only.
+%   这些函数列出由 \LaTeXe{} 命令加载的所有文件，这些命令填充了 \tn{@filelist}，
+%   或者由 \cs{file_input:n} 加载的文件。虽然 \cs{file_show_list:} 在终端显示列表，
+%   \cs{file_log_list:} 仅将其输出到日志文件中。
 % \end{function}
 %
 % \end{documentation}
 %
 % \begin{implementation}
 %
-% \section{\pkg{l3file} implementation}
+% \section{\pkg{l3file} 代码实现}
 %
 % \TestFiles{m3file001}
 %
@@ -1171,54 +981,47 @@
 %<*package>
 %    \end{macrocode}
 %
-% \subsection{Input operations}
+% \subsection{输入操作}
 %
 %    \begin{macrocode}
 %<@@=ior>
 %    \end{macrocode}
 %
-% \subsubsection{Variables and constants}
+% \subsubsection{变量和常量}
 %
 % \begin{variable}{\l_@@_internal_tl}
-%   Used as a short-term scratch variable.
+%   用作短期临时变量。
 %    \begin{macrocode}
 \tl_new:N  \l_@@_internal_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\c_@@_term_ior}
-%   Reading from the terminal (with a prompt) is done using a positive
-%   but non-existent stream number. Unlike writing, there is no concept
-%   of reading from the log.
+%   从终端（带有提示符）读取时使用正数但不存在的流号。与写入不同，没有从日志读取的概念。
 %    \begin{macrocode}
 \int_const:Nn \c_@@_term_ior { 16 }
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\g_@@_streams_seq}
-%   A list of the currently-available input streams to be used as a
-%   stack.
+%   用作堆栈的当前可用输入流列表。
 %    \begin{macrocode}
 \seq_new:N \g_@@_streams_seq
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_stream_tl}
-%   Used to recover the raw stream number from the stack.
+%   用于从堆栈中恢复原始流号。
 %    \begin{macrocode}
 \tl_new:N \l_@@_stream_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\g_@@_streams_prop}
-%   The name of the file attached to each stream is tracked in a property
-%   list. To get the correct number of reserved streams in package mode the
-%   underlying mechanism needs to be queried. For \LaTeXe{} and plain \TeX{}
-%   this data is stored in |\count16|: with the \pkg{etex} package loaded
-%   we need to subtract $1$ as the register holds the number of the next
-%   stream to use. In \ConTeXt{}, we need to look at |\count38| but there
-%   is no subtraction: like the original plain \TeX{}/\LaTeXe{} mechanism
-%   it holds the value of the \emph{last} stream allocated.
+%   跟踪与每个流关联的文件的名称的属性列表。要获取包模式下保留的流的正确数量，需要查询底层机制。
+%   对于 \LaTeXe{} 和 plain \TeX{}，此数据存储在 |\count16| 中：如果加载了 \pkg{etex} 宏包，
+%   我们需要减去 $1$，因为该寄存器保存要使用的下一个流的编号。在 \ConTeXt{} 中，我们需要查看 |\count38|，
+%   但没有减法：与原始的 plain \TeX{}/\LaTeXe{} 机制一样，它保存了分配的\emph{最后}一个流的值。
 %    \begin{macrocode}
 \prop_new:N \g_@@_streams_prop
 \int_step_inline:nnn
@@ -1237,11 +1040,10 @@
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsubsection{Stream management}
+% \subsubsection{流管理}
 %
 % \begin{macro}{\ior_new:N, \ior_new:c}
-%   Reserving a new stream is done by defining the name as equal to using the
-%   terminal.
+%   通过将名称定义为使用终端来保留新流。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_new:N #1 { \cs_new_eq:NN #1 \c_@@_term_ior }
 \cs_generate_variant:Nn \ior_new:N { c }
@@ -1249,7 +1051,7 @@
 % \end{macro}
 %
 % \begin{variable}{\g_tmpa_ior, \g_tmpb_ior}
-%   The usual scratch space.
+%   常用的临时空间。
 %    \begin{macrocode}
 \ior_new:N \g_tmpa_ior
 \ior_new:N \g_tmpb_ior
@@ -1257,7 +1059,7 @@
 % \end{variable}
 %
 % \begin{macro}{\ior_open:Nn, \ior_open:cn}
-%   Use the conditional version, with an error if the file is not found.
+%   使用条件版本，如果找不到文件，则引发错误。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_open:Nn #1#2
   { \ior_open:NnF #1 {#2} { \__kernel_file_missing:n {#2} } }
@@ -1266,17 +1068,15 @@
 % \end{macro}
 %
 % \begin{variable}{\l_@@_file_name_tl}
-%   Data storage.
+%   数据存储。
 %    \begin{macrocode}
 \tl_new:N \l_@@_file_name_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{macro}[TF]{\ior_open:Nn, \ior_open:cn}
-%   An auxiliary searches for the file in the \TeX{}, \LaTeXe{} and
-%   \LaTeX3 paths.  Then pass the file found to the lower-level function
-%   which deals with streams.  The |full_name| is empty when the file is
-%   not found.
+% 辅助宏在\TeX{}、\LaTeXe{}和\LaTeX3路径中搜索文件，然后将找到的文件传递给处理流的底层函数。
+% 当文件未找到时，|full_name|为空。
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn \ior_open:Nn #1#2 { T , F , TF }
   {
@@ -1292,15 +1092,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_new:N}
-%   Streams are reserved using \tn{newread} before they
-%   can be managed by \pkg{ior}.  To prevent \pkg{ior} from being
-%   affected by redefinitions of \tn{newread} (such as done by the
-%   third-party package \pkg{morewrites}), this macro is saved here
-%   under a private name.  The complicated code ensures that
-%   \cs{@@_new:N} is not \tn{outer} despite plain \TeX{}'s \tn{newread}
-%   being \tn{outer}. For \ConTeXt{}, we have to deal with the fact
-%   that \tn{newread} works like our own: it actually checks before
-%   altering definition.
+% 流需要在\tn{newread}之前进行预留才能由\pkg{ior}管理。
+% 为防止\pkg{ior}受到\tn{newread}重新定义的影响，此宏被保存在此处，使用私有名称。
+% 复杂的代码确保\cs{@@_new:N}不是\tn{outer}，尽管plain \TeX{}的\tn{newread}是\tn{outer}的。
+% 对于\ConTeXt{}，我们必须处理\tn{newread}的重新定义，它实际上检查定义之前的情况。
 %    \begin{macrocode}
 \exp_args:NNf \cs_new_protected:Npn \@@_new:N
   { \exp_args:NNc \exp_after:wN \exp_stop_f: { newread } }
@@ -1318,12 +1113,9 @@
 %
 % \begin{macro}{\__kernel_ior_open:Nn, \__kernel_ior_open:No}
 % \begin{macro}{\@@_open_stream:Nn}
-%   The stream allocation itself uses the fact that there is a list of all of
-%   those available. Life gets more complex as it's
-%   important to keep things in sync. That is done using a two-part approach:
-%   any streams that have already been taken up by \pkg{ior} but are now free
-%   are tracked, so we first try those. If that fails, ask plain \TeX{} or \LaTeXe{}
-%   for a new stream and use that number (after a bit of conversion).
+% 流分配本身利用了所有可用流的列表。保持同步很重要，采用两部分方法实现：
+% 已被\pkg{ior}占用但现在可用的任何流都会被跟踪，因此首先尝试这些。
+% 如果失败，则向plain \TeX{}或\LaTeXe{}请求新的流并使用该数字（经过一些转换）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \__kernel_ior_open:Nn #1#2
   {
@@ -1338,8 +1130,7 @@
   }
 \cs_generate_variant:Nn \__kernel_ior_open:Nn { No }
 %    \end{macrocode}
-%   Here, we act defensively in case \LuaTeX{} is in use with an
-%   extensionless file name.
+% 在这里，我们采取防御性措施，以防使用\LuaTeX{}和无扩展名的文件名。
 %    \begin{macrocode}
 \cs_new_protected:Npe \@@_open_stream:Nn #1#2
   {
@@ -1356,10 +1147,8 @@
 %
 % \begin{macro}{\ior_shell_open:Nn}
 % \begin{macro}{\@@_shell_open:nN, \@@_shell_open:oN}
-%   Actually much easier than either the standard open or input versions!
-%   When calling \cs{__kernel_ior_open:Nn} the file the pipe is added to
-%   signal a shell command, but the quotes are not added yet---they are
-%   added later by \cs{__kernel_file_name_quote:n}.
+% 实际上比标准的打开或输入版本要容易得多！
+% 在调用\cs{__kernel_ior_open:Nn}时，文件上添加了管道以表示shell命令，但尚未添加引号，稍后由\cs{__kernel_file_name_quote:n}添加。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_shell_open:Nn #1#2
   {
@@ -1388,11 +1177,9 @@
 % \end{macro}
 %
 % \begin{macro}{\ior_close:N, \ior_close:c}
-%   Closing a stream means getting rid of it at the \TeX{} level and
-%   removing from the various data structures.  Unless the name passed
-%   is an invalid stream number (outside the range $[0,15]$), it can be
-%   closed.  On the other hand, it only gets added to the stack if it
-%   was not already there, to avoid duplicates building up.
+%   关闭流意味着在\TeX{}级别摆脱它，并从各种数据结构中删除。
+%   除非传递的名称是无效的流编号（在范围$[0,15]$之外），否则可以关闭它。
+%   另一方面，只有在尚未在堆栈中时才将其添加到堆栈中，以避免重复堆积。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_close:N #1
   {
@@ -1410,8 +1197,7 @@
 % \end{macro}
 %
 % \begin{macro}{\ior_show:N, \ior_log:N, \@@_show:NN}
-%   Seek the stream in the \cs{g_@@_streams_prop} list, then show the
-%   stream as open or closed accordingly.
+%   寻找流在\cs{g_@@_streams_prop}列表中，然后根据情况显示流是否打开或关闭。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_show:N { \@@_show:NN \tl_show:n }
 \cs_generate_variant:Nn \ior_show:N { c }
@@ -1434,13 +1220,10 @@
 %
 % \begin{macro}{\ior_show_list:, \ior_log_list:}
 % \begin{macro}{\@@_list:N}
-%   Show the property lists, but with some \enquote{pretty printing}.
-%   See the \pkg{l3msg} module.  The first argument of the message is
-%   |ior| (as opposed to |iow|) and the second is empty if no read
-%   stream is open and non-empty (the list of streams formatted using
-%   \cs{msg_show_item_unbraced:nn}) otherwise.  The code of the message
-%   \texttt{show-streams} takes care of translating |ior|/|iow| to
-%   English.
+%   显示属性列表，但带有一些\enquote{漂亮的打印}。参见\pkg{l3msg}模块。
+%   消息的第一个参数是|ior|（与|iow|相对），第二个参数为空如果没有读取流打开，
+%   否则非空（使用\cs{msg_show_item_unbraced:nn}格式化的流列表）。
+%   消息\texttt{show-streams}的代码负责将|ior|/|iow|翻译为英语。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_show_list: { \@@_list:N \msg_show:nneeee }
 \cs_new_protected:Npn \ior_log_list: { \@@_list:N \msg_log:nneeee }
@@ -1458,20 +1241,18 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsubsection{Reading input}
+% \subsubsection{读取输入}
 %
 % \begin{macro}{\if_eof:w}
-%   The primitive conditional
+%   原始条件
 %    \begin{macrocode}
 \cs_new_eq:NN \if_eof:w \tex_ifeof:D
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}[pTF]{\ior_if_eof:N}
-%   To test if some particular input stream is exhausted the following
-%   conditional is provided.  The primitive test can only deal with
-%   numbers in the range $[0,15]$ so we catch outliers (they are
-%   exhausted).
+%   为了测试某个特定的输入流是否耗尽，提供了以下条件。
+%   原始测试只能处理范围$[0,15]$内的数字，所以我们捕获异常情况（它们已经耗尽）。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \ior_if_eof:N #1 { p , T , F , TF }
   {
@@ -1494,7 +1275,7 @@
 %
 % \begin{macro}{\ior_get:NN, \@@_get:NN}
 % \begin{macro}[TF]{\ior_get:NN}
-%   And here we read from files.
+%   在这里我们从文件中读取。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_get:NN #1#2
   { \ior_get:NNF #1 #2 { \tl_set:Nn #2 { \q_no_value } } }
@@ -1515,8 +1296,8 @@
 %
 % \begin{macro}{\ior_str_get:NN, \@@_str_get:NN}
 % \begin{macro}[TF]{\ior_str_get:NN}
-%   Reading as strings is a more complicated wrapper, as we wish to
-%   remove the endline character and restore it afterwards.
+%   作为字符串读取是一个更复杂的换行器，因为我们希望
+%   删除换行字符并在之后恢复它。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_str_get:NN #1#2
   { \ior_str_get:NNF #1 #2 { \tl_set:Nn #2 { \q_no_value } } }
@@ -1543,7 +1324,7 @@
 % \end{macro}
 %
 % \begin{variable}{\c_@@_term_noprompt_ior}
-%   For reading without a prompt.
+%   用于无提示的读取。
 %    \begin{macrocode}
 \int_const:Nn \c_@@_term_noprompt_ior { -1 }
 %    \end{macrocode}
@@ -1551,7 +1332,7 @@
 %
 % \begin{macro}{\ior_get_term:nN, \ior_str_get_term:nN}
 % \begin{macro}{\@@_get_term:NnN}
-%   Getting from the terminal is better with pretty-printing.
+%   从终端获取最好使用漂亮的打印。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_get_term:nN #1#2
   { \@@_get_term:NnN \@@_get:NN {#1} #2 }
@@ -1573,7 +1354,7 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\ior_map_break:, \ior_map_break:n}
-%   Usual map breaking functions.
+%   常规映射中断函数。
 %    \begin{macrocode}
 \cs_new:Npn \ior_map_break:
   { \prg_map_break:Nn \ior_map_break: { } }
@@ -1586,12 +1367,10 @@
 % \begin{macro}{\@@_map_inline:NNn}
 % \begin{macro}{\@@_map_inline:NNNn}
 % \begin{macro}{\@@_map_inline_loop:NNN}
-%   Mapping over an input stream can be done on either a token or a string
-%   basis, hence the set up. Within that, there is a check to avoid reading
-%   past the end of a file, hence the two applications of \cs{ior_if_eof:N}
-%   and its lower-level analogue \cs{if_eof:w}.
-%   This mapping cannot be nested with twice the same stream, as the
-%   stream has only one \enquote{current line}.
+%   在输入流上进行映射可以基于令牌或字符串进行，因此设置了两者。
+%   在其中，有一个检查，以避免读取文件末尾之外的内容，因此使用了两次
+%   \cs{ior_if_eof:N}及其底层相似物\cs{if_eof:w}。
+%   该映射不能嵌套使用相同的流两次，因为流只有一个\enquote{当前行}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_map_inline:Nn
   { \@@_map_inline:NNn \@@_get:NN }
@@ -1628,10 +1407,8 @@
 % \begin{macro}{\ior_map_variable:NNn, \ior_str_map_variable:NNn}
 % \begin{macro}{\@@_map_variable:NNNn}
 % \begin{macro}{\@@_map_variable_loop:NNNn}
-%   Since the \TeX{} primitive (\tn{read} or \tn{readline}) assigns the
-%   tokens read in the same way as a token list assignment, we simply
-%   call the appropriate primitive.  The end-of-loop is checked using
-%   the primitive conditional for speed.
+%   由于\TeX{}原语（\tn{read}或\tn{readline}）以与令牌列表分配相同的方式分配读取的令牌，
+%   我们只需调用相应的原语。为了提高速度，使用原语条件检查循环结束。
 %    \begin{macrocode}
 \cs_new_protected:Npn \ior_map_variable:NNn
   { \@@_map_variable:NNNn \ior_get:NN }
@@ -1656,31 +1433,27 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsection{Output operations}
+% \subsection{输出操作}
 %
 %    \begin{macrocode}
 %<@@=iow>
 %    \end{macrocode}
 %
-% There is a lot of similarity here to the input operations, at least for
-% many of the basics. Thus quite a bit is copied from the earlier material
-% with minor alterations.
+% 这里与输入操作有很多相似之处，至少对于许多基本操作来说是这样。
+% 因此，从前面的材料中复制了相当多的内容，进行了一些小的修改。
 %
-% \subsubsection{Variables and constants}
+% \subsubsection{变量和常量}
 %
 % \begin{variable}{\l_@@_internal_tl}
-%   Used as a short-term scratch variable.
+%   用作短期临时变量。
 %    \begin{macrocode}
 \tl_new:N  \l_@@_internal_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\c_log_iow, \c_term_iow}
-%   Here we allocate two output streams for writing to the transcript
-%   file only (\cs{c_log_iow}) and to both the terminal and transcript
-%   file (\cs{c_term_iow}).  Recent \LuaTeX{} provide $128$ write
-%   streams; we also use \cs{c_term_iow} as the first non-allowed write
-%   stream so its value depends on the engine.
+%   在这里，我们为写入到传输文件（\cs{c_log_iow}）和同时写入到终端和传输文件（\cs{c_term_iow}）分配了两个输出流。
+%   最近的\LuaTeX{}提供$128$个写入流；我们还将\cs{c_term_iow}用作第一个不允许写入流，因此其值取决于引擎。
 %    \begin{macrocode}
 \int_const:Nn \c_log_iow  { -1 }
 \int_const:Nn \c_term_iow
@@ -1695,23 +1468,21 @@
 % \end{variable}
 %
 % \begin{variable}{\g_@@_streams_seq}
-%   A list of the currently-available output streams to be used as a
-%   stack.
+%   一个当前可用的输出流列表，用作堆栈。
 %    \begin{macrocode}
 \seq_new:N \g_@@_streams_seq
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_stream_tl}
-%   Used to recover the raw stream number from the stack.
+%   用于从堆栈中恢复原始流编号。
 %    \begin{macrocode}
 \tl_new:N \l_@@_stream_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\g_@@_streams_prop}
-%   As for reads with the appropriate adjustment of the register numbers to
-%   check on.
+%   就像读取一样，根据要检查的寄存器编号进行适当的调整。
 %    \begin{macrocode}
 \prop_new:N \g_@@_streams_prop
 \int_step_inline:nnn
@@ -1730,10 +1501,10 @@
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsubsection{Internal auxiliaries}
+% \subsubsection{内部辅助}
 %
 % \begin{variable}{\s_@@_mark,\s_@@_stop}
-%   Internal scan marks.
+%   内部扫描标记。
 %    \begin{macrocode}
 \scan_new:N \s_@@_mark
 \scan_new:N \s_@@_stop
@@ -1741,24 +1512,23 @@
 % \end{variable}
 %
 % \begin{macro}[EXP]{\@@_use_i_delimit_by_s_stop:nw}
-%   Functions to gobble up to a scan mark.
+%   到扫描标记的函数。
 %    \begin{macrocode}
 \cs_new:Npn \@@_use_i_delimit_by_s_stop:nw #1 #2 \s_@@_stop {#1}
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{variable}{\q_@@_nil}
-%   Internal quarks.
+%   内部 quark 。
 %    \begin{macrocode}
 \quark_new:N \q_@@_nil
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsection{Stream management}
+% \subsection{流管理}
 %
 % \begin{macro}{\iow_new:N, \iow_new:c}
-%   Reserving a new stream is done by defining the name as equal to writing
-%   to the terminal: odd but at least consistent.
+%   通过将名称定义为写入终端来保留新流：奇怪但至少一致。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_new:N #1 { \cs_new_eq:NN #1 \c_term_iow }
 \cs_generate_variant:Nn \iow_new:N { c }
@@ -1766,7 +1536,7 @@
 % \end{macro}
 %
 % \begin{variable}{\g_tmpa_iow, \g_tmpb_iow}
-%   The usual scratch space.
+%   常规的临时空间。
 %    \begin{macrocode}
 \iow_new:N \g_tmpa_iow
 \iow_new:N \g_tmpb_iow
@@ -1774,10 +1544,8 @@
 % \end{variable}
 %
 % \begin{macro}{\@@_new:N}
-%   As for read streams, copy \tn{newwrite}, making sure
-%   that it is not \tn{outer}. For \ConTeXt{}, we have to
-%   deal with the fact that \tn{newwrite} works like our
-%   own: it actually checks before altering definition.
+%   与读取流一样，复制\tn{newwrite}，确保它不是\tn{outer}。
+%   对于\ConTeXt{}，我们必须处理\tn{newwrite}的工作方式与我们自己的相同的事实：在更改定义之前，它实际上会进行检查。
 %    \begin{macrocode}
 \exp_args:NNf \cs_new_protected:Npn \@@_new:N
   { \exp_args:NNc \exp_after:wN \exp_stop_f: { newwrite } }
@@ -1794,7 +1562,7 @@
 % \end{macro}
 %
 % \begin{variable}{\l_@@_file_name_tl}
-%  Data storage.
+%  数据存储。
 %    \begin{macrocode}
 \tl_new:N \l_@@_file_name_tl
 %    \end{macrocode}
@@ -1802,8 +1570,7 @@
 %
 % \begin{macro}{\iow_open:Nn, \iow_open:NV, \iow_open:cn, \iow_open:cV}
 % \begin{macro}{\@@_open_stream:Nn, \@@_open_stream:NV}
-%   The same idea as for reading, but without the path and without the need
-%   to allow for a conditional version.
+%   与读取相同的思路，但不包括路径，也不需要允许有条件版本。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_open:Nn #1#2
   {
@@ -1833,7 +1600,7 @@
 %
 % \begin{macro}{\iow_shell_open:Nn}
 % \begin{macro}{\@@_shell_open:nN, \@@_shell_open:oN}
-%   Very similar to the \texttt{ior} version
+%   与\texttt{ior}版本非常相似。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_shell_open:Nn #1#2
   {
@@ -1856,10 +1623,8 @@
 % \end{macro}
 %
 % \begin{macro}{\iow_close:N, \iow_close:c}
-%   Closing a stream is not quite the reverse of opening one. First,
-%   the close operation is easier than the open one, and second as the
-%   stream is actually a number we can use it directly to show that the
-%   slot has been freed up.
+%   关闭流不完全是打开的逆操作。首先，关闭操作比打开操作更容易，
+%   其次，由于流实际上是一个数字，我们可以直接使用它来显示已释放的槽。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_close:N #1
   {
@@ -1877,8 +1642,7 @@
 % \end{macro}
 %
 % \begin{macro}{\iow_show:N, \iow_log:N, \@@_show:NN}
-%   Seek the stream in the \cs{g_@@_streams_prop} list, then show the
-%   stream as open or closed accordingly.
+%   在\cs{g_@@_streams_prop}列表中查找流，然后根据情况显示流是否打开或关闭。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_show:N { \@@_show:NN \tl_show:n }
 \cs_generate_variant:Nn \iow_show:N { c }
@@ -1901,7 +1665,7 @@
 %
 % \begin{macro}{\iow_show_list:, \iow_log_list:}
 % \begin{macro}{\@@_list:N}
-%   Done as for input, but with a copy of the auxiliary so the name is correct.
+%   与输入一样，但是辅助函数的副本，以便名称是正确的。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_show_list: { \@@_list:N \msg_show:nneeee }
 \cs_new_protected:Npn \iow_log_list: { \@@_list:N \msg_log:nneeee }
@@ -1919,15 +1683,14 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsubsection{Deferred writing}
+% \subsubsection{延迟写入}
 %
 % \begin{macro}
 %   {
 %     \iow_shipout_e:Nn, \iow_shipout_e:Ne,
 %     \iow_shipout_e:cn, \iow_shipout_e:ce
 %   }
-%   First the easy part, this is the primitive, which expects its
-%   argument to be braced.
+%   首先是简单部分，这是原语，期望其参数用大括号括起来。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_shipout_e:Nn #1#2
   { \tex_write:D #1 {#2} }
@@ -1942,7 +1705,7 @@
 %     \iow_shipout:cn, \iow_shipout:ce,
 %     \iow_shipout:cx
 %   }
-%   With \eTeX{} available deferred writing without expansion is easy.
+%   有了\eTeX{}，不带扩展的延迟写入很容易。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_shipout:Nn #1#2
   { \tex_write:D #1 { \exp_not:n {#2} } }
@@ -1951,14 +1714,12 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Immediate writing}
+% \subsubsection{立即写入}
 %
 % \begin{macro}{\__kernel_iow_with:Nnn}
 % \begin{macro}{\@@_with:nNnn, \@@_with:oNnn}
-%   If the integer~|#1| is equal to~|#2|, just leave~|#3| in the input
-%   stream.  Otherwise, pass the old value to an auxiliary, which sets
-%   the integer to the new value, runs the code, and restores the
-%   integer.
+%   如果整数~|#1| 等于~|#2|，则只需将~|#3| 保留在输入流中。
+%   否则，将旧值传递给辅助函数，该函数将整数设置为新值，运行代码，然后还原整数。
 %    \begin{macrocode}
 \cs_new_protected:Npn \__kernel_iow_with:Nnn #1#2
   {
@@ -1984,17 +1745,11 @@
 %     \iow_now:cn, \iow_now:cV, \iow_now:ce,
 %     \iow_now:cx
 %   }
-%   This routine writes the second argument onto the output stream without
-%   expansion. If this stream isn't open, the output goes to the terminal
-%   instead. If the first argument is no output stream at all, we get an
-%   internal error.  We don't use the expansion done by \tn{write} to
-%   get the |Nx| variant, because it differs in subtle ways from
-%   \texttt{x}-expansion, namely, macro parameter characters would not
-%   need to be doubled.  We set the \tn{newlinechar} to~$10$ using
-%   \cs{__kernel_iow_with:Nnn} to support formats such as plain \TeX{}: otherwise,
-%   \cs{iow_newline:} would not work.  We do not do this for
-%   \cs{iow_shipout:Nn} or \cs{iow_shipout_x:Nn}, as \TeX{} looks at the
-%   value of the \tn{newlinechar} at shipout time in those cases.
+%   该例程将第二个参数写入输出流，不进行扩展。
+%   如果此流未打开，则输出转到终端。如果第一个参数根本不是输出流，我们会得到一个内部错误。
+%   我们不使用\tn{write}执行的扩展来获得|Nx|变体，因为它与\texttt{x}-扩展在细微的方面有所不同，即，不需要将宏参数字符加倍。
+%   我们使用\cs{__kernel_iow_with:Nnn}将\tn{newlinechar}设置为$10$，以支持格式，例如plain \TeX{}：否则，\cs{iow_newline:} 将无法工作。
+%   我们对\cs{iow_shipout:Nn}或\cs{iow_shipout_x:Nn}不执行此操作，因为在这些情况下，\TeX{}在出航时查看\tn{newlinechar}的值。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_now:Nn #1#2
   {
@@ -2008,9 +1763,8 @@
 %
 % \begin{macro}{\iow_log:n, \iow_log:e, \iow_log:x}
 % \begin{macro}{\iow_term:n, \iow_term:e, \iow_term:x}
-%   Writing to the log and the terminal directly are relatively easy;
-%   as we need the two \texttt{e}-type variants for bootstrapping,
-%   they are redefinitions here.
+%   直接写入日志和终端相对较容易。
+%   由于我们需要两个\texttt{e}-类型的变体进行引导，因此在这里进行重新定义。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_log:n  { \iow_now:Nn \c_log_iow  }
 \cs_set_protected:Npn \iow_log:e  { \iow_now:Ne \c_log_iow  }
@@ -2022,34 +1776,29 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsubsection{Special characters for writing}
+% \subsubsection{写入的特殊字符}
 %
 % \begin{macro}{\iow_newline:}
-%   Global variable holding the character that forces a new line when
-%   something is written to an output stream.
+%   全局变量，保存强制将新行写入输出流时的字符。
 %    \begin{macrocode}
 \cs_new:Npn \iow_newline: { ^^J }
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\iow_char:N}
-%   Function to write any escaped char to an output stream.
+%   用于将任何转义字符写入输出流的函数。
 %    \begin{macrocode}
 \cs_new_eq:NN \iow_char:N \cs_to_str:N
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Hard-wrapping lines to a character count}
+% \subsubsection{将行硬换行到字符计数}
 %
-% The code here implements a generic hard-wrapping function. This is
-% used by the messaging system, but is designed such that it is
-% available for other uses.
+% 此处的代码实现了通用的硬换行函数。这用于消息系统，但设计为可用于其他用途。
 %
 % \begin{variable}{\l_iow_line_count_int}
-%   This is the \enquote{raw} number of characters in a line which
-%   can be written to the terminal.
-%   The standard value is the line length typically used by
-%   \TeX{} Live and \hologo{MiKTeX}.
+%   这是可以写入终端的一行字符的\enquote{原始}数量。
+%   标准值是\TeX{} Live和\hologo{MiKTeX}通常使用的行长度。
 %    \begin{macrocode}
 \int_new:N  \l_iow_line_count_int
 \int_set:Nn \l_iow_line_count_int { 78 }
@@ -2057,16 +1806,14 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_newline_tl}
-%   The token list inserted to produce a new line, with the
-%   \meta{run-on text}.
+%   插入产生新行的记号列表，带有\meta{run-on text}。
 %    \begin{macrocode}
 \tl_new:N \l_@@_newline_tl
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_line_target_int}
-%   This stores the target line count: the full number of characters
-%   in a line, minus any part for a leader at the start of each line.
+%   这存储目标行数：每行字符的完整数量，减去每行开头的引导部分。
 %    \begin{macrocode}
 \int_new:N \l_@@_line_target_int
 %    \end{macrocode}
@@ -2075,11 +1822,9 @@
 % \begin{macro}{\@@_set_indent:n}
 % \begin{macro}{\@@_unindent:w}
 % \begin{variable}{\l_@@_one_indent_tl, \l_@@_one_indent_int}
-%   The \texttt{one_indent} variables hold one indentation marker and
-%   its length.  The \cs{@@_unindent:w} auxiliary removes one
-%   indentation.  The function \cs{@@_set_indent:n} (that could possibly
-%   be public) sets the indentation in a consistent way.  We set it to
-%   four spaces by default.
+%   \texttt{one_indent}变量保存一个缩进标记及其长度。
+%   \cs{@@_unindent:w}辅助函数删除一个缩进。
+%   函数\cs{@@_set_indent:n}（可能是公共的）以一致的方式设置缩进。默认设置为四个空格。
 %    \begin{macrocode}
 \tl_new:N \l_@@_one_indent_tl
 \int_new:N \l_@@_one_indent_int
@@ -2100,8 +1845,7 @@
 % \end{macro}
 %
 % \begin{variable}{\l_@@_indent_tl, \l_@@_indent_int}
-%   The current indentation (some copies of \cs{l_@@_one_indent_tl}) and
-%   its number of characters.
+%   当前缩进（\cs{l_@@_one_indent_tl}的一些副本）及其字符数。
 %    \begin{macrocode}
 \tl_new:N \l_@@_indent_tl
 \int_new:N \l_@@_indent_int
@@ -2109,8 +1853,7 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_line_tl, \l_@@_line_part_tl}
-%   These hold the current line of text and a partial line to be added
-%   to it, respectively.
+%   这些分别保存当前文本行和要添加到它的部分行。
 %    \begin{macrocode}
 \tl_new:N \l_@@_line_tl
 \tl_new:N \l_@@_line_part_tl
@@ -2118,16 +1861,14 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_line_break_bool}
-%   Indicates whether the line was broken precisely at a chunk boundary.
+%   指示行是否精确地在块边界处中断的布尔值。
 %    \begin{macrocode}
 \bool_new:N \l_@@_line_break_bool
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_wrap_tl}
-%   Used for the expansion step before detokenizing, and for the output
-%   from wrapping text: fully expanded and with lines which are not
-%   overly long.
+%   用于解标记之前的扩展步骤，以及用于换行文本的输出：完全展开，行不会过长。
 %    \begin{macrocode}
 \tl_new:N \l_@@_wrap_tl
 %    \end{macrocode}
@@ -2142,13 +1883,9 @@
 %     \c_@@_wrap_indent_marker_tl,
 %     \c_@@_wrap_unindent_marker_tl
 %   }
-%   Every special action of the wrapping code is starts with
-%   the same recognizable string, \cs{c_@@_wrap_marker_tl}.
-%   Upon seeing that \enquote{word}, the wrapping code reads
-%   one space-delimited argument to know what operation to
-%   perform. The setting of \tn{escapechar} here is not
-%   very important, but makes \cs{c_@@_wrap_marker_tl} look
-%   marginally nicer.
+%   换行代码的每个特殊操作都以相同可识别的字符串\cs{c_@@_wrap_marker_tl}开头。
+%   看到该\enquote{word}后，换行代码读取一个空格分隔的参数，以知道要执行的操作。
+%   此处设置\tn{escapechar}并不是非常重要，但使\cs{c_@@_wrap_marker_tl}看起来略微更漂亮。
 %    \begin{macrocode}
 \group_begin:
   \int_set:Nn \tex_escapechar:D { -1 }
@@ -2172,10 +1909,9 @@
 % \begin{macro}{\iow_wrap_allow_break:}
 % \begin{macro}[EXP]{\@@_wrap_allow_break:}
 % \begin{macro}[EXP]{\@@_wrap_allow_break_error:}
-%   We set \cs{iow_wrap_allow_break:n} to produce an error when outside
-%   messages. Within wrapped message, it is set to \cs{@@_wrap_allow_break:}
-%   when valid and otherwise to \cs{@@_wrap_allow_break_error:}.  The second
-%   produces an error expandably.
+%   我们将\cs{iow_wrap_allow_break:n}设置为在消息外部产生错误。
+%   在换行消息中，如果有效，它设置为\cs{@@_wrap_allow_break:}，否则为\cs{@@_wrap_allow_break_error:}。
+%   第二个是可展开产生错误。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_wrap_allow_break:
   {
@@ -2196,13 +1932,10 @@
 % \begin{macro}{\iow_indent:n}
 % \begin{macro}[EXP]{\@@_indent:n}
 % \begin{macro}[EXP]{\@@_indent_error:n}
-%   We set \cs{iow_indent:n} to produce an error when outside
-%   messages. Within wrapped message, it is set to \cs{@@_indent:n} when
-%   valid and otherwise to \cs{@@_indent_error:n}.  The first places the
-%   instruction for increasing the indentation before its argument, and
-%   the instruction for unindenting afterwards.  The second produces an
-%   error expandably.  Note that there are no forced line-break, so
-%   the indentation only changes when the next line is started.
+%   我们将\cs{iow_indent:n}设置为在消息外部产生错误。
+%   在换行消息中，如果有效，它设置为\cs{@@_indent:n}，否则为\cs{@@_indent_error:n}。
+%   第一个在其参数之前放置增加缩进的指令，以及之后放置减少缩进的指令。
+%   第二个是可展开产生错误。请注意，没有强制换行，因此缩进仅在下一行开始时更改。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_indent:n #1
   {
@@ -2228,15 +1961,9 @@
 % \end{macro}
 %
 % \begin{macro}{\iow_wrap:nnnN, \iow_wrap:nenN}
-%   The main wrapping function works as follows.  First give |\\|,
-%   \verb*|\ | and other formatting commands the correct definition for
-%   messages and perform the given setup~|#3|.  The definition of
-%   \verb*|\ | uses an \enquote{other} space rather than a normal space,
-%   because the latter might be absorbed by \TeX{} to end a number or
-%   other \texttt{f}-type expansions.
-%   Use \cs{conditionally@traceoff} if defined; it is introduced by the
-%   \pkg{trace} package and suppresses uninteresting tracing of the
-%   wrapping code.
+%   主要的换行函数工作如下。首先给出|\\|、\verb*|\ |等格式化命令正确的定义以及执行给定的设置~|#3|。
+%   \verb*|\ |的定义使用\enquote{other} space而不是正常空格，因为后者可能被\TeX{}吸收以结束数字或其他\texttt{f}-type扩展。
+%   如果定义了\cs{conditionally@traceoff}，则使用它；它由\pkg{trace}宏包引入，抑制换行代码的不相关跟踪。
 %    \begin{macrocode}
 \cs_new_protected:Npn \iow_wrap:nnnN #1#2#3#4
   {
@@ -2255,28 +1982,22 @@
       \cs_set_eq:NN \iow_indent:n \@@_indent:n
       #3
 %    \end{macrocode}
-%   Then fully-expand the input: in package mode, the expansion uses
-%   \LaTeXe{}'s \tn{protect} mechanism in the same way as \tn{typeout}.
-%   In generic mode this setting is useless but harmless.  As soon as
-%   the expansion is done, reset \cs{iow_indent:n} to its error
-%   definition: it only works in the first argument of
-%   \cs{iow_wrap:nnnN}.
+%   然后完全展开输入：在宏包模式中，扩展使用\LaTeXe{}的\tn{protect}机制，与\tn{typeout}相同。
+%   在通用模式中，此设置无用但无害。一旦展开完成，将\cs{iow_indent:n}重置为其错误定义：它只在\cs{iow_wrap:nnnN}的第一个参数中起作用。
 %    \begin{macrocode}
       \cs_set_eq:NN \protect \token_to_str:N
       \__kernel_tl_set:Ne \l_@@_wrap_tl {#1}
       \cs_set_eq:NN \iow_wrap_allow_break: \@@_wrap_allow_break_error:
       \cs_set_eq:NN \iow_indent:n \@@_indent_error:n
 %    \end{macrocode}
-%   Afterwards, set the newline marker (two assignments to fully expand,
-%   then convert to a string) and initialize the target count for lines
-%   (the first line has target count \cs{l_iow_line_count_int} instead).
+%   然后，设置换行标记（两次赋值完全展开，然后转换为字符串），并初始化行的目标计数（第一行的目标计数为\cs{l_iow_line_count_int}）。
 %    \begin{macrocode}
       \__kernel_tl_set:Ne \l_@@_newline_tl { \iow_newline: #2 }
       \__kernel_tl_set:Ne \l_@@_newline_tl { \tl_to_str:N \l_@@_newline_tl }
       \int_set:Nn \l_@@_line_target_int
         { \l_iow_line_count_int - \str_count:N \l_@@_newline_tl + 1 }
 %    \end{macrocode}
-%   Sanity check.
+%   完整性检查。
 %    \begin{macrocode}
       \int_compare:nNnT { \l_@@_line_target_int } < 0
         {
@@ -2285,12 +2006,8 @@
             { \l_iow_line_count_int + 1 }
         }
 %    \end{macrocode}
-%   There is then a loop over the input, which stores the wrapped
-%   result in \cs{l_@@_wrap_tl}.  After the loop, the resulting text is
-%   passed on to the function which has been given as a post-processor.
-%   The \cs{tl_to_str:N} step converts the \enquote{other} spaces back
-%   to normal spaces.  The \texttt{f}-expansion removes a leading space
-%   from \cs{l_@@_wrap_tl}.
+%   然后是对输入的循环，它将换行的结果存储在\cs{l_@@_wrap_tl}中。循环后，将结果的文本传递给作为后处理器给定的函数。
+%   \cs{tl_to_str:N}步骤将\enquote{other}空格转换回普通空格。\texttt{f}-expansion从\cs{l_@@_wrap_tl}中移除前导空格。
 %    \begin{macrocode}
       \@@_wrap_do:
     \exp_args:NNf \group_end:
@@ -2301,14 +2018,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_do:, \@@_wrap_fix_newline:w, \@@_wrap_start:w}
-%   Escape spaces and change newlines to \cs{c_@@_wrap_newline_marker_tl}.
-%   Set up a few variables, in particular the initial
-%   value of \cs{l_@@_wrap_tl}: the space stops the
-%   \texttt{f}-expansion of the main wrapping function and
-%   \cs{use_none:n} removes a newline marker inserted by later code.
-%   The main loop consists of repeatedly calling the \texttt{chunk}
-%   auxiliary to wrap chunks delimited by (newline or indentation)
-%   markers.
+%   转义空格并将换行符更改为\cs{c_@@_wrap_newline_marker_tl}。
+%   设置一些变量，特别是\cs{l_@@_wrap_tl}的初始值：
+%   空格停止主换行函数的\texttt{f}-扩展，\cs{use_none:n}去除后续代码插入的换行符。
+%   主循环包括反复调用\texttt{chunk}辅助程序，以换行由（换行符或缩进）标记界定的块。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_do:
   {
@@ -2347,18 +2060,13 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_chunk:nw, \@@_wrap_next:nw}
-%   The \texttt{chunk} and \texttt{next} auxiliaries are defined
-%   indirectly to obtain the expansions of \cs{c_catcode_other_space_tl}
-%   and \cs{c_@@_wrap_marker_tl} in their definition.  The \texttt{next}
-%   auxiliary calls a function corresponding to the type of marker (its
-%   |##2|), which can be \texttt{newline} or \texttt{indent} or
-%   \texttt{unindent} or \texttt{end}.  The first argument of the
-%   \texttt{chunk} auxiliary is a target number of characters and the
-%   second is some string to wrap.  If the chunk is empty simply call
-%   \texttt{next}.  Otherwise, set up a call to \cs{@@_wrap_line:nw},
-%   including the indentation if the current line is empty, and
-%   including a trailing space (|#1|) before the
-%   \cs{@@_wrap_end_chunk:w} auxiliary.
+%   辅助程序\texttt{chunk}和\texttt{next}间接定义，
+%   以获取\cs{c_catcode_other_space_tl}和\cs{c_@@_wrap_marker_tl}的扩展。
+%   \texttt{next}辅助程序调用与标记类型相对应的函数（其|##2|），
+%   可以是\texttt{newline}、\texttt{indent}、\texttt{unindent}或\texttt{end}。
+%   \texttt{chunk}辅助程序的第一个参数是字符的目标数，第二个是要换行的字符串。
+%   如果块为空，只需调用\texttt{next}。否则，设置调用\cs{@@_wrap_line:nw}的调用，
+%   包括如果当前行为空则包括缩进，并在\cs{@@_wrap_end_chunk:w}辅助程序之前包括一个尾随空格（|#1|）。
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmp:w #1#2
   {
@@ -2398,30 +2106,16 @@
 %     \@@_wrap_line_end:nw,
 %     \@@_wrap_end_chunk:w
 %   }
-%   This is followed by \Arg{string} \meta{int expr} |;|.  It stores the
-%   \meta{string} and up to \meta{int expr} characters from the current
-%   chunk into \cs{l_@@_line_part_tl}.  Characters are grabbed 8~at a
-%   time and left in \cs{l_@@_line_part_tl} by the \texttt{line_loop}
-%   auxiliary.  When $k<8$ remain to be found, the \texttt{line_aux}
-%   auxiliary calls the \texttt{line_end} auxiliary followed by (the
-%   single digit) $k$, then $7-k$ empty brace groups, then the chunk's
-%   remaining characters.  The \texttt{line_end} auxiliary leaves
-%   $k$~characters from the chunk in the line part, then ends the
-%   assignment.  Ignore the \cs{use_none:nnnnn} line for now.  If the
-%   next character is a space the line can be broken there:
-%   store what we found into the result and get the next line.
-%   Otherwise some work is needed to find a break-point.  So far we have
-%   ignored what happens if the chunk is shorter than the requested
-%   number of characters: this is dealt with by the \texttt{end_chunk}
-%   auxiliary, which gets treated like a character by the rest of the
-%   code.  It ends up being called either as one of the arguments
-%   |#2|--|#9| of the \texttt{line_loop} auxiliary or as one of the
-%   arguments |#2|--|#8| of the \texttt{line_end} auxiliary.  In both
-%   cases stop the assignment and work out how many characters are still
-%   needed. Notice that when we have exactly seven arguments to clean up,
-%   a \cs{exp_stop_f:} has to be inserted to stop the \cs{exp:w}.
-%   The weird \cs{use_none:nnnnn} ensures that the required
-%   data is in the right place.
+%   接下来是\Arg{string} \meta{int expr} |;|。它将\meta{string}和来自当前块的\meta{int expr}字符存储到\cs{l_@@_line_part_tl}中。
+%   字符以8个为一组抓取，并由\texttt{line_loop}辅助程序将其留在\cs{l_@@_line_part_tl}中。
+%   当还有$k<8$个要找到时，\texttt{line_aux}辅助程序调用\texttt{line_end}辅助程序，后跟（单个数字）$k$，然后是$7-k$个空的花括号组，
+%   然后是块的剩余字符。 \texttt{line_end}辅助程序将来自块的$k$个字符留在行部分中，然后结束赋值。
+%   暂时忽略\cs{use_none:nnnnn}行。如果下一个字符是空格，则可以在此处换行：
+%   将找到的内容存储到结果中并获取下一行。否则，需要一些工作来找到断点。
+%   到目前为止，我们忽略了如果块短于请求的字符数会发生什么：这由\texttt{end_chunk}辅助程序处理，
+%   它被代码的其余部分视为字符处理。它最终被调用为\texttt{line_loop}辅助程序的参数之一|#2|--|#9|，
+%   或者作为\texttt{line_end}辅助程序的参数之一|#2|--|#8|。在这两种情况下，停止赋值并计算尚需多少字符。
+%   请注意，当我们有七个参数需要清理时，必须插入\cs{exp_stop_f:}来停止\cs{exp:w}。奇怪的\cs{use_none:nnnnn}确保所需的数据位于正确的位置。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_line:nw #1
   {
@@ -2491,23 +2185,13 @@
 %     \@@_wrap_break_loop:w,
 %     \@@_wrap_break_end:w,
 %   }
-%   Functions here are defined indirectly: \cs{@@_tmp:w} is eventually
-%   called with an \enquote{other} space as its argument.  The goal is
-%   to remove from \cs{l_@@_line_part_tl} the part after the last space.
-%   In most cases this is done by repeatedly calling the
-%   \texttt{break_loop} auxiliary, which leaves \enquote{words}
-%   (delimited by spaces) until it hits the trailing space: then its
-%   argument |##3| is |?| \cs{@@_wrap_break_end:w} instead of a single
-%   token, and that \texttt{break_end} auxiliary leaves in the
-%   assignment the line until the last space, then calls
-%   \cs{@@_wrap_line_end:nw} to finish up the line and move on to the
-%   next.  If there is no space in \cs{l_@@_line_part_tl} then the
-%   \texttt{break_first} auxiliary calls the \texttt{break_none}
-%   auxiliary.  In that case, if the current line is empty, the complete
-%   word (including |##4|, characters beyond what we had grabbed) is
-%   added to the line, making it over-long.  Otherwise, the word is
-%   used for the following line (and the last space of the line so far
-%   is removed because it was inserted due to the presence of a marker).
+%   这里定义的函数是间接定义的：\cs{@@_tmp:w} 最终会以一个“其他”空格作为其参数调用。
+%   目标是从\cs{l_@@_line_part_tl}中移除最后一个空格之后的部分。
+%   在大多数情况下，这是通过反复调用\texttt{break_loop}辅助程序完成的，该程序在达到尾随空格之前留下“单词”（由空格分隔）：
+%   然后其参数 |##3| 是 |?| \cs{@@_wrap_break_end:w} 而不是单个标记，而\texttt{break_end}辅助程序在分配中留下直到最后一个空格的行，然后调用\cs{@@_wrap_line_end:nw}来完成行并继续下一个。
+%   如果\cs{l_@@_line_part_tl}中没有空格，那么\texttt{break_first}辅助程序调用\texttt{break_none}辅助程序。
+%   在这种情况下，如果当前行为空，则将完整的单词（包括 |##4|，超出我们抓取的字符之外的字符）添加到行中，使其过长。
+%   否则，该单词用于下一行（并且由于存在标记，因此删除到目前为止的行的最后一个空格）。
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmp:w #1
   {
@@ -2547,10 +2231,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_next_line:w}
-%   The special case where the end of a line coincides with the end of a
-%   chunk is detected here, to avoid a spurious empty line.  Otherwise,
-%   call \cs{@@_wrap_line:nw} to find characters for the next line
-%   (remembering to account for the indentation).
+%   在这里检测到特殊情况，即一行的结尾与块的结尾重合，以避免产生虚假的空行。
+%   否则，调用\cs{@@_wrap_line:nw}来查找下一行的字符（记得考虑缩进）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_next_line:w #1#2 \s_@@_stop
   {
@@ -2572,12 +2254,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_allow_break:n}
-%   This is called after a chunk has been wrapped.  The
-%   \cs{l_@@_line_part_tl} typically ends with a space (except at the
-%   beginning of a line?), which we remove since the
-%   \texttt{allow\_break} marker should not insert a space.  Then move
-%   on with the next chunk, making sure to adjust the target number of
-%   characters for the line in case we did remove a space.
+%   在换行完块后调用这个函数。由于\texttt{allow\_break}标记不应插入空格，因此通常\cs{l_@@_line_part_tl}以空格结尾（除非在行的开头？），我们移除它。
+%   然后继续下一个块，确保调整行的目标字符数，以防我们删除了一个空格。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_allow_break:n #1
   {
@@ -2592,12 +2270,10 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_indent:n, \@@_wrap_unindent:n}
-%   These functions are called after a chunk has been wrapped, when
-%   encountering \texttt{indent}/\texttt{unindent} markers.  Add the
-%   line part (last line part of the previous chunk) to the line so far
-%   and reset a boolean denoting the presence of a line-break.  Most
-%   importantly, add or remove one indent from the current indent (both
-%   the integer and the token list).  Finally, continue wrapping.
+%   这些函数在换行完块后，在遇到\texttt{indent}/\texttt{unindent}标记时调用。
+%   将行部分（前一个块的最后一行部分）添加到行中，并重置表示存在换行的布尔值。
+%   最重要的是，从当前缩进（整数和记号列表）中添加或删除一个缩进。
+%   最后，继续换行。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_indent:n #1
   {
@@ -2620,12 +2296,9 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_newline:n, \@@_wrap_end:n}
-%   These functions are called after a chunk has been line-wrapped, when
-%   encountering a \texttt{newline}/\texttt{end} marker.  Unless we just
-%   took a line-break, store the line part and the line so far into the
-%   whole \cs{l_@@_wrap_tl}, trimming a trailing space.  In the
-%   \texttt{newline} case look for a new line (of length
-%   \cs{l_@@_line_target_int}) in a new chunk.
+%   在遇到\texttt{newline}/\texttt{end}标记时，这些函数在一块文本被换行后被调用。
+%   除非刚刚发生过换行，否则将行部分和当前行存储到整个\cs{l_@@_wrap_tl}中，修剪尾随空格。
+%   在\texttt{newline}情况下，在新的块中查找长度为\cs{l_@@_line_target_int}的新行。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_newline:n #1
   {
@@ -2644,10 +2317,8 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_wrap_store_do:n}
-%   First add the last line part to the line, then append it to
-%   \cs{l_@@_wrap_tl} with the appropriate new line (with
-%   \enquote{run-on} text), possibly with its last space removed (|#1|
-%   is empty or \cs{@@_wrap_trim:N}).
+%   首先将最后一行部分添加到行中，然后将其附加到\cs{l_@@_wrap_tl}中，带有适当的新行
+%   （带有“run-on”文本），可能会去掉其最后的空格（|#1|为空或\cs{@@_wrap_trim:N}）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_wrap_store_do:n #1
   {
@@ -2665,7 +2336,7 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\@@_wrap_trim:N, \@@_wrap_trim:w, \@@_wrap_trim_aux:w}
-%   Remove one trailing \enquote{other} space from the argument if present.
+%   如果存在，从参数中删除一个尾随的“other”空格。
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmp:w #1
   {
@@ -2683,10 +2354,10 @@
 %<@@=file>
 %    \end{macrocode}
 %
-% \subsection{File operations}
+% \subsection{文件操作}
 %
 % \begin{variable}{\l_@@_internal_tl}
-%   Used as a short-term scratch variable.
+%   用作短期临时变量。
 %    \begin{macrocode}
 \tl_new:N \l_@@_internal_tl
 %    \end{macrocode}
@@ -2698,8 +2369,7 @@
 %     \g_file_curr_ext_str ,
 %     \g_file_curr_name_str
 %   }
-%   The name of the current file should be available at all times:
-%   the name itself is set dynamically.
+%   当前文件的名称应始终可用：名称本身是动态设置的。
 %    \begin{macrocode}
 \str_new:N \g_file_curr_dir_str
 \str_new:N \g_file_curr_ext_str
@@ -2708,12 +2378,9 @@
 % \end{variable}
 %
 % \begin{variable}{\g_@@_stack_seq}
-%   The input list of files is stored as a sequence stack. In package
-%   mode we can recover the information from the details held by
-%   \LaTeXe{} (we must be in the preamble and loaded using \tn{usepackage}
-%   or \tn{RequirePackage}). As \LaTeXe{} doesn't store directory and
-%   name separately, we stick to the same convention here. In pre-loading,
-%   \tn{@currnamestack} is empty so is skipped.
+%   输入文件列表被存储为序列栈。在包模式下，我们可以从\LaTeXe{}保存的详细信息中恢复信息
+%   （我们必须在导言中以\tn{usepackage}或\tn{RequirePackage}加载）。
+%   由于\LaTeXe{}不分别存储目录和名称，我们在这里坚持相同的约定。在预加载中，\tn{@currnamestack}为空，因此被跳过。
 %    \begin{macrocode}
 \seq_new:N \g_@@_stack_seq
 \group_begin:
@@ -2744,17 +2411,15 @@
 % \end{variable}
 %
 % \begin{variable}{\g_@@_record_seq}
-%   The total list of files used is recorded separately from the current
-%   file stack, as nothing is ever popped from this list.  The current
-%   file name should be included in the file list! We
-%   will eventually copy the contents of \cs{@filelist}.
+%   用于记录单独存储的文件使用列表，因为从此列表中永远不会弹出任何内容。
+%   当前文件名应包含在文件列表中！我们最终将复制\cs{@filelist}的内容。
 %    \begin{macrocode}
 \seq_new:N \g_@@_record_seq
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_base_name_tl, \l_@@_full_name_tl}
-%   For storing the basename and full path whilst passing data internally.
+%   用于在内部传递数据时存储基本名称和完整路径。
 %    \begin{macrocode}
 \tl_new:N \l_@@_base_name_tl
 \tl_new:N \l_@@_full_name_tl
@@ -2762,8 +2427,7 @@
 % \end{variable}
 %
 % \begin{variable}{\l_@@_dir_str, \l_@@_ext_str, \l_@@_name_str}
-%   Used in parsing a path into parts: in contrast to the above, these are
-%   never used outside of the current module.
+%   用于解析路径的变量：与上述变量相比，这些变量从未在当前模块之外使用。
 %    \begin{macrocode}
 \str_new:N \l_@@_dir_str
 \str_new:N \l_@@_ext_str
@@ -2772,44 +2436,44 @@
 % \end{variable}
 %
 % \begin{variable}{\l_file_search_path_seq}
-%   The current search path.
+%   当前搜索路径。
 %    \begin{macrocode}
 \seq_new:N \l_file_search_path_seq
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\l_@@_tmp_seq}
-%   Scratch space for comma list conversion.
+%   用于逗号列表转换的临时空间。
 %    \begin{macrocode}
 \seq_new:N \l_@@_tmp_seq
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsubsection{Internal auxiliaries}
+% \subsubsection{内部辅助功能}
 %
 % \begin{variable}{\s_@@_stop}
-%   Internal scan marks.
+%   内部扫描标记。
 %    \begin{macrocode}
 \scan_new:N \s_@@_stop
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{variable}{\q_@@_nil}
-%   Internal quarks.
+%   内部 quark 。
 %    \begin{macrocode}
 \quark_new:N \q_@@_nil
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{macro}[pTF]{\@@_quark_if_nil:n}
-%   Branching quark conditional.
+%   分支quark条件。
 %    \begin{macrocode}
 \__kernel_quark_new_conditional:Nn \@@_quark_if_nil:n { TF }
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{variable}{\q_@@_recursion_tail,\q_@@_recursion_stop}
-%   Internal recursion quarks.
+%   内部递归quarks。
 %    \begin{macrocode}
 \quark_new:N \q_@@_recursion_tail
 \quark_new:N \q_@@_recursion_stop
@@ -2820,7 +2484,7 @@
 %     \@@_if_recursion_tail_break:NN,
 %     \@@_if_recursion_tail_stop_do:Nn
 %   }
-%   Functions to query recursion quarks.
+%   查询递归quarks的函数。
 %    \begin{macrocode}
 \__kernel_quark_new_test:N \@@_if_recursion_tail_stop:N
 \__kernel_quark_new_test:N \@@_if_recursion_tail_stop_do:nn
@@ -2847,11 +2511,9 @@
 %     \@@_name_trim_spaces_aux:n,
 %     \@@_name_trim_spaces_aux:w,
 %   }
-%   Expanding the file name uses a \tn{csname}-based approach, and
-%   relies on active characters (for example from UTF-8 characters)
-%   being properly set up to expand to a expansion-safe version using
-%   \cs{ifcsname}.  This is less conservative than the token-by-token
-%   approach used before, but it is much faster.
+%   扩展文件名使用\tn{csname}为基础的方法，依赖于活动字符（例如UTF-8字符）的正确设置，
+%   以扩展为使用\cs{ifcsname}的扩展安全版本。
+%   这比以前使用的逐个标记的方法更不保守，但速度更快。
 %    \begin{macrocode}
 \cs_new:Npn \__kernel_file_name_sanitize:n #1
   {
@@ -2863,11 +2525,8 @@
   }
 %    \end{macrocode}
 %
-%   We'll use \cs{cs:w} to start expanding the file name, and to avoid
-%   creating csnames equal to \tn{relax} with \enquote{common} names,
-%   there's a prefix |__file_name=| to the csname.  There's also a guard
-%   token at the end so we can check if there was an error during the
-%   process and (try to) clean up gracefully.
+%   我们将使用\cs{cs:w}开始扩展文件名，为了避免创建与\tn{relax}相等的csnames并具有“common”名称，
+%   csname前缀为|__file_name=|。结尾处还有一个守卫标记，以便我们可以检查在此过程中是否有错误，并（尽力）进行优雅清理。
 %    \begin{macrocode}
 \cs_new:Npn \@@_name_expand:n #1
   {
@@ -2876,15 +2535,10 @@
         \@@_name_expand_end:
   }
 %    \end{macrocode}
-%   With the csname built, we grab it, and grab the remaining tokens
-%   delimited by \cs{@@_name_expand_end:}.  If there are any remaining
-%   tokens, something bad happened, so we'll call the error procedure
-%   \cs{@@_name_expand_error:Nw}.
-%   If everything went according to plan, then use \cs{token_to_str:N}
-%   on the csname built, and call \cs{@@_name_expand_cleanup:w} to
-%   remove the prefix we added a while back.
-%   \cs{@@_name_expand_cleanup:w} takes a leading argument so we don't
-%   have to bother about the value of \cs{tex_escapechar:D}.
+%   构建csname后，我们获取它，并获取由\cs{@@_name_expand_end:}定界的剩余标记。如果还有剩余标记，那么出现了问题，
+%   因此我们将调用错误程序\cs{@@_name_expand_error:Nw}。如果一切按计划进行，那么在csname上使用\cs{token_to_str:N}，
+%   并调用\cs{@@_name_expand_cleanup:w}以删除我们之前添加的前缀。
+%   \cs{@@_name_expand_cleanup:w}带有前导参数，因此我们不必担心\cs{tex_escapechar:D}的值。
 %    \begin{macrocode}
 \cs_new:Npn \@@_name_expand_cleanup:Nw #1 #2 \@@_name_expand_end:
   {
@@ -2895,12 +2549,9 @@
 \exp_last_unbraced:NNNNo
 \cs_new:Npn \@@_name_expand_cleanup:w #1 \tl_to_str:n { @@_name = } { }
 %    \end{macrocode}
-%   In non-error cases \cs{@@_name_expand_end:} should not expand.  It
-%   will only do so in case there is a \cs{csname} too much in the file
-%   name, so it will throw an error (while expanding), then insert the
-%   missing \cs{cs_end:} and yet another \cs{@@_name_expand_end:} that
-%   will be used as a delimiter by \cs{@@_name_expand_cleanup:Nw} (or
-%   that will expand again if yet another \cs{endcsname} is missing).
+%   在非错误情况下，\cs{@@_name_expand_end:}不应该扩展。只有在文件名中存在\cs{csname}太多的情况下，它才会这样做，
+%   因此它将引发错误（在扩展时），然后插入缺少的\cs{cs_end:}和另一个\cs{@@_name_expand_end:}，它将由\cs{@@_name_expand_cleanup:Nw}用作定界符
+%   （或者如果还缺少\cs{endcsname}，它将再次扩展）。
 %    \begin{macrocode}
 \cs_new:Npn \@@_name_expand_end:
   {
@@ -2909,9 +2560,8 @@
     \cs_end: \@@_name_expand_end:
   }
 %    \end{macrocode}
-%   Now to the error case.  \cs{@@_name_expand_error:Nw} adds an extra
-%   \cs{cs_end:} so that in case there was an extra \tn{csname} in the
-%   file name, then \cs{@@_name_expand_error_aux:Nw} throws the error.
+%   现在到错误情况。 \cs{@@_name_expand_error:Nw}添加额外的\cs{cs_end:}，
+%   以便在文件名中有额外的\tn{csname}时，\cs{@@_name_expand_error_aux:Nw}抛出错误。
 %    \begin{macrocode}
 \cs_new:Npn \@@_name_expand_error:Nw #1 #2 \@@_name_expand_end:
   { \@@_name_expand_error_aux:Nw #1 #2 \cs_end: \@@_name_expand_end: }
@@ -2923,8 +2573,7 @@
         { \token_to_str:N #1 } { \exp_stop_f: #2 }
   }
 %    \end{macrocode}
-%   Quoting file name uses basically the same approach as for
-%   \texttt{luaquotejobname}: count the |"| tokens and remove them.
+%   引用文件名基本上使用与\texttt{luaquotejobname}相同的方法：计算|"|标记并删除它们。
 %    \begin{macrocode}
 \cs_new:Npn \@@_name_strip_quotes:n #1
   {
@@ -2950,11 +2599,8 @@
       }
   }
 %    \end{macrocode}
-%   Spaces need to be trimmed from the start of the name and from the end of
-%   any extension. However, the name we are passed might not have an extension:
-%   that means we have to look for one. If there is no extension, we still use
-%   the standard trimming function but deliberately prevent any spaces being
-%   removed at the end.
+%   从名称的开始和任何扩展的结尾修剪空格。但是，我们传递的名称可能没有扩展：这意味着我们必须查找扩展名。
+%   如果没有扩展名，我们仍然使用标准修剪函数，但有意阻止删除结尾的任何空格。
 %    \begin{macrocode}
 \cs_new:Npn \@@_name_trim_spaces:n #1
   { \@@_name_trim_spaces:nw {#1} #1 . \q_@@_nil . \s_@@_stop }
@@ -2992,8 +2638,7 @@
 % \end{macro}
 %
 % \begin{variable}{\c_@@_marker_tl}
-%   The same idea as the marker for rescanning token lists: this pair of
-%   tokens cannot appear in a file that is being input.
+%   与重新扫描标记token列表的标记相同：这一对token不能出现在被输入的文件中。
 %    \begin{macrocode}
 \tl_const:Ne \c_@@_marker_tl { : \token_to_str:N : }
 %    \end{macrocode}
@@ -3001,13 +2646,9 @@
 %
 % \begin{macro}[TF]{\file_get:nnN, \file_get:VnN}
 % \begin{macro}{\file_get:nnN,\@@_get_aux:nnN,\@@_get_do:Nw}
-%   The approach here is similar to that for \cs{tl_set_rescan:Nnn}.
-%   The file contents are grabbed as an argument delimited by
-%   \cs{c_@@_marker_tl}.  A few subtleties: braces in \cs{if_false:}
-%   \ldots{} \cs{fi:} to deal with possible alignment tabs,
-%   \tn{tracingnesting} to avoid a warning about a group being closed
-%   inside the \tn{scantokens}, and \cs{prg_return_true:} is placed
-%   after the end-of-file marker.
+%   这里的方法与\cs{tl_set_rescan:Nnn}类似。文件内容被抓取为由\cs{c_@@_marker_tl}定界的参数。
+%   一些微妙之处：在\cs{if_false:} \ldots{} \cs{fi:}中使用花括号以处理可能的对齐制表符，
+%   使用\tn{tracingnesting}避免有关在\tn{scantokens}内关闭组的警告，并且\cs{prg_return_true:}放置在文件末尾标记之后。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_get:nnN #1#2#3
   {
@@ -3056,7 +2697,7 @@
 % \end{macro}
 %
 % \begin{macro}{\@@_size:n}
-%   A copy of the primitive where it's available.
+%   在原语可用的地方复制了原语。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_size:n \tex_filesize:D
 %    \end{macrocode}
@@ -3076,11 +2717,9 @@
 % \begin{macro}[EXP]{\@@_name_ext_check:nnnw}
 % \begin{macro}[EXP]{\@@_name_ext_check:nnn}
 % \begin{macro}[EXP]{\@@_name_ext_check:nnnn}
-%   File searching can be carried out if the \tn{pdffilesize} primitive
-%   or an equivalent is available. That of course means we need to
-%   arrange for everything else to here to be done by expansion too.
-%   We start off by sanitizing the name and quoting if required: we
-%   may need to remove those quotes, so the raw name is passed too.
+%   如果\tn{pdffilesize}原语或等效物可用，可以执行文件搜索。
+%   当然，这意味着我们需要安排这里的一切都通过扩展来完成。
+%   我们首先通过清理名称并在需要时引用来准备一切：我们可能需要删除这些引号，因此原始名称也被传递。
 %    \begin{macrocode}
 \cs_new:Npn \file_full_name:n #1
   {
@@ -3089,12 +2728,10 @@
   }
 \cs_generate_variant:Nn \file_full_name:n { V }
 %    \end{macrocode}
-%   First, we check of the file is just here: no mapping so we do not
-%   need the break part of the broader auxiliary. We are using the fact
-%   that the primitive here returns nothing if the file is entirely absent.
-%   To avoid unnecessary filesystem lookups, the result of \tn{pdffilesize}
-%   is kept available as an argument.
-%   For package mode, \tn{input@path} is a token list not a sequence.
+%   首先，我们检查文件是否就在这里：没有映射，因此我们不需要较广泛的辅助部分的中断。
+%   我们使用原语在文件完全不存在时返回空。为了避免不必要的文件系统查找，
+%   \tn{pdffilesize}的结果作为参数保持可用。
+%   对于包模式，\tn{input@path}是一个token list而不是一个sequence。
 %    \begin{macrocode}
 \cs_new:Npn \@@_full_name:n #1
   {
@@ -3102,13 +2739,10 @@
       { \exp_args:Nne \@@_full_name_auxii:nn {#1} { \@@_full_name_aux:n {#1} } }
   }
 %    \end{macrocode}
-%   To avoid repeated reading of files we need to cache the loading:
-%   this is important as the code here is used by \emph{all} file checks.
-%   The same marker is used in the \LaTeXe{} kernel, meaning that we get a
-%   double-saving with for example \cs{IfFileExists}. As this is all about
-%   performance, we use the low-level approach for the conditionals. For
-%   a file already seen, the size is reported as $-1$ so it's distinct from
-%   any non-cached ones.
+%   为了避免重复读取文件，我们需要缓存加载：这很重要，因为这里的代码被\emph{所有}文件检查使用。
+%   在\LaTeXe{}内核中使用相同的标记，这意味着我们在\cs{IfFileExists}等地方获得了双重节省。
+%   由于这一切都是关于性能的，我们对条件使用底层方法。
+%   对于已经看到的文件，如果标记已被设置，将大小报告为$-1$，以便与任何非缓存的文件区分开。
 %    \begin{macrocode}
 \cs_new:Npn \@@_full_name_aux:n #1
   {
@@ -3119,9 +2753,7 @@
     \fi:
   }
 %    \end{macrocode}
-%   We will need the size of files later, and we have to avoid the
-%   \cs{scan_stop:} causing issues if we are raising the flag. Thus there is
-%   a slightly odd gobble here.
+%   我们以后需要文件的大小，而且我们必须避免\cs{scan_stop:}在我们提高标志时引起问题。因此，这里有一点奇怪的吞噬。
 %    \begin{macrocode}
 \cs_new:Npn \@@_full_name_auxi:nn #1#2
   {
@@ -3148,8 +2780,7 @@
       { \@@_ext_check:nn {#1} {#2} }
   }
 %    \end{macrocode}
-%   Two pars to the auxiliary here so we can avoid doing quoting
-%   twice in the event we find the right file.
+%   此处的辅助有两个部分，因此在我们找到正确的文件时可以避免两次引用。
 %    \begin{macrocode}
 \cs_new:Npn \@@_full_name_aux:Nnn #1#2#3
   {
@@ -3183,9 +2814,8 @@
 \cs_new:Npn \@@_name_cleanup:w #1 \@@_name_end: { }
 \cs_new:Npn \@@_name_end: { }
 %    \end{macrocode}
-%   As \TeX{} automatically adds |.tex| if there is no extension,
-%   there is a little clean up to do here. First, make sure we are not in the
-%   directory part, saving that. Then check for an extension.
+%   由于\TeX{}在没有扩展时会自动添加|.tex|，这里有一些清理工作要做。
+%   首先，确保我们不在目录部分，保存该部分。然后检查是否有扩展。
 %    \begin{macrocode}
 \cs_new:Npn \@@_ext_check:nn #1 #2
 { \@@_ext_check:nnw {#2} { / } #1 / \q_@@_nil / \s_@@_stop }
@@ -3240,9 +2870,9 @@
 % \begin{macro}{\file_get_full_name:nN, \file_get_full_name:VN}
 % \begin{macro}[TF]{\file_get_full_name:nN, \file_get_full_name:VN}
 % \begin{macro}{\@@_get_full_name_search:nN}
-%   These functions pre-date using \cs{tex_filesize:D} for file searching,
-%   so are |get| functions with protection. To avoid having different
-%   search set ups, they are simply wrappers around the code above.
+%   这些函数在使用\cs{tex_filesize:D}进行文件搜索之前就已存在，
+%   因此是带有保护的|get|函数。为了避免不同的搜索设置，
+%   它们只是上面代码的简单封装。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_get_full_name:nN #1#2
   {
@@ -3266,7 +2896,7 @@
 % \end{macro}
 %
 % \begin{variable}{\g_@@_internal_ior}
-%   A reserved stream to test for opening a shell.
+%   用于测试是否打开shell的保留流。
 %    \begin{macrocode}
 \ior_new:N \g_@@_internal_ior
 %    \end{macrocode}
@@ -3280,9 +2910,8 @@
 %   }
 % \begin{macro}[rEXP]{\@@_details:nn, \@@_details_aux:nn}
 % \begin{macro}[rEXP]{\@@_mdfive_hash:n}
-%   Getting file details by expansion is relatively easy if a bit repetitive.
-%   As the MD5 function has a slightly different syntax from the other commands,
-%   there is a little cleaning up to do.
+%   通过扩展获取文件详情相对容易，尽管有点重复。
+%   由于MD5函数的语法与其他命令略有不同，需要进行一些清理。
 %    \begin{macrocode}
 \cs_new:Npn \file_size:n #1
   { \@@_details:nn {#1} { size } }
@@ -3314,9 +2943,8 @@
 % \begin{macro}[rEXP]{\@@_hex_dump_auxii:nnnn, \@@_hex_dump_auxiii:nnnn}
 % \begin{macro}[rEXP]{\@@_hex_dump_auxiiv:nnn}
 % \begin{macro}[rEXP]{\file_hex_dump:n, \file_hex_dump:V, \@@_hex_dump:n}
-%   These are separate as they need multiple arguments \emph{or} the
-%   file size. For \LuaTeX{}, the emulation does not need the file
-%   size so we save a little on expansion.
+%   这些函数需要多个参数\emph{或}文件大小，因此单独处理。
+%   对于\LuaTeX{}，模拟不需要文件大小，因此我们在扩展上稍微节省了一些。
 %    \begin{macrocode}
 \cs_new:Npn \file_hex_dump:nnn #1#2#3
   {
@@ -3399,8 +3027,7 @@
 %     \file_get_timestamp:nN, \file_get_timestamp:VN
 %   }
 % \begin{macro}{\@@_get_details:nnN}
-%   Non-expandable wrappers around the above in the case where appropriate
-%   primitive support exists.
+%   在适当的原始支持存在的情况下，对上述功能进行非可扩展封装。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_get_hex_dump:nN #1#2
   { \file_get_hex_dump:nNF {#1} #2 { \tl_set:Nn #2 { \q_no_value } } }
@@ -3443,7 +3070,7 @@
 % \end{macro}
 %
 % \begin{macro}[noTF]{\file_get_hex_dump:nnnN, \file_get_hex_dump:VnnN}
-%   Custom code due to the additional arguments.
+%   由于有额外的参数，所以是自定义代码。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_get_hex_dump:nnnN #1#2#3#4
   {
@@ -3466,8 +3093,7 @@
 % \end{macro}
 %
 % \begin{macro}[EXP]{\@@_str_cmp:nn}
-%   As we are doing a fixed-length \enquote{big} integer comparison, it
-%   is easiest to use the low-level behavior  of string comparisons.
+%   由于我们正在进行固定长度的“大”整数比较，最容易使用字符串比较的低级行为。
 %    \begin{macrocode}
 \cs_new_eq:NN \@@_str_cmp:nn \tex_strcmp:D
 %    \end{macrocode}
@@ -3482,8 +3108,7 @@
 %   }
 % \begin{macro}[EXP]{\@@_compare_timestamp:nnN}
 % \begin{macro}[EXP]{\@@_timestamp:n}
-%   Comparison of file date can be done by using the low-level nature of the
-%   string comparison functions.
+%   通过使用字符串比较函数的低级性质，可以进行文件日期的比较。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \file_compare_timestamp:nNn #1#2#3
   { p , T , F , TF }
@@ -3534,10 +3159,7 @@
 % \end{macro}
 %
 % \begin{macro}[pTF]{\file_if_exist:n, \file_if_exist:V}
-%   The test for the existence of a file is a wrapper around the function to
-%   add a path to a file. If the file was found, the path contains
-%   something, whereas if the file was not located then the return value
-%   is empty.
+%   这个文件存在性检测是对添加路径到文件函数的封装。如果找到文件，路径就包含了一些内容；而如果未找到文件，返回值就是空的。
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \file_if_exist:n #1 { p , T , F , TF }
   {
@@ -3556,9 +3178,8 @@
 %     \file_if_exist_input:nF,
 %     \file_if_exist_input:VF
 %   }
-%   Input of a file with a test for existence.  We do not define the |T|
-%   or |TF| variants because the most useful place to place the
-%   \meta{true code} would be inconsistent with other conditionals.
+%   文件存在性测试的文件输入。我们没有定义|T|或|TF|变体，
+%   因为放置\meta{true code}的最有用的地方在与其他条件不一致。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_if_exist_input:n #1
   {
@@ -3577,14 +3198,14 @@
 % \end{macro}
 %
 % \begin{macro}{\file_input_stop:}
-%   A simple rename.
+%   简单的重命名。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_input_stop: { \tex_endinput:D }
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\__kernel_file_missing:n}
-%   An error message for a missing file, also used in \cs{ior_open:Nn}.
+%   丢失文件的错误消息，也用于\cs{ior_open:Nn}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \__kernel_file_missing:n #1
   {
@@ -3599,10 +3220,10 @@
 % \begin{macro}{\@@_input_push:n, \__kernel_file_input_push:n}
 % \begin{macro}{\@@_input_pop:, \__kernel_file_input_pop:}
 % \begin{macro}{\@@_input_pop:nnn}
-%   Loading a file is done in a safe way, checking first that the file
-%   exists and loading only if it does.  Push the file name on the
-%   \cs{g_@@_stack_seq}, and add it to the file list, either
-%   \cs{g_@@_record_seq}, or \cs{@filelist} in package mode.
+%   以安全的方式加载文件，首先检查文件是否存在，
+%   只有在存在时才加载。将文件名推送到\cs{g_@@_stack_seq}，
+%   并将其添加到文件列表，可以是\cs{g_@@_record_seq}，
+%   也可以是在包模式下的\cs{@filelist}。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_input:n #1
   {
@@ -3625,8 +3246,8 @@
   }
 \cs_generate_variant:Nn \@@_input:n { V }
 %    \end{macrocode}
-%   Keeping a track of the file data is easy enough: we store the separated
-%   parts so we do not need to parse them twice.
+%   跟踪文件数据很容易：我们存储了分离的部分，
+%   这样就不需要两次解析它们。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_input_push:n #1
   {
@@ -3663,7 +3284,7 @@
 % \end{macro}
 %
 % \begin{macro}{\file_input_raw:n, \file_input_raw:V, \@@_input_raw:nn}
-%   No error checking, no tracking.
+%   无错误检查，无跟踪。
 %    \begin{macrocode}
 \cs_new:Npn \file_input_raw:n #1
   { \exp_args:Ne \@@_input_raw:nn { \file_full_name:n {#1} } {#1} }
@@ -3689,12 +3310,11 @@
 %
 % \begin{macro}{\file_parse_full_name:n, \file_parse_full_name:V}
 % \begin{macro}{\file_parse_full_name_apply:nN, \file_parse_full_name_apply:VN}
-%   The main parsing macro \cs{file_parse_full_name_apply:nN} passes the
-%   file name |#1| through \cs{__kernel_file_name_sanitize:n} so that we
-%   have a single normalised way to treat files internally.
-%   \cs{file_parse_full_name:n} uses the former, with
-%   \cs{prg_do_nothing:} to
-%   leave each part of the name within a pair of braces.
+%   主要解析宏 \cs{file_parse_full_name_apply:nN} 将文件名 |#1| 通过
+%   \cs{__kernel_file_name_sanitize:n} 处理，使我们在内部以单一规范化
+%   方式处理文件。
+%   \cs{file_parse_full_name:n} 使用前者，并使用
+%   \cs{prg_do_nothing:} 使每个名字部分保留在一对大括号中。
 %    \begin{macrocode}
 \cs_new:Npn \file_parse_full_name:n #1
   {
@@ -3712,12 +3332,10 @@
 %
 % \begin{macro}{\@@_parse_full_name_auxi:nN}
 % \begin{macro}{\@@_parse_full_name_area:nw}
-%   \cs{@@_parse_full_name_area:nw} splits the file name into chunks
-%   separated by |/|, until the last one is reached.  The last chunk is
-%   the file name plus the extension, and everything before that is the
-%   path.  When \cs{@@_parse_full_name_area:nw} is done, it leaves
-%   the path within braces after the scan mark \cs{s_@@_stop} and
-%   proceeds parsing the actual file name.
+%   \cs{@@_parse_full_name_area:nw} 将文件名分成由 |/| 分隔的块，直到
+%   达到最后一个块。最后一个块是文件名加上扩展名，而在那之前的所有内容
+%   都是路径。当 \cs{@@_parse_full_name_area:nw} 完成时，它在扫描标记
+%   \cs{s_@@_stop} 之后将路径保留在大括号中，并继续解析实际的文件名。
 %    \begin{macrocode}
 \cs_new:Npn \@@_parse_full_name_auxi:nN #1
   {
@@ -3733,13 +3351,11 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_parse_full_name_base:nw}
-%   \cs{@@_parse_full_name_base:nw} does roughly the same as above, but
-%   it separates the chunks at each period.  However here there's some
-%   extra complications:  In case |#1| is empty, it is assumed that the
-%   extension is actually empty, and the file name is |#2|.  Besides, an
-%   extra |.| has to be added to |#2| because it is later removed in
-%   \cs{@@_parse_full_name_tidy:nnnN}.  In any case, if there's an
-%   extension, it is returned with a leading |.|.
+%   \cs{@@_parse_full_name_base:nw} 做的事情与上面大致相同，但它
+%   在每个句点处分隔块。然而，这里有一些额外的复杂性：如果 |#1| 为空，
+%   则假定扩展名实际上为空，并且文件名为 |#2|。此外，必须在 |#2| 中
+%   添加一个额外的 |.|，因为它稍后将在 \cs{@@_parse_full_name_tidy:nnnN}
+%   中删除。无论如何，如果有扩展名，它将以前导 |.| 返回。
 %    \begin{macrocode}
 \cs_new:Npn \@@_parse_full_name_base:nw #1 #2 . #3 \s_@@_stop
   {
@@ -3758,11 +3374,9 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_parse_full_name_tidy:nnnN}
-%   Now we just need to tidy some bits left loose before.  The loop
-%   used in the two macros above start with a leading |/| and |.| in the
-%   file path an name, so here we need to remove them, except in the
-%   path, if it is a single |/|, in which case it's left as is.  After
-%   all's done, pass to |#4|.
+%   现在我们只需要清理一些在前面放开的位。上述两个宏中使用的循环在文件
+%   路径和名称的开头都有一个前导 |/| 和 |.|，因此这里我们需要去除它们，
+%   除非它是单独的 |/|，在这种情况下它保留原样。全部完成后，传递给 |#4|。
 %    \begin{macrocode}
 \cs_new:Npn \@@_parse_full_name_tidy:nnnN #1 #2 #3 #4
   {
@@ -3801,11 +3415,10 @@
 %
 % \begin{macro}{\file_show_list:, \file_log_list:, \@@_list:N}
 % \begin{macro}[EXP]{\@@_list_aux:n}
-%   A function to list all files used to the log, without duplicates.
-%   In package mode, if \cs{@filelist} is still defined, we need to take
-%   this list of file names into account (we capture it
-%   \cs{AtBeginDocument} into \cs{g_@@_record_seq}), turning it to a
-%   string (this does not affect the commas of this comma list).
+%   列出所有使用的文件到日志，去除重复。
+%   在包模式下，如果\cs{@filelist}仍然定义，需要将文件名列表\cs{@filelist}
+%   考虑在内（我们在\cs{AtBeginDocument}中捕获它到\cs{g_@@_record_seq}），
+%   转换为字符串（这不影响逗号列表的逗号）。
 %    \begin{macrocode}
 \cs_new_protected:Npn \file_show_list: { \@@_list:N \msg_show:nneeee }
 \cs_new_protected:Npn \file_log_list: { \@@_list:N \msg_log:nneeee }
@@ -3828,10 +3441,8 @@
 % \end{macro}
 % \end{macro}
 %
-% When used as a package, there is a need to hold onto the standard file
-% list as well as the new one here.  File names recorded in
-% \cs{@filelist} must be turned to strings before being added to
-% \cs{g_@@_record_seq}.
+% 在作为包时，需要在这里保存标准文件列表和新列表。记录在
+% \cs{@filelist}中的文件名在添加到\cs{g_@@_record_seq}之前必须转换为字符串。
 %    \begin{macrocode}
 \cs_if_exist:NT \@filelist
   {
@@ -3851,17 +3462,14 @@
 %
 % \begin{macro}{\GetIdInfo}
 % \begin{macro}{\@@_id_info_auxi:w, \@@_id_info_auxii:w, \@@_id_info_auxiii:w}
-%   As documented in \pkg{expl3.dtx} this function extracts file name
-%   etc from an \textsc{svn} \texttt{Id} line.  This used to be how we
-%   got version number and so on in all modules, so it had to be defined
-%   in \pkg{l3bootstrap}.  Now it's more convenient to define it after
-%   we have set up quite a lot of tools, and \pkg{l3file} seems the
-%   least unreasonable place for it.
+%   此函数从\textsc{svn} \texttt{Id}行中提取文件名等信息，如
+%   \pkg{expl3.dtx}中所述。这曾经是我们在所有模块中获取版本号等信息的方式，
+%   因此它必须在\pkg{l3bootstrap}中定义。现在在我们设置了很多工具之后，
+%   定义它更方便，\pkg{l3file}似乎是最合理的地方。
 %
-%   The idea here is to extract out the information needed from a standard
-%   \textsc{svn} \texttt{Id} line, but to avoid a line that would get
-%   changed when the file is checked in. Hence the fact that none of the
-%   lines here include both a dollar sign and the \texttt{Id} keyword!
+%   这里的想法是从标准的\textsc{svn} \texttt{Id}行中提取出所需的信息，
+%   但要避免在检入文件时会更改的行。因此，这些行中没有包含同时包含
+%   美元符号和\texttt{Id}关键字的行的原因！
 %    \begin{macrocode}
 \cs_new_protected:Npn \GetIdInfo
   {
@@ -3877,12 +3485,10 @@
     \@@_id_info_auxi:w
   }
 %    \end{macrocode}
-%   A first check for a completely empty \textsc{svn} field. If that is
-%   not the case, there is a second case when a file created using
-%   \texttt{svn cp} but has not been checked in. That leaves a special
-%   marker \texttt{-1} version, which has no further data. Dealing
-%   correctly with that is the reason for the space in the line to use
-%   \cs{@@_id_info_auxii:w}.
+%   首先检查\textsc{svn}字段是否完全为空。如果不是这种情况，
+%   还有一种情况，即使用\texttt{svn cp}创建但尚未检入的文件。这会留下
+%   一个特殊的标记\texttt{-1}版本，它没有进一步的数据。正确处理这一点是使用
+%   \cs{@@_id_info_auxii:w}的原因，在行中使用空格。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_id_info_auxi:w $ #1 $ #2
   {
@@ -3897,10 +3503,9 @@
       { \@@_id_info_auxii:w #1 ~ \s_@@_stop }
   }
 %    \end{macrocode}
-%   Here, |#1| is |Id|, |#2| is the file name, |#3| is the extension,
-%   |#4| is the version, |#5| is the check in date and |#6| is the check
-%   in time and user, plus some trailing spaces. If |#4| is the marker
-%   |-1| value then |#5| and |#6| are empty.
+%   在这里，|#1|是|Id|，|#2|是文件名，|#3|是扩展名，|#4|是版本，
+%   |#5|是检入日期，|#6|是检入时间和用户，加上一些尾随空格。如果|#4|是标记
+%   |-1|值，那么|#5|和|#6|都是空的。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_id_info_auxii:w
     #1 ~ #2.#3 ~ #4 ~ #5 ~ #6 \s_@@_stop
@@ -3913,7 +3518,7 @@
       { \@@_id_info_auxiii:w #5 - 0 - 0 - \s_@@_stop }
   }
 %    \end{macrocode}
-%   Convert an \textsc{svn}-style date into a \LaTeX{}-style one.
+%   将\textsc{svn}风格的日期转换为\LaTeX{}风格的日期。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_id_info_auxiii:w #1 - #2 - #3 - #4 \s_@@_stop
   { \tl_set:Nn \ExplFileDate { #1/#2/#3 } }
@@ -3921,21 +3526,17 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsection{Checking the version of kernel dependencies}
+% \subsection{检查内核依赖版本}
 %
 % \begin{macro}{\__kernel_dependency_version_check:Nn}
 % \begin{macro}{\__kernel_dependency_version_check:nn}
 % \begin{macro}{\@@_kernel_dependency_compare:nnn,\@@_parse_version:w}
-%   This function is responsible for checking if dependencies of the
-%   \LaTeX3 kernel match the version preloaded in the \LaTeXe{} kernel.
-%   If versions don't match, the function attempts to tell why by
-%   searching for a possible stray format file.
+%   此函数负责检查 \LaTeX3 内核的依赖关系是否与 \LaTeXe 内核中预加载的版本匹配。
+%   如果版本不匹配，该函数尝试通过搜索可能的格式文件来解释原因。
 %
-%   The function starts by checking that the kernel date is defined, and
-%   if not zero is used to force the error route.  The kernel date is
-%   then compared with the argument requested date (ususally the
-%   packaging date of the dependency).  If the kernel date is less than
-%   the required date, it's an error and the loading should abort.
+%   该函数首先检查内核日期是否定义，如果未定义，则使用零强制错误路线。
+%   然后将内核日期与请求的日期进行比较（通常是依赖项的打包日期）。
+%   如果内核日期小于所需日期，则是一个错误，加载应该中止。
 %    \begin{macrocode}
 \cs_new_protected:Npn \__kernel_dependency_version_check:Nn #1
   { \exp_args:NV \__kernel_dependency_version_check:nn #1 }
@@ -3959,14 +3560,12 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_mismatched_dependency_error:nn}
-%   If the versions differ, then we try to give the user some guidance.
-%   This function starts by taking the engine name \cs{c_sys_engine_str}
-%   and replacing |tex| by |latex|, then building a command of the form:
+%   如果版本不同，则尝试为用户提供一些指导。此函数首先取得引擎名称\cs{c_sys_engine_str}，
+%   并将|tex|替换为|latex|，然后构建如下形式的命令：
 %   \begin{texttt}
 %   kpsewhich --all --engine=\meta{engine} \meta{format}[-dev].fmt
 %   \end{texttt}
-%   to query the format files available.  A shell is opened and each
-%   line is read into a sequence.
+%   以查询可用的格式文件。打开一个shell，并将每行读入一个序列。
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_mismatched_dependency_error:nn #1 #2
   {
@@ -3987,21 +3586,21 @@
     \msg_error:nnnn { kernel } { mismatched-support-file }
       {#1} {#2}
 %    \end{macrocode}
-%   And finish by ending the current file.
+%   最后，结束当前文件。
 %    \begin{macrocode}
     \tex_endinput:D
   }
 %    \end{macrocode}
 %
-%   Now define the actual error message:
+%   现在定义实际的错误消息：
 %    \begin{macrocode}
 \msg_new:nnnn { kernel } { mismatched-support-file }
   {
     Mismatched~LaTeX~support~files~detected. \\
     Loading~'#2'~aborted!
 %    \end{macrocode}
-%   \cs{c__kernel_expl_date_tl} may not exist, due to an older format,
-%   so only print the dates when the sentinel token list exists:
+%   \cs{c__kernel_expl_date_tl}可能不存在，因为是较旧的格式，
+%   所以只有在存在标记的令牌列表时才打印日期：
 %    \begin{macrocode}
     \tl_if_exist:NT \c__kernel_expl_date_tl
       {
@@ -4013,12 +3612,10 @@
   }
   {
 %    \end{macrocode}
-%   The sequence containing the format files should have exactly one
-%   item: the format file currently being run.  If that's the case, the
-%   cause of the error is not that, so print a generic help with some
-%   possible causes.  If more than one format file was found, then print
-%   the list to the user, with appropriate indications of what's in the
-%   system and what's in the user tree.
+%   包含格式文件的序列应该恰好有一项：当前运行的格式文件。如果是这种情况，
+%   则错误的原因不是这个，因此打印一些可能原因的通用帮助。
+%   如果找到多个格式文件，则将列表打印给用户，指示系统中有什么，
+%   用户树中有什么。
 %    \begin{macrocode}
     \int_compare:nNnTF { \seq_count:N \l_@@_tmp_seq } > 1
       {
@@ -4046,7 +3643,7 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsection{Messages}
+% \subsection{消息}
 %
 %    \begin{macrocode}
 \msg_new:nnnn { kernel } { file-not-found }
@@ -4088,16 +3685,15 @@
   }
 %    \end{macrocode}
 %
-% \subsection{Functions delayed from earlier modules}
+% \subsection{从先前模块延迟的函数}
 %
 %<@@=sys>
 %
 % \begin{variable}{\c_sys_platform_str}
-%   Detecting the platform on \LuaTeX{} is easy: for other engines, we use
-%   the fact that the two common cases have special null files. It is possible
-%   to probe further (see package \pkg{platform}), but that requires shell
-%   escape and seems unlikely to be useful. This is set up here as it requires
-%   file searching.
+%   在\LuaTeX{}上检测平台很容易：对于其他引擎，我们使用两种常见情况
+%   的特殊空文件。虽然可以进一步探测（参见\pkg{platform}宏包），
+%   但这需要shell escape，并且似乎不太可能有用。在这里设置，
+%   因为它需要文件搜索。
 %    \begin{macrocode}
 \sys_if_engine_luatex:TF
   {
@@ -4121,7 +3717,7 @@
 % \end{variable}
 % \begin{macro}[pTF]{\sys_if_platform_unix:}
 % \begin{macro}[pTF]{\sys_if_platform_windows:}
-%   We can now set up the tests.
+%   现在我们可以设置测试。
 %    \begin{macrocode}
 \clist_map_inline:nn { unix , windows }
   {
