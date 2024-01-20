@@ -203,10 +203,10 @@
 %     \cs{ior_new:N} \meta{stream}
 %     \cs{iow_new:N} \meta{stream}
 %   \end{syntax}
-%   全局保留 \meta{stream} 的名称，根据需要用于读取或写入。直到使用相应
-%   的 \cs[no-index]{\ldots_open:Nn} 函数打开 \meta{stream} 之前，它不会被打开。
-%   尝试使用未打开的 \meta{stream} 是一个错误，并且 \meta{stream} 将表现
-%   得像相应的 \cs[no-index]{c_term_\ldots}。
+%   全局保留 \meta{stream} 的名称，根据需要用于读取或写入。\meta{stream} 
+%   默认为未打开的状态，使用相应的 \cs[no-index]{\ldots_open:Nn} 函数打开。
+%   尝试使用未打开的 \meta{stream} 会报错，并且 \meta{stream} 将表现
+%   得像相应的 \cs[no-index]{c_term_\ldots}（译者注：像终端一样输入输出）。
 % \end{function}
 %
 % \begin{function}[updated = 2012-02-10]{\ior_open:Nn, \ior_open:cn}
@@ -214,7 +214,7 @@
 %     \cs{ior_open:Nn} \meta{stream} \Arg{file name}
 %   \end{syntax}
 %   使用 \meta{stream} 作为文件访问的控制序列，打开 \meta{file name} 以供读取。
-%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。立即可以访问
+%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。可以立即访问
 %   \meta{stream}，并将保留给 \meta{file name} 直到给出 \cs{ior_close:N} 指令
 %   或 \TeX{} 运行结束。如果找不到文件，将引发错误。
 % \end{function}
@@ -224,7 +224,7 @@
 %     \cs{ior_open:NnTF} \meta{stream} \Arg{file name} \Arg{true code} \Arg{false code}
 %   \end{syntax}
 %   使用 \meta{stream} 作为文件访问的控制序列，打开 \meta{file name} 以供读取。
-%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。立即可以访问
+%   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。可以立即访问
 %   \meta{stream}，并将保留给 \meta{file name} 直到给出 \cs{ior_close:N} 指令
 %   或 \TeX{} 运行结束。然后将 \meta{true code} 插入到输入流中。如果找不到文件，
 %   不会引发错误，而是将 \meta{false code} 插入到输入流中。
@@ -238,7 +238,7 @@
 %   使用 \meta{stream} 作为文件访问的控制序列，打开 \meta{file name} 以供写入。
 %   如果 \meta{stream} 已经打开，则在新操作开始之前关闭它。立即可以访问
 %   \meta{stream}，并将保留给 \meta{file name} 直到给出 \cs{iow_close:N} 指令
-%   或 \TeX{} 运行结束。打开文件以写入会清除文件中的任何现有内容（即写入不是追加的）。
+%   或 \TeX{} 运行结束。以写入方式打开文件会清除文件中的任何现有内容（即写入是非追加的）。
 % \end{function}
 %
 % \begin{function}[added = 2019-05-08]{\ior_shell_open:Nn}
@@ -333,7 +333,7 @@
 %   还要注意，如果读取多行以匹配大括号，那么结果的记号列表可能包含 \cs{par} 记号。
 %   在非分支版本中，如果 \meta{stream} 未打开，则将 \meta{tl var} 设置为 \cs{q_no_value}。
 %   \begin{texnote}
-%     该受保护的宏是对 \TeX{} 原始命令 \tn{read} 的换行。无论设置如何，\TeX{} 都会在
+%     该受保护的宏是对 \TeX{} 原始命令 \tn{read} 的包装。无论设置如何，\TeX{} 都会在
 %     将字符按照当前类别码转换为记号之前将每行中的尾随空格和制表符（字符代码为 32 和 9）
 %     替换为换行符（字符代码为 \tn{endlinechar}，如果 \tn{endlinechar} 为负或太大则被省略）。
 %     使用默认设置，行首的空格也会被忽略。
@@ -357,7 +357,7 @@
 %   将得到一个记号列表 |a b  c|，其中字母 |a|、|b| 和 |c| 的类别码为 12。
 %   在非分支版本中，如果 \meta{stream} 未打开，则将 \meta{tl var} 设置为 \cs{q_no_value}。
 %   \begin{texnote}
-%     该受保护的宏是对 \eTeX{} 原始命令 \tn{readline} 的换行。无论设置如何，
+%     该受保护的宏是对 \eTeX{} 原始命令 \tn{readline} 的包装。无论设置如何，
 %     \TeX{} 都会删除每行中的尾随空格和制表符（字符代码为 32 和 9）。
 %     但是，该原始命令通常添加的行尾字符不包括在 \cs{ior_str_get:NN} 的结果中。
 %   \end{texnote}
@@ -540,7 +540,7 @@
 %   \meta{stream}。 \meta{tokens} 在写入时扩展，以及在使用函数时的任何扩展。这使
 %   这些函数适用于包含在页面构建过程中最终确定的材料（例如页码整数）。
 %   \begin{texnote}
-%     这是对 \TeX{} 原始命令 \tn{write} 的换行。
+%     这是对 \TeX{} 原始命令 \tn{write} 的包装。
 %     使用 \pkg{expl3} 与除 \LaTeX{} 之外的格式时，使用 \cs{iow_newline:} 插入的
 %     换行符或使用 \cs{iow_wrap:nnnN} 插入的换行代码在 \cs{iow_shipout:Nn} 的
 %     参数中不会被 \TeX{} 识别。这可能导致插入额外的不需要的换行。
@@ -581,7 +581,7 @@
 %   \begin{syntax}
 %     \cs{iow_wrap:nnnN} \Arg{text} \Arg{run-on text} \Arg{set up} \meta{function}
 %   \end{syntax}
-%   该函数将 \meta{text} 换行到每行固定的字符数中。在每行开始换行的地方，
+%   该函数将 \meta{text} 按每行固定的字符数换行。在每行开始换行的地方，
 %   插入 \meta{run-on text}。所针对的行字符计数是 \cs{l_iow_line_count_int} 的
 %   值减去除第一行外所有行的 \meta{run-on text} 字符数，对于第一行，目标字符
 %   数只是 \cs{l_iow_line_count_int}，因为没有 \meta{run-on text}。函数会详尽
@@ -603,8 +603,8 @@
 %
 %   换行操作的结果作为带大括号的参数传递给 \meta{function}，通常是换行
 %   写操作的换行器。 \cs{iow_wrap:nnnN} 的输出
-%   （即传递给 \meta{function} 的参数）由类别代码为 \enquote{other}
-%   （类别代码为~12）的字符组成，空格除外，其类别代码为 \enquote{space}
+%   （即传递给 \meta{function} 的参数）由类别为 \enquote{other}
+%   （类别码为~12）的字符组成，空格除外，其类别代码为 \enquote{space}
 %   （类别代码为~10）。这意味着输出在写入文件时不会进一步扩展。
 %
 %   \begin{texnote}
