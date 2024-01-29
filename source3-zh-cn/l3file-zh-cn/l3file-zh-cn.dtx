@@ -598,7 +598,7 @@
 %   通过使用 \meta{set up}，可以向换行添加其他功能，该函数在换行发生之前执行：
 %   这可能包括覆盖列出的替换。
 %
-%   \meta{text} 中不希望在换行时扩展的可扩展材料应使用 \cs{token_to_str:N}、
+%   \meta{text} 中任何不希望在换行时扩展的可扩展材料应使用 \cs{token_to_str:N}、
 %   \cs{tl_to_str:n}、\cs{tl_to_str:N} 等转换为字符串。
 %
 %   换行操作的结果作为带大括号的参数传递给 \meta{function}，通常是换行
@@ -608,7 +608,7 @@
 %   （类别代码为~10）。这意味着输出在写入文件时不会进一步扩展。
 %
 %   \begin{texnote}
-%     在内部，\cs{iow_wrap:nnnN} 对 \meta{text} 执行 \texttt{e}-type 扩展以扩展它。
+%     在内部，\cs{iow_wrap:nnnN} 对 \meta{text} 执行 \texttt{e}-类型的扩展以扩展它。
 %     这是以 \cs{exp_not:N} 或 \cs{exp_not:n} 可以用于防止材料扩展的方式完成的。
 %     但是，与转换为字符串相比，这在概念上不够清晰，因此转换为字符串是处理
 %     \meta{text} 中可扩展材料的受支持方法。
