@@ -1,6 +1,7 @@
 # How to Package Your LATEX Package
 ## 如何打包你的LaTeX宏包
 **dtxtut.pdf** （中文文档 **dtxtut-zh-cn.pdf** ）是一篇综合介绍 doc 宏包与 DocStrip 程序的教程。与 doc.pdf 和 docstrip.pdf 不同的是，那两份是说明手册的性质，而这份 dtxtut.pdf 则是一篇手把手教你如何利用 doc 宏包与 DocStrip 程序为工具，在 LaTeX 中实现初步的文学编程，打包你的代码。
+本中文文档已经更新至2024年1月21日版。
 
 为方便阅读，中文版的翻译文档添加了目录，并且，在部分内容颜色上做了一定的区分，宏命令和标题以及其它带链接的部分（比如目录和引用等）用蓝色，抄录（verbatim）环境和类似的环境用的是绿色。
 
