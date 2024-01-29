@@ -2,11 +2,11 @@
 %%% ====================================================================
 %%%  @LaTeX-file{
 %%%     author          = "Scott Pakin",
-%%%     version         = "2.1",
-%%%     date            = "13 September 2015",
-%%%     time            = "23:06:32 MDT",
+%%%     version         = "2.4",
+%%%     date            = "21 January 2024",
+%%%     time            = "16:37:48 PM MST",
 %%%     filename        = "dtxtut.tex",
-%%%     checksum        = "38789 2107 7734 71546"
+%%%     checksum        = "42847 2059 7542 69980"
 %%%     email           = "scott+dtx@pakin.org (Internet)",
 %%%     codetable       = "ISO/ASCII",
 %%%     keywords        = "LaTeX, packages, .ins files, .dtx files,
@@ -36,6 +36,8 @@
 \usepackage{makeidx}
 \usepackage{alltt}
 \usepackage[nottoc]{tocbibind}
+\usepackage{upquote}
+\usepackage{microtype}
 \usepackage[bookmarksopen]{hyperref}
 \usepackage{hyperxmp}
 
@@ -89,7 +91,7 @@
 % Define this document's metadata.
 \title{\huge\bfseries\color{spot}如何打包你的 \LaTeX{} 宏包}
 \author{Scott Pakin \texttt{<scott+dtx@pakin.org>}}
-\date{\parbox{\linewidth}{\centering 13 September 2015
+\date{\parbox{\linewidth}{\centering 21 January 2024
       \\[.5cm]张泓知\qquad 翻译\\[.3cm]\zhtoday}}
 \hypersetup{%
   pdftitle={How to Package Your LaTeX Package},
@@ -99,7 +101,7 @@
   pdfsubject={Writing .ins and .dtx files for LaTeX},
   pdfkeywords={LaTeX package documentation, literate programming, typesetting, installer files},
   pdfcaptionwriter={Scott Pakin},
-  pdfcopyright={Copyright (C) 2015 Scott Pakin},
+  pdfcopyright={Copyright (C) 2015-2024 Scott Pakin},
   pdflicenseurl={http://latex-project.org/lppl/},
   pdflang={en-US}
 }
@@ -193,6 +195,9 @@
 \newcommand{\latex}[1][\LaTeX]{%
   #1\index{LaTeX@\LaTeX}}
 
+% Prohibit TeX from splitting footnotes across pages.
+\interfootnotelinepenalty=10000
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
@@ -219,13 +224,26 @@
 最后，您应该知道如何安装由 \dtxfile{} 文件和 \insfile{} 文件
 组成的软件包\index{package}。
 
-\index{package|(}
 \paragraph{术语}
-一个\defn[style file]{宏包\textnormal{（ \styfile{}）}文件}主要是一组宏和环境的定义。
-一个或多个样式文件（例如一个主样式文件， \usemacro{input} 或 \usemacro{RequirePackage}
-多个辅助文件）称为一个\defn{package}。包可以用 \usemacro{usepackage}|{<main .sty file>}|
-\index{style file}载入文档中。在本文档的其余部分，我们使用符号“\m{package}”
-代表您的包的名称。\index{package|)}
+\index{class file|(}
+\defn[class file]{类文件 \textnormal{(\clsfile{})}} 指定文档的基本格式：
+页面上的文本块大小和位置，结构元素如 \verb|\section| 的排版，页眉和页脚样式等。
+一个文档中仅使用一个类文件（通过 \usemacro{documentclass}）。
+\index{class file|)}
+
+\index{style file|(}
+
+\defn[style file]{样式文件 \textnormal{(\styfile{})}} 主要是一组宏和环境的定义。
+样式文件可以覆盖类文件的格式决策，提供新的功能，或更改现有功能。
+一个文档可以加载任意数量的样式文件（通过 \usemacro{usepackage}）。
+\index{style file|)}
+
+\index{package|(}
+一个或多个类文件或样式文件（例如，一个主样式文件使用 \usemacro{input}
+或 \usemacro{RequirePackage} 来加载多个辅助文件）及其文档被称为
+\defn{宏包}。在本文档的其余部分，我们使用符号``\m{package}''来表示
+你的宏包的名称。警告：在\LaTeX\ 社区中，有时也使用术语``宏包''来指
+``样式文件''。您可能需要从上下文中判断使用的是哪个定义。
 
 \paragraph{动机}
 一个包\index{package}的重要部分包括代码、代码的文档和用户文档。
@@ -265,7 +283,7 @@
 
 \begin{verbatim}
     %%
-    %% Copyright (C) <year> by <your name>
+    %% Copyright (C) <year> <your name>
     %%
     %% This file may be distributed and/or modified under the
     %% conditions of the LaTeX Project Public License, either
@@ -274,8 +292,8 @@
     %%
     %%    http://www.latex-project.org/lppl.txt
     %%
-    %% and version 1.3 or later is part of all distributions of
-    %% LaTeX version 2005/12/01 or later.
+    %% and version 1.3c or later is part of all distributions of
+    %% LaTeX version 2008-05-04 or later.
     %%
 \end{verbatim}
 
@@ -286,8 +304,8 @@
   许可证}（LPPL）是大多数包——以及 \latex{} 本身——所使用的许可证。当然，
 您可以根据您想要的任何许可证发布您的包；LPPL 只是 \latex{} 包中最常见的
 许可证。LPPL 规定用户可以对您的包做任何事情——包括出售它，并且无需向您
-支付任何费用。唯一的限制是他必须为您的工作给予您信用，并且如果他修改了
-任何内容以避免版本混淆，他必须更改包的名称。
+支付任何费用。唯一的限制是他必须为您的工作给予您信用，并且他必须清晰地
+将修改过的代码明确标识为修改版本，以避免版本混淆。
 \index{package|)}
 \index{license|)}
 \index{LPPL|see{\LaTeX{} Project Public License}}
@@ -349,7 +367,7 @@
 
     This is a generated file.
 
-    Copyright (C) <year> by <your name>
+    Copyright (C) <year> <your name>
 
     This file may be distributed and/or modified under the
     conditions of the LaTeX Project Public License, either
@@ -358,8 +376,8 @@
 
        http://www.latex-project.org/lppl.txt
 
-    and version 1.3 or later is part of all distributions of
-    LaTeX version 2005/12/01 or later.
+    and version 1.3c or later is part of all distributions of
+    LaTeX version 2008-05-04 or later.
 
     \endpreamble
 \end{verbatim}
@@ -380,7 +398,7 @@
     %%
     %% This is a generated file.
     %%
-    %% Copyright (C) <year> by <your name>
+    %% Copyright (C) <year> <your name>
     %%
     %% This file may be distributed and/or modified under the
     %% conditions of the LaTeX Project Public License, either
@@ -389,8 +407,8 @@
     %%
     %%    http://www.latex-project.org/lppl.txt
     %%
-    %% and version 1.3 or later is part of all distributions of
-    %% LaTeX version 2005/12/01 or later.
+    %% and version 1.3c or later is part of all distributions of
+    %% LaTeX version 2008-05-04 or later.
     %%
 \end{verbatim}
 
@@ -505,7 +523,7 @@
 \begin{verbatim}
     % \iffalse meta-comment
     %
-    % Copyright (C) <year> by <your name>
+    % Copyright (C) <year> <your name>
     %
     % This file may be distributed and/or modified under the
     % conditions of the LaTeX Project Public License, either
@@ -514,8 +532,8 @@
     %
     %    http://www.latex-project.org/lppl.txt
     %
-    % and version 1.3 or later is part of all distributions of
-    % LaTeX version 2005/12/01 or later.
+    % and version 1.3c or later is part of all distributions of
+    % LaTeX version 2008-05-04 or later.
     %
     % \fi
 \end{verbatim}
@@ -543,9 +561,9 @@
 \label{code:ProvidesPackage}
 \begin{verbatim}
     % \iffalse
-    %<<package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    %<<package>>\NeedsTeXFormat{LaTeX2e}[2023-11-01]
     %<<package>>\ProvidesPackage{<package>}
-    %<<package>>   [<YYYY>/<MM>/<DD> v<version> <description>]
+    %<<package>>   [<YYYY>-<MM>-<DD> v<version> <description>]
     %
 \end{verbatim}%
 \indexmacro{NeedsTeXFormat}%
@@ -556,13 +574,13 @@
 
 还记得 \insfile{} 文件（第 \pageref{code:generate} 页）中的 \usemacro{generate} 行吗？
 它以标签“|package|”结束。这告诉 \ds{} 将以“|%<<package>>|”开头的行写入到
-\styfile{} 文件中，并在此过程中剥离“|%<<package>>|”。因此，我们的 \styfile{} 文件
-将以以下内容开头：
+\styfile{} 文件中，并在此过程中剥离“|%<<package>>|”。
+因此，我们的样式文件 \styfile{} 将在头部注释之后包含以下代码：
 
 \begin{verbatim}
-    \NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    \NeedsTeXFormat{LaTeX2e}[2023-11-01]
     \ProvidesPackage{<package>}
-       [<YYYY>/<MM>/<DD> v<version> <description>]
+       [<YYYY>-<MM>-<DD> v<version> <description>]
 \end{verbatim}%
 \indexmacro{NeedsTeXFormat}%
 \indexmacro{ProvidesPackage}
@@ -570,19 +588,30 @@
 比如：
 
 \begin{verbatim}
-    \NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    \NeedsTeXFormat{LaTeX2e}[2023-11-01]
     \ProvidesPackage{skeleton}
-       [2002/03/25 v1.0 .dtx skeleton file]
+       [2002-03-25 v1.0 .dtx skeleton file]
 \end{verbatim}%
 \label{code:ProvidesPackage-example}%
 \indexmacro{NeedsTeXFormat}%
 \indexmacro{ProvidesPackage}
 
 \index{package|(}
-\usemacro{NeedsTeXFormat} 行确保该包不会在早于该包测试的 \latex[\LaTeXe]{} 版本下运行。
-\usemacro{ProvidesPackage} 行中的日期和版本字符串用于由 \DOC{} 设置 \usemacro{filedate}
-和 \usemacro{fileversion} 宏。请注意日期\index{date format}的格式：\emph{YYYY/MM/DD} 在
-整个 \latex[\LaTeXe]{} 中都被使用，您的包中也应该使用这种格式。
+\usemacro{NeedsTeXFormat} 行确保宏包不会在除 \latex[\LaTeXe] 外的
+其他\TeX\ 格式下运行。可选的日期参数导致 |latex| 在\latex[\LaTeXe]的版本
+（可以通过\latex[\LaTeXe]的 |\fmtversion| 宏找到）早于宏包测试版本时输出警告消息：
+
+\begin{verbatim}
+  LaTeX Warning: You have requested release `2239-09-30' of LaTeX,
+                 but only release `2023-11-01' is available.
+\end{verbatim}
+
+在 \usemacro{ProvidesPackage} 行中的日期和版本字符串被\DOC{}用于设置
+\usemacro{filedate} 和 \usemacro{fileversion} 宏。请注意日期\index{日期格式}
+格式；在\latex[\LaTeXe]中，\emph{YYYY-MM-DD} 被广泛使用，因此在您的宏包中也应该使用。
+\footnote{\latex[\LaTeXe]的旧版本使用 \emph{YYYY/MM/DD} 格式，但最新的宏包/类作者指南~\cite{LaTeX:clsguide}
+规定从现在开始应该使用 \emph{YYYY-MM-DD}。}
+
 \index{package|)}
 
 \indexmacroEnd{ProvidesPackage}
@@ -601,7 +630,7 @@
   \defmacro{DocInput} \arg{filename}   \label{desc:CodelineIndex}
 \end{decl}
 
-接下来是 \dtxfile{} 文件中唯一不被注释掉的部分（即每行不以 |%| 开头）：
+接下来是 \dtxfile{} 文件中唯一不被注释掉的部分（即每行不以 ``|%|'' 开头）：
 
 \begin{verbatim}
     %<<*driver>>
@@ -628,11 +657,12 @@
         因为这会加载 \DOC{} 并提供一些有用的宏来格式化程序文档。
 
         \index{package|(}
-  \item 您应该始终使用 \usemacro{usepackage} 导入您的包。如果不这样做，
-        \DOC{} 将无法看到包的 \usemacro{ProvidesPackage} 行，
-        并且不知道如何设置 \usemacro{filedate} 和 \usemacro{fileversion}
-        （参见第~\pageref{code:GetFileInfo} 页）。这也是您应该在此处使用
-        \usemacro{usepackage} 导入用于排版用户文档所需的其他任何包的地方。
+  \item 你应该总是使用 \usemacro{usepackage} 导入你的样式文件。
+        如果不这样做，\DOC{} 将看不到宏包的 \usemacro{ProvidesPackage} 行，
+        也就无法设置 \usemacro{filedate} 和 \usemacro{fileversion}
+        （参见第~\pageref{code:GetFileInfo} 页）。这也是你应该使用
+        \usemacro{usepackage} 导入任何用于排版用户文档的其他宏包的地方
+        （与你的宏包需要的宏包不同）。
         \index{package|)}
 
   \item \usemacro{EnableCrossrefs} 告诉 \DOC{} 您希望它为您的代码构建索引——通常是个好主意。
@@ -644,7 +674,7 @@
         但以索引的自洽性稍有损失（因为宏和环境的描述总是按页码索引）。
         索引，不过，会以一条说明性的注释开始。
 
-  \item \label{item:RecordChanges} 在第~\pageref{code:changes} 页，我们将看到如何记录
+  \item \label{item:RecordChanges} 在第~\pageref{code:changes} 页，讨论了如何记录
         包\index{package}每个版本的更改。 \usemacro{RecordChanges} 告诉 \DOC{} 应该保留并
         汇总日志条目。
 
@@ -683,104 +713,6 @@
 \bigskip
 本节剩余部分涵盖了 |latex| 对 \dtxfile{} 文件的第二次处理。
 因此，所有随后的示例都以百分号开头。
-
-\indexmacroBegin{CheckSum} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\index{checksumming|(}
-
-\begin{decl}
-  \defmacro{CheckSum} \arg{number} \label{decl:CheckSum}
-\end{decl}
-
-\DOC{} 支持一种非常简单的文档校验机制，以确保包\index{package}在传输过程中没有损坏。
-\DOC{} 只是简单地计算代码中反斜杠的数量。如果数量与校验和匹配，\DOC{} 会给出一个成功的消息：
-
-\begin{verbatim}
-    *******************
-    * Checksum passed *
-    *******************
-\end{verbatim}
-
-否则，它会显示正确的校验和应该是多少：
-
-\begin{verbatim}
-    ! Package doc Error: Checksum not passed (<incorrect><<>><correct>).
-\end{verbatim}%
-\indexthing{Checksum not passed}
-
-要在 \dtxfile{} 文件中指定校验和，只需添加一个 \usemacro{CheckSum} 语句：
-
-\begin{verbatim}
-    % \CheckSum{<number>}
-\end{verbatim}
-
-当 \m{number} 为 |0|，或者 \dtxfile{} 文件完全缺少 \usemacro{CheckSum} 行时，
-\DOC{} 会输出以下警告消息：
-
-\begin{verbatim}
-    **********************************
-    * This macro file has no checksum!
-    * The checksum should be <number>!
-    **********************************
-\end{verbatim}
-
-在代码开发过程中，指定 |\CheckSum{0}| 很方便，这样你每次运行 |latex| 时就不会收到错误消息。
-但在发布你的包\index{package}之前，请不要忘记将“|0|”替换为正确的数字！
-
-\index{checksumming|)}
-\indexmacroEnd{CheckSum}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\indexmacroBegin{CharacterTable} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{decl}
-  \defmacro{CharacterTable} \arg{text}
-\end{decl}
-
-\DOC{} 使用的第二种确保 \dtxfile{} 文件未损坏的机制是字符表。
-\footnote{译者注：虽然 \texttt{\bslash CharacterTable} 和 \texttt{\bslash CheckSum} 在公共互联网早
-  期是 \DOC{} 写作时的重要的特性，因为当时的邮件网关相当不可靠并经常搞乱文件，但在今天，它们更多的是一个
-  麻烦而不是帮助。因此，它们现在是完全可选的，并且不建议在新文件中使用。}
-如果你将以下命令原样放入你的 \dtxfile{} 文件中，\DOC{} 将确保在传输过
-程中没有发生意外的字符转换：
-\footnote{字符表通常以双百分号作为前
-  缀，这样它会被写入 \texttt{.sty}\index{style file} 文件。这似乎
-  是不必要的，因此此处用单百分号显示。}
-
-\begin{verbatim}
-    % \CharacterTable
-    %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
-    %   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
-    %   Digits        \0\1\2\3\4\5\6\7\8\9
-    %   Exclamation   \!     Double quote  \"     Hash (number) \#
-    %   Dollar        \$     Percent       \%     Ampersand     \&
-    %   Acute accent  \'     Left paren    \(     Right paren   \)
-    %   Asterisk      \*     Plus          \+     Comma         \,
-    %   Minus         \-     Point         \.     Solidus       \/
-    %   Colon         \:     Semicolon     \;     Less than     \<<
-    %   Equals        \=     Greater than  \>>     Question mark \?
-    %   Commercial at \@     Left bracket  \[     Backslash     \\
-    %   Right bracket \]     Circumflex    \^     Underscore    \_
-    %   Grave accent  \`     Left brace    \{     Vertical bar  \|
-    %   Right brace   \}     Tilde         \~}
-\end{verbatim}
-
-成功消息的样式如下：
-
-\begin{verbatim}
-    ***************************
-    * Character table correct *
-    ***************************
-\end{verbatim}
-
-而错误消息的样式如下：
-
-\begin{verbatim}
-    ! Package doc Error: Character table corrupted.
-\end{verbatim}%
-\indexthing{Character table corrupted}
-
-\indexmacroEnd{CharacterTable}     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 \indexmacroBegin{changes} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -854,7 +786,7 @@
 
 |    |%
 \begin{tabular}{@{}l@{\qquad$\equiv$\qquad}l@{}}
-  \usemacro{filedate}    & 2002/03/25         \\
+  \usemacro{filedate}    & 2002-03-25         \\
   \usemacro{fileversion} & v1.0               \\
   \usemacro{fileinfo}    & .dtx skeleton file
 \end{tabular}
@@ -940,6 +872,25 @@
 \indexmacroEnd{DescribeMacro}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+\indexmacroBegin{NewDocElement} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{decl}
+  \defmacro{NewDocElement} \oarg{options} \arg{element-name} \arg{env-name}
+\end{decl}
+
+在\latex{}文档中，最常见的是记录宏和环境，\usemacro{NewDocElement} 方便地
+用于记录任意宏包组件。它定义了类似于\usemacro{DescribeMacro} 和 \usemacro{DescribeEnv}
+的 |\Describe|\m{element-name} 宏。然后，你可以使用
+|\begin{|\m{env-name}|}|\dots\linebreak[1]|\end{|\m{env-name}|}|
+来标记新元素的实例，类似于描述在\vpageref{code:macro-environment}上的
+|\begin{macro}|\dots\linebreak[1]|\end{macro}| 和
+|\begin{environment}|\dots\linebreak[1]|\end{environment}|。 \m{options}
+参数指定了新元素是 |macrolike|（以反斜杠开头）还是 |envlike|（不以
+反斜杠开头），等等。
+
+\indexmacroEnd{NewDocElement} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \indexmacroBegin{marg} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \indexmacroBegin{oarg}
 \indexmacroBegin{parg}
@@ -994,24 +945,24 @@
 
 \subsection{代码和评论}
 
-\indexmacroBegin{StopEventually} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroBegin{MaybeStop} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \indexmacroBegin{Finale}
 
 \begin{decl}
-  \defmacro{StopEventually} |{<text>}| \\
+  \defmacro{MaybeStop} |{<text>}| \\
   \defmacro{Finale}
 \end{decl}
 
-该包的\index{package}源代码由 \usemacro{StopEventually}和 \usemacro{Finale}包围起来。
-请注意， \usemacro{CheckSum}（第~\pageref{decl:CheckSum} 页）仅适用于该包的\index{package}源代码。
-\usemacro{StopEventually}接受一个参数，即一段要在代码后排版的文本。
-如果指定了 \usemacro{OnlyDescription}（第~\pageref{desc:OnlyDescription} 页），
-那么 \usemacro{StopEventually}后面的内容将不会输出——包括 \usemacro{Finale}后面的文本。
-因此， \usemacro{StopEventually}的 \m{text} 参数是用于提供一段无论是否排版代码都应输出的文本的机制。
-通常包括参考文献部分和/或以下命令中的一个或多个。
+包的\index{package}源代码位于\usemacro{MaybeStop}\footnote{在早期版本的\DOC{}中，
+\usemacro{MaybeStop}被称为\usemacro{StopEventually}。后者仍然被定义，但已被弃用。}
+和\usemacro{Finale}之间。
+\usemacro{MaybeStop}带有一个参数，即在代码后要排版的文本块。如果指定了\usemacro{OnlyDescription}
+（第~\pageref{desc:OnlyDescription}页），则\usemacro{MaybeStop}之后将不会输出任何内容，
+包括\usemacro{Finale}后面的文本。因此，\usemacro{MaybeStop}的\m{text}参数是提供一个文本块的机制，
+无论是否排版代码列表，都应该输出该文本块。通常包括参考文献部分和/或以下两个命令之一：
 
 \indexmacroEnd{Finale}
-\indexmacroEnd{StopEventually}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\indexmacroEnd{MaybeStop}    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \begin{decl}
@@ -1026,7 +977,7 @@
 变更历史部分汇总了 \dtxfile{}文件中所有 \usemacro{changes}命令的各版本修改，这样就能轻松跟踪每个版本的变更内容。
 
 \usemacro{PrintChanges} 使用了 \latex 的术语表机制。在 |<package>.dtx| 上运行 |latex| 会在 |<package>.glo|
-中生成变更历史数据。要生成实际的变更历史（|<package>.gls|），用户应该按以下方式运行\usething{makeindex}程序：
+中生成变更历史数据。要生成排版的变更历史（|<package>.gls|），用户应该按以下方式运行\usething{makeindex}程序：
 
 \begin{verbatim}
     makeindex -s gglo.ist -o <package>.gls <package>.glo
@@ -1049,28 +1000,28 @@
   \caption{Formatting of entries in the index}
   \label{tbl:index-formatting}
   \begin{tabular}{@{}llp{6cm}@{}}
-    \hline
-    Item        & Function           & Formatting in index                            \\
-    \hline
-    Macro       & Used               & |\myMacro| \dotfill~123                        \\
-    Macro       & Defined            & |\myMacro| \dotfill~\underline{123}            \\
-    Macro       & Described          & |\myMacro| \dotfill~\textit{27}                \\
-    Environment & Defined            & |myEnv| (environment) \dotfill~\underline{123} \\
-    Environment & Described          & |myEnv| (environment) \dotfill~\textit{27}     \\
-    \multicolumn{2}{@{}l}{Other (\ie an explicit \texttt{\string\index})}
-                & myItem \dotfill~27                                                  \\
-    \hline
+  \hline
+  Item        & Function  & Formatting in index                            \\
+  \hline
+  Macro       & Used      & |\myMacro| \dotfill~123                        \\
+  Macro       & Defined   & |\myMacro| \dotfill~\underline{123}            \\
+  Macro       & Described & |\myMacro| \dotfill~\textit{27}                \\
+  Environment & Defined   & |myEnv| (environment) \dotfill~\underline{123} \\
+  Environment & Described & |myEnv| (environment) \dotfill~\textit{27}     \\
+  Explicit \texttt{\string\index}
+              & ---       & myItem \dotfill~27                             \\
+  \hline
   \end{tabular}
 \end{table}
 
 对于显式 \usemacro{index}命令的默认格式化使用了罗马页码。这会导致混淆，因为在包源代码中罗马页码通常
-表示行号。解决方案是向 \usemacro{index}命令指定``|usage|''格式化：
+表示行号。解决方案是对\usemacro{index}命令指定``|usage|''格式，以使页码以斜体排版：
 
 \begin{verbatim}
     \index{explicit indexing|usage}
 \end{verbatim}
 
-在 |<package>.dtx| 上运行 |latex| 会在 |<package>.idx| 中生成索引数据。要生成实际的索引（|<package>.ind|），
+在 |<package>.dtx| 上运行 |latex| 会在 |<package>.idx| 中生成索引数据。要生成排版的索引（|<package>.ind|），
 用户应该按以下方式运行\usething{makeindex}程序：
 
 \begin{verbatim}
@@ -1145,6 +1096,7 @@
     \qquad $\vdots$ \\
     |\end{environment}| \\
 \end{decl}
+\label{code:macro-environment}
 
 \usething{macro}  和 \usething{environment} 环境用于界定完整的宏或环境定义。
 \usething{macro} /\usething{environment} 环境通常包含一个或多个\usething{macrocode} 环境，其中穿插着代码文档。
@@ -1173,8 +1125,8 @@
 
 \DOC{} 在边距中排版宏/环境名称，以增加可见性。此外，\DOC{} 也会将相应条目添加到索引中
 （参见表~\vref{tbl:index-formatting}，了解这些条目的格式示例）。请注意，
-|\begin{macro}|\dotsbrk|\end{macro}| 不是必需的来指示宏定义。它也可以用于指示 \latex{}
-数据类型的定义，例如计数器、长度和盒子：
+|\begin{macro}|\dotsbrk|\end{macro}| 不是必需的来指示宏定义。它也可以用于指示其它控制序列
+的定义，例如计数器、长度和盒子：
 
 \begin{verbatim}
     % \begin{macro}{myCounter}
@@ -1209,7 +1161,24 @@
 \indexthing{macro}%
 \indexthing{macrocode}
 
-通常应避免没有描述的\usething{macro} 环境，因为格式有些丑陋；宏名称单独出现在一行上，位于一个“空白”
+为了方便起见，\DOC{}的最新版本允许一个|\begin{macro}|同时列出多个要定义的宏：
+
+\begin{verbatim}
+    % \begin{macro}{\thingheight,\thingwidth,\thingdepth}
+    % These lengths keep track of the dimensions of our |\thing|
+    % box.  (Actually, we're just trying to show how to nest
+    % |macro| environments.)
+    %    \begin{macrocode}
+    \newlength{\thingheight}
+    \newlength{\thingwidth}
+    \newlength{\thingdepth}
+    %    \end{macrocode}
+    % \end{macro}
+\end{verbatim}%
+\indexthing{macro}%
+\indexthing{macrocode}
+
+通常应避免没有描述的\usething{macro} 环境，因为格式有些丑陋：宏名称单独出现在一行上，位于一个“空白”
 描述的左侧，但代码直到下一行才开始。
 
 在|\begin{macro}|\dotsbrk|\end{macro}|或|\begin{environment}|\dotsbrk|\end{environment}|块内
@@ -1230,6 +1199,13 @@
       \setcounter{count@iii}{0}%
       \setcounter{count@iv}{0}%
     %    \end{macrocode}
+    % \begin{macro}{\helperMacro}
+    % Define a helper macro for |\complexMacro| to use.
+    %    \begin{macrocode}
+      \def\helperMacro#1,#2,\relax{%
+        \someOtherMacro{#1}{#2}%
+      }%
+    %    \end{macrocode}
     % Do some really complicated processing.
     %    \begin{macrocode}
 \end{verbatim}%
@@ -1242,6 +1218,7 @@
     }
     %    \end{macrocode}
     % \end{macro}
+    % \end{macro}
 \end{verbatim}%
 \indexthing{macrocode}
 
@@ -1250,6 +1227,9 @@
 
 \index{comments|)}
 
+请注意，上述代码在|\complexMacro|内部定义了|\helperMacro|。文档使用了一个嵌套的|\begin{macro}|来引入
+  |\helperMacro|，按照惯例，在外层宏的|\end{macro}|之前放置了一个|\end{macro}|，而不是紧跟在|\helperMacro|的最后的``|}|''后面。
+  
 附录~\ref{sec:skeleton-dtx-file-style} 列出了一个完整的、包含 \styfile{} 文件及其文档的 \dtxfile{} 文件的框架。
 
 \index{class file|(}
@@ -1351,7 +1331,7 @@
   \item 一定要阅读《\ds{} 程序》
         \footnote{译者注：该文档可对照参阅由本人翻译的\href
           {https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/docstrip-zh-cn/docstrip-zh-cn.pdf}{中文版}。}
-        和《\DOC{} 和\ \svrb{} 包》
+        和《|doc| 和\ \svrb{} 宏包》
         \footnote{译者注：该文档可对照参阅由本人翻译的\href
           {https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/doc-zh-cn/doc-code-zh-cn.pdf}{中文版}。}
         的文档，分别是\ds{} 和\DOC{} 的文档（当然是以 \dtxfile{}格式提供的）。这些文档解释了如何
@@ -1362,7 +1342,7 @@
 
           \item 将不同的导言放入不同的 \styfile{} 文件中。
 
-          \item 从 \dtxfile{} 文件中提取除了 \styfile{} 文件之外的其他内容（例如配置文件或Perl脚本）。
+          \item 从 \dtxfile{} 文件中提取除了 \styfile{} 文件之外的其他内容（例如配置文件或Python代码）。
 
           \item 更改排版文档的格式。
         \end{itemize}
@@ -1457,7 +1437,7 @@
 
 \subsection{具有共享版本信息的类和样式文件}
 
-某些包包含 \clsfile{}和 \styfile{}文件。希望从同一个 \insfile{}文件中提取这两个文件，并共享相同的
+某些包包含 \clsfile{}和 \styfile{}文件。希望从同一个 \dtxfile{}文件中提取这两个文件，并共享相同的
 版本信息字符串。《 \ds{} 程序》文档解释了如何从单个 \usemacro{generate}调用中提取多个文件：
 
 \begin{verbatim}
@@ -1469,21 +1449,21 @@
 \clsfile{}和 \styfile{}文件使用单个版本字符串：
 
 \begin{verbatim}
-    %<<class>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    %<<class>>\NeedsTeXFormat{LaTeX2e}[2023-11-01]
     %<<class>>\ProvidesClass{<package>}
     %<<*class>>
-        [<YYYY>/<MM>/<DD> v<version> <brief description>]
+        [<YYYY>-<MM>-<DD> v<version> <brief description>]
     %<</class>>
 \end{verbatim}
 
 替换的代码指定了哪些行属于类文件，哪些属于样式文件：
 
 \begin{verbatim}
-    %<<class|package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+    %<<class|package>>\NeedsTeXFormat{LaTeX2e}[2023-11-01]
     %<<class>>\ProvidesClass{<package>}
     %<<package>>\ProvidesPackage{<package>}
     %<<*class|package>>
-        [<YYYY>/<MM>/<DD> v<version> <brief description>]
+        [<YYYY>-<MM>-<DD> v<version> <brief description>]
     %<</class|package>>
 \end{verbatim}
 
@@ -1513,7 +1493,7 @@
 
 \begin{verbatim}
 %%
-%% Copyright (C) <year> by <your name>
+%% Copyright (C) <year> <your name>
 %%
 %% This file may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either
@@ -1522,8 +1502,8 @@
 %%
 %%    http://www.latex-project.org/lppl.txt
 %%
-%% and version 1.3 or later is part of all distributions of
-%% LaTeX version 2005/12/01 or later.
+%% and version 1.3c or later is part of all distributions of
+%% LaTeX version 2008-05-04 or later.
 %%
 
 \input docstrip.tex
@@ -1535,7 +1515,7 @@
 
 This is a generated file.
 
-Copyright (C) <year> by <your name>
+Copyright (C) <year> <your name>
 
 This file may be distributed and/or modified under the
 conditions of the LaTeX Project Public License, either
@@ -1544,8 +1524,8 @@ version.  The latest version of this license is in:
 
    http://www.latex-project.org/lppl.txt
 
-and version 1.3 or later is part of all distributions of
-LaTeX version 2005/12/01 or later.
+and version 1.3c or later is part of all distributions of
+LaTeX version 2008-05-04 or later.
 
 \endpreamble
 
@@ -1573,7 +1553,7 @@ LaTeX version 2005/12/01 or later.
 
 \begin{verbatim}
 %%
-%% Copyright (C) <year> by <your name>
+%% Copyright (C) <year> <your name>
 %%
 %% This file may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either
@@ -1582,20 +1562,20 @@ LaTeX version 2005/12/01 or later.
 %%
 %%    http://www.latex-project.org/lppl.txt
 %%
-%% and version 1.3 or later is part of all distributions of
-%% LaTeX version 2005/12/01 or later.
+%% and version 1.3c or later is part of all distributions of
+%% LaTeX version 2008-05-04 or later.
 %%
 
 \input docstrip.tex
 \keepsilent
 
-\usedir{tex/latex/<package>}
+\usedir{tex/latex/<class>}
 
 \preamble
 
 This is a generated file.
 
-Copyright (C) <year> by <your name>
+Copyright (C) <year> <your name>
 
 This file may be distributed and/or modified under the
 conditions of the LaTeX Project Public License, either
@@ -1604,19 +1584,19 @@ version.  The latest version of this license is in:
 
    http://www.latex-project.org/lppl.txt
 
-and version 1.3 or later is part of all distributions of
-LaTeX version 2005/12/01 or later.
+and version 1.3c or later is part of all distributions of
+LaTeX version 2008-05-04 or later.
 
 \endpreamble
 
-\generate{\file{<package>.cls}{\from{<package>.dtx}{class}}}
+\generate{\file{<class>.cls}{\from{<class>.dtx}{class}}}
 
 \Msg{*********************************************************}
 \Msg{*}
 \Msg{* To finish the installation you have to move the}
 \Msg{* following file into a directory searched by TeX:}
 \Msg{*}
-\Msg{* \space\space <package>.cls}
+\Msg{* \space\space <class>.cls}
 \Msg{*}
 \Msg{* To produce the documentation run the file <class>.dtx}
 \Msg{* through LaTeX.}
@@ -1637,8 +1617,8 @@ LaTeX version 2005/12/01 or later.
 \begin{verbatim}
 % \iffalse meta-comment
 %
-% Copyright (C) <year> by <your name>
-% -----------------------------------
+% Copyright (C) <year> <your name>
+% --------------------------------
 %
 % This file may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -1647,15 +1627,15 @@ LaTeX version 2005/12/01 or later.
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% and version 1.3 or later is part of all distributions of LaTeX
-% version 2005/12/01 or later.
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008-05-04 or later.
 %
 % \fi
 %
 % \iffalse
-%<<package>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+%<<package>>\NeedsTeXFormat{LaTeX2e}[2023-11-01]
 %<<package>>\ProvidesPackage{<package>}
-%<<package>>   [<YYYY>/<MM>/<DD> v<version> <brief description>]
+%<<package>>   [<YYYY>-<MM>-<DD> v<version> <brief description>]
 %
 %<<*driver>>
 \documentclass{ltxdoc}
@@ -1669,26 +1649,7 @@ LaTeX version 2005/12/01 or later.
 %<</driver>>
 % \fi
 %
-% \CheckSum{0}
-%
-% \CharacterTable
-%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
-%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
-%   Digits        \0\1\2\3\4\5\6\7\8\9
-%   Exclamation   \!     Double quote  \"     Hash (number) \#
-%   Dollar        \$     Percent       \%     Ampersand     \&
-%   Acute accent  \'     Left paren    \(     Right paren   \)
-%   Asterisk      \*     Plus          \+     Comma         \,
-%   Minus         \-     Point         \.     Solidus       \/
-%   Colon         \:     Semicolon     \;     Less than     \<<
-%   Equals        \=     Greater than  \>>     Question mark \?
-%   Commercial at \@     Left bracket  \[     Backslash     \\
-%   Right bracket \]     Circumflex    \^     Underscore    \_
-%   Grave accent  \`     Left brace    \{     Vertical bar  \|
-%   Right brace   \}     Tilde         \~}
-%
-%
-% \changes{v1.0}{<YYYY>/<MM>/<DD>}{Initial version}
+% \changes{v1.0}{<YYYY>-<MM>-<DD>}{Initial version}
 %
 % \GetFileInfo{<package>.sty}
 %
@@ -1712,12 +1673,12 @@ LaTeX version 2005/12/01 or later.
 % \section{Usage}
 %
 % \DescribeMacro{\YOURMACRO}
-% Put description of |\YOURMACRO| here.
+% Put description of macro |\YOURMACRO| here.
 %
 % \DescribeEnv{YOURENV}
-% Put description of |YOURENV| here.
+% Put description of environment |YOURENV| here.
 %
-% \StopEventually{\PrintIndex}
+% \MaybeStop{\PrintIndex}
 %
 % \section{Implementation}
 %
@@ -1746,8 +1707,8 @@ LaTeX version 2005/12/01 or later.
 \begin{verbatim}
 % \iffalse meta-comment
 %
-% Copyright (C) <year> by <your name>
-% -----------------------------------
+% Copyright (C) <year> <your name>
+% --------------------------------
 %
 % This file may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -1756,19 +1717,19 @@ LaTeX version 2005/12/01 or later.
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% and version 1.3 or later is part of all distributions of LaTeX
-% version 2005/12/01 or later.
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008-05-04 or later.
 %
 % \fi
 %
 % \iffalse
 %<<*driver>>
-\ProvidesFile{<package>.dtx}
+\ProvidesFile{<class>.dtx}
 %<</driver>>
-%<<class>>\NeedsTeXFormat{LaTeX2e}[2005/12/01]
-%<<class>>\ProvidesClass{<package>}
+%<<class>>\NeedsTeXFormat{LaTeX2e}[2023-11-01]
+%<<class>>\ProvidesClass{<class>}
 %<<*class>>
-    [<YYYY>/<MM>/<DD> v<version> <brief description>]
+    [<YYYY>-<MM>-<DD> v<version> <brief description>]
 %<</class>>
 %
 %<<*driver>>
@@ -1777,38 +1738,19 @@ LaTeX version 2005/12/01 or later.
 \CodelineIndex
 \RecordChanges
 \begin{document}
-  \DocInput{<package>.dtx}
+  \DocInput{<class>.dtx}
 \end{document}
 %<</driver>>
 % \fi
 %
-% \CheckSum{0}
+% \changes{v1.0}{<YYYY>-<MM>-<DD>}{Initial version}
 %
-% \CharacterTable
-%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
-%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
-%   Digits        \0\1\2\3\4\5\6\7\8\9
-%   Exclamation   \!     Double quote  \"     Hash (number) \#
-%   Dollar        \$     Percent       \%     Ampersand     \&
-%   Acute accent  \'     Left paren    \(     Right paren   \)
-%   Asterisk      \*     Plus          \+     Comma         \,
-%   Minus         \-     Point         \.     Solidus       \/
-%   Colon         \:     Semicolon     \;     Less than     \<<
-%   Equals        \=     Greater than  \>>     Question mark \?
-%   Commercial at \@     Left bracket  \[     Backslash     \\
-%   Right bracket \]     Circumflex    \^     Underscore    \_
-%   Grave accent  \`     Left brace    \{     Vertical bar  \|
-%   Right brace   \}     Tilde         \~}
-%
-%
-% \changes{v1.0}{<YYYY>/<MM>/<DD>}{Initial version}
-%
-% \GetFileInfo{<package>.dtx}
+% \GetFileInfo{<class>.dtx}
 %
 % \DoNotIndex{<list of control sequences>}
 %
-% \title{The \textsf{<package>} class\thanks{This document
-%   corresponds to \textsf{<package>}~\fileversion,
+% \title{The \textsf{<class>} class\thanks{This document
+%   corresponds to \textsf{<class>}~\fileversion,
 %   dated \filedate.}}
 % \author{<your name> \\ \texttt{<your e-mail address>}}
 %
@@ -1825,12 +1767,12 @@ LaTeX version 2005/12/01 or later.
 % \section{Usage}
 %
 % \DescribeMacro{\YOURMACRO}
-% Put description of |\YOURMACRO| here.
+% Put description of macro |\YOURMACRO| here.
 %
 % \DescribeEnv{YOURENV}
-% Put description of |YOURENV| here.
+% Put description of environment |YOURENV| here.
 %
-% \StopEventually{\PrintIndex}
+% \MaybeStop{\PrintIndex}
 %
 % \section{Implementation}
 %
@@ -1874,7 +1816,7 @@ LaTeX version 2005/12/01 or later.
   \maketitle
 
   \begin{abstract}
-    <abstract>
+    Put text here.
   \end{abstract}
 
   \tableofcontents
@@ -1884,7 +1826,6 @@ LaTeX version 2005/12/01 or later.
   \DocInclude{<file3>}
 \end{document}
 \end{verbatim}
-
 
 % The following was generated by BibTeX and slightly touched up by hand.
 \vfill
@@ -1901,6 +1842,12 @@ LaTeX version 2005/12/01 or later.
   \newblock \emph{The Computer Journal}, 27(2):97--111, May 1984.
   \newblock British Computer Society. Available from
   \URL{http://www.literateprogramming.com/knuthweb.pdf}.
+
+  \bibitem{LaTeX:clsguide}
+  \LaTeX\ Project Team.
+  \newblock \LaTeX\ for package and class authors.
+  \newblock Available from \URL{https://ctan.org/pkg/clsguide},
+  October~24, 2023.
 \end{thebibliography}
 
 % Print an index.
