@@ -67,7 +67,7 @@
 \renewcommand{\refname}{参考文献}
 \renewcommand{\indexname}{索引}
 \renewcommand{\contentsname}{\centerline{目\quad 录}}
-\renewcommand{\clsguide}{面向宏包与类文件编写者的\ \LaTeXe}
+\renewcommand{\clsguide}{面向类文件与宏包编写者的\ \LaTeX}
 \setlength{\parindent}{2em}
 \usepackage{indentfirst}
 \linespread{1.242} 
@@ -218,7 +218,9 @@
 我们假设您已经了解如何在 \latex\@ 中\emph{编程}。
 也就是说，您应该知道如何使用 \usemacro{newcommand}、
 \usemacro{newenvironment}，最好还懂一点 \TeX\@。
-您还应该熟悉《\clsguide》，它可以在 \CTAN{}
+您还应该熟悉《\clsguide》\footnote{译者注：该文档可对照参阅由本人翻译的\href
+{https://github.com/rockyzhz/latexdoc-chinese-translation/blob/main/clsguide-current-zh-cn/clsguide-zh-cn.pdf}{中文版}。}
+，它可以在 \CTAN{}
 (\URL{http://www.ctan.org}) 上获取，并且大多数
 \latex[\LaTeXe]{} 发行版中都包含一个名为 |clsguide.dvi| 的文件。
 最后，您应该知道如何安装由 \dtxfile{} 文件和 \insfile{} 文件
@@ -242,7 +244,7 @@
 一个或多个类文件或样式文件（例如，一个主样式文件使用 \usemacro{input}
 或 \usemacro{RequirePackage} 来加载多个辅助文件）及其文档被称为
 \defn{宏包}。在本文档的其余部分，我们使用符号``\m{package}''来表示
-你的宏包的名称。警告：在\LaTeX\ 社区中，有时也使用术语``宏包''来指
+你的宏包的名称。{\bf 警告}：在\LaTeX\ 社区中，有时也使用术语``宏包''来指
 ``样式文件''。您可能需要从上下文中判断使用的是哪个定义。
 
 \paragraph{动机}
